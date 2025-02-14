@@ -66,7 +66,7 @@ end
 local dedupeByID = function(t)
     local seen = {}
     for i = #t, 1, -1 do --counting backwards to make table.remove a safe operation
-        --adding a cleanup step in the process, removing entries with an empty or 0-length name
+        --adding a cleanup step in the process, removing entries with an whitespaces or 0-length name
         if t[i] and t[i]:getName():match('^%s*$') or seen[t[i]:getID()] then
             table.remove(t, i)
         else
