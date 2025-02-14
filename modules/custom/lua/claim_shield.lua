@@ -65,11 +65,12 @@ end
 -- Using entity ids: dedupe a table in-place
 local dedupeByID = function(t)
     local seen = {}
-    for index, entity in ipairs(t) do
-        if seen[entity:getID()] then
-            table.remove(t, index)
+	for i = #t, 1, -1 do --counting backwards to make table.remove a safe operation
+		--adding a cleanup step in the process, removing entries with an empty or 0-length name
+        if t[i] and t[i]:getName():match('^%s*$') or seen[t[i]:getID()] then
+            table.remove(t, i)
         else
-            seen[entity:getID()] = true
+            seen[t[i]:getID()] = true
         end
     end
 end
