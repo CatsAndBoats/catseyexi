@@ -13,6 +13,18 @@ local mobType =
     SPECIAL = 3,
 }
 
+local function playersCount(players)
+    -- TODO: Replace with a generic map count function in utils
+    local count = 0
+    for _, player in pairs(players) do
+        if player then
+            count = count + 1
+        end
+    end
+
+    return count
+end
+
 local function forEachPlayer(players, callback)
     for _, player in pairs(players) do
         if player then
@@ -299,7 +311,7 @@ end
 -- Check if everyone is dead, queue emergency teleportation
 local function onPlayerDeath(chamberData, player)
     if
-        #chamberData.players == 0 or
+        playersCount(chamberData.players) == 0 or
         not allPlayersDead(chamberData.players)
     then
         return
@@ -497,7 +509,7 @@ xi.einherjar.onChamberExit = function(chamberData, player)
     onPlayerDeath(chamberData, player)
 
     -- Release chamber if no players are left without waiting for the timeout
-    if #chamberData.players == 0 then
+    if playersCount(chamberData.players) == 0 then
         cleanChamber(chamberData)
         releaseChamber(chamberData.id)
     end
@@ -649,7 +661,8 @@ xi.einherjar.onZoneOut = function(chamberData, player)
         onPlayerDeath(chamberData, player)
 
         -- Release chamber if no players are left without waiting for the timeout
-        if #chamberData.players == 0 then
+        if playersCount(chamberData.players) == 0 then
+            log(chamberData.id, 'No players left in chamber, cleaning up.')
             cleanChamber(chamberData)
             releaseChamber(chamberData.id)
         end
