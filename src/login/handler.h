@@ -61,17 +61,17 @@ private:
             {
                 if constexpr (std::is_same_v<T, auth_session>)
                 {
-                    auto auth_handler = std::make_shared<T>(asio::ssl::stream<asio::ip::tcp::socket>(std::move(socket), sslContext_), zmqDealerWrapper_);
+                    const auto auth_handler = std::make_shared<T>(asio::ssl::stream<asio::ip::tcp::socket>(std::move(socket), sslContext_), zmqDealerWrapper_);
                     auth_handler->start();
                 }
                 else if constexpr (std::is_same_v<T, view_session>)
                 {
-                    auto view_handler = std::make_shared<T>(asio::ssl::stream<asio::ip::tcp::socket>(std::move(socket), sslContext_));
+                    const auto view_handler = std::make_shared<T>(asio::ssl::stream<asio::ip::tcp::socket>(std::move(socket), sslContext_));
                     view_handler->start();
                 }
                 else if constexpr (std::is_same_v<T, data_session>)
                 {
-                    auto data_handler = std::make_shared<T>(asio::ssl::stream<asio::ip::tcp::socket>(std::move(socket), sslContext_));
+                    const auto data_handler = std::make_shared<T>(asio::ssl::stream<asio::ip::tcp::socket>(std::move(socket), sslContext_));
                     data_handler->start();
                 }
             }

@@ -511,7 +511,7 @@ xi.spells.damage.calculateAdditionalResistTier = function(caster, target, spellE
     return additionalResistTier
 end
 
-xi.spells.damage.calculateDayAndWeather = function(caster, spellId, spellElement)
+xi.spells.damage.calculateDayAndWeather = function(caster, spellElement, alwaysApply)
     local dayAndWeather = 1 -- The variable we want to calculate
 
     -- Return if no/incorrect element.
@@ -521,21 +521,12 @@ xi.spells.damage.calculateDayAndWeather = function(caster, spellId, spellElement
 
     local weather      = caster:getWeather()
     local dayElement   = VanadielDayElement()
-    local isHelixSpell = false -- TODO: I'm not sure thats the correct way to handle helixes. This is how we handle it and im not gonna change it for now.
-
-    -- See if its a Helix type spell
-    if
-        (spellId >= xi.magic.spell.GEOHELIX and spellId <= xi.magic.spell.LUMINOHELIX) or
-        (spellId >= xi.magic.spell.GEOHELIX_II and spellId <= xi.magic.spell.LUMINOHELIX_II)
-    then
-        isHelixSpell = true
-    end
 
     -- Calculate Weather bonus + Iridescence bonus.
     if
+        alwaysApply or
         math.random(1, 100) <= 33 or
-        caster:getMod(xi.combat.element.getForcedDayOrWeatherBonusModifier(spellElement)) >= 1 or
-        isHelixSpell
+        caster:getMod(xi.combat.element.getForcedDayOrWeatherBonusModifier(spellElement)) >= 1
     then
         -- Strong weathers.
         if weather == xi.combat.element.getAssociatedSingleWeather(spellElement) then
@@ -553,9 +544,9 @@ xi.spells.damage.calculateDayAndWeather = function(caster, spellId, spellElement
 
     -- Calculate day bonus
     if
+        alwaysApply or
         math.random(1, 100) <= 33 or
-        caster:getMod(xi.combat.element.getForcedDayOrWeatherBonusModifier(spellElement)) >= 1 or
-        isHelixSpell
+        caster:getMod(xi.combat.element.getForcedDayOrWeatherBonusModifier(spellElement)) >= 1
     then
         -- Strong day.
         if dayElement == spellElement then
@@ -568,7 +559,7 @@ xi.spells.damage.calculateDayAndWeather = function(caster, spellId, spellElement
     end
 
     -- Cap bonuses from both day and weather
-    dayAndWeather = utils.clamp(dayAndWeather, 0.6, 1.4)
+    dayAndWeather = utils.clamp(dayAndWeather, 0, 1.4)
 
     return dayAndWeather
 end
@@ -1068,6 +1059,17 @@ xi.spells.damage.useDamageSpell = function(caster, target, spell)
         end
     end
 
+    -- Day and Weather bonus exception. (Helix)
+    local forceDayWeatherBonus = false
+
+    -- See if its a Helix type spell
+    if
+        (spellId >= xi.magic.spell.GEOHELIX and spellId <= xi.magic.spell.LUMINOHELIX) or
+        (spellId >= xi.magic.spell.GEOHELIX_II and spellId <= xi.magic.spell.LUMINOHELIX_II)
+    then
+        forceDayWeatherBonus = true
+    end
+
     -- Calculate base damage and the rest of damage multipliers.
     local spellDamage               = xi.spells.damage.calculateBaseDamage(caster, target, spellId, spellGroup, skillType, statUsed)
     local multipleTargetReduction   = xi.spells.damage.calculateMTDR(spell)
@@ -1075,7 +1077,7 @@ xi.spells.damage.useDamageSpell = function(caster, target, spell)
     local magianAffinity            = xi.spells.damage.calculateMagianAffinity()
     local additionalResistTier      = xi.spells.damage.calculateAdditionalResistTier(caster, target, spellElement)
     local sdt                       = xi.spells.damage.calculateSDT(target, spellElement)
-    local dayAndWeather             = xi.spells.damage.calculateDayAndWeather(caster, spellId, spellElement)
+    local dayAndWeather             = xi.spells.damage.calculateDayAndWeather(caster, spellElement, forceDayWeatherBonus)
     local magicBonusDiff            = xi.spells.damage.calculateMagicBonusDiff(caster, target, spellId, skillType, spellElement)
     local divineSealMultiplier      = xi.spells.damage.calculateDivineSealMultiplier(caster, skillType)
     local divineEmblemMultiplier    = xi.spells.damage.calculateDivineEmblemMultiplier(caster, skillType)

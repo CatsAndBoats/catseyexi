@@ -36,6 +36,11 @@ xi.einherjar.meetsRequirementsForEntry = function(player, chamberId)
     local toau        = player:hasCompletedMission(xi.mission.log_id.TOAU, xi.mission.id.toau.IMMORTAL_SENTRIES)
     local chamberData = xi.einherjar.getChamber(chamberId)
 
+    if not chamberData then
+        player:messageSpecial(texts.REQUIREMENTS_UNMET)
+        return false
+    end
+
     -- 1. Player must be level EINHERJAR_LEVEL_MIN+
     if player:getMainLvl() < xi.einherjar.settings.EINHERJAR_LEVEL_MIN then
         player:messageSpecial(texts.MIN_LEVEL_ENTRY, xi.einherjar.settings.EINHERJAR_LEVEL_MIN)

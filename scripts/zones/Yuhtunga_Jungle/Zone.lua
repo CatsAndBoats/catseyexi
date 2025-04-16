@@ -88,7 +88,10 @@ zoneObject.onZoneWeatherChange = function(weather)
             DisallowRespawn(bayawak:getID(), false)
 
             -- Spawn if respawn is up
-            if os.time() > bayawak:getLocalVar('respawn') then
+            if
+                os.time() > bayawak:getLocalVar('respawn') and
+                not bayawak:isSpawned()
+            then
                 SpawnMob(bayawak:getID())
             end
         else

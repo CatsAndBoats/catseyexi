@@ -32,9 +32,10 @@ end
 ---@param message string Message to send
 ---@param arg1 integer? Message Type
 ---@param arg2 integer? Message Range
----@param arg3 string Name
+---@param arg3 string? Name
+---@param arg4 boolean? Skip sender
 ---@return nil
-function CBaseEntity:printToArea(message, arg1, arg2, arg3)
+function CBaseEntity:printToArea(message, arg1, arg2, arg3, arg4)
 end
 
 ---@param messageID integer
@@ -868,6 +869,7 @@ end
 ---@param tType integer
 ---@param bit integer
 ---@param arg2 integer?
+---@return boolean
 function CBaseEntity:hasTeleport(tType, bit, arg2)
 end
 
@@ -1249,6 +1251,11 @@ end
 ---@param sendUpdate boolean?
 ---@return nil
 function CBaseEntity:setAnimationSub(animationsub, sendUpdate)
+end
+
+---@param spawnAnimation integer
+---@return nil
+function CBaseEntity:setSpawnAnimation(spawnAnimation)
 end
 
 ---@nodiscard
@@ -2722,6 +2729,11 @@ function CBaseEntity:setVE(target, amount)
 end
 
 ---@param PEntity CBaseEntity
+---@return nil
+function CBaseEntity:addBaseEnmity(PEntity)
+end
+
+---@param PEntity CBaseEntity
 ---@param CE integer
 ---@param VE integer
 ---@return nil
@@ -2768,6 +2780,12 @@ end
 ---@param entity CBaseEntity
 ---@return nil
 function CBaseEntity:updateClaim(entity)
+end
+
+---@nodiscard
+---@param entity CBaseEntity
+---@return boolean
+function CBaseEntity:hasClaim(entity)
 end
 
 ---@nodiscard
@@ -2937,8 +2955,9 @@ end
 
 ---@param PTargetEntity CBaseEntity
 ---@param flagObj integer?
+---@param silentObj boolean?
 ---@return integer
-function CBaseEntity:stealStatusEffect(PTargetEntity, flagObj)
+function CBaseEntity:stealStatusEffect(PTargetEntity, flagObj, silentObj)
 end
 
 ---@param type integer

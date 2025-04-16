@@ -46,8 +46,8 @@ entity.onMobInitialize = function(mob)
         local rate = mob:getLocalVar('[SEA]IxAern_DropRate')
         loot:addGroupFixed(rate,
         {
-            { item = xi.item.DEED_OF_PLACIDITY, weight = 750 },
-            { item = xi.item.VICE_OF_ANTIPATHY, weight = 250 },
+            { item = xi.item.DEED_OF_PLACIDITY, weight = 850 },
+            { item = xi.item.VICE_OF_ANTIPATHY, weight = 150 },
         })
     end)
 end

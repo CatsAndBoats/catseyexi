@@ -19,9 +19,6 @@
 ===========================================================================
 */
 
-/*
-The PathFind class provides an interface for getting an entity to a destination. It will find a path from a navmesh and carry it out.
-*/
 #ifndef _PATHFIND_H
 #define _PATHFIND_H
 

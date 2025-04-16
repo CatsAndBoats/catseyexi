@@ -19,7 +19,6 @@
 ===========================================================================
 */
 
-#include "common/socket.h"
 #include "common/timer.h"
 #include "common/utils.h"
 #include "common/vana_time.h"

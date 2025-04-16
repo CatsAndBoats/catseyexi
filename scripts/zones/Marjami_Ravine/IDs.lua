@@ -12,6 +12,7 @@ zones[xi.zone.MARJAMI_RAVINE] =
         GIL_OBTAINED                  = 6392, -- Obtained <number> gil.
         KEYITEM_OBTAINED              = 6394, -- Obtained key item: <keyitem>.
         KEYITEM_LOST                  = 6395, -- Lost key item: <keyitem>.
+        NOTHING_OUT_OF_ORDINARY       = 6405, -- There is nothing out of the ordinary here.
         CARRIED_OVER_POINTS           = 7002, -- You have carried over <number> login point[/s].
         LOGIN_CAMPAIGN_UNDERWAY       = 7003, -- The [/January/February/March/April/May/June/July/August/September/October/November/December] <number> Login Campaign is currently underway!
         LOGIN_NUMBER                  = 7004, -- In celebration of your most recent login (login no. <number>), we have provided you with <number> points! You currently have a total of <number> points.

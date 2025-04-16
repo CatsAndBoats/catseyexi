@@ -19,8 +19,6 @@
 ===========================================================================
 */
 
-#include "common/socket.h"
-
 #include "menu_config.h"
 
 #include "entities/charentity.h"

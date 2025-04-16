@@ -25,6 +25,7 @@
 #include "blue_spell.h"
 #include "common/cbasetypes.h"
 #include "merit.h"
+#include "packets/weather.h"
 #include "status_effect.h"
 
 #include <list>
@@ -177,13 +178,13 @@ namespace battleutils
     uint8 GetRangedHitRate(CBattleEntity* PAttacker, CBattleEntity* PDefender, bool isBarrage, int16 accBonus);
     int32 CalculateEnspellDamage(CBattleEntity* PAttacker, CBattleEntity* PDefender, uint8 Tier, uint8 element);
 
-    int16 GetEnmityModDamage(int16 level);
-    int16 GetEnmityModCure(int16 level);
+    int32 GetEnmityModDamage(int16 level);
+    int32 GetEnmityModCure(int16 level);
     bool  isValidSelfTargetWeaponskill(int wsid);
     bool  CanUseWeaponskill(CCharEntity* PChar, CWeaponSkill* PSkill);
     int16 CalculateBaseTP(int32 delay);
     void  GenerateCureEnmity(CBattleEntity* PSource, CBattleEntity* PTarget, int32 amount, int32 fixedCE = 0, int32 fixedVE = 0);
-    void  GenerateInRangeEnmity(CBattleEntity* PSource, int16 CE, int16 VE);
+    void  GenerateInRangeEnmity(CBattleEntity* PSource, int32 CE, int32 VE);
 
     CItemWeapon*    GetEntityWeapon(CBattleEntity* PEntity, SLOTTYPE Slot);
     CItemEquipment* GetEntityArmor(CBattleEntity* PEntity, SLOTTYPE Slot);

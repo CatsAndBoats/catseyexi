@@ -81,8 +81,12 @@ zones[xi.zone.BHAFLAU_REMNANTS] =
         DOOR_2_SW_EXIT       = GetFirstID('_23i'),
         DOOR_2_WEST_ENTRANCE = GetFirstID('_23b'),
         DOOR_3_EAST_EXIT     = GetFirstID('_23p'),
+        DOOR_3_NE_ENTRANCE   = GetFirstID('_23o'),
         DOOR_3_NORTH_CENTER  = GetFirstID('_23s'),
+        DOOR_3_NW_ENTRANCE   = GetFirstID('_23n'),
         DOOR_3_SOUTH_CENTER  = GetFirstID('_23r'),
+        DOOR_3_SE_ENTRANCE   = GetFirstID('_23q'),
+        DOOR_3_SW_ENTRANCE   = GetFirstID('_23l'),
         DOOR_3_WEST_EXIT     = GetFirstID('_23m'),
         DOOR_4_EAST_EXIT     = GetFirstID('_23u'),
         DOOR_4_WEST_EXIT     = GetFirstID('_23t'),
@@ -91,6 +95,111 @@ zones[xi.zone.BHAFLAU_REMNANTS] =
         DORMANT_RAMPART      = GetTableOfIDs('Dormant_Rampart'),
         SLOT                 = GetFirstID('Slot'),
         SOCKET               = GetFirstID('Socket'),
+    },
+    pos =
+    {
+        [1] =
+        {
+            [1] =
+            {
+                enter = { -340, 0, -530, 192 },
+                exit  = { 420, 16, -291,  64 },
+            },
+            [2] =
+            {
+                enter = { -340, 0, -530, 192 },
+                exit  = { 451, 16, -460, 255 },
+            },
+            [3] =
+            {
+                enter = { -340, 0, -530, 192 },
+                exit  = { 260, 16, -291,  64 },
+            },
+            [4] =
+            {
+                enter = { -340, 0, -530, 192 },
+                exit  = { 229, 16, -460, 129 },
+            },
+        },
+        [2] =
+        {
+            [1] =
+            {
+                enter = { -340, 0, -233, 64 },
+                exit  = {  309, -4, 260,  0 },
+            },
+            [2] =
+            {
+                enter = { -340, 0, -233, 64 },
+                exit  = { 340, -4, 229, 197 },
+            },
+            [3] =
+            {
+                enter = { -340, 0, -233, 64 },
+                exit  = { 371, -4, 260, 126 },
+            },
+            [4] =
+            {
+                enter = { -340, 0, -233, 64 },
+                exit  = { 340, -4,  291, 63 },
+            },
+        },
+        [3] =
+        {
+            [1] =
+            {
+                enter = { 260, 0.5, 114 , 192 },
+                exit  = { -300, -4, -420,   0 },
+            },
+            [2] =
+            {
+                enter = { 260, 0.5,  114, 192 },
+                exit  = { -380, -4, -420, 128 },
+            },
+        },
+        [4] =
+        {
+            [1] =
+            {
+                enter = { 420,  0, 114, 192 },
+                exit  = { -300, 0, -75, 192 },
+            },
+            [2] =
+            {
+                enter = { 420, 0, 114, 192 },
+                exit  = { -315, -4, 20,  0 },
+            },
+            [3] =
+            {
+                enter = {  420,  0, 114, 192 },
+                exit  = { -220, -4, 125, 192 },
+            },
+            [4] =
+            {
+                enter = { 420,  0, 114, 192 },
+                exit  = { -300, 0, 195,  64 },
+            },
+            [5] =
+            {
+                enter = {  420, 0, 114, 192 },
+                exit  = { -380, 0, -75, 192 },
+            },
+            [6] =
+            {
+                enter = {  420, 0, 114, 192 },
+                exit  = { -365, -4, 20, 128 },
+            },
+            [7] =
+            {
+                enter = {  420,  0, 114, 192 },
+                exit  = { -460, -4, 125, 192 },
+            },
+            [8] =
+            {
+                enter = {  420, 0, 114, 192 },
+                exit  = { -380, 0, 195,  64 },
+            },
+        },
     },
 }
 

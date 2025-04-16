@@ -150,7 +150,7 @@ namespace conquest
             case REGION_TYPE::QUFIMISLAND:
             case REGION_TYPE::LITELOR:
             case REGION_TYPE::KUZOTZ:
-            case REGION_TYPE::ELSHIMOLOWLANDS:
+            case REGION_TYPE::ELSHIMO_LOWLANDS:
             {
                 points = 75;
                 break;
@@ -158,7 +158,7 @@ namespace conquest
             case REGION_TYPE::VOLLBOW:
             case REGION_TYPE::VALDEAUNIA:
             case REGION_TYPE::FAUREGANDI:
-            case REGION_TYPE::ELSHIMOUPLANDS:
+            case REGION_TYPE::ELSHIMO_UPLANDS:
             {
                 points = 300;
                 break;

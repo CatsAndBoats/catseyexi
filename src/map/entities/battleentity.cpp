@@ -19,10 +19,12 @@
 ===========================================================================
 */
 
-#include "common/logging.h"
-#include "common/utils.h"
-
 #include "battleentity.h"
+
+#include "common/database.h"
+#include "common/logging.h"
+#include "common/sql.h"
+#include "common/utils.h"
 
 #include "ai/ai_container.h"
 #include "ai/states/attack_state.h"
@@ -861,31 +863,31 @@ uint16 CBattleEntity::ATT(SLOTTYPE slot)
 {
     TracyZoneScoped;
     // TODO: consider which weapon!
-    int32 ATT    = 8 + m_modStat[Mod::ATT];
-    auto  ATTP   = m_modStat[Mod::ATTP];
-    auto* weapon = dynamic_cast<CItemWeapon*>(m_Weapons[slot]);
+    int32 ATT           = 8 + m_modStat[Mod::ATT];
+    auto  ATTP          = m_modStat[Mod::ATTP];
+    auto* weapon        = dynamic_cast<CItemWeapon*>(m_Weapons[slot]);
+    float strMultiplier = 0.5;
 
     // https://www.bg-wiki.com/ffxi/Strength
     if (weapon && weapon->isTwoHanded()) // 2-handed weapon
     {
-        ATT += STR();
+        strMultiplier = 1.0;
     }
     else if (weapon && weapon->isHandToHand()) // H2H Weapon
     {
-        ATT += STR() * 3 / 4;
+        strMultiplier = 0.75;
     }
-    else if (slot == SLOT_RANGED || slot == SLOT_AMMO) // Ranged/ammo weapon.
+    else if (slot == SLOT_MAIN || slot == SLOT_RANGED || slot == SLOT_AMMO) // 1-handed weapon in main slot, Ranged or ammo weapon.
     {
-        ATT += STR();
+        strMultiplier = 1.0;
     }
-    else if (slot == SLOT_MAIN) // 1-handed weapon in main slot.
+
+    if (settings::get<bool>("main.USE_PRE_2013_STR_MULTIPLIER"))
     {
-        ATT += STR();
+        strMultiplier = 0.5;
     }
-    else // 1-handed weapon in sub slot.
-    {
-        ATT += STR() / 2;
-    }
+
+    ATT += STR() * strMultiplier;
 
     if (this->StatusEffectContainer->HasStatusEffect(EFFECT_ENDARK))
     {
@@ -1003,16 +1005,17 @@ uint16 CBattleEntity::ACC(uint8 attackNumber, uint16 offsetAccuracy)
             }
             skill = SKILL_HAND_TO_HAND;
         }
-        int32 ACC = GetSkill(skill) + iLvlSkill;
-        ACC       = (ACC > 200 ? (int16)(((ACC - 200) * 0.9) + 200) : ACC);
+        int32 ACC           = GetSkill(skill) + iLvlSkill;
+        ACC                 = (ACC > 200 ? (int16)(((ACC - 200) * 0.9) + 200) : ACC);
+        float dexMultiplier = settings::get<bool>("main.USE_PRE_2013_DEX_MULTIPLIER") ? 0.50f : 0.75f;
         if (auto* weapon = dynamic_cast<CItemWeapon*>(m_Weapons[SLOT_MAIN]); weapon && weapon->isTwoHanded())
         {
-            ACC += (int16)(DEX() * 0.75);
+            ACC += (int16)(DEX() * dexMultiplier);
             ACC += m_modStat[Mod::TWOHAND_ACC];
         }
         else
         {
-            ACC += (int16)(DEX() * 0.75);
+            ACC += (int16)(DEX() * dexMultiplier);
         }
         ACC = (ACC + m_modStat[Mod::ACC] + offsetAccuracy);
 
@@ -1167,7 +1170,7 @@ void CBattleEntity::SetMLevel(uint8 mlvl)
 
     if (this->objtype & TYPE_PC)
     {
-        _sql->Query("UPDATE char_stats SET mlvl = %u WHERE charid = %u LIMIT 1", m_mlvl, this->id);
+        db::preparedStmt("UPDATE char_stats SET mlvl = ? WHERE charid = ? LIMIT 1", m_mlvl, this->id);
     }
 }
 
@@ -1203,7 +1206,7 @@ void CBattleEntity::SetSLevel(uint8 slvl)
 
     if (this->objtype & TYPE_PC)
     {
-        _sql->Query("UPDATE char_stats SET slvl = %u WHERE charid = %u LIMIT 1", m_slvl, this->id);
+        db::preparedStmt("UPDATE char_stats SET slvl = ? WHERE charid = ? LIMIT 1", m_slvl, this->id);
     }
 }
 

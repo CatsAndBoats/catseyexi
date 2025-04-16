@@ -33,10 +33,15 @@ namespace loginHelpers
 
     bool isStringMalformed(std::string const& str, std::size_t max_length)
     {
+        // clang-format off
         const bool isEmpty        = str.empty();
         const bool isTooLong      = str.size() > max_length;
-        const bool hasInvalidChar = std::any_of(str.cbegin(), str.cend(), [](char const& c)
-                                                { return c < 0x20; });
+        const bool hasInvalidChar = std::any_of(str.cbegin(), str.cend(),
+                                                [](char const& c)
+                                                {
+                                                    return c < 0x20;
+                                                });
+        // clang-format on
 
         return isEmpty || isTooLong || hasInvalidChar;
     }
@@ -46,26 +51,8 @@ namespace loginHelpers
         return authenticatedSessions_[ipAddr][sessionHash]; // NOTE: Will construct if doesn't exist
     }
 
-    // hostname/ip conversion functions
-    std::string ip2str(uint32 ip)
-    {
-        uint32 reversed_ip = htonl(ip);
-        char   address[INET_ADDRSTRLEN];
-        inet_ntop(AF_INET, &reversed_ip, address, INET_ADDRSTRLEN);
-
-        // This is internal, so we can trust it.
-        return fmt::format("{}", asStringFromUntrustedSource(address));
-    }
-
-    uint32 str2ip(const char* ip_str)
-    {
-        uint32 ip = 0;
-        inet_pton(AF_INET, ip_str, &ip);
-        return ntohl(ip);
-    }
-
     // https://github.com/atom0s/XiPackets/blob/main/lobby/S2C_0x0004_ResponseError.md
-    void generateErrorMessage(char* packet, uint16 errorCode)
+    void generateErrorMessage(uint8* packet, uint16 errorCode)
     {
         std::memset(packet, 0, 0x24);
 
@@ -82,8 +69,8 @@ namespace loginHelpers
 
         ref<uint16>(packet, 32) = errorCode;
 
-        unsigned char hash[16];
-        md5(reinterpret_cast<uint8*>(packet), hash, 0x24);
+        uint8 hash[16];
+        md5(packet, hash, 0x24);
         std::memcpy(packet + 12, hash, 16);
     }
 
@@ -220,13 +207,13 @@ namespace loginHelpers
         return 0;
     }
 
-    int32 createCharacter(session_t& session, char* buf)
+    int32 createCharacter(session_t& session, uint8* buf)
     {
-        char_mini createchar;
+        char_mini createchar{};
 
         std::memcpy(createchar.m_name, session.requestedNewCharacterName.c_str(), 16);
 
-        const auto charName = db::escapeString(asStringFromUntrustedSource(createchar.m_name));
+        const auto charName = asStringFromUntrustedSource(createchar.m_name);
 
         createchar.m_look.race = ref<uint8>(buf, 48);
         createchar.m_look.size = ref<uint8>(buf, 57);
@@ -275,7 +262,6 @@ namespace loginHelpers
         }
 
         uint32 charID = 0;
-
         if (rset->rowsCount() != 0 && rset->next())
         {
             charID = rset->get<uint32>("max(charid)") + 1;
@@ -290,10 +276,9 @@ namespace loginHelpers
         return 0;
     }
 
-    std::string getHashFromPacket(std::string const& ip_str, char* data)
+    std::string getHashFromPacket(std::string const& ip_str, uint8* data)
     {
-        std::string hash = std::string(data + 12, 16);
-
+        auto hash = asStringFromUntrustedSource(data + 12, 16);
         if (authenticatedSessions_[ip_str].find(hash) == authenticatedSessions_[ip_str].end())
         {
             return "";

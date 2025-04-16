@@ -118,7 +118,7 @@ xi.einherjar.chambers =
 -- Wing 1 is always accessible
 -- Mark of the Einherjar owners have all wings open
 xi.einherjar.getChambersMenu = function(player)
-    local mask  = 0xFF0
+    local mask = 0xFF0
     local wings =
     {
         xi.einherjar.wing.WING_1,

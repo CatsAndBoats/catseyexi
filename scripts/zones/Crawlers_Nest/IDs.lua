@@ -15,6 +15,7 @@ zones[xi.zone.CRAWLERS_NEST] =
         ITEM_OBTAINED                 = 6581,  -- Obtained: <item>.
         GIL_OBTAINED                  = 6582,  -- Obtained <number> gil.
         KEYITEM_OBTAINED              = 6584,  -- Obtained key item: <keyitem>.
+        NOTHING_OUT_OF_ORDINARY       = 6595,  -- There is nothing out of the ordinary here.
         SENSE_OF_FOREBODING           = 6596,  -- You are suddenly overcome with a sense of foreboding...
         FELLOW_MESSAGE_OFFSET         = 6610,  -- I'm ready. I suppose.
         CARRIED_OVER_POINTS           = 7192,  -- You have carried over <number> login point[/s].

@@ -19,6 +19,7 @@ zones[xi.zone.NORTH_GUSTABERG_S] =
         CAMPAIGN_RESULTS_TALLIED      = 7289, -- Campaign results tallied.
         FISHING_MESSAGE_OFFSET        = 7374, -- You can't fish here.
         MINING_IS_POSSIBLE_HERE       = 7563, -- Mining is possible here if you have <item>.
+        NO_WAY_PAST_BARRIER           = 7931, -- It seems there is no way past this imposing barrier...
         VOIDWALKER_DESPAWN            = 8148, -- The monster fades before your eyes, a look of disappointment on its face.
         VOIDWALKER_NO_MOB             = 8195, -- The <keyitem> quivers ever so slightly, but emits no light. There seem to be no monsters in the area.
         VOIDWALKER_MOB_TOO_FAR        = 8196, -- The <keyitem> quivers ever so slightly and emits a faint light. There seem to be no monsters in the immediate vicinity.

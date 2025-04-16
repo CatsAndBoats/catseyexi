@@ -11,13 +11,17 @@
 #include "common/database.h"
 #include "common/timer.h"
 
-#include "map/ipc_client.h"
-#include "map/item_container.h"
+#include "map/packet_system.h"
 #include "map/packets/auction_house.h"
+#include "map/packets/basic.h"
 #include "map/packets/chat_message.h"
 #include "map/packets/inventory_finish.h"
 #include "map/utils/charutils.h"
 #include "map/utils/itemutils.h"
+
+#include "map/ipc_client.h"
+#include "map/item_container.h"
+#include "map/map_session.h"
 #include "map/zone.h"
 
 #include <functional>
@@ -25,7 +29,7 @@
 
 extern uint8 PacketSize[512];
 
-extern std::function<void(map_session_data_t* const, CCharEntity* const, CBasicPacket&)> PacketParser[512];
+extern std::function<void(MapSession* const, CCharEntity* const, CBasicPacket&)> PacketParser[512];
 
 class AHAnnouncementModule : public CPPModule
 {
@@ -35,7 +39,7 @@ class AHAnnouncementModule : public CPPModule
 
         const auto originalHandler = PacketParser[0x04E];
 
-        const auto newHandler = [originalHandler](map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data) -> void
+        const auto newHandler = [originalHandler](MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data) -> void
         {
             TracyZoneScoped;
 
@@ -77,6 +81,8 @@ class AHAnnouncementModule : public CPPModule
 
                         if (gil != nullptr && gil->isType(ITEM_CURRENCY) && gil->getQuantity() >= price && gil->getReserve() == 0)
                         {
+                            bool itemPurchasedSuccessfully = false;
+
                             // clang-format off
                             const auto success = db::transaction([&]()
                             {
@@ -106,15 +112,13 @@ class AHAnnouncementModule : public CPPModule
                                 // Now that we have the row id, we can use it to update the purchase information
                                 const auto successfulUpdate = [&]() -> bool
                                 {
-                                    const auto [rset, affectedRows] = db::preparedStmtWithAffectedRows(R"""(
-                                        UPDATE auction_house
-                                        SET buyer_name = ?, sale = ?, sell_date = ?
-                                        WHERE id = ?
-                                        LIMIT 1;
-                                        )""",
+                                    const auto rset = db::preparedStmt("UPDATE auction_house "
+                                        "SET buyer_name = ?, sale = ?, sell_date = ? "
+                                        "WHERE id = ? "
+                                        "LIMIT 1 ",
                                         PChar->getName(), price, (uint32)time(nullptr), rowId);
 
-                                    return rset && affectedRows;
+                                    return rset && rset->rowsAffected();
                                 }();
 
                                 // If the update was successful we can now add the item to the buyer's inventory
@@ -169,10 +173,12 @@ class AHAnnouncementModule : public CPPModule
                                                 .messageType = MESSAGE_SYSTEM_3,
                                             });
                                         }
+
+                                        itemPurchasedSuccessfully = true;
                                     }
                                 }
                             });
-                            if (success)
+                            if (itemPurchasedSuccessfully && success)
                             {
                                 return;
                             }

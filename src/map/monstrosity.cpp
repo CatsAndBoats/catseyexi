@@ -325,7 +325,7 @@ void monstrosity::HandleZoneIn(CCharEntity* PChar)
         // NOTE: It DOES say the effect wears off
         // PEffect->AddEffectFlag(EFFECTFLAG_NO_LOSS_MESSAGE);
 
-        PChar->StatusEffectContainer->AddStatusEffect(PEffect, true);
+        PChar->StatusEffectContainer->AddStatusEffect(PEffect, EffectNotice::Silent);
     }
 
     SendFullMonstrosityUpdate(PChar);
@@ -624,7 +624,7 @@ void monstrosity::HandleDeathMenu(CCharEntity* PChar, uint8 type)
 
         // Restart this zone with Gestation effect
         PChar->loc.destination = PChar->loc.zone->GetID();
-        charutils::SendToZone(PChar, ZoningType::Zoning, zoneutils::GetZoneIPP(PChar->loc.destination));
+        charutils::SendToZone(PChar, PChar->loc.destination);
     }
 }
 

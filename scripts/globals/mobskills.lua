@@ -283,7 +283,7 @@ xi.mobskills.mobMagicalMove = function(actor, target, action, baseDamage, action
     -- Multipliers.
     local sdt                         = xi.spells.damage.calculateSDT(target, actionElement)
     local resist                      = xi.mobskills.applyPlayerResistance(actor, nil, target, actor:getStat(xi.mod.INT) - target:getStat(xi.mod.INT), petAccBonus, actionElement)
-    local dayAndWeather               = xi.spells.damage.calculateDayAndWeather(actor, 0, actionElement)
+    local dayAndWeather               = xi.spells.damage.calculateDayAndWeather(actor, actionElement, false)
     local magicBonusDiff              = xi.spells.damage.calculateMagicBonusDiff(actor, target, 0, 0, actionElement)
     local targetMagicDamageAdjustment = xi.spells.damage.calculateTMDA(target, actionElement)
 
@@ -345,7 +345,7 @@ end
 -- Equation: (HP * percent) + (LVL / base)
 -- cap is optional, defines a maximum damage
 xi.mobskills.mobBreathMove = function(mob, target, skill, percent, base, element, cap)
-    local damage = (mob:getHP() * percent) + (mob:getMainLvl() / base)
+    local damage = mob:getHP() * percent + mob:getMainLvl() / base
 
     if not cap then
         -- cap max damage
@@ -354,15 +354,15 @@ xi.mobskills.mobBreathMove = function(mob, target, skill, percent, base, element
 
     -- Deal bonus damage vs mob ecosystem
     local systemBonus = utils.getEcosystemStrengthBonus(mob:getEcosystem(), target:getEcosystem())
-    damage = damage + damage * (systemBonus * 0.25)
+    damage            = damage + damage * systemBonus * 0.25
 
     -- elemental resistence
     if element and element > 0 then
         -- no skill available, pass nil
-        local resist  = xi.mobskills.applyPlayerResistance(mob, nil, target, mob:getStat(xi.mod.INT)-target:getStat(xi.mod.INT), 0, element)
-        local defense = xi.spells.damage.calculateSDT(target, element)
+        local resistRate   = xi.mobskills.applyPlayerResistance(mob, nil, target, mob:getStat(xi.mod.INT) - target:getStat(xi.mod.INT), 0, element)
+        local elementalSDT = xi.spells.damage.calculateSDT(target, element)
 
-        damage = damage * resist * defense
+        damage = damage * resistRate * elementalSDT
     end
 
     damage = utils.clamp(damage, 1, cap)
@@ -377,26 +377,25 @@ xi.mobskills.mobBreathMove = function(mob, target, skill, percent, base, element
     -- 2500 would mean 25% ADDITIONAL damage taken.
     -- The effects of the "Shell" spells are also included in this step. The effect also aplies a negative value.
 
-    local globalDamageTaken   = target:getMod(xi.mod.DMG) / 10000          -- Mod is base 10000
-    local breathDamageTaken   = target:getMod(xi.mod.DMGBREATH) / 10000    -- Mod is base 10000
-    local combinedDamageTaken = 1.0 + utils.clamp(breathDamageTaken + globalDamageTaken, -0.5, 0.5) -- The combination of regular "Damage Taken" and "Breath Damage Taken" caps at 50%. There is no BDTII known as of yet.
+    local globalDamageTaken   = target:getMod(xi.mod.DMG) / 10000                             -- Mod is base 10000
+    local breathDamageTaken   = target:getMod(xi.mod.DMGBREATH) / 10000                       -- Mod is base 10000
+    local uBreathDamageTaken  = target:getMod(xi.mod.UDMGBREATH) / 10000                      -- Mod is base 10000
+    local combinedDamageTaken = utils.clamp(breathDamageTaken + globalDamageTaken, -0.5, 0.5) -- The combination of regular "Damage Taken" and "Breath Damage Taken" caps at 50%. There is no BDTII known as of yet.
+    combinedDamageTaken       = utils.clamp(1 + combinedDamageTaken + uBreathDamageTaken, 0, 2)                     -- Uncapped breath damage modifier. Cap is 100% both ways.
 
+    -- Apply "Damage taken" mods to damage.
     damage = math.floor(damage * combinedDamageTaken)
 
-    -- Handle Phalanx
+    -- Phalanx, Stoneskin and TP.
     if damage > 0 then
-        damage = utils.clamp(damage - target:getMod(xi.mod.PHALANX), 0, 99999)
-    end
+        damage = utils.clamp(damage - target:getMod(xi.mod.PHALANX), 0, 99999) -- Handle Phalanx
+        damage = utils.clamp(utils.stoneskin(target, damage), -99999, 99999)   -- Handle Stoneskin
 
-    -- Handle Stoneskin
-    if damage > 0 then
-        damage = utils.clamp(utils.stoneskin(target, damage), -99999, 99999)
-    end
-
-    -- breath mob skills are single hit so provide single Melee hit TP return if primary target
-    if damage > 0 and skill:getPrimaryTargetID() == target:getID() then
-        local tpReturn = xi.combat.tp.getSingleMeleeHitTPReturn(mob, target)
-        mob:addTP(tpReturn)
+        -- Breath mob skills are single hit so provide single Melee hit TP return if primary target
+        if skill:getPrimaryTargetID() == target:getID() then
+            local tpReturn = xi.combat.tp.getSingleMeleeHitTPReturn(mob, target)
+            mob:addTP(tpReturn)
+        end
     end
 
     return damage

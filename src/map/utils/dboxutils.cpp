@@ -19,12 +19,15 @@
 ===========================================================================
 */
 
+#include "common/async.h"
+
 #include "dboxutils.h"
 
 #include "common/database.h"
 #include "common/logging.h"
 #include "common/macros.h"
 #include "common/settings.h"
+#include "common/sql.h"
 #include "common/tracy.h"
 
 #include "entities/charentity.h"
@@ -39,17 +42,6 @@
 
 #include "trade_container.h"
 #include "universal_container.h"
-
-extern std::unique_ptr<SqlConnection> _sql;
-
-namespace
-{
-    auto escapeString(const std::string_view str) -> std::string
-    {
-        // TODO: Replace with db::escapeString
-        return _sql->EscapeString(str);
-    }
-} // namespace
 
 void dboxutils::HandlePacket(CCharEntity* PChar, CBasicPacket& data)
 {
@@ -98,7 +90,7 @@ void dboxutils::HandlePacket(CCharEntity* PChar, CBasicPacket& data)
         {
             const uint8  invslot      = data.ref<uint8>(0x07);
             const uint32 quantity     = data.ref<uint32>(0x08);
-            const auto   recieverName = escapeString(asStringFromUntrustedSource(data[0x10], 15));
+            const auto   recieverName = db::escapeString(asStringFromUntrustedSource(data[0x10], 15));
 
             DebugDeliveryBoxFmt("DBOX: AddItemsToBeSent (action: {:02X}): player: {} ({}), boxtype: {}, slotID: {}, invslot: {}, quantity: {}, recieverName: {}",
                                 action, charName, PChar->id, boxtype, slotID, invslot, quantity, recieverName);
@@ -161,7 +153,7 @@ void dboxutils::HandlePacket(CCharEntity* PChar, CBasicPacket& data)
         break;
         case 0x0C:
         {
-            const auto recieverName = escapeString(asStringFromUntrustedSource(data[0x10], 15));
+            const auto recieverName = db::escapeString(asStringFromUntrustedSource(data[0x10], 15));
 
             DebugDeliveryBoxFmt("DBOX: ConfirmNameBeforeSending (action: {:02X}): player: {} ({}), boxtype: {}, recieverName: {}", action, charName, PChar->id, boxtype, recieverName);
             ConfirmNameBeforeSending(PChar, action, boxtype, recieverName);
@@ -303,12 +295,12 @@ void dboxutils::AddItemsToBeSent(CCharEntity* PChar, uint8 action, uint8 boxtype
             std::memcpy(PUBoxItem->m_extra, PItem->m_extra, sizeof(PUBoxItem->m_extra));
 
             // NOTE: This will trigger SQL trigger: delivery_box_insert
-            const auto [rset, affectedRows] = db::preparedStmtWithAffectedRows(
+            const auto rset = db::preparedStmt(
                 "INSERT INTO delivery_box(charid, charname, box, slot, itemid, itemsubid, quantity, extra, senderid, sender) "
                 "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 PChar->id, PChar->getName(), 2, slotID, PItem->getID(), PItem->getSubID(), quantity, PItem->m_extra, recvCharid, recieverName);
 
-            if (rset && affectedRows && charutils::UpdateItem(PChar, LOC_INVENTORY, invslot, -(int32)quantity))
+            if (rset && rset->rowsAffected() && charutils::UpdateItem(PChar, LOC_INVENTORY, invslot, -(int32)quantity))
             {
                 PChar->UContainer->SetItem(slotID, PUBoxItem);
                 PChar->pushPacket<CDeliveryBoxPacket>(action, boxtype, PUBoxItem, slotID, PChar->UContainer->GetItemsCount(), 1);
@@ -350,17 +342,17 @@ void dboxutils::SendConfirmation(CCharEntity* PChar, uint8 action, uint8 boxtype
             {
                 uint32 charid = charutils::getCharIdFromName(PItem->getReceiver());
 
-                const auto [rset, affectedRows] = db::preparedStmtWithAffectedRows("UPDATE delivery_box SET sent = 1 WHERE charid = ? AND senderid = ? AND slot = ? AND box = ?",
+                const auto rset = db::preparedStmt("UPDATE delivery_box SET sent = 1 WHERE charid = ? AND senderid = ? AND slot = ? AND box = ?",
                                                                                    PChar->id, charid, slotID, 2);
-                if (rset && affectedRows)
+                if (rset && rset->rowsAffected())
                 {
                     // NOTE: This will trigger SQL trigger: delivery_box_insert
-                    const auto [rset2, affectedRows2] = db::preparedStmtWithAffectedRows(
+                    const auto rset2 = db::preparedStmt(
                         "INSERT INTO delivery_box(charid, charname, box, itemid, itemsubid, quantity, extra, senderid, sender) "
                         "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)",
                         charid, PItem->getReceiver(), 1, PItem->getID(), PItem->getSubID(), PItem->getQuantity(), PItem->m_extra, PChar->id, PChar->getName());
 
-                    if (rset2 && affectedRows2)
+                    if (rset2 && rset2->rowsAffected())
                     {
                         PItem->setSent(true);
                         PChar->pushPacket<CDeliveryBoxPacket>(action, boxtype, PItem, slotID, send_items, 0x02);
@@ -400,18 +392,18 @@ void dboxutils::CancelSendingItem(CCharEntity* PChar, uint8 action, uint8 boxtyp
             uint32 charid = charutils::getCharIdFromName(PChar->UContainer->GetItem(slotID)->getReceiver());
             if (charid)
             {
-                const auto [rset, affectedRows] = db::preparedStmtWithAffectedRows(
+                const auto rset = db::preparedStmt(
                     "UPDATE delivery_box SET sent = 0 WHERE charid = ? AND box = 2 AND slot = ? AND sent = 1 AND received = 0 LIMIT 1",
                     PChar->id, slotID);
 
-                if (rset && affectedRows)
+                if (rset && rset->rowsAffected())
                 {
-                    const auto [rset2, affectedRows2] = db::preparedStmtWithAffectedRows(
+                    const auto rset2 = db::preparedStmt(
                         "DELETE FROM delivery_box WHERE senderid = ? AND box = 1 AND charid = ? AND itemid = ? AND quantity = ? "
                         "AND slot >= 8 LIMIT 1",
                         PChar->id, charid, PItem->getID(), PItem->getQuantity());
 
-                    if (rset2 && affectedRows2 == 1)
+                    if (rset2 && rset->rowsAffected())
                     {
                         PChar->UContainer->GetItem(slotID)->setSent(false);
                         PChar->pushPacket<CDeliveryBoxPacket>(action, boxtype, PChar->UContainer->GetItem(slotID), slotID, PChar->UContainer->GetItemsCount(), 0x02);
@@ -428,10 +420,10 @@ void dboxutils::CancelSendingItem(CCharEntity* PChar, uint8 action, uint8 boxtyp
         });
         if (!success)
         {
-            const auto [rset, affectedRows] = db::preparedStmtWithAffectedRows(
+            const auto rset = db::preparedStmt(
                 "DELETE FROM delivery_box WHERE box = 2 AND charid = ? AND itemid = ? AND quantity = ? AND slot = ? LIMIT 1",
                 PChar->id, PItem->getID(), PItem->getQuantity(), slotID);
-            if (rset && affectedRows)
+            if (rset && rset->rowsAffected())
             {
                 ShowErrorFmt("DBOX: Deleting orphaned outbox record (player: {} ({}), target: {}, slotID: {})",
                                 PChar->getName(), PChar->id, PItem->getReceiver(), slotID);
@@ -526,6 +518,26 @@ void dboxutils::SendNewItems(CCharEntity* PChar, uint8 action, uint8 boxtype, ui
                         db::preparedStmt("UPDATE delivery_box SET received = 1 WHERE senderid = ? AND charid = ? AND box = 2 AND received = 0 AND quantity = ? AND sent = 1 AND itemid = ? LIMIT 1",
                                          PChar->id, senderID, PItem->getQuantity(), PItem->getID());
 
+                        if (settings::get<bool>("map.AUDIT_PLAYER_DBOX"))
+                        {
+                            Async::getInstance()->submit(
+                                [itemid        = PItem->getID(),
+                                 quantity      = PItem->getQuantity(),
+                                 sender        = senderID,
+                                 sender_name   = PItem->getSender(),
+                                 receiver      = PChar->id,
+                                 receiver_name = PChar->getName(),
+                                 date          = static_cast<uint32>(time(nullptr))]()
+                                {
+                                    const auto query = "INSERT INTO audit_dbox(itemid, quantity, sender, sender_name, receiver, receiver_name, date) VALUES (?, ?, ?, ?, ?, ?, ?)";
+                                    if (!db::preparedStmt(query, itemid, quantity, sender, sender_name, receiver, receiver_name, date))
+                                    {
+                                        ShowErrorFmt("Failed to log delivery box transaction (item: {}, quantity: {}, sender: {}, receiver: {}, date: {})", itemid, quantity, sender, receiver, date);
+                                    }
+                                }
+                            );
+                        }
+
                         const auto rset = db::preparedStmt("SELECT slot FROM delivery_box WHERE charid = ? AND box = 1 AND slot > 7 ORDER BY slot ASC", PChar->id);
                         FOR_DB_SINGLE_RESULT(rset)
                         {
@@ -588,8 +600,8 @@ void dboxutils::RemoveDeliveredItemFromSendingBox(CCharEntity* PChar, uint8 acti
                 CItem* PItem = PChar->UContainer->GetItem(deliverySlotID);
                 if (PItem && PItem->isSent())
                 {
-                    const auto [rset2, affectedRows2] = db::preparedStmtWithAffectedRows("DELETE FROM delivery_box WHERE charid = ? AND box = 2 AND slot = ? LIMIT 1", PChar->id, deliverySlotID);
-                    if (rset2 && affectedRows2)
+                    const auto rset2 = db::preparedStmt("DELETE FROM delivery_box WHERE charid = ? AND box = 2 AND slot = ? LIMIT 1", PChar->id, deliverySlotID);
+                    if (rset2 && rset2->rowsAffected())
                     {
                         DebugDeliveryBoxFmt("DBOX: RemoveDeliveredItemFromSendingBox (action: {:02X}): player: {} ({}) removed item: {} ({})",
                                             action, PChar->getName(), PChar->id, PItem->getName(), PItem->getID());
@@ -656,14 +668,14 @@ void dboxutils::ReturnToSender(CCharEntity* PChar, uint8 action, uint8 boxtype, 
             if (senderID)
             {
                 // NOTE: This will trigger SQL trigger: delivery_box_insert
-                const auto [rset, affectedRows] = db::preparedStmtWithAffectedRows("INSERT INTO delivery_box (charid, charname, box, itemid, itemsubid, quantity, extra, senderid, sender) "
+                const auto rset = db::preparedStmt("INSERT INTO delivery_box (charid, charname, box, itemid, itemsubid, quantity, extra, senderid, sender) "
                                                                                    "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)",
                                                                                    senderID, senderName, 1, PItem->getID(), PItem->getSubID(), PItem->getQuantity(), PItem->m_extra, PChar->id, PChar->getName());
-                if (rset && affectedRows)
+                if (rset && rset->rowsAffected())
                 {
                     // Remove original delivery record
-                    const auto [rset2, affectedRows2] = db::preparedStmtWithAffectedRows("DELETE FROM delivery_box WHERE charid = ? AND slot = ? AND box = 1 LIMIT 1", PChar->id, slotID);
-                    if (rset2 && affectedRows2)
+                    const auto rset2 = db::preparedStmt("DELETE FROM delivery_box WHERE charid = ? AND slot = ? AND box = 1 LIMIT 1", PChar->id, slotID);
+                    if (rset2 && rset2->rowsAffected())
                     {
                         PChar->UContainer->SetItem(slotID, nullptr);
                         PChar->pushPacket<CDeliveryBoxPacket>(action, boxtype, PItem, slotID, PChar->UContainer->GetItemsCount(), 1);
@@ -712,9 +724,9 @@ void dboxutils::TakeItemFromCell(CCharEntity* PChar, uint8 action, uint8 boxtype
         {
             if (boxtype == 0x01)
             {
-                const auto [rset, affectedRows] = db::preparedStmtWithAffectedRows("DELETE FROM delivery_box WHERE charid = ? AND slot = ? AND box = ? LIMIT 1",
+                const auto rset = db::preparedStmt("DELETE FROM delivery_box WHERE charid = ? AND slot = ? AND box = ? LIMIT 1",
                                                                    PChar->id, slotID, boxtype);
-                if (rset && affectedRows)
+                if (rset && rset->rowsAffected())
                 {
                     if (charutils::AddItem(PChar, LOC_INVENTORY, itemutils::GetItem(PItem), true) != ERROR_SLOTID)
                     {
@@ -724,9 +736,9 @@ void dboxutils::TakeItemFromCell(CCharEntity* PChar, uint8 action, uint8 boxtype
             }
             else if (boxtype == 0x02)
             {
-                const auto [rset, affectedRows] = db::preparedStmtWithAffectedRows("DELETE FROM delivery_box WHERE charid = ? AND sent = 0 AND slot = ? AND box = ? LIMIT 1",
+                const auto rset = db::preparedStmt("DELETE FROM delivery_box WHERE charid = ? AND sent = 0 AND slot = ? AND box = ? LIMIT 1",
                                                                                    PChar->id, slotID, boxtype);
-                if (rset && affectedRows)
+                if (rset && rset->rowsAffected())
                 {
                     if (charutils::AddItem(PChar, LOC_INVENTORY, itemutils::GetItem(PItem), true) != ERROR_SLOTID)
                     {
@@ -767,8 +779,8 @@ void dboxutils::RemoveItemFromCell(CCharEntity* PChar, uint8 action, uint8 boxty
 
     if (!PChar->UContainer->IsSlotEmpty(slotID))
     {
-        const auto [rset, affectedRows] = db::preparedStmtWithAffectedRows("DELETE FROM delivery_box WHERE charid = ? AND slot = ? AND box = 1 LIMIT 1", PChar->id, slotID);
-        if (rset && affectedRows)
+        const auto rset = db::preparedStmt("DELETE FROM delivery_box WHERE charid = ? AND slot = ? AND box = 1 LIMIT 1", PChar->id, slotID);
+        if (rset && rset->rowsAffected())
         {
             CItem* PItem = PChar->UContainer->GetItem(slotID);
             PChar->UContainer->SetItem(slotID, nullptr);

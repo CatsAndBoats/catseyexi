@@ -4,7 +4,7 @@
 -- Type: Magical
 -- Utsusemi/Blink absorb: 1 shadow
 -- Range: Melee
--- Notes: In ToAU zones, this has an additional effect of absorbing all status effects, including food.
+-- Notes: (Unverified) In ToAU zones, this has an additional effect of absorbing all status effects, including food.
 -----------------------------------
 ---@type TMobSkill
 local mobskillObject = {}

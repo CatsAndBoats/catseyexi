@@ -20,12 +20,12 @@ zones[xi.zone.AYDEEWA_SUBTERRANE] =
         MEMBERS_LEVELS_ARE_RESTRICTED = 7024, -- Your party is unable to participate because certain members' levels are restricted.
         FISHING_MESSAGE_OFFSET        = 7064, -- You can't fish here.
         MINING_IS_POSSIBLE_HERE       = 7335, -- Mining is possible here if you have <item>.
-        NO_MORE_SPROUTS               = 7715, -- However, you cannot carry any more sprouts.
-        SENSE_OMINOUS_PRESENCE        = 8016, -- You sense an ominous presence...
-        BLOOD_STAINS                  = 8022, -- The ground is smeared with bloodstains...
-        DRAWS_NEAR                    = 8047, -- Something draws near!
-        COMMON_SENSE_SURVIVAL         = 8919, -- It appears that you have arrived at a new survival guide provided by the Adventurers' Mutual Aid Network. Common sense dictates that you should now be able to teleport here from similar tomes throughout the world.
-        UNITY_WANTED_BATTLE_INTERACT  = 8983, -- Those who have accepted % must pay # Unity accolades to participate. The content for this Wanted battle is #. [Ready to begin?/You do not have the appropriate object set, so your rewards will be limited.]
+        NO_MORE_SPROUTS               = 7716, -- However, you cannot carry any more sprouts.
+        SENSE_OMINOUS_PRESENCE        = 8017, -- You sense an ominous presence...
+        BLOOD_STAINS                  = 8023, -- The ground is smeared with bloodstains...
+        DRAWS_NEAR                    = 8048, -- Something draws near!
+        COMMON_SENSE_SURVIVAL         = 8920, -- It appears that you have arrived at a new survival guide provided by the Adventurers' Mutual Aid Network. Common sense dictates that you should now be able to teleport here from similar tomes throughout the world.
+        UNITY_WANTED_BATTLE_INTERACT  = 8984, -- Those who have accepted % must pay # Unity accolades to participate. The content for this Wanted battle is #. [Ready to begin?/You do not have the appropriate object set, so your rewards will be limited.]
     },
     mob =
     {

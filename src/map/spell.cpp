@@ -26,7 +26,7 @@
 
 #include "blue_spell.h"
 #include "items/item_weapon.h"
-#include "map.h"
+#include "map_server.h"
 #include "mob_spell_list.h"
 #include "spell.h"
 #include "status_effect_container.h"
@@ -352,12 +352,12 @@ void CSpell::setElement(uint16 element)
     m_element = element;
 }
 
-void CSpell::setCE(uint16 ce)
+void CSpell::setCE(int32 ce)
 {
     m_CE = ce;
 }
 
-uint16 CSpell::getCE() const
+int32 CSpell::getCE() const
 {
     return m_CE;
 }
@@ -367,12 +367,12 @@ void CSpell::setRadius(float radius)
     m_radius = radius;
 }
 
-void CSpell::setVE(uint16 ve)
+void CSpell::setVE(int32 ve)
 {
     m_VE = ve;
 }
 
-uint16 CSpell::getVE() const
+int32 CSpell::getVE() const
 {
     return m_VE;
 }
@@ -563,10 +563,10 @@ namespace spell
             }
         }
 
-        const char* blueQuery = "SELECT blue_spell_list.spellid, blue_spell_list.mob_skill_id, blue_spell_list.set_points, \
-                                blue_spell_list.trait_category, blue_spell_list.trait_category_weight, blue_spell_list.primary_sc, \
-                                blue_spell_list.secondary_sc, blue_spell_list.tertiary_sc, spell_list.content_tag \
-                             FROM blue_spell_list JOIN spell_list on blue_spell_list.spellid = spell_list.spellid";
+        const char* blueQuery = "SELECT blue_spell_list.spellid, blue_spell_list.mob_skill_id, blue_spell_list.set_points, "
+                                "blue_spell_list.trait_category, blue_spell_list.trait_category_weight, blue_spell_list.primary_sc, "
+                                "blue_spell_list.secondary_sc, blue_spell_list.tertiary_sc, spell_list.content_tag "
+                                "FROM blue_spell_list JOIN spell_list on blue_spell_list.spellid = spell_list.spellid";
 
         ret = _sql->Query(blueQuery);
 
@@ -574,7 +574,8 @@ namespace spell
         {
             while (_sql->NextRow() == SQL_SUCCESS)
             {
-                char* contentTag = (char*)_sql->GetData(8);
+                // const auto contentTag = rset->getOrDefault<std::string>("content_tag", "");
+                const auto contentTag = _sql->GetStringData(8);
                 if (!luautils::IsContentEnabled(contentTag))
                 {
                     continue;
@@ -623,7 +624,8 @@ namespace spell
         {
             while (_sql->NextRow() == SQL_SUCCESS)
             {
-                char* contentTag = (char*)_sql->GetData(2);
+                // const auto contentTag = rset->getOrDefault<std::string>("content_tag", "");
+                const auto contentTag = _sql->GetStringData(2);
                 if (!luautils::IsContentEnabled(contentTag))
                 {
                     continue;

@@ -1662,15 +1662,15 @@ INSERT INTO `mob_skills` VALUES (1644,878,'hypothermal_combustion',1,0.0,20.0,20
 INSERT INTO `mob_skills` VALUES (1645,876,'freeze_rush',0,0.0,7.0,2000,1500,4,0,0,0,0,0,0);
 INSERT INTO `mob_skills` VALUES (1646,877,'cold_wave',4,0.0,10.0,2000,1500,4,0,0,0,0,0,0);
 INSERT INTO `mob_skills` VALUES (1647,1598,'berserk',0,0.0,7.0,2000,1500,1,0,0,0,0,0,0);
--- INSERT INTO `mob_skills` VALUES (1648,418,'crystal_shield',0,0.0,7.0,2000,1500,4,0,0,0,0,0,0);
--- INSERT INTO `mob_skills` VALUES (1649,419,'heavy_strike',0,0.0,7.0,2000,1500,4,0,0,0,0,0,0);
+INSERT INTO `mob_skills` VALUES (1648,418,'crystal_shield',0,0.0,7.0,2000,1500,1,0,0,0,0,0,0);
+INSERT INTO `mob_skills` VALUES (1649,419,'heavy_strike',0,0.0,7.0,2000,1500,4,0,0,0,0,0,0);
 -- INSERT INTO `mob_skills` VALUES (1650,420,'ice_break',0,0.0,7.0,2000,1500,4,0,0,0,0,0,0);
 -- INSERT INTO `mob_skills` VALUES (1651,1395,'thunder_break',0,0.0,7.0,2000,1500,4,0,0,0,0,0,0);
--- INSERT INTO `mob_skills` VALUES (1652,422,'crystal_rain',0,0.0,7.0,2000,1500,4,0,0,0,0,0,0);
--- INSERT INTO `mob_skills` VALUES (1653,423,'crystal_weapon',0,0.0,7.0,2000,1500,4,0,0,0,0,0,0);
--- INSERT INTO `mob_skills` VALUES (1654,424,'crystal_weapon',0,0.0,7.0,2000,1500,4,0,0,0,0,0,0);
--- INSERT INTO `mob_skills` VALUES (1655,425,'crystal_weapon',0,0.0,7.0,2000,1500,4,0,0,0,0,0,0);
--- INSERT INTO `mob_skills` VALUES (1656,426,'crystal_weapon',0,0.0,7.0,2000,1500,4,0,0,0,0,0,0);
+INSERT INTO `mob_skills` VALUES (1652,422,'crystal_rain',1,0.0,15.0,2000,1500,4,0,0,0,0,0,0);
+INSERT INTO `mob_skills` VALUES (1653,423,'crystal_weapon_fire',0,0.0,15.0,2000,1500,4,0,0,0,0,0,0);
+INSERT INTO `mob_skills` VALUES (1654,424,'crystal_weapon_stone',0,0.0,15.0,2000,1500,4,0,0,0,0,0,0);
+INSERT INTO `mob_skills` VALUES (1655,425,'crystal_weapon_water',0,0.0,15.0,2000,1500,4,0,0,0,0,0,0);
+INSERT INTO `mob_skills` VALUES (1656,426,'crystal_weapon_wind',0,0.0,15.0,2000,1500,4,0,0,0,0,0,0);
 -- INSERT INTO `mob_skills` VALUES (1657,1401,'blind_vortex',0,0.0,7.0,2000,1500,4,0,0,0,0,0,0);
 -- INSERT INTO `mob_skills` VALUES (1658,1402,'giga_scream',0,0.0,7.0,2000,1500,4,0,0,0,0,0,0);
 -- INSERT INTO `mob_skills` VALUES (1659,1403,'dread_dive',0,0.0,7.0,2000,1500,4,0,0,0,0,0,0);
@@ -1943,7 +1943,7 @@ INSERT INTO `mob_skills` VALUES (1925,1269,'stave_toss',0,0.0,15.0,2000,1500,4,0
 -- INSERT INTO `mob_skills` VALUES (1926,1270,'groundburst',0,0.0,7.0,2000,1500,4,0,0,0,0,0,0);
 -- INSERT INTO `mob_skills` VALUES (1927,1671,'.',0,0.0,7.0,2000,1500,4,0,0,0,0,0,0);
 -- INSERT INTO `mob_skills` VALUES (1928,1672,'.',0,0.0,7.0,2000,1500,4,0,0,0,0,0,0);
--- INSERT INTO `mob_skills` VALUES (1929,1278,'pole_swing',0,0.0,7.0,2000,1500,4,0,0,0,0,0,0);
+INSERT INTO `mob_skills` VALUES (1929,1278,'pole_swing',0,0.0,7.0,2000,1500,4,0,0,0,0,0,0);
 INSERT INTO `mob_skills` VALUES (1930,1279,'tidal_slash',4,0.0,10.0,2000,1500,4,0,0,0,0,0,0);
 INSERT INTO `mob_skills` VALUES (1931,1280,'eagle_eye_shot',0,0.0,25.0,2000,0,4,2,0,0,0,0,0); -- lamiae
 INSERT INTO `mob_skills` VALUES (1932,16,'eagle_eye_shot',0,0.0,25.0,2000,0,4,2,0,0,0,0,0); -- swift shot ??
@@ -2121,12 +2121,12 @@ INSERT INTO `mob_skills` VALUES (2103,1439,'granite_skin',0,0.0,7.0,2000,1500,1,
 INSERT INTO `mob_skills` VALUES (2104,1436,'crippling_slam',4,0.0,15.0,2000,1500,4,0,0,0,0,0,0);
 -- INSERT INTO `mob_skills` VALUES (2105,1440,'mijin_gakure',0,0.0,7.0,2000,1500,4,0,0,0,0,0,0);
 INSERT INTO `mob_skills` VALUES (2106,1449,'bloodrake',0,0.0,7.0,2000,1000,4,0,0,0,0,0,0);
-INSERT INTO `mob_skills` VALUES (2107,1450,'decollation',0,0.0,7.0,2000,1000,4,0,0,0,0,0,0);
+INSERT INTO `mob_skills` VALUES (2107,1450,'decollation',4,0.0,7.0,2000,1000,4,0,0,0,0,0,0);
 INSERT INTO `mob_skills` VALUES (2108,1451,'nosferatus_kiss',1,0.0,20.0,2000,1000,4,0,0,0,0,0,0);
 INSERT INTO `mob_skills` VALUES (2109,1452,'heliovoid',1,0.0,20.0,2000,1000,4,0,0,0,0,0,0);
 INSERT INTO `mob_skills` VALUES (2110,1454,'wings_of_gehenna',1,0.0,20.0,2000,1000,4,0,0,0,0,0,0);
 INSERT INTO `mob_skills` VALUES (2111,1453,'eternal_damnation',4,0.0,15.0,2000,1000,4,0,0,0,0,0,0);
--- INSERT INTO `mob_skills` VALUES (2112,1455,'nocturnal_servitude',0,0.0,7.0,2000,1500,4,0,0,0,0,0,0);
+INSERT INTO `mob_skills` VALUES (2112,1455,'nocturnal_servitude',4,0.0,7.0,2000,1500,4,0,0,0,0,0,0);
 INSERT INTO `mob_skills` VALUES (2113,1456,'hellsnap',1,0.0,30.0,2000,1000,4,0,0,0,0,0,0);
 INSERT INTO `mob_skills` VALUES (2114,1460,'hellclap',4,0.0,10.0,2000,1000,4,0,0,0,0,0,0);
 INSERT INTO `mob_skills` VALUES (2115,1457,'cackle',1,0.0,30.0,2000,1000,4,0,0,0,0,0,0);
@@ -2141,9 +2141,9 @@ INSERT INTO `mob_skills` VALUES (2119,1459,'thundris_shriek',1,0.0,15.0,2000,100
 -- INSERT INTO `mob_skills` VALUES (2124,1445,'sanngetall',0,0.0,7.0,2000,1500,4,0,0,0,0,0,0);
 -- INSERT INTO `mob_skills` VALUES (2125,1443,'geirrothr',0,0.0,7.0,2000,1500,4,0,0,0,0,0,0);
 INSERT INTO `mob_skills` VALUES (2126,1447,'zantetsuken',4,0.0,10.0,2000,1000,4,0,0,0,0,0,0);
--- INSERT INTO `mob_skills` VALUES (2127,1871,'.',0,0.0,7.0,2000,1500,4,0,0,0,0,0,0);
--- INSERT INTO `mob_skills` VALUES (2128,1872,'.',0,0.0,7.0,2000,1500,4,0,0,0,0,0,0);
--- INSERT INTO `mob_skills` VALUES (2129,1873,'.',0,0.0,7.0,2000,1500,4,0,0,0,0,0,0);
+INSERT INTO `mob_skills` VALUES (2127,848,'snort_2127',4,0.0,12.5,2000,0,4,0,0,3,0,0,0);
+INSERT INTO `mob_skills` VALUES (2128,420,'ice_break_2128',1,0.0,15.0,2000,1500,4,0,0,0,0,0,0);
+INSERT INTO `mob_skills` VALUES (2129,421,'thunder_break_2129',1,0.0,15.0,2000,1500,4,0,0,0,0,0,0);
 -- INSERT INTO `mob_skills` VALUES (2130,1175,'proboscis_shower',0,0.0,7.0,2000,1500,4,0,0,0,0,0,0);
 -- INSERT INTO `mob_skills` VALUES (2131,1875,'.',0,0.0,7.0,2000,1500,4,0,0,0,0,0,0);
 INSERT INTO `mob_skills` VALUES (2132,434,'replicator',0,0.0,7.0,2000,0,16,4,0,0,0,0,0);
@@ -3629,13 +3629,13 @@ INSERT INTO `mob_skills` VALUES (3613,295,'',0,0.0,7.0,2000,1500,4,0,0,0,0,0,0);
 INSERT INTO `mob_skills` VALUES (3614,296,'',0,0.0,7.0,2000,1500,4,0,0,0,0,0,0);
 INSERT INTO `mob_skills` VALUES (3615,297,'',0,0.0,7.0,2000,1500,4,0,0,0,0,0,0);
 INSERT INTO `mob_skills` VALUES (3616,298,'',0,0.0,7.0,2000,1500,4,0,0,0,0,0,0);
-INSERT INTO `mob_skills` VALUES (3617,299,'feast_of_arrows',0,0.0,7.0,2000,1500,4,0,0,0,0,0,0);
-INSERT INTO `mob_skills` VALUES (3618,301,'regurgitated_swarm',0,0.0,7.0,2000,1500,4,0,0,0,0,0,0);
-INSERT INTO `mob_skills` VALUES (3619,302,'setting_the_stage',0,0.0,7.0,2000,1500,4,0,0,0,0,0,0);
-INSERT INTO `mob_skills` VALUES (3620,303,'last_laugh',0,0.0,7.0,2000,1500,4,0,0,0,0,0,0);
-INSERT INTO `mob_skills` VALUES (3621,483,'luminous_lance',0,0.0,7.0,2000,1500,4,0,0,0,0,0,0);
-INSERT INTO `mob_skills` VALUES (3622,481,'rejuvenation',0,0.0,7.0,2000,1500,4,0,0,0,0,0,0);
-INSERT INTO `mob_skills` VALUES (3623,482,'revelation',0,0.0,7.0,2000,1500,4,0,0,0,0,0,0);
+INSERT INTO `mob_skills` VALUES (3617,2347,'feast_of_arrows',0,0.0,7.0,2000,1500,4,0,0,0,0,0,0);    -- Capture shows 299. Adding 2048 for it to work properly.
+INSERT INTO `mob_skills` VALUES (3618,2349,'regurgitated_swarm',0,0.0,7.0,2000,1500,4,0,0,0,0,0,0); -- Capture shows 301. Adding 2048 for it to work properly.
+INSERT INTO `mob_skills` VALUES (3619,2350,'setting_the_stage',0,0.0,7.0,2000,1500,4,0,0,0,0,0,0);  -- Capture shows 302. Adding 2048 for it to work properly.
+INSERT INTO `mob_skills` VALUES (3620,2351,'last_laugh',0,0.0,7.0,2000,1500,4,0,0,0,0,0,0);         -- Capture shows 303. Adding 2048 for it to work properly.
+INSERT INTO `mob_skills` VALUES (3621,2531,'luminous_lance',0,0.0,7.0,2000,1500,4,0,0,0,0,0,0);     -- Capture shows 483. Adding 2048 for it to work properly.
+INSERT INTO `mob_skills` VALUES (3622,2529,'rejuvenation',0,0.0,7.0,2000,1500,4,0,0,0,0,0,0);       -- Capture shows 481. Adding 2048 for it to work properly.
+INSERT INTO `mob_skills` VALUES (3623,2530,'revelation',0,0.0,7.0,2000,1500,4,0,0,0,0,0,0);         -- Capture shows 482. Adding 2048 for it to work properly.
 INSERT INTO `mob_skills` VALUES (3624,900,'memento_mori',0,0.0,7.0,2000,1500,4,0,0,0,0,0,0);
 INSERT INTO `mob_skills` VALUES (3625,901,'silence_seal',0,0.0,7.0,2000,1500,4,0,0,0,0,0,0);
 INSERT INTO `mob_skills` VALUES (3626,902,'envoutement',0,0.0,7.0,2000,1500,4,0,0,0,0,0,0);
@@ -3645,7 +3645,7 @@ INSERT INTO `mob_skills` VALUES (3629,340,'',0,0.0,7.0,2000,1500,4,0,0,0,0,0,0);
 INSERT INTO `mob_skills` VALUES (3630,341,'',0,0.0,7.0,2000,1500,4,0,0,0,0,0,0);
 INSERT INTO `mob_skills` VALUES (3631,342,'start_from_scratch',0,0.0,7.0,2000,1500,4,0,0,0,0,0,0);
 INSERT INTO `mob_skills` VALUES (3632,343,'frenzied_thrust',0,0.0,7.0,2000,1500,4,0,0,0,0,0,0);
-INSERT INTO `mob_skills` VALUES (3633,344,'sinners_cross',0,0.0,7.0,2000,1500,4,0,0,0,0,0,0);
+INSERT INTO `mob_skills` VALUES (3633,2392,'sinners_cross',0,0.0,7.0,2000,1500,4,0,0,0,0,0,0); -- Capture shows 344. Adding 2048 for it to work properly.
 INSERT INTO `mob_skills` VALUES (3634,345,'open_coffin',0,0.0,7.0,2000,1500,4,0,0,0,0,0,0);
 INSERT INTO `mob_skills` VALUES (3635,346,'ravenous_assault',0,0.0,7.0,2000,1500,4,0,0,0,0,0,0);
 INSERT INTO `mob_skills` VALUES (3636,347,'hemocladis',0,0.0,7.0,2000,1500,4,0,0,0,0,0,0);
@@ -3660,10 +3660,11 @@ INSERT INTO `mob_skills` VALUES (3644,266,'ruthlessness',0,0.0,7.0,2000,1500,4,0
 INSERT INTO `mob_skills` VALUES (3645,268,'inexorable_strike',0,0.0,7.0,2000,1500,4,0,0,0,0,0,0);
 INSERT INTO `mob_skills` VALUES (3646,267,'self-aggrandizement',0,0.0,7.0,2000,1500,4,0,0,0,0,0,0);
 INSERT INTO `mob_skills` VALUES (3647,82,'merciless_strike',0,0.0,7.0,2000,1500,4,0,0,0,0,0,0);
-INSERT INTO `mob_skills` VALUES (3648,409,'august_melee_sword',0,0.0,7.0,2000,0,4,4,0,0,0,0,0); -- August
-INSERT INTO `mob_skills` VALUES (3649,410,'august_melee_axe',0,0.0,7.0,2000,0,4,4,0,0,0,0,0);
-INSERT INTO `mob_skills` VALUES (3650,411,'august_melee_h2h',0,0.0,7.0,2000,0,4,4,0,0,0,0,0);
-INSERT INTO `mob_skills` VALUES (3651,412,'august_melee_bow',0,0.0,7.0,2000,0,4,4,0,0,0,0,0);
+-- Trust: August
+INSERT INTO `mob_skills` VALUES (3648,2457,'august_melee_sword',0,0.0,7.0,2000,0,4,4,0,0,0,0,0); -- Capture shows 409. Adding 2048 for it to work properly.
+INSERT INTO `mob_skills` VALUES (3649,2458,'august_melee_axe',0,0.0,7.0,2000,0,4,4,0,0,0,0,0);   -- Capture shows 410. Adding 2048 for it to work properly.
+INSERT INTO `mob_skills` VALUES (3650,2459,'august_melee_h2h',0,0.0,7.0,2000,0,4,4,0,0,0,0,0);   -- Capture shows 411. Adding 2048 for it to work properly.
+INSERT INTO `mob_skills` VALUES (3651,2460,'august_melee_bow',0,0.0,7.0,2000,0,4,4,0,0,0,0,0);   -- Capture shows 412. Adding 2048 for it to work properly.
 INSERT INTO `mob_skills` VALUES (3652,413,'daybreak',0,0.0,7.0,2000,1500,4,0,0,0,0,0,0);
 INSERT INTO `mob_skills` VALUES (3653,414,'tartaric_sigil',0,0.0,7.0,2000,1500,4,0,0,0,0,0,0);
 INSERT INTO `mob_skills` VALUES (3654,415,'null_field"',0,0.0,7.0,2000,1500,4,0,0,0,0,0,0);
@@ -3696,11 +3697,11 @@ INSERT INTO `mob_skills` VALUES (3680,291,'12_blades_of_remorse',0,0.0,7.0,2000,
 INSERT INTO `mob_skills` VALUES (3681,272,'',0,0.0,7.0,2000,1500,4,0,0,0,0,0,0);
 INSERT INTO `mob_skills` VALUES (3682,273,'',0,0.0,7.0,2000,1500,4,0,0,0,0,0,0);
 INSERT INTO `mob_skills` VALUES (3683,274,'',0,0.0,7.0,2000,1500,4,0,0,0,0,0,0);
-INSERT INTO `mob_skills` VALUES (3684,275,'aurous_charge',0,0.0,7.0,2000,1500,4,0,0,0,0,0,0);
-INSERT INTO `mob_skills` VALUES (3685,276,'howling_gust',0,0.0,7.0,2000,1500,4,0,0,0,0,0,0);
-INSERT INTO `mob_skills` VALUES (3686,277,'righteous_rasp',0,0.0,7.0,2000,1500,4,0,0,0,0,0,0);
-INSERT INTO `mob_skills` VALUES (3687,278,'starward_yowl',0,0.0,7.0,2000,1500,4,0,0,0,0,0,0);
-INSERT INTO `mob_skills` VALUES (3688,279,'stalking_prey',0,0.0,7.0,2000,1500,4,0,0,0,0,0,0);
+INSERT INTO `mob_skills` VALUES (3684,2323,'aurous_charge',0,0.0,7.0,2000,1500,4,0,0,0,0,0,0);  -- Capture shows 275. Adding 2048 for it to work properly.
+INSERT INTO `mob_skills` VALUES (3685,2324,'howling_gust',0,0.0,7.0,2000,1500,4,0,0,0,0,0,0);   -- Capture shows 276. Adding 2048 for it to work properly.
+INSERT INTO `mob_skills` VALUES (3686,2325,'righteous_rasp',0,0.0,7.0,2000,1500,4,0,0,0,0,0,0); -- Capture shows 277. Adding 2048 for it to work properly.
+INSERT INTO `mob_skills` VALUES (3687,2326,'starward_yowl',0,0.0,7.0,2000,1500,4,0,0,0,0,0,0);  -- Capture shows 278. Adding 2048 for it to work properly.
+INSERT INTO `mob_skills` VALUES (3688,2327,'stalking_prey',0,0.0,7.0,2000,1500,4,0,0,0,0,0,0);  -- Capture shows 279. Adding 2048 for it to work properly.
 INSERT INTO `mob_skills` VALUES (3689,344,'shuffle',0,0.0,7.0,2000,1500,4,0,0,0,0,0,0);
 INSERT INTO `mob_skills` VALUES (3690,345,'double_down',0,0.0,7.0,2000,1500,4,0,0,0,0,0,0);
 INSERT INTO `mob_skills` VALUES (3691,427,'bludgeon',0,0.0,7.0,2000,1500,4,0,0,0,0,0,0);
@@ -3718,14 +3719,16 @@ INSERT INTO `mob_skills` VALUES (3702,405,'darkest_hour',0,0.0,7.0,2000,1500,4,0
 INSERT INTO `mob_skills` VALUES (3703,406,'unceasing_dread',0,0.0,7.0,2000,1500,4,0,0,0,0,0,0);
 INSERT INTO `mob_skills` VALUES (3704,407,'dignified_awe',0,0.0,7.0,2000,1500,4,0,0,0,0,0,0);
 INSERT INTO `mob_skills` VALUES (3705,408,'naakuals_vengeance',0,0.0,7.0,2000,1500,4,0,0,0,0,0,0);
-INSERT INTO `mob_skills` VALUES (3706,633,'cross_reaver',4,0.0,7.0,2000,1500,4,0,0,0,0,0,0);         -- AAHM
+-- Trust: AAHM
+INSERT INTO `mob_skills` VALUES (3706,633,'cross_reaver',4,0.0,7.0,2000,1500,4,0,0,0,0,0,0);
 -- INSERT INTO `mob_skills` VALUES (3707,3451,'#1915',0,0.0,7.0,2000,1500,4,0,0,0,0,0,0);
-INSERT INTO `mob_skills` VALUES (3708,641,'swift_blade',0,0.0,7.0,2000,1500,4,0,0,0,9,0,0);          -- AAHM
-INSERT INTO `mob_skills` VALUES (3709,235,'chant_du_cygne',0,0.0,7.0,2000,1500,4,0,0,0,13,10,0);     -- AAHM
-INSERT INTO `mob_skills` VALUES (3710,237,'arrogance_incarnate',1,0.0,7.0,2000,1500,4,0,0,0,0,0,0);  -- AAEV
-INSERT INTO `mob_skills` VALUES (3711,643,'vorpal_blade',0,0.0,7.0,2000,1500,4,0,0,0,4,8,0);         -- AAEV
-INSERT INTO `mob_skills` VALUES (3712,635,'dominion_slash',0,0.0,7.0,2000,1500,4,0,0,0,0,0,0);       -- AAEV
-INSERT INTO `mob_skills` VALUES (3713,236,'chant_du_cygne',0,0.0,7.0,2000,1500,4,0,0,0,13,10,0);     -- AAEV
+INSERT INTO `mob_skills` VALUES (3708,641,'swift_blade',0,0.0,7.0,2000,1500,4,0,0,0,9,0,0);
+INSERT INTO `mob_skills` VALUES (3709,2283,'chant_du_cygne',0,0.0,7.0,2000,1500,4,0,0,0,13,10,0); -- Capture shows 235. Adding 2048 for it to work properly.
+-- Trust: AAEV
+INSERT INTO `mob_skills` VALUES (3710,2285,'arrogance_incarnate',1,0.0,7.0,2000,1500,4,0,0,0,0,0,0); -- Capture shows 237. Adding 2048 for it to work properly.
+INSERT INTO `mob_skills` VALUES (3711,643,'vorpal_blade',0,0.0,7.0,2000,1500,4,0,0,0,4,8,0);
+INSERT INTO `mob_skills` VALUES (3712,635,'dominion_slash',0,0.0,7.0,2000,1500,4,0,0,0,0,0,0);
+INSERT INTO `mob_skills` VALUES (3713,2284,'chant_du_cygne',0,0.0,7.0,2000,1500,4,0,0,0,13,10,0); -- Capture shows 236. Adding 2048 for it to work properly.
 INSERT INTO `mob_skills` VALUES (3714,638,'shield_strike',0,0.0,7.0,2000,1500,4,0,0,0,0,0,0);
 INSERT INTO `mob_skills` VALUES (3715,644,'rampage',0,0.0,7.0,2000,1500,4,0,0,0,4,0,0);              -- AAMR
 INSERT INTO `mob_skills` VALUES (3716,3460,'calamity',0,0.0,7.0,2000,1500,4,0,0,0,4,8,0);            -- AAMR
@@ -3734,11 +3737,12 @@ INSERT INTO `mob_skills` VALUES (3718,2282,'cloudsplitter',0,0.0,7.0,2000,1500,4
 -- INSERT INTO `mob_skills` VALUES (3719,3463,'#1927',0,0.0,7.0,2000,1500,4,0,0,0,0,0,0);
 INSERT INTO `mob_skills` VALUES (3720,636,'amon_drive',0,0.0,7.0,2000,1500,4,0,0,0,0,0,0);           -- AATT
 INSERT INTO `mob_skills` VALUES (3721,647,'guillotine',0,0.0,7.0,2000,1500,4,0,0,0,7,0,0);           -- AATT
-INSERT INTO `mob_skills` VALUES (3722,648,'tachi_yukikaze',0,0.0,7.0,2000,1500,4,0,0,0,7,6,0);       -- AAGK
-INSERT INTO `mob_skills` VALUES (3723,649,'tachi_gekko',0,0.0,7.0,2000,1500,4,0,0,0,10,5,0);         -- AAGK
-INSERT INTO `mob_skills` VALUES (3724,637,'dragonfall',1,0.0,7.0,2000,1500,4,0,0,0,0,0,0);           -- AAGK
-INSERT INTO `mob_skills` VALUES (3725,650,'tachi_kasha',0,0.0,7.0,2000,1500,4,0,0,0,11,2,0);         -- AAGK
-INSERT INTO `mob_skills` VALUES (3726,233,'tachi_fudo',0,0.0,7.0,2000,1500,4,0,0,0,13,10,0);         -- AAGK
+-- Trust: AAGK
+INSERT INTO `mob_skills` VALUES (3722,648,'tachi_yukikaze',0,0.0,7.0,2000,1500,4,0,0,0,7,6,0);
+INSERT INTO `mob_skills` VALUES (3723,649,'tachi_gekko',0,0.0,7.0,2000,1500,4,0,0,0,10,5,0);
+INSERT INTO `mob_skills` VALUES (3724,637,'dragonfall',1,0.0,7.0,2000,1500,4,0,0,0,0,0,0);
+INSERT INTO `mob_skills` VALUES (3725,650,'tachi_kasha',0,0.0,7.0,2000,1500,4,0,0,0,11,2,0);
+INSERT INTO `mob_skills` VALUES (3726,2281,'tachi_fudo',0,0.0,7.0,2000,1500,4,0,0,0,13,10,0); -- Capture shows 233. Adding 2048 for it to work properly.
 -- INSERT INTO `mob_skills` VALUES (3727,3471,'#1935',0,0.0,7.0,2000,1500,4,0,0,0,0,0,0);
 -- INSERT INTO `mob_skills` VALUES (3728,3472,'#1936',0,0.0,7.0,2000,1500,4,0,0,0,0,0,0);
 -- INSERT INTO `mob_skills` VALUES (3729,3473,'#1937',0,0.0,7.0,2000,1500,4,0,0,0,0,0,0);
@@ -3751,11 +3755,12 @@ INSERT INTO `mob_skills` VALUES (3735,490,'amatsu_choun',0,0.0,7.0,2000,1500,4,0
 INSERT INTO `mob_skills` VALUES (3736,491,'amatsu_gachirin',0,0.0,7.0,2000,1500,4,0,0,0,0,0,0);
 INSERT INTO `mob_skills` VALUES (3737,493,'amatsu_suien',0,0.0,7.0,2000,1500,4,0,0,0,0,0,0);
 INSERT INTO `mob_skills` VALUES (3738,516,'rise_from_ashes',0,0.0,7.0,2000,1500,4,0,0,0,0,0,0);
-INSERT INTO `mob_skills` VALUES (3739,498,'shantotto_ii_melee',0,0.0,7.0,2000,0,4,4,0,0,0,0,0);
-INSERT INTO `mob_skills` VALUES (3740,499,'final_exam',0,0.0,7.0,2000,1500,4,0,0,0,13,11,0);
-INSERT INTO `mob_skills` VALUES (3741,500,'doctors_orders',0,0.0,7.0,2000,1500,4,0,0,0,14,9,0);
-INSERT INTO `mob_skills` VALUES (3742,501,'empirical_research',0,0.0,7.0,2000,1500,4,0,0,0,12,1,0);
-INSERT INTO `mob_skills` VALUES (3743,502,'lesson_in_pain',0,0.0,7.0,2000,1500,4,0,0,0,10,4,0);
+-- Trust: Shantotto II
+INSERT INTO `mob_skills` VALUES (3739,2546,'shantotto_ii_melee',0,0.0,7.0,2000,0,4,4,0,0,0,0,0);     -- Capture shows 498. Adding 2048 for it to work properly.
+INSERT INTO `mob_skills` VALUES (3740,2547,'final_exam',0,0.0,7.0,2000,1500,4,0,0,0,13,11,0);        -- Capture shows 499. Adding 2048 for it to work properly.
+INSERT INTO `mob_skills` VALUES (3741,2548,'doctors_orders',0,0.0,7.0,2000,1500,4,0,0,0,14,9,0);     -- Capture shows 500. Adding 2048 for it to work properly.
+INSERT INTO `mob_skills` VALUES (3742,2549,'empirical_research',0,0.0,7.0,2000,1500,4,0,0,0,12,1,0); -- Capture shows 501. Adding 2048 for it to work properly.
+INSERT INTO `mob_skills` VALUES (3743,2550,'lesson_in_pain',0,0.0,7.0,2000,1500,4,0,0,0,10,4,0);     -- Capture shows 502. Adding 2048 for it to work properly.
 -- INSERT INTO `mob_skills` VALUES (3744,503,'peccant_typhoon',0,0.0,7.0,2000,1500,4,0,0,0,0,0,0);
 -- INSERT INTO `mob_skills` VALUES (3745,504,'censure',0,0.0,7.0,2000,1500,4,0,0,0,0,0,0);
 -- INSERT INTO `mob_skills` VALUES (3746,505,'osmotic_wave',0,0.0,7.0,2000,1500,4,0,0,0,0,0,0);
@@ -4062,12 +4067,12 @@ INSERT INTO `mob_skills` VALUES (3975,36,'drill_claw',0,0.0,7.0,2000,1500,4,0,0,
 -- INSERT INTO `mob_skills` VALUES (4047,3791,'#2255',0,0.0,7.0,2000,1500,4,0,0,0,0,0,0);
 -- INSERT INTO `mob_skills` VALUES (4048,3792,'#2256',0,0.0,7.0,2000,1500,4,0,0,0,0,0,0);
 -- INSERT INTO `mob_skills` VALUES (4049,3793,'#2257',0,0.0,7.0,2000,1500,4,0,0,0,0,0,0);
--- INSERT INTO `mob_skills` VALUES (4050,294,'hypnosis',0,0.0,7.0,2000,1500,4,0,0,0,0,0,0);
+-- INSERT INTO `mob_skills` VALUES (4050,3794,'hypnosis',0,0.0,7.0,2000,1500,4,0,0,0,0,0,0); -- Capture shows 294. Adding 2048 for it to work properly.
 -- INSERT INTO `mob_skills` VALUES (4051,3795,'#2259',0,0.0,7.0,2000,1500,4,0,0,0,0,0,0);
 -- INSERT INTO `mob_skills` VALUES (4052,3796,'#2260',0,0.0,7.0,2000,1500,4,0,0,0,0,0,0);
 -- INSERT INTO `mob_skills` VALUES (4053,3797,'#2261',0,0.0,7.0,2000,1500,4,0,0,0,0,0,0);
 -- INSERT INTO `mob_skills` VALUES (4054,3798,'#2262',0,0.0,7.0,2000,1500,4,0,0,0,0,0,0);
--- INSERT INTO `mob_skills` VALUES (4055,299,'magic_barrier',0,0.0,7.0,2000,1500,4,0,0,0,0,0,0);
+-- INSERT INTO `mob_skills` VALUES (4055,3799,'magic_barrier',0,0.0,7.0,2000,1500,4,0,0,0,0,0,0); -- Capture shows 299. Adding 2048 for it to work properly.
 -- INSERT INTO `mob_skills` VALUES (4056,3800,'#2264',0,0.0,7.0,2000,1500,4,0,0,0,0,0,0);
 -- INSERT INTO `mob_skills` VALUES (4057,3801,'#2265',0,0.0,7.0,2000,1500,4,0,0,0,0,0,0);
 -- INSERT INTO `mob_skills` VALUES (4058,3802,'#2266',0,0.0,7.0,2000,1500,4,0,0,0,0,0,0);
@@ -4118,35 +4123,36 @@ INSERT INTO `mob_skills` VALUES (3975,36,'drill_claw',0,0.0,7.0,2000,1500,4,0,0,
 -- INSERT INTO `mob_skills` VALUES (4219,962,'glacial_breath',0,0.0,14.0,2000,1000,3,4,0,0,0,0,0); -- ?
 -- INSERT INTO `mob_skills` VALUES (4220,968,'sable_breath',0,0.0,14.0,2000,1000,3,4,0,0,0,0,0); -- ?
 
-INSERT INTO `mob_skills` VALUES (4231,2613,'mix_final_elixir',0,0.0,14.0,2000,1000,3,4,0,0,0,0,0); -- Trust: Monberaux Final Elixir
-INSERT INTO `mob_skills` VALUES (4232,549,'potion',0,0.0,14.0,2000,1000,3,4,0,0,0,0,0); -- Trust: Monberaux Potion
-INSERT INTO `mob_skills` VALUES (4233,2597,'hi_potion',0,0.0,14.0,2000,1000,3,4,0,0,0,0,0); -- Trust: Monberaux Hi Potion
-INSERT INTO `mob_skills` VALUES (4234,550,'x-potion',0,0.0,14.0,2000,1000,3,4,0,0,0,0,0); -- Trust: Monberaux X-Potion
-INSERT INTO `mob_skills` VALUES (4235,550,'hyper-potion',0,0.0,14.0,2000,1000,3,4,0,0,0,0,0); -- Trust: Monberaux Hyper Potion
-INSERT INTO `mob_skills` VALUES (4236,550,'max_potion',0,0.0,14.0,2000,1000,3,4,0,0,0,0,0); -- Trust: Monberaux Max Potion
-INSERT INTO `mob_skills` VALUES (4237,550,'mix_max_potion',0,0.0,14.0,2000,1000,3,4,0,0,0,0,0); -- Trust: Monberaux Mix: Max Potion
-INSERT INTO `mob_skills` VALUES (4238,552,'mix_antidote',1,0.0,14.0,2000,1000,3,4,0,0,0,0,0); -- Trust: Monberaux AoE Antidote
-INSERT INTO `mob_skills` VALUES (4239,553,'mix_para-b-gone',1,0.0,14.0,2000,1000,3,4,0,0,0,0,0); -- Trust: Monberaux AoE Paralyna
-INSERT INTO `mob_skills` VALUES (4240,2602,'mix_eye_drops',1,0.0,14.0,2000,1000,3,4,0,0,0,0,0); -- Trust: Monberaux AoE Blindna
-INSERT INTO `mob_skills` VALUES (4241,555,'mix_echo_drops',1,0.0,14.0,2000,1000,3,4,0,0,0,0,0); -- Trust: Monberaux AoE Silena
-INSERT INTO `mob_skills` VALUES (4242,2604,'mix_holy_water',1,0.0,14.0,2000,1000,3,4,0,0,0,0,0); -- Trust: Monberaux AoE Cursna
-INSERT INTO `mob_skills` VALUES (4243,2605,'mix_vaccine',1,0.0,14.0,2000,1000,3,4,0,0,0,0,0); -- Trust: Monberaux AoE Viruna
-INSERT INTO `mob_skills` VALUES (4244,2606,'mix_gold_needle',1,0.0,14.0,2000,1000,3,4,0,0,0,0,0); -- Trust: Monberaux AoE Stona
-INSERT INTO `mob_skills` VALUES (4245,556,'mix_panacea-1',1,0.0,14.0,2000,1000,3,4,0,0,0,0,0); -- Trust: Monberaux AoE Erase
-INSERT INTO `mob_skills` VALUES (4246,552,'mix_antidote',0,0.0,14.0,2000,1000,3,4,0,0,0,0,0); -- Trust: Monberaux Single Target Antitode
-INSERT INTO `mob_skills` VALUES (4247,553,'mix_para-b-gone',0,0.0,14.0,2000,1000,3,4,0,0,0,0,0); -- Trust: Monberaux Single Target Paralyna
-INSERT INTO `mob_skills` VALUES (4248,2602,'mix_eye_drops',0,0.0,14.0,2000,1000,3,4,0,0,0,0,0); -- Trust: Monberaux Single Target Blindna
-INSERT INTO `mob_skills` VALUES (4249,2603,'mix_echo_drops',0,0.0,14.0,2000,1000,3,4,0,0,0,0,0); -- Trust: Monberaux Single Target Silena
-INSERT INTO `mob_skills` VALUES (4250,2604,'mix_holy_water',0,0.0,14.0,2000,1000,3,4,0,0,0,0,0); -- Trust: Monberaux Single Target Cursna
-INSERT INTO `mob_skills` VALUES (4251,2605,'mix_vaccine',0,0.0,14.0,2000,1000,3,4,0,0,0,0,0); -- Trust: Monberaux Single Target Viruna
-INSERT INTO `mob_skills` VALUES (4252,2606,'mix_gold_needle',0,0.0,14.0,2000,1000,3,4,0,0,0,0,0); -- Trust: Monberaux Single Target Stona
-INSERT INTO `mob_skills` VALUES (4253,556,'mix_panacea-1',0,0.0,14.0,2000,1000,3,4,0,0,0,0,0); -- Trust: Monberaux Single Target Erase
-INSERT INTO `mob_skills` VALUES (4254,2599,'mix_dry_ether_concoction',0,0.0,14.0,2000,1000,3,4,0,0,0,0,0); -- Trust: Monberaux Mix: Dry Ether Concoction
-INSERT INTO `mob_skills` VALUES (4255,559,'mix_guard_drink',1,0.0,14.0,2000,1000,3,4,0,0,0,0,0); -- Trust: Monberaux Mix: Guard Drink
-INSERT INTO `mob_skills` VALUES (4256,560,'mix_insomniant',0,0.0,14.0,2000,1000,3,4,0,0,0,0,0); -- Trust: Monberaux Mix: Insomniant; have someone verify new animation
-INSERT INTO `mob_skills` VALUES (4257,561,'mix_life_water',1,0.0,14.0,2000,1000,3,4,0,0,0,0,0); -- Trust: Monberaux Mix: Life Water
-INSERT INTO `mob_skills` VALUES (4258,562,'mix_elemental_power',1,0.0,14.0,2000,1000,3,4,0,0,0,0,0); -- Trust: Monberaux Mix: Elemental Power
-INSERT INTO `mob_skills` VALUES (4259,562,'mix_dragon_shield',1,0.0,14.0,2000,1000,3,4,0,0,0,0,0); -- Trust: Monberaux Mix: Dragon Shield
-INSERT INTO `mob_skills` VALUES (4260,563,'mix_dark_potion',0,0.0,14.0,2000,1000,4,4,0,0,0,0,0); -- Trust: Monberaux Mix: Dark Potion
-INSERT INTO `mob_skills` VALUES (4261,564,'mix_samsons_strength',1,0.0,14.0,2000,1000,3,4,0,0,0,0,0); -- Trust: Monberaux Mix: Samsons Strength
+-- Trust: Monberaux
+INSERT INTO `mob_skills` VALUES (4231,2613,'mix_final_elixir',0,0.0,14.0,2000,1000,3,4,0,0,0,0,0);
+INSERT INTO `mob_skills` VALUES (4232,2597,'potion',0,0.0,14.0,2000,1000,3,4,0,0,0,0,0); -- Capture shows 549. Adding 2048 for it to work properly.
+INSERT INTO `mob_skills` VALUES (4233,2597,'hi_potion',0,0.0,14.0,2000,1000,3,4,0,0,0,0,0);
+INSERT INTO `mob_skills` VALUES (4234,2598,'x-potion',0,0.0,14.0,2000,1000,3,4,0,0,0,0,0);        -- Capture shows 550. Adding 2048 for it to work properly.
+INSERT INTO `mob_skills` VALUES (4235,2598,'hyper-potion',0,0.0,14.0,2000,1000,3,4,0,0,0,0,0);    -- Capture shows 550. Adding 2048 for it to work properly.
+INSERT INTO `mob_skills` VALUES (4236,2598,'max_potion',0,0.0,14.0,2000,1000,3,4,0,0,0,0,0);      -- Capture shows 550. Adding 2048 for it to work properly.
+INSERT INTO `mob_skills` VALUES (4237,2598,'mix_max_potion',0,0.0,14.0,2000,1000,3,4,0,0,0,0,0);  -- Capture shows 550. Adding 2048 for it to work properly.
+INSERT INTO `mob_skills` VALUES (4238,2600,'mix_antidote',1,0.0,14.0,2000,1000,3,4,0,0,0,0,0);    -- Capture shows 552. Adding 2048 for it to work properly.
+INSERT INTO `mob_skills` VALUES (4239,2601,'mix_para-b-gone',1,0.0,14.0,2000,1000,3,4,0,0,0,0,0); -- Capture shows 553. Adding 2048 for it to work properly.
+INSERT INTO `mob_skills` VALUES (4240,2602,'mix_eye_drops',1,0.0,14.0,2000,1000,3,4,0,0,0,0,0);
+INSERT INTO `mob_skills` VALUES (4241,2603,'mix_echo_drops',1,0.0,14.0,2000,1000,3,4,0,0,0,0,0); -- Capture shows 555. Adding 2048 for it to work properly.
+INSERT INTO `mob_skills` VALUES (4242,2604,'mix_holy_water',1,0.0,14.0,2000,1000,3,4,0,0,0,0,0);
+INSERT INTO `mob_skills` VALUES (4243,2605,'mix_vaccine',1,0.0,14.0,2000,1000,3,4,0,0,0,0,0);
+INSERT INTO `mob_skills` VALUES (4244,2606,'mix_gold_needle',1,0.0,14.0,2000,1000,3,4,0,0,0,0,0);
+INSERT INTO `mob_skills` VALUES (4245,2604,'mix_panacea-1',1,0.0,14.0,2000,1000,3,4,0,0,0,0,0);   -- Capture shows 556. Adding 2048 for it to work properly.
+INSERT INTO `mob_skills` VALUES (4246,2600,'mix_antidote',0,0.0,14.0,2000,1000,3,4,0,0,0,0,0);    -- Capture shows 552. Adding 2048 for it to work properly.
+INSERT INTO `mob_skills` VALUES (4247,2601,'mix_para-b-gone',0,0.0,14.0,2000,1000,3,4,0,0,0,0,0); -- Capture shows 553. Adding 2048 for it to work properly.
+INSERT INTO `mob_skills` VALUES (4248,2602,'mix_eye_drops',0,0.0,14.0,2000,1000,3,4,0,0,0,0,0);
+INSERT INTO `mob_skills` VALUES (4249,2603,'mix_echo_drops',0,0.0,14.0,2000,1000,3,4,0,0,0,0,0);
+INSERT INTO `mob_skills` VALUES (4250,2604,'mix_holy_water',0,0.0,14.0,2000,1000,3,4,0,0,0,0,0);
+INSERT INTO `mob_skills` VALUES (4251,2605,'mix_vaccine',0,0.0,14.0,2000,1000,3,4,0,0,0,0,0);
+INSERT INTO `mob_skills` VALUES (4252,2606,'mix_gold_needle',0,0.0,14.0,2000,1000,3,4,0,0,0,0,0);
+INSERT INTO `mob_skills` VALUES (4253,2604,'mix_panacea-1',0,0.0,14.0,2000,1000,3,4,0,0,0,0,0); -- Capture shows 556. Adding 2048 for it to work properly.
+INSERT INTO `mob_skills` VALUES (4254,2599,'mix_dry_ether_concoction',0,0.0,14.0,2000,1000,3,4,0,0,0,0,0);
+INSERT INTO `mob_skills` VALUES (4255,2607,'mix_guard_drink',1,0.0,14.0,2000,1000,3,4,0,0,0,0,0);      -- Capture shows 559. Adding 2048 for it to work properly.
+INSERT INTO `mob_skills` VALUES (4256,2608,'mix_insomniant',0,0.0,14.0,2000,1000,3,4,0,0,0,0,0);       -- Capture shows 560. Adding 2048 for it to work properly.
+INSERT INTO `mob_skills` VALUES (4257,2609,'mix_life_water',1,0.0,14.0,2000,1000,3,4,0,0,0,0,0);       -- Capture shows 561. Adding 2048 for it to work properly.
+INSERT INTO `mob_skills` VALUES (4258,2610,'mix_elemental_power',1,0.0,14.0,2000,1000,3,4,0,0,0,0,0);  -- Capture shows 562. Adding 2048 for it to work properly.
+INSERT INTO `mob_skills` VALUES (4259,2610,'mix_dragon_shield',1,0.0,14.0,2000,1000,3,4,0,0,0,0,0);    -- Capture shows 562. Adding 2048 for it to work properly.
+INSERT INTO `mob_skills` VALUES (4260,2611,'mix_dark_potion',0,0.0,14.0,2000,1000,4,4,0,0,0,0,0);      -- Capture shows 563. Adding 2048 for it to work properly.
+INSERT INTO `mob_skills` VALUES (4261,2612,'mix_samsons_strength',1,0.0,14.0,2000,1000,3,4,0,0,0,0,0); -- Capture shows 564. Adding 2048 for it to work properly.
 -- INSERT INTO `mob_skills` VALUES (4262,2170,'shadow_burst',0,0.0,7.0,2000,1500,4,0,0,0,0,0,0);

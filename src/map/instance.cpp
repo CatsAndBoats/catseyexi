@@ -72,42 +72,43 @@ void CInstance::LoadInstance()
 {
     TracyZoneScoped;
 
-    static const char* Query = "SELECT "
-                               "instance_name, "
-                               "time_limit, "
-                               "entrance_zone, "
-                               "start_x, "
-                               "start_y, "
-                               "start_z, "
-                               "start_rot, "
-                               "music_day, "
-                               "music_night, "
-                               "battlesolo, "
-                               "battlemulti "
-                               "FROM instance_list "
-                               "WHERE instanceid = %u "
-                               "LIMIT 1";
+    const auto rset = db::preparedStmt("SELECT "
+                                       "instance_name, "
+                                       "time_limit, "
+                                       "entrance_zone, "
+                                       "start_x, "
+                                       "start_y, "
+                                       "start_z, "
+                                       "start_rot, "
+                                       "music_day, "
+                                       "music_night, "
+                                       "battlesolo, "
+                                       "battlemulti "
+                                       "FROM instance_list "
+                                       "WHERE instanceid = ? "
+                                       "LIMIT 1",
+                                       m_instanceid);
 
-    if (_sql->Query(Query, m_instanceid) != SQL_ERROR && _sql->NumRows() != 0 && _sql->NextRow() == SQL_SUCCESS)
+    if (rset && rset->rowsCount() && rset->next())
     {
-        m_instanceName.insert(0, (const char*)_sql->GetData(0));
+        m_instanceName = rset->get<std::string>("instance_name");
 
-        m_timeLimit                       = std::chrono::minutes(_sql->GetUIntData(1));
-        m_entrance                        = _sql->GetUIntData(2);
-        m_entryloc.x                      = _sql->GetFloatData(3);
-        m_entryloc.y                      = _sql->GetFloatData(4);
-        m_entryloc.z                      = _sql->GetFloatData(5);
-        m_entryloc.rotation               = _sql->GetUIntData(6);
-        m_zone_music_override.m_songDay   = _sql->GetUIntData(7);
-        m_zone_music_override.m_songNight = _sql->GetUIntData(8);
-        m_zone_music_override.m_bSongS    = _sql->GetUIntData(9);
-        m_zone_music_override.m_bSongM    = _sql->GetUIntData(10);
+        m_timeLimit                       = std::chrono::minutes(rset->get<uint32>("time_limit"));
+        m_entrance                        = rset->get<uint16>("entrance_zone");
+        m_entryloc.x                      = rset->get<float>("start_x");
+        m_entryloc.y                      = rset->get<float>("start_y");
+        m_entryloc.z                      = rset->get<float>("start_z");
+        m_entryloc.rotation               = rset->get<uint8>("start_rot");
+        m_zone_music_override.m_songDay   = rset->get<uint16>("music_day");
+        m_zone_music_override.m_songNight = rset->get<uint16>("music_night");
+        m_zone_music_override.m_bSongS    = rset->get<uint16>("battlesolo");
+        m_zone_music_override.m_bSongM    = rset->get<uint16>("battlemulti");
 
         // Add to Lua cache
         // TODO: This will happen more often than needed, but not so often that it's a performance concern
-        auto zone     = m_zone->getName();
-        auto name     = m_instanceName;
-        auto filename = fmt::format("./scripts/zones/{}/instances/{}.lua", zone, name);
+        const auto zone     = m_zone->getName();
+        const auto name     = m_instanceName;
+        const auto filename = fmt::format("./scripts/zones/{}/instances/{}.lua", zone, name);
         luautils::CacheLuaObjectFromFile(filename);
     }
     else

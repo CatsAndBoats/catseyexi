@@ -21,7 +21,6 @@
 
 #include "trade_update.h"
 
-#include "common/socket.h"
 #include "common/utils.h"
 #include "common/vana_time.h"
 

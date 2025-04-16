@@ -24,7 +24,9 @@
 
 #include "event_info.h"
 #include "item_container.h"
+#include "map_session.h"
 #include "monstrosity.h"
+#include "treasure_pool.h"
 
 #include "common/cbasetypes.h"
 #include "common/mmo.h"
@@ -36,10 +38,10 @@
 #include <unordered_map>
 #include <unordered_set>
 
+#include "automatonentity.h"
 #include "battleentity.h"
 #include "petentity.h"
 
-#include "automatonentity.h"
 #include "utils/fishingutils.h"
 
 #define MAX_QUESTAREA    11
@@ -59,14 +61,6 @@ struct jobs_t
     uint8  job[MAX_JOBTYPE]; // the current levels of each of the jobs from above
     uint16 exp[MAX_JOBTYPE]; // the experience points for each of the jobs above
     uint8  genkai;           // the maximum genkai level achieved
-
-    jobs_t()
-    : unlocked(0)
-    , genkai(0)
-    {
-        std::memset(&job, 0, sizeof(job));
-        std::memset(&exp, 0, sizeof(exp));
-    }
 };
 
 struct profile_t
@@ -92,66 +86,30 @@ struct profile_t
     location_t home_point;
     uint8      campaign_allegiance;
     uint8      unity_leader;
-
-    profile_t()
-    : nation(0)
-    , mhflag(0)
-    , title(0)
-    , rankpoints(0)
-    , campaign_allegiance(0)
-    , unity_leader(0)
-    {
-        std::memset(&fame, 0, sizeof(fame));
-        std::memset(&rank, 0, sizeof(rank));
-    }
 };
 
 struct capacityChain_t
 {
     uint16 chainNumber;
     uint32 chainTime;
-
-    capacityChain_t()
-    : chainNumber(0)
-    , chainTime(0)
-    {
-    }
 };
 
 struct expChain_t
 {
     uint16 chainNumber;
     uint32 chainTime;
-
-    expChain_t()
-    : chainNumber(0)
-    , chainTime(0)
-    {
-    }
 };
 
 struct telepoint_t
 {
     uint32 access[4];
     int32  menu[10];
-
-    telepoint_t()
-    {
-        std::memset(&access, 0, sizeof(access));
-        std::memset(&menu, 0, sizeof(menu));
-    }
 };
 
 struct waypoint_t
 {
     uint32 access[2];
     bool   confirmation;
-
-    waypoint_t()
-    {
-        std::memset(&access, 0, sizeof(access));
-        confirmation = false;
-    }
 };
 
 struct teleport_t
@@ -169,19 +127,6 @@ struct teleport_t
     uint8       abysseaConflux[MAX_ABYSSEAZONES];
     waypoint_t  waypoints;
     uint32      eschanPortal;
-
-    teleport_t()
-    : outpostSandy(0)
-    , outpostBastok(0)
-    , outpostWindy(0)
-    , runicPortal(0)
-    , pastMaw(0)
-    , campaignSandy(0)
-    , campaignBastok(0)
-    , campaignWindy(0)
-    {
-        std::memset(&abysseaConflux, 0, sizeof(abysseaConflux));
-    }
 };
 
 struct PetInfo_t
@@ -292,18 +237,20 @@ typedef std::vector<EntityID_t>        BazaarList_t;
 class CCharEntity : public CBattleEntity
 {
 public:
-    uint32 accid; // Account ID associated with the character.
+    uint32 accid{}; // Account ID associated with the character.
 
-    jobs_t     jobs; // Available Character jobs
-    keyitems_t keys; // Table key objects
+    MapSession* PSession = nullptr;
 
-    EventPrep*            eventPreparation; // Information about a potential upcoming event
-    EventInfo*            currentEvent;     // The currently ongoing event playing for the player
-    std::list<EventInfo*> eventQueue;       // The queued events to play for the player
-    bool                  inSequence;       // True if the player is locked in a NPC sequence
-    bool                  gotMessage;       // Used to let the interaction framework know that a message outside of it was triggered.
+    jobs_t     jobs{}; // Available Character jobs
+    keyitems_t keys{}; // Table key objects
 
-    skills_t RealSkills; // The structure of all the real skills of the character, with an accuracy of 0.1 and not limited by the level
+    EventPrep*            eventPreparation = nullptr; // Information about a potential upcoming event
+    EventInfo*            currentEvent     = nullptr; // The currently ongoing event playing for the player
+    std::list<EventInfo*> eventQueue;                 // The queued events to play for the player
+    bool                  inSequence{};               // True if the player is locked in a NPC sequence
+    bool                  gotMessage{};               // Used to let the interaction framework know that a message outside of it was triggered.
+
+    skills_t RealSkills{}; // The structure of all the real skills of the character, with an accuracy of 0.1 and not limited by the level
 
     uint8 visibleGmLevel;        // See GmLevel of flags0_t
     bool  wallhackEnabled;       // GM walk through walls
@@ -320,35 +267,35 @@ public:
     bool   isMentor() const;             // If player is a mentor or not.
     bool   hasAutoTargetEnabled() const; // has autotarget enabled
 
-    profile_t       profile;
-    capacityChain_t capacityChain;
-    expChain_t      expChain;
-    search_t        search;              // Data and comment displayed in the search box
-    bazaar_t        bazaar;              // All the data you need to run bazaar
-    uint16          m_EquipFlag;         // Current events handled by the equipment (later it will be packed into a structure, along with equip[])
-    uint16          m_EquipBlock;        // Locked equipment slots
-    uint16          m_StatsDebilitation; // Debilitation arrows
-    uint8           equip[18]{};         // SlotID where equipment is
-    uint8           equipLoc[18]{};      // ContainerID where equipment is
-    uint16          styleItems[16]{};    // Item IDs for items that are style locked.
+    profile_t       profile{};
+    capacityChain_t capacityChain{};
+    expChain_t      expChain{};
+    search_t        search{};              // Data and comment displayed in the search box
+    bazaar_t        bazaar{};              // All the data you need to run bazaar
+    uint16          m_EquipFlag{};         // Current events handled by the equipment (later it will be packed into a structure, along with equip[])
+    uint16          m_EquipBlock{};        // Locked equipment slots
+    uint16          m_StatsDebilitation{}; // Debilitation arrows
+    uint8           equip[18]{};           // SlotID where equipment is
+    uint8           equipLoc[18]{};        // ContainerID where equipment is
+    uint16          styleItems[16]{};      // Item IDs for items that are style locked.
 
-    uint8             m_ZonesList[38]{};        // List of zones visited by the character
-    std::bitset<1024> m_SpellList;              // List of learned spells
-    uint8             m_TitleList[143]{};       // List of obtained titles
-    uint8             m_Abilities[64]{};        // List of current abilities
-    uint8             m_LearnedAbilities[49]{}; // Learnable abilities (corsair rolls)
-    std::bitset<64>   m_LearnedWeaponskills;    // Learnable Weaponskills
-    uint8             m_TraitList[18]{};        // List of active job traits in the form of a bit mask
-    uint8             m_PetCommands[64]{};
-    uint8             m_WeaponSkills[32]{};
-    questlog_t        m_questLog[MAX_QUESTAREA];     // Quest List
-    missionlog_t      m_missionLog[MAX_MISSIONAREA]; // Mission list
-    eminencelog_t     m_eminenceLog;                 // Record of Eminence log
-    eminencecache_t   m_eminenceCache;               // Caching data for Eminence lookups
-    assaultlog_t      m_assaultLog;                  // Assault mission list
-    campaignlog_t     m_campaignLog;                 // Campaign mission list
-    uint32            m_lastBcnmTimePrompt;          // The last message prompt in seconds
-    PetInfo_t         petZoningInfo{};               // Used to repawn dragoons pets ect on zone
+    uint8            m_ZonesVisitedList[38]{}; // List of zones visited by the character
+    xi::bitset<1024> m_SpellList{};            // List of learned spells
+    uint8            m_TitleList[143]{};       // List of obtained titles
+    uint8            m_Abilities[64]{};        // List of current abilities
+    uint8            m_LearnedAbilities[49]{}; // Learnable abilities (corsair rolls)
+    xi::bitset<64>   m_LearnedWeaponskills;    // Learnable Weaponskills
+    uint8            m_TraitList[18]{};        // List of active job traits in the form of a bit mask
+    uint8            m_PetCommands[64]{};
+    uint8            m_WeaponSkills[32]{};
+    questlog_t       m_questLog[MAX_QUESTAREA]{};     // Quest List
+    missionlog_t     m_missionLog[MAX_MISSIONAREA]{}; // Mission list
+    eminencelog_t    m_eminenceLog{};                 // Record of Eminence log
+    eminencecache_t  m_eminenceCache{};               // Caching data for Eminence lookups
+    assaultlog_t     m_assaultLog{};                  // Assault mission list
+    campaignlog_t    m_campaignLog{};                 // Campaign mission list
+    uint32           m_lastBcnmTimePrompt{};          // The last message prompt in seconds
+    PetInfo_t        petZoningInfo{};                 // Used to repawn dragoons pets ect on zone
 
     void setPetZoningInfo();              // Set pet zoning info (when zoning and logging out)
     void resetPetZoningInfo();            // Reset pet zoning info (when changing job ect)
@@ -360,7 +307,7 @@ public:
     uint32 m_claimedDeeds[5]{};
     uint32 m_uniqueEvents[5]{};
 
-    struct
+    struct automatonInfo_t
     {
         // Store a copy of calculated stats to use when automaton is deactivated for the job info packet (automaton menu)
         skills_t automatonSkills{};
@@ -372,8 +319,10 @@ public:
         std::array<uint8, 8> m_ElementMax{};
         std::array<uint8, 8> m_ElementEquip{};
         uint8                m_elementalCapacityBonus = 0;
-        std::string          m_automatonName          = "Automaton";
-    } automatonInfo;
+
+        std::string m_automatonName = "Automaton";
+    };
+    automatonInfo_t automatonInfo{};
 
     uint8 getAutomatonAttachment(uint8 slot);
     bool  hasAutomatonAttachment(uint8 attachment);
@@ -427,7 +376,7 @@ public:
         }
     }
 
-    CBattleEntity* PClaimedMob;
+    CBattleEntity* PClaimedMob = nullptr;
 
     // These missions do not need a list of completed, because client automatically
     // displays earlier missions completed
@@ -438,7 +387,7 @@ public:
     uint16 m_asaCurrent; // current mission of A Shantotto Ascension
 
     // currency_t        m_currency;                 // conquest points, imperial standing points etc
-    teleport_t teleport; // Outposts, Runic Portals, Homepoints, Survival Guides, Maws, etc.
+    teleport_t teleport{}; // Outposts, Runic Portals, Homepoints, Survival Guides, Maws, etc.
 
     bool requestedWarp       = false; // used in CLuaBaseEntity::warp(). This will be processed after the player's tick to warp.
     bool requestedZoneChange = false; // used in CLueBaseEntity::setPos(). This will be processed after the player's tick to change zones.
@@ -502,11 +451,11 @@ public:
 
     void SetName(const std::string& name); // set the name of character, limited to 15 characters
 
-    time_point   lastTradeInvite;
-    EntityID_t   TradePending{};  // Character ID offering trade
-    EntityID_t   InvitePending{}; // Character ID sending party invite
-    EntityID_t   BazaarID{};      // Pointer to the bazaar we are browsing.
-    BazaarList_t BazaarCustomers; // Array holding the IDs of the current customers
+    time_point   lastTradeInvite{};
+    EntityID_t   TradePending{};    // Character ID offering trade
+    EntityID_t   InvitePending{};   // Character ID sending party invite
+    EntityID_t   BazaarID{};        // Pointer to the bazaar we are browsing.
+    BazaarList_t BazaarCustomers{}; // Array holding the IDs of the current customers
 
     std::unique_ptr<monstrosity::MonstrosityData_t> m_PMonstrosity;
 
@@ -515,21 +464,21 @@ public:
     uint16     m_Costume2;
     uint32     m_AHHistoryTimestamp;
     uint32     m_DeathTimestamp;
-    time_point m_deathSyncTime; // Timer used for sending an update packet at a regular interval while the character is dead
+    time_point m_deathSyncTime{}; // Timer used for sending an update packet at a regular interval while the character is dead
 
-    uint8      m_hasTractor;      // checks if player has tractor already
-    uint8      m_hasRaise;        // checks if player has raise already
-    uint8      m_weaknessLvl;     // tracks if the player was previously weakend
-    bool       m_hasArise;        // checks if the white magic spell arise was cast on the player and a re-raise effect should be applied
-    position_t m_StartActionPos;  // action start position (item use, shooting start, tractor position)
-    position_t m_ActionOffsetPos; // action offset position from the action packet(currently only used for repositioning of luopans)
+    uint8      m_hasTractor;        // checks if player has tractor already
+    uint8      m_hasRaise;          // checks if player has raise already
+    uint8      m_weaknessLvl;       // tracks if the player was previously weakend
+    bool       m_hasArise;          // checks if the white magic spell arise was cast on the player and a re-raise effect should be applied
+    position_t m_StartActionPos{};  // action start position (item use, shooting start, tractor position)
+    position_t m_ActionOffsetPos{}; // action offset position from the action packet(currently only used for repositioning of luopans)
 
-    location_t m_previousLocation;
+    location_t m_previousLocation{};
 
     uint32 m_PlayTime;
     uint32 m_SaveTime;
 
-    time_point m_LeaderCreatedPartyTime; // Time that a party member joined and this player was leader.
+    time_point m_LeaderCreatedPartyTime{}; // Time that a party member joined and this player was leader.
 
     uint8 m_GMlevel;    // Level of the GM flag assigned to this character
     bool  m_isGMHidden; // GM Hidden flag to prevent player updates from being processed.
@@ -539,7 +488,7 @@ public:
     uint32 m_moghouseID;
     uint16 m_moghancementID;
 
-    CharHistory_t m_charHistory;
+    CharHistory_t m_charHistory{};
 
     int8  getShieldSize();
     int16 getShieldDefense();
@@ -555,8 +504,8 @@ public:
 
     bool       m_EquipSwap; // true if equipment was recently changed
     bool       m_EffectsChanged;
-    time_point m_LastSynthTime;
-    time_point m_LastRangedAttackTime;
+    time_point m_LastSynthTime{};
+    time_point m_LastRangedAttackTime{};
 
     CHAR_SUBSTATE m_Substate;
 
@@ -661,7 +610,7 @@ public:
 
     void clearCharVarsWithPrefix(std::string const& prefix);
 
-    bool m_Locked; // Is the player locked in a cutscene
+    bool m_Locked{}; // Is the player locked in a cutscene
 
     // Starts a synth with skillType X
     bool startSynth(SKILLTYPE synthSkill);
@@ -702,7 +651,7 @@ private:
     std::unordered_set<uint32>                                charTriggerAreaIDs; // Holds any TriggerArea IDs that the player is currently within the bounds of
 
     uint8      dataToPersist = 0;
-    time_point nextDataPersistTime;
+    time_point nextDataPersistTime{};
 
     // TODO: Don't use raw ptrs for this, but don't duplicate whole packets with unique_ptr either.
     std::deque<std::unique_ptr<CBasicPacket>> PacketList;          // The list of packets to be sent to the character during the next network cycle

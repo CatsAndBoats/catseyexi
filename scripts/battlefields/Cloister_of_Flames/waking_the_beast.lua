@@ -12,14 +12,23 @@ local content = BattlefieldQuest:new({
     index            = 2,
     entryNpc         = 'FP_Entrance',
     exitNpc          = 'Fire_Protocrystal',
-    requiredKeyItems = { xi.ki.RAINBOW_RESONATOR },
 
     questArea = xi.questLog.OTHER_AREAS,
     quest     = xi.quest.id.otherAreas.WAKING_THE_BEAST,
 })
 
-function content:onEventFinishWin(player, csid, option, npc)
-    npcUtil.giveKeyItem(player, xi.ki.EYE_OF_FLAMES)
+-- can help if you are doing the quest or already completed the quest
+function content:entryRequirement(player, npc, isRegistrant, trade)
+    local hasQuestItem = player:hasKeyItem(xi.ki.RAINBOW_RESONATOR)
+    local prevCompletedQuest = player:getQuestStatus(self.questArea, self.quest) == xi.questStatus.QUEST_COMPLETED
+
+    -- registrant must actually be doing the quest
+    if isRegistrant then
+        return hasQuestItem
+    -- others can help if they are either doing the quest or already completed the quest
+    else
+        return hasQuestItem or prevCompletedQuest
+    end
 end
 
 content.groups =
@@ -35,6 +44,7 @@ content.groups =
                 end
             end
 
+            -- giving the player the eye key item is done in the WTB quest script
             battlefield:setStatus(xi.battlefield.status.WON)
         end,
     },

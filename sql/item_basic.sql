@@ -4518,7 +4518,7 @@ INSERT INTO `item_basic` VALUES (4688,82,'scroll_of_recall-pashh','recall-pashh'
 INSERT INTO `item_basic` VALUES (4689,83,'scroll_of_recall-meriph','recall-meriph',1,1676,@WHITE_MAGIC,0,2290);
 INSERT INTO `item_basic` VALUES (4690,84,'scroll_of_baramnesia','baramnesia',1,34444,@WHITE_MAGIC,0,1680);
 INSERT INTO `item_basic` VALUES (4691,85,'scroll_of_baramnesra','baramnesra',1,34444,@WHITE_MAGIC,0,1722);
-INSERT INTO `item_basic` VALUES (4692,847,'scroll_of_haste_ii','haste_ii',1,34316,@WHITE_MAGIC,0,9250);
+INSERT INTO `item_basic` VALUES (4692,847,'scroll_of_haste_ii','haste_ii',1,34444,@WHITE_MAGIC,0,9250); -- DAT missing SCROLL flag
 INSERT INTO `item_basic` VALUES (4694,86,'scroll_of_barsleepra','barsleepra',1,1676,@WHITE_MAGIC,0,241);
 INSERT INTO `item_basic` VALUES (4695,87,'scroll_of_barpoisonra','barpoisonra',1,1676,@WHITE_MAGIC,0,399);
 INSERT INTO `item_basic` VALUES (4696,88,'scroll_of_barparalyzra','barparalyzra',1,1676,@WHITE_MAGIC,0,518);
@@ -4704,10 +4704,10 @@ INSERT INTO `item_basic` VALUES (4900,292,'thunder_spirit_pact','thunder_spirit'
 INSERT INTO `item_basic` VALUES (4901,293,'water_spirit_pact','water_spirit',1,34444,@SUMMONING,0,43);
 INSERT INTO `item_basic` VALUES (4902,294,'light_spirit_pact','light_spirit',1,34444,@SUMMONING,0,43);
 INSERT INTO `item_basic` VALUES (4903,295,'dark_spirit_pact','dark_spirit',1,34444,@SUMMONING,0,43);
-INSERT INTO `item_basic` VALUES (4912,841,'scroll_of_distract','distract',1,1548,@BLACK_MAGIC,0,0);
-INSERT INTO `item_basic` VALUES (4913,842,'scroll_of_distract_ii','distract_ii',1,34316,@BLACK_MAGIC,0,0);
-INSERT INTO `item_basic` VALUES (4914,843,'scroll_of_frazzle','frazzle',1,1548,@BLACK_MAGIC,0,0);
-INSERT INTO `item_basic` VALUES (4915,844,'scroll_of_frazzle_ii','frazzle_ii',1,34316,@BLACK_MAGIC,0,6737);
+INSERT INTO `item_basic` VALUES (4912,841,'scroll_of_distract','distract',1,1676,@BLACK_MAGIC,0,0); -- DAT missing SCROLL flag
+INSERT INTO `item_basic` VALUES (4913,842,'scroll_of_distract_ii','distract_ii',1,34444,@BLACK_MAGIC,0,0); -- DAT missing SCROLL flag
+INSERT INTO `item_basic` VALUES (4914,843,'scroll_of_frazzle','frazzle',1,1676,@BLACK_MAGIC,0,0); -- DAT missing SCROLL flag
+INSERT INTO `item_basic` VALUES (4915,844,'scroll_of_frazzle_ii','frazzle_ii',1,34444,@BLACK_MAGIC,0,6737); -- DAT missing SCROLL flag
 INSERT INTO `item_basic` VALUES (4916,828,'scroll_of_fira','fira',1,34444,@BLACK_MAGIC,0,43);
 INSERT INTO `item_basic` VALUES (4917,829,'scroll_of_fira_ii','fira_ii',1,34444,@BLACK_MAGIC,0,43);
 INSERT INTO `item_basic` VALUES (4918,830,'scroll_of_blizzara','blizzara',1,34444,@BLACK_MAGIC,0,43);
@@ -4754,8 +4754,8 @@ INSERT INTO `item_basic` VALUES (4966,507,'scroll_of_myoshu_ichi','myoshu_ichi',
 INSERT INTO `item_basic` VALUES (4967,508,'scroll_of_yurin_ichi','yurin_ichi',1,34444,@NINJUTSU,0,3965);
 INSERT INTO `item_basic` VALUES (4968,509,'scroll_of_kakka_ichi','kakka_ichi',1,34444,@NINJUTSU,0,5631);
 INSERT INTO `item_basic` VALUES (4969,510,'scroll_of_migawari_ichi','migawari_ichi',1,34444,@NINJUTSU,0,5385);
-INSERT INTO `item_basic` VALUES (4970,505,'scroll_of_gekka_ichi','gekka_ichi',1,34316,@NINJUTSU,0,70159);
-INSERT INTO `item_basic` VALUES (4971,506,'scroll_of_yain_ichi','yain_ichi',1,34316,@NINJUTSU,0,5002);
+INSERT INTO `item_basic` VALUES (4970,505,'scroll_of_gekka_ichi','gekka_ichi',1,34444,@NINJUTSU,0,70159); -- DAT missing SCROLL flag
+INSERT INTO `item_basic` VALUES (4971,506,'scroll_of_yain_ichi','yain_ichi',1,34444,@NINJUTSU,0,5002); -- DAT missing SCROLL flag
 INSERT INTO `item_basic` VALUES (4976,368,'scroll_of_foe_requiem','foe_requiem',1,1676,@SONGS,0,48);
 INSERT INTO `item_basic` VALUES (4977,369,'scroll_of_foe_requiem_ii','foe_requiem_ii',1,1676,@SONGS,0,330);
 INSERT INTO `item_basic` VALUES (4978,370,'scroll_of_foe_requiem_iii','foe_requiem_iii',1,1676,@SONGS,0,1599);
@@ -4872,8 +4872,8 @@ INSERT INTO `item_basic` VALUES (5100,485,'scroll_of_boost-chr','boost-chr',1,34
 INSERT INTO `item_basic` VALUES (5101,494,'scroll_of_arise','arise',1,34444,@WHITE_MAGIC,0,0);
 INSERT INTO `item_basic` VALUES (5102,840,'scroll_of_foil','foil',1,1676,@WHITE_MAGIC,0,0);
 INSERT INTO `item_basic` VALUES (5103,476,'scroll_of_crusade','crusade',1,1676,@WHITE_MAGIC,0,0);
-INSERT INTO `item_basic` VALUES (5104,845,'scroll_of_flurry','flurry',1,1548,@WHITE_MAGIC,0,3300);
-INSERT INTO `item_basic` VALUES (5105,846,'scroll_of_flurry_ii','flurry_ii',1,34316,@WHITE_MAGIC,0,43);
+INSERT INTO `item_basic` VALUES (5104,845,'scroll_of_flurry','flurry',1,1676,@WHITE_MAGIC,0,3300); -- DAT missing SCROLL flag
+INSERT INTO `item_basic` VALUES (5105,846,'scroll_of_flurry_ii','flurry_ii',1,34444,@WHITE_MAGIC,0,43); -- DAT missing SCROLL flag
 INSERT INTO `item_basic` VALUES (5106,0,'scroll_of_inundation','inundation',1,34444,@WHITE_MAGIC,0,0);
 INSERT INTO `item_basic` VALUES (5109,0,'frayed_sack_of_abundance_+1','frayed_sack_(a1)',99,30296,@NONE,0,0);
 INSERT INTO `item_basic` VALUES (5110,0,'frayed_sack_of_abundance_+2','frayed_sack_(a2)',99,30296,@NONE,0,0);
