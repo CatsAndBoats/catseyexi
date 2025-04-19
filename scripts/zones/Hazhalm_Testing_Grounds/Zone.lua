@@ -31,7 +31,7 @@ zoneObject.onZoneIn = function(player, prevZone)
     -- Eject players past the gate if they no longer have a valid reservation
     -- TODO: Will likely conflict with The Rider Cometh
     local inEinherjar = player:getCharVar('[ein]chamber')
-    if inEinherjar and player:getXPos() < 486 then
+    if inEinherjar then
         local chamberData = xi.einherjar.getChamber(inEinherjar)
         if chamberData then
             local validForChamber = xi.einherjar.onReconnection(chamberData, player)

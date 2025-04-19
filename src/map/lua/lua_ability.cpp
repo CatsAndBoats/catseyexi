@@ -86,22 +86,22 @@ void CLuaAbility::setRecast(uint16 recastTime)
     m_PLuaAbility->setRecastTime(recastTime);
 }
 
-uint16 CLuaAbility::getCE()
+int32 CLuaAbility::getCE()
 {
     return m_PLuaAbility->getCE();
 }
 
-void CLuaAbility::setCE(uint16 ce)
+void CLuaAbility::setCE(int32 ce)
 {
     m_PLuaAbility->setCE(ce);
 }
 
-uint16 CLuaAbility::getVE()
+int32 CLuaAbility::getVE()
 {
     return m_PLuaAbility->getVE();
 }
 
-void CLuaAbility::setVE(uint16 ve)
+void CLuaAbility::setVE(int32 ve)
 {
     m_PLuaAbility->setVE(ve);
 }

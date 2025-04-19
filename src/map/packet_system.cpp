@@ -25,8 +25,7 @@
 #include "common/logging.h"
 #include "common/md52.h"
 #include "common/mmo.h"
-#include "common/socket.h"
-#include "common/taskmgr.h"
+#include "common/task_manager.h"
 #include "common/timer.h"
 #include "common/utils.h"
 #include "common/version.h"
@@ -36,6 +35,7 @@
 
 #include "alliance.h"
 #include "campaign_system.h"
+#include "command_handler.h"
 #include "conquest_system.h"
 #include "enmity_container.h"
 #include "fishingcontest.h"
@@ -43,7 +43,9 @@
 #include "item_container.h"
 #include "latent_effect_container.h"
 #include "linkshell.h"
-#include "map.h"
+#include "map_networking.h"
+#include "map_server.h"
+#include "map_session.h"
 #include "mob_modifier.h"
 #include "monstrosity.h"
 #include "notoriety_container.h"
@@ -181,7 +183,7 @@
 
 uint8 PacketSize[512];
 
-std::function<void(map_session_data_t* const, CCharEntity* const, CBasicPacket&)> PacketParser[512];
+std::function<void(MapSession* const, CCharEntity* const, CBasicPacket&)> PacketParser[512];
 
 /************************************************************************
  *                                                                       *
@@ -213,22 +215,13 @@ void PrintPacket(CBasicPacket& packet)
     }
 }
 
-namespace
-{
-    auto escapeString(const std::string_view str) -> std::string
-    {
-        // TODO: Replace with db::escapeString
-        return _sql->EscapeString(str);
-    }
-} // namespace
-
 /************************************************************************
  *                                                                       *
  *  Unknown Packet                                                       *
  *                                                                       *
  ************************************************************************/
 
-void SmallPacket0x000(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+void SmallPacket0x000(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     ShowWarning("parse: Unhandled game packet %03hX from user: %s", (data.ref<uint16>(0) & 0x1FF), PChar->getName());
 }
@@ -239,7 +232,7 @@ void SmallPacket0x000(map_session_data_t* const PSession, CCharEntity* const PCh
  *                                                                       *
  ************************************************************************/
 
-void SmallPacket0xFFF_NOT_IMPLEMENTED(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+void SmallPacket0xFFF_NOT_IMPLEMENTED(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     ShowWarning("parse: SmallPacket is not implemented Type<%03hX>", (data.ref<uint16>(0) & 0x1FF));
 }
@@ -252,7 +245,7 @@ void SmallPacket0xFFF_NOT_IMPLEMENTED(map_session_data_t* const PSession, CCharE
  *                                                                       *
  ************************************************************************/
 
-void SmallPacket0x00A(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+void SmallPacket0x00A(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
     data.ref<uint32>(0x5C) = 0;
@@ -263,9 +256,9 @@ void SmallPacket0x00A(map_session_data_t* const PSession, CCharEntity* const PCh
         return;
     }
 
-    /*
-     * Handle out of sync zone correction..
-     */
+    //
+    // Handle out of sync zone correction..
+    //
     if (data.ref<uint16_t>(0x02) > 1)
     {
         PSession->server_packet_id = data.ref<uint16_t>(0x02);
@@ -309,44 +302,17 @@ void SmallPacket0x00A(map_session_data_t* const PSession, CCharEntity* const PCh
 
         destZone->IncreaseZoneCounter(PChar);
 
-        PChar->m_ZonesList[PChar->getZone() >> 3] |= (1 << (PChar->getZone() % 8));
-
-        const char* fmtQuery = "UPDATE accounts_sessions SET targid = %u, server_addr = %u, client_port = %u, last_zoneout_time = 0 WHERE charid = %u";
-
         // Current zone could either be current zone or destination
         CZone* currentZone = zoneutils::GetZone(PChar->getZone());
-
         if (currentZone == nullptr)
         {
             ShowWarning("currentZone was null for Zone ID %d.", PChar->getZone());
             return;
         }
 
-        _sql->Query(fmtQuery, PChar->targid, currentZone->GetIP(), PSession->client_port, PChar->id);
-
-        fmtQuery  = "SELECT death FROM char_stats WHERE charid = %u";
-        int32 ret = _sql->Query(fmtQuery, PChar->id);
-        if (_sql->NextRow() == SQL_SUCCESS)
-        {
-            // Update the character's death timestamp based off of how long they were previously dead
-            uint32 secondsSinceDeath = _sql->GetUIntData(0);
-            if (PChar->health.hp == 0)
-            {
-                PChar->SetDeathTimestamp((uint32)time(nullptr) - secondsSinceDeath);
-                PChar->Die(CCharEntity::death_duration - std::chrono::seconds(secondsSinceDeath));
-            }
-        }
-
-        fmtQuery = "SELECT pos_prevzone FROM chars WHERE charid = %u";
-        ret      = _sql->Query(fmtQuery, PChar->id);
-        if (ret != SQL_ERROR && _sql->NextRow() == SQL_SUCCESS)
-        {
-            if (PChar->getZone() == _sql->GetUIntData(0))
-            {
-                PChar->loc.zoning = true;
-            }
-        }
-
+        charutils::updateSession(PSession, PChar, currentZone);
+        charutils::loadDeathTimestamp(PChar);
+        charutils::loadZoningFlag(PChar);
         charutils::SaveCharPosition(PChar);
         charutils::SaveZonesVisited(PChar);
         charutils::SavePlayTime(PChar);
@@ -354,6 +320,7 @@ void SmallPacket0x00A(map_session_data_t* const PSession, CCharEntity* const PCh
         if (PChar->m_moghouseID != 0)
         {
             PChar->m_charHistory.mhEntrances++;
+            charutils::updateMannequins(PChar);
             gardenutils::UpdateGardening(PChar, false);
         }
     }
@@ -363,60 +330,6 @@ void SmallPacket0x00A(map_session_data_t* const PSession, CCharEntity* const PCh
     // TODO: Need further research into the relationship between 0x00D and 0x00A, if any.
     if (PChar->loc.zone != nullptr)
     {
-        if (PChar->m_moghouseID != 0)
-        {
-            // Update any mannequins that might be placed on zonein
-            // Build Mannequin model id list
-            auto getModelIdFromStorageSlot = [](CCharEntity* PChar, uint8 slot) -> uint16
-            {
-                uint16 modelId = 0x0000;
-
-                if (slot == 0)
-                {
-                    return modelId;
-                }
-
-                auto* PItem = PChar->getStorage(LOC_STORAGE)->GetItem(slot);
-                if (PItem == nullptr)
-                {
-                    return modelId;
-                }
-
-                if (auto* PItemEquipment = dynamic_cast<CItemEquipment*>(PItem))
-                {
-                    modelId = PItemEquipment->getModelId();
-                }
-
-                return modelId;
-            };
-
-            for (auto safeContainerId : { LOC_MOGSAFE, LOC_MOGSAFE2 })
-            {
-                CItemContainer* PContainer = PChar->getStorage(safeContainerId);
-                for (int slotIndex = 1; slotIndex <= PContainer->GetSize(); ++slotIndex)
-                {
-                    CItem* PContainerItem = PContainer->GetItem(slotIndex);
-                    if (PContainerItem != nullptr && PContainerItem->isType(ITEM_FURNISHING))
-                    {
-                        auto* PFurnishing = static_cast<CItemFurnishing*>(PContainerItem);
-                        if (PFurnishing->isInstalled() && PFurnishing->isMannequin())
-                        {
-                            auto*  PMannequin = PFurnishing;
-                            uint16 mainId     = getModelIdFromStorageSlot(PChar, PMannequin->m_extra[10 + 0]);
-                            uint16 subId      = getModelIdFromStorageSlot(PChar, PMannequin->m_extra[10 + 1]);
-                            uint16 rangeId    = getModelIdFromStorageSlot(PChar, PMannequin->m_extra[10 + 2]);
-                            uint16 headId     = getModelIdFromStorageSlot(PChar, PMannequin->m_extra[10 + 3]);
-                            uint16 bodyId     = getModelIdFromStorageSlot(PChar, PMannequin->m_extra[10 + 4]);
-                            uint16 handsId    = getModelIdFromStorageSlot(PChar, PMannequin->m_extra[10 + 5]);
-                            uint16 legId      = getModelIdFromStorageSlot(PChar, PMannequin->m_extra[10 + 6]);
-                            uint16 feetId     = getModelIdFromStorageSlot(PChar, PMannequin->m_extra[10 + 7]);
-                            PChar->pushPacket<CInventoryCountPacket>(safeContainerId, slotIndex, headId, bodyId, handsId, legId, feetId, mainId, subId, rangeId);
-                        }
-                    }
-                }
-            }
-        }
-
         PChar->pushPacket<CDownloadingDataPacket>();
         PChar->pushPacket<CZoneInPacket>(PChar, PChar->currentEvent);
         PChar->pushPacket<CZoneVisitedPacket>(PChar);
@@ -425,15 +338,15 @@ void SmallPacket0x00A(map_session_data_t* const PSession, CCharEntity* const PCh
 
 // https://github.com/atom0s/XiPackets/tree/main/world/client/0x000C
 /************************************************************************
- *                                                                       *
  *  GP_CLI_COMMAND_GAMEOK                                                *
  *  Client is ready to receive packets from the server.                  *
  *  Before this packet is sent, all commands are blocked locally.        *
  ************************************************************************/
 
-void SmallPacket0x00C(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+void SmallPacket0x00C(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
+
     PChar->pushPacket<CInventorySizePacket>(PChar);
     PChar->pushPacket<CMenuConfigPacket>(PChar);
     PChar->pushPacket<CCharJobsPacket>(PChar);
@@ -464,12 +377,11 @@ void SmallPacket0x00C(map_session_data_t* const PSession, CCharEntity* const PCh
 }
 
 /************************************************************************
- *                                                                       *
  *  Player Leaving Zone (Dezone)                                         *
  *  It is not reliable to recieve this packet, so do nothing.            *
  ************************************************************************/
 
-void SmallPacket0x00D(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+void SmallPacket0x00D(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
 
@@ -484,9 +396,10 @@ void SmallPacket0x00D(map_session_data_t* const PSession, CCharEntity* const PCh
  *                                                                       *
  ************************************************************************/
 
-void SmallPacket0x00F(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+void SmallPacket0x00F(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
+
     charutils::SendKeyItems(PChar);
     charutils::SendQuestMissionLog(PChar);
 
@@ -511,9 +424,10 @@ void SmallPacket0x00F(map_session_data_t* const PSession, CCharEntity* const PCh
  *                                                                       *
  ************************************************************************/
 
-void SmallPacket0x011(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+void SmallPacket0x011(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
+
     PSession->blowfish.status = BLOWFISH_ACCEPTED;
     PChar->status             = STATUS_TYPE::NORMAL;
     PChar->health.tp          = 0;
@@ -527,16 +441,6 @@ void SmallPacket0x011(map_session_data_t* const PSession, CCharEntity* const PCh
     }
 
     PChar->PAI->QueueAction(queueAction_t(4000ms, false, zoneutils::AfterZoneIn));
-
-    // TODO: kill player til theyre dead and bsod
-    const char* fmtQuery = "SELECT version_mismatch FROM accounts_sessions WHERE charid = %u";
-    int32       ret      = _sql->Query(fmtQuery, PChar->id);
-    if (ret != SQL_ERROR && _sql->NextRow() == SQL_SUCCESS)
-    {
-        // On zone change, only sending a version message if mismatch
-        // if ((bool)sql->GetUIntData(0))
-        // PChar->pushPacket<CChatMessagePacket>(PChar, CHAT_MESSAGE_TYPE::MESSAGE_SYSTEM_1, "Server does not support this client version.");
-    }
 }
 
 /************************************************************************
@@ -546,7 +450,7 @@ void SmallPacket0x011(map_session_data_t* const PSession, CCharEntity* const PCh
  *                                                                       *
  ************************************************************************/
 
-void SmallPacket0x015(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+void SmallPacket0x015(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
     TracyZoneCString("Player Sync");
@@ -629,9 +533,10 @@ void SmallPacket0x015(map_session_data_t* const PSession, CCharEntity* const PCh
  *                                                                       *
  ************************************************************************/
 
-void SmallPacket0x016(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+void SmallPacket0x016(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
+
     uint16 targid = data.ref<uint16>(0x04);
 
     if (targid == PChar->targid)
@@ -696,9 +601,10 @@ void SmallPacket0x016(map_session_data_t* const PSession, CCharEntity* const PCh
  *                                                                       *
  ************************************************************************/
 
-void SmallPacket0x017(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+void SmallPacket0x017(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
+
     uint16 targid = data.ref<uint16>(0x04);
     uint32 npcid  = data.ref<uint32>(0x08);
     uint8  type   = data.ref<uint8>(0x12);
@@ -712,7 +618,7 @@ void SmallPacket0x017(map_session_data_t* const PSession, CCharEntity* const PCh
  *                                                                       *
  ************************************************************************/
 
-void SmallPacket0x01A(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+void SmallPacket0x01A(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
 
@@ -792,7 +698,7 @@ void SmallPacket0x01A(map_session_data_t* const PSession, CCharEntity* const PCh
         return;
     }
 
-    auto actionStr = fmt::format("Player Action: {}: {} (0x{:02X}) -> targid: {}", PChar->getName(), actionToStr(action), action, TargID);
+    const auto actionStr = fmt::format("Player Action: {}: {} ({}) -> targid: {}", PChar->getName(), actionToStr(action), hex8ToString(action), TargID);
     TracyZoneString(actionStr);
     ShowTrace(actionStr);
     DebugActions(actionStr);
@@ -1062,6 +968,7 @@ void SmallPacket0x01A(map_session_data_t* const PSession, CCharEntity* const PCh
             PChar->animation = ANIMATION_NONE;
             PChar->updatemask |= UPDATE_HP;
             PChar->StatusEffectContainer->DelStatusEffectSilent(EFFECT_MOUNTED);
+
             // Workaround for a bug where dismounting out of update range would cause the character to stop rendering.
             PChar->loc.zone->UpdateEntityPacket(PChar, ENTITY_UPDATE, UPDATE_HP);
         }
@@ -1070,13 +977,12 @@ void SmallPacket0x01A(map_session_data_t* const PSession, CCharEntity* const PCh
         {
             if (data.ref<uint8>(0x0C) == 0 && PChar->m_hasTractor != 0) // ACCEPTED TRACTOR
             {
-                // PChar->PBattleAI->SetCurrentAction(ACTION_RAISE_MENU_SELECTION);
                 PChar->loc.p           = PChar->m_StartActionPos;
                 PChar->loc.destination = PChar->getZone();
                 PChar->status          = STATUS_TYPE::DISAPPEAR;
                 PChar->loc.boundary    = 0;
                 PChar->clearPacketList();
-                charutils::SendToZone(PChar, ZoningType::Zoning, zoneutils::GetZoneIPP(PChar->loc.destination));
+                charutils::SendToZone(PChar, PChar->loc.destination);
             }
 
             PChar->m_hasTractor = 0;
@@ -1177,7 +1083,7 @@ void SmallPacket0x01A(map_session_data_t* const PSession, CCharEntity* const PCh
                                                                   1800,
                                                                   0,
                                                                   0x40), // previously known as nameflag "FLAG_CHOCOBO"
-                                                              true);
+                                                              EffectNotice::Silent);
 
                 PChar->PRecastContainer->Add(RECAST_ABILITY, 256, 60);
                 PChar->pushPacket<CCharRecastPacket>(PChar);
@@ -1188,7 +1094,7 @@ void SmallPacket0x01A(map_session_data_t* const PSession, CCharEntity* const PCh
         break;
         default:
         {
-            ShowWarning(fmt::format("CLIENT {} PERFORMING UNHANDLED ACTION {} (0x{:02X})", PChar->getName(), actionStr, action));
+            ShowWarningFmt("CLIENT {} PERFORMING UNHANDLED ACTION {} ({})", PChar->getName(), actionStr, hex8ToString(action));
             return;
         }
         break;
@@ -1201,10 +1107,39 @@ void SmallPacket0x01A(map_session_data_t* const PSession, CCharEntity* const PCh
  *                                                                       *
  ************************************************************************/
 
-void SmallPacket0x01B(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+void SmallPacket0x01B(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
-    // 0 - world pass, 2 - gold world pass; +1 - purchase
+
+    // https://github.com/atom0s/XiPackets/tree/main/world/client/0x001B
+    struct GP_CLI_FRIENDPASS
+    {
+        uint16_t id : 9;
+        uint16_t size : 7;
+        uint16_t sync;
+        uint16_t Para;      // PS2: Para
+        uint16_t padding00; // PS2: Dammy
+    };
+
+    auto* packet = data.as<GP_CLI_FRIENDPASS>();
+    switch (packet->Para)
+    {
+        case 0: // 0: Client has requested to begin the purchase of a world pass.
+            // TODO
+            break;
+        case 1: // 1: Client has confirmed the purchase of a world pass.
+            // TODO
+            break;
+        case 2: // 2: Client has requested to begin the purchase of a gold world pass.
+            // TODO
+            break;
+        case 3: // 3: Client has confirmed the purchase of a gold world pass.
+            // TODO
+            break;
+        default:
+            ShowWarning("SmallPacket0x01B: Unknown Para value %u", packet->Para);
+            break;
+    }
 
     PChar->pushPacket<CWorldPassPacket>(data.ref<uint8>(0x04) & 1 ? (uint32)xirand::GetRandomNumber(9999999999) : 0);
 }
@@ -1216,7 +1151,7 @@ void SmallPacket0x01B(map_session_data_t* const PSession, CCharEntity* const PCh
  *                                                                       *
  ************************************************************************/
 
-void SmallPacket0x01C(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+void SmallPacket0x01C(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
     PrintPacket(data);
@@ -1228,7 +1163,7 @@ void SmallPacket0x01C(map_session_data_t* const PSession, CCharEntity* const PCh
  *                                                                       *
  ************************************************************************/
 
-void SmallPacket0x01E(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+void SmallPacket0x01E(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
 
@@ -1267,9 +1202,10 @@ void SmallPacket0x01E(map_session_data_t* const PSession, CCharEntity* const PCh
  *                                                                       *
  ************************************************************************/
 
-void SmallPacket0x028(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+void SmallPacket0x028(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
+
     int32 quantity  = data.ref<uint8>(0x04);
     uint8 container = data.ref<uint8>(0x08);
     uint8 slotID    = data.ref<uint8>(0x09);
@@ -1344,9 +1280,10 @@ void SmallPacket0x028(map_session_data_t* const PSession, CCharEntity* const PCh
  *                                                                       *
  ************************************************************************/
 
-void SmallPacket0x029(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+void SmallPacket0x029(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
+
     uint32 quantity       = data.ref<uint8>(0x04);
     uint8  FromLocationID = data.ref<uint8>(0x08);
     uint8  ToLocationID   = data.ref<uint8>(0x09);
@@ -1437,9 +1374,9 @@ void SmallPacket0x029(map_session_data_t* const PSession, CCharEntity* const PCh
 
         if (NewSlotID != ERROR_SLOTID)
         {
-            const char* Query = "UPDATE char_inventory SET location = %u, slot = %u WHERE charid = %u AND location = %u AND slot = %u";
-
-            if (_sql->Query(Query, ToLocationID, NewSlotID, PChar->id, FromLocationID, FromSlotID) != SQL_ERROR && _sql->AffectedRows() != 0)
+            const auto rset = db::preparedStmt("UPDATE char_inventory SET location = ?, slot = ? WHERE charid = ? AND location = ? AND slot = ?",
+                                               ToLocationID, NewSlotID, PChar->id, FromLocationID, FromSlotID);
+            if (rset && rset->rowsAffected())
             {
                 PChar->getStorage(FromLocationID)->InsertItem(nullptr, FromSlotID);
 
@@ -1480,7 +1417,7 @@ void SmallPacket0x029(map_session_data_t* const PSession, CCharEntity* const PCh
  *                                                                       *
  ************************************************************************/
 
-void SmallPacket0x032(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+void SmallPacket0x032(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
 
@@ -1608,7 +1545,7 @@ void SmallPacket0x032(map_session_data_t* const PSession, CCharEntity* const PCh
  *                                                                       *
  ************************************************************************/
 
-void SmallPacket0x033(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+void SmallPacket0x033(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
 
@@ -1716,7 +1653,7 @@ void SmallPacket0x033(map_session_data_t* const PSession, CCharEntity* const PCh
  *                                                                       *
  ************************************************************************/
 
-void SmallPacket0x034(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+void SmallPacket0x034(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
 
@@ -1792,6 +1729,25 @@ void SmallPacket0x034(map_session_data_t* const PSession, CCharEntity* const PCh
                     PItem->setReserve(quantity + PItem->getReserve());
                     PChar->UContainer->SetItem(tradeSlotID, PItem);
                 }
+
+                if (settings::get<bool>("map.AUDIT_PLAYER_TRADES"))
+                {
+                    Async::getInstance()->submit(
+                        [itemID        = PItem->getID(),
+                         quantity      = quantity,
+                         sender        = PChar->id,
+                         sender_name   = PChar->getName(),
+                         receiver      = PTarget->id,
+                         receiver_name = PTarget->getName(),
+                         date          = static_cast<uint32>(time(nullptr))]()
+                        {
+                            const auto query = "INSERT INTO audit_trade(itemid, quantity, sender, sender_name, receiver, receiver_name, date) VALUES (?, ?, ?, ?, ?, ?, ?)";
+                            if (!db::preparedStmt(query, itemID, quantity, sender, sender_name, receiver, receiver_name, date))
+                            {
+                                ShowErrorFmt("Failed to log trade transaction (item: {}, quantity: {}, sender: {}, receiver: {}, date: {})", itemID, quantity, sender, receiver, date);
+                            }
+                        });
+                }
             }
             else
             {
@@ -1818,7 +1774,7 @@ void SmallPacket0x034(map_session_data_t* const PSession, CCharEntity* const PCh
  *                                                                       *
  ************************************************************************/
 
-void SmallPacket0x036(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+void SmallPacket0x036(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
 
@@ -1878,6 +1834,25 @@ void SmallPacket0x036(map_session_data_t* const PSession, CCharEntity* const PCh
                 return;
             }
 
+            if (settings::get<bool>("map.AUDIT_PLAYER_TRADES"))
+            {
+                Async::getInstance()->submit(
+                    [itemID        = PItem->getID(),
+                     quantity      = Quantity,
+                     sender        = PChar->id,
+                     sender_name   = PChar->getName(),
+                     receiver      = PNpc->id,
+                     receiver_name = PNpc->getName(),
+                     date          = static_cast<uint32>(time(nullptr))]()
+                    {
+                        const auto query = "INSERT INTO audit_trade(itemid, quantity, sender, sender_name, receiver, receiver_name, date) VALUES (?, ?, ?, ?, ?, ?, ?)";
+                        if (!db::preparedStmt(query, itemID, quantity, sender, sender_name, receiver, receiver_name, date))
+                        {
+                            ShowErrorFmt("Failed to log trade transaction (item: {}, quantity: {}, sender: {}, receiver: {}, date: {})", itemID, quantity, sender, receiver, date);
+                        }
+                    });
+            }
+
             PItem->setReserve(Quantity);
             PChar->TradeContainer->setItem(slotID, PItem->getID(), invSlotID, Quantity, PItem);
         }
@@ -1893,7 +1868,7 @@ void SmallPacket0x036(map_session_data_t* const PSession, CCharEntity* const PCh
  *                                                                       *
  ************************************************************************/
 
-void SmallPacket0x037(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+void SmallPacket0x037(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
 
@@ -1935,7 +1910,7 @@ void SmallPacket0x037(map_session_data_t* const PSession, CCharEntity* const PCh
  *                                                                       *
  ************************************************************************/
 
-void SmallPacket0x03A(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+void SmallPacket0x03A(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
     TracyZoneCString("Sort Inventory");
@@ -2008,7 +1983,7 @@ void SmallPacket0x03A(map_session_data_t* const PSession, CCharEntity* const PCh
  *                                                                       *
  ************************************************************************/
 
-void SmallPacket0x03B(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+void SmallPacket0x03B(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
     TracyZoneCString("Mannequin Equip");
@@ -2144,21 +2119,17 @@ void SmallPacket0x03B(map_session_data_t* const PSession, CCharEntity* const PCh
     uint16 handsId = getModelIdFromStorageSlot(PChar, PMannequin->m_extra[10 + 5]);
     uint16 legId   = getModelIdFromStorageSlot(PChar, PMannequin->m_extra[10 + 6]);
     uint16 feetId  = getModelIdFromStorageSlot(PChar, PMannequin->m_extra[10 + 7]);
+
+    // TODO: (?)
     // 10 + 8 = Race
     // 10 + 9 = Pose
 
-    // Write out to Mannequin
-    char extra[sizeof(PMannequin->m_extra) * 2 + 1];
-    _sql->EscapeStringLen(extra, (const char*)PMannequin->m_extra, sizeof(PMannequin->m_extra));
-
-    const char* Query = "UPDATE char_inventory "
-                        "SET "
-                        "extra = '%s' "
-                        "WHERE location = %u AND slot = %u AND charid = %u";
-
-    auto ret  = _sql->Query(Query, extra, mannequinStorageLoc, mannequinStorageLocSlot, PChar->id);
-    auto rows = _sql->AffectedRows();
-    if (ret != SQL_ERROR && rows != 0)
+    const auto rset = db::preparedStmt("UPDATE char_inventory "
+                                       "SET "
+                                       "extra = ? "
+                                       "WHERE location = ? AND slot = ? AND charid = ?",
+                                       PMannequin->m_extra, mannequinStorageLoc, mannequinStorageLocSlot, PChar->id);
+    if (rset)
     {
         PChar->pushPacket<CInventoryItemPacket>(PMannequin, mannequinStorageLoc, mannequinStorageLocSlot);
         PChar->pushPacket<CInventoryCountPacket>(mannequinStorageLoc, mannequinStorageLocSlot, headId, bodyId, handsId, legId, feetId, mainId, subId, rangeId);
@@ -2173,7 +2144,7 @@ void SmallPacket0x03B(map_session_data_t* const PSession, CCharEntity* const PCh
 // GP_CLI_COMMAND_BLACK_LIST
 // https://github.com/atom0s/XiPackets/tree/main/world/client/0x003C
 // Client is asking for blist because it wasn't initialized correctly?
-void SmallPacket0x03C(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+void SmallPacket0x03C(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
     blacklistutils::SendBlacklist(PChar);
@@ -2185,11 +2156,11 @@ void SmallPacket0x03C(map_session_data_t* const PSession, CCharEntity* const PCh
  *                                                                       *
  ************************************************************************/
 
-void SmallPacket0x03D(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+void SmallPacket0x03D(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
 
-    const auto name = escapeString(asStringFromUntrustedSource(data[0x08], 15));
+    const auto name = db::escapeString(asStringFromUntrustedSource(data[0x08], 15));
     const auto cmd  = data.ref<uint8>(0x18);
 
     const auto sendFailPacket = [&]()
@@ -2237,7 +2208,7 @@ void SmallPacket0x03D(map_session_data_t* const PSession, CCharEntity* const PCh
  *                                                                       *
  ************************************************************************/
 
-void SmallPacket0x041(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+void SmallPacket0x041(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
 
@@ -2264,7 +2235,7 @@ void SmallPacket0x041(map_session_data_t* const PSession, CCharEntity* const PCh
  *                                                                       *
  ************************************************************************/
 
-void SmallPacket0x042(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+void SmallPacket0x042(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
 
@@ -2291,7 +2262,7 @@ void SmallPacket0x042(map_session_data_t* const PSession, CCharEntity* const PCh
  *                                                                       *
  ************************************************************************/
 
-void SmallPacket0x04B(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+void SmallPacket0x04B(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
     uint8  msgChunk      = data.ref<uint8>(0x04);  // The current chunk of the message to send (1 = start, 2 = rest of message)
@@ -2418,7 +2389,7 @@ void SmallPacket0x04B(map_session_data_t* const PSession, CCharEntity* const PCh
  *                                                                       *
  ************************************************************************/
 
-void SmallPacket0x04D(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+void SmallPacket0x04D(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
 
@@ -2431,7 +2402,7 @@ void SmallPacket0x04D(map_session_data_t* const PSession, CCharEntity* const PCh
  *                                                                       *
  ************************************************************************/
 
-void SmallPacket0x04E(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+void SmallPacket0x04E(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
 
@@ -2444,7 +2415,7 @@ void SmallPacket0x04E(map_session_data_t* const PSession, CCharEntity* const PCh
  *                                                                       *
  ************************************************************************/
 
-void SmallPacket0x050(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+void SmallPacket0x050(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
     if (PChar->status != STATUS_TYPE::NORMAL)
@@ -2497,7 +2468,7 @@ void SmallPacket0x050(map_session_data_t* const PSession, CCharEntity* const PCh
  *                                                                       *
  ************************************************************************/
 
-void SmallPacket0x051(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+void SmallPacket0x051(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
     if (PChar->status != STATUS_TYPE::NORMAL)
@@ -2529,7 +2500,7 @@ void SmallPacket0x051(map_session_data_t* const PSession, CCharEntity* const PCh
  *                                                                        *
  ************************************************************************/
 
-void SmallPacket0x052(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+void SmallPacket0x052(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
     // Im guessing this is here to check if you can use A Item, as it seems useless to have this sent to server
@@ -2548,7 +2519,7 @@ void SmallPacket0x052(map_session_data_t* const PSession, CCharEntity* const PCh
  *  LockStyleSet                                                          *
  *                                                                        *
  ************************************************************************/
-void SmallPacket0x053(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+void SmallPacket0x053(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
     uint8 count = data.ref<uint8>(0x04);
@@ -2661,7 +2632,7 @@ void SmallPacket0x053(map_session_data_t* const PSession, CCharEntity* const PCh
  *                                                                       *
  ************************************************************************/
 
-void SmallPacket0x058(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+void SmallPacket0x058(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
     uint16 skillID     = data.ref<uint16>(0x04);
@@ -2690,7 +2661,7 @@ void SmallPacket0x058(map_session_data_t* const PSession, CCharEntity* const PCh
  *                                                                       *
  ************************************************************************/
 
-void SmallPacket0x059(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+void SmallPacket0x059(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
     // Do nothing. This is handled in synth state.
@@ -2702,7 +2673,7 @@ void SmallPacket0x059(map_session_data_t* const PSession, CCharEntity* const PCh
  *                                                                       *
  ************************************************************************/
 
-void SmallPacket0x05A(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+void SmallPacket0x05A(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
     PChar->pushPacket<CConquestPacket>(PChar);
@@ -2719,15 +2690,31 @@ void SmallPacket0x05A(map_session_data_t* const PSession, CCharEntity* const PCh
  *                                                                       *
  ************************************************************************/
 
-void SmallPacket0x05B(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+// https://github.com/atom0s/XiPackets/blob/main/world/client/0x005B/README.md
+struct GP_CLI_EVENTEND
+{
+    uint16_t id : 9;
+    uint16_t size : 7;
+    uint16_t sync;
+    uint32_t UniqueNo;  // PS2: UniqueNo
+    uint32_t EndPara;   // PS2: EndPara
+    uint16_t ActIndex;  // PS2: ActIndex
+    uint16_t Mode;      // PS2: Mode
+    uint16_t EventNum;  // PS2: EventNum
+    uint16_t EventPara; // PS2: EventPara
+};
+
+void SmallPacket0x05B(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
 
     if (!PChar->isInEvent())
         return;
 
-    auto Result  = data.ref<uint32>(0x08);
-    auto EventID = data.ref<uint16>(0x12);
+    auto eventData = data.as<GP_CLI_EVENTEND>();
+
+    auto Result  = eventData->EndPara;
+    auto EventID = eventData->EventPara;
 
     if (PChar->currentEvent->eventId == EventID)
     {
@@ -2736,7 +2723,7 @@ void SmallPacket0x05B(map_session_data_t* const PSession, CCharEntity* const PCh
             Result = PChar->currentEvent->option;
         }
 
-        if (data.ref<uint8>(0x0E) != 0)
+        if (eventData->Mode == 1) // This mode is used when updating a pending event tag.
         {
             // If optional cutscene is started, we check to see if the selected option should lock the player
             if (Result != -1 && PChar->currentEvent->hasCutsceneOption(Result))
@@ -2766,21 +2753,41 @@ void SmallPacket0x05B(map_session_data_t* const PSession, CCharEntity* const PCh
  *                                                                       *
  ************************************************************************/
 
-void SmallPacket0x05C(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+// https://github.com/atom0s/XiPackets/blob/main/world/client/0x005C/README.md
+struct GP_CLI_EVENTENDXZY
+{
+    uint16_t id : 9;
+    uint16_t size : 7;
+    uint16_t sync;
+    float    x;         // PS2: x
+    float    y;         // PS2: y
+    float    z;         // PS2: z
+    uint32_t UniqueNo;  // PS2: UniqueNo
+    uint32_t EndPara;   // PS2: EndPara
+    uint16_t EventNum;  // PS2: EventNum
+    uint16_t EventPara; // PS2: EventPara
+    uint16_t ActIndex;  // PS2: ActIndex
+    uint8_t  Mode;      // PS2: Mode
+    uint8_t  dir;       // PS2: dir
+};
+
+void SmallPacket0x05C(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
 
     if (!PChar->isInEvent())
         return;
 
-    auto Result  = data.ref<uint32>(0x14);
-    auto EventID = data.ref<uint16>(0x1A);
+    auto eventData = data.as<GP_CLI_EVENTENDXZY>();
+
+    auto Result  = eventData->EndPara;
+    auto EventID = eventData->EventPara;
 
     if (PChar->currentEvent->eventId == EventID)
     {
         bool updatePosition = false;
 
-        if (data.ref<uint8>(0x1E) != 0)
+        if (eventData->Mode == 1) // This value is always set to 1.
         {
             // TODO: Currently the return value for onEventUpdate in Interaction Framework is not received.  Remove
             // the localVar check when this is resolved.
@@ -2804,14 +2811,18 @@ void SmallPacket0x05C(map_session_data_t* const PSession, CCharEntity* const PCh
         if (updatePosition)
         {
             position_t newPos = {
-                data.ref<float>(0x04),
-                data.ref<float>(0x08),
-                data.ref<float>(0x0C),
+                eventData->x,
+                eventData->y,
+                eventData->z,
                 0,
-                data.ref<uint8>(0x1F),
+                eventData->dir,
             };
-            PChar->pushPacket<CPositionPacket>(PChar, newPos, POSMODE::EVENT);
-            // PChar->pushPacket<CCSPositionPacket>(PChar); // Same as CPositionPacket? When is this one sent?
+            PChar->pushPacket<CCSPositionPacket>(PChar, newPos, POSMODE::EVENT);
+            PChar->pushPacket<CPositionPacket>(PChar, newPos, POSMODE::NORMAL);
+        }
+        else
+        {
+            PChar->pushPacket<CCSPositionPacket>(PChar, PChar->loc.p, POSMODE::CLEAR);
         }
     }
     PChar->pushPacket<CReleasePacket>(PChar, RELEASE_TYPE::EVENT);
@@ -2823,7 +2834,7 @@ void SmallPacket0x05C(map_session_data_t* const PSession, CCharEntity* const PCh
  *                                                                       *
  ************************************************************************/
 
-void SmallPacket0x05D(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+void SmallPacket0x05D(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
     if (jailutils::InPrison(PChar))
@@ -2904,7 +2915,7 @@ void SmallPacket0x05D(map_session_data_t* const PSession, CCharEntity* const PCh
  *                                                                       *
  ************************************************************************/
 
-void SmallPacket0x05E(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+void SmallPacket0x05E(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
 
@@ -3029,7 +3040,7 @@ void SmallPacket0x05E(map_session_data_t* const PSession, CCharEntity* const PCh
                 PChar->loc.p.rotation += 128;
 
                 PChar->pushPacket<CMessageSystemPacket>(0, 0, MsgStd::CouldNotEnter); // You could not enter the next area.
-                PChar->pushPacket<CCSPositionPacket>(PChar);
+                PChar->pushPacket<CCSPositionPacket>(PChar, PChar->loc.p, POSMODE::RESET);
 
                 PChar->status = STATUS_TYPE::NORMAL;
                 return;
@@ -3039,7 +3050,7 @@ void SmallPacket0x05E(map_session_data_t* const PSession, CCharEntity* const PCh
                 PChar->loc.p.rotation += 128;
 
                 PChar->pushPacket<CMessageSystemPacket>(0, 0, MsgStd::CouldNotEnter); // You could not enter the next area.
-                PChar->pushPacket<CCSPositionPacket>(PChar);
+                PChar->pushPacket<CCSPositionPacket>(PChar, PChar->loc.p, POSMODE::RESET);
 
                 PChar->status = STATUS_TYPE::NORMAL;
                 return;
@@ -3055,7 +3066,7 @@ void SmallPacket0x05E(map_session_data_t* const PSession, CCharEntity* const PCh
                     PChar->loc.p.rotation += 128;
 
                     PChar->pushPacket<CMessageSystemPacket>(0, 0, MsgStd::CouldNotEnter); // You could not enter the next area.
-                    PChar->pushPacket<CCSPositionPacket>(PChar);
+                    PChar->pushPacket<CCSPositionPacket>(PChar, PChar->loc.p, POSMODE::RESET);
 
                     PChar->status = STATUS_TYPE::NORMAL;
                     return;
@@ -3097,14 +3108,14 @@ void SmallPacket0x05E(map_session_data_t* const PSession, CCharEntity* const PCh
         PChar->loc.p.rotation += 128;
 
         PChar->pushPacket<CMessageSystemPacket>(0, 0, MsgStd::CouldNotEnter); // You could not enter the next area.
-        PChar->pushPacket<CCSPositionPacket>(PChar);
+        PChar->pushPacket<CCSPositionPacket>(PChar, PChar->loc.p, POSMODE::RESET);
 
         PChar->status = STATUS_TYPE::NORMAL;
 
         return;
     }
 
-    charutils::SendToZone(PChar, ZoningType::Zoning, ipp);
+    charutils::SendToZone(PChar, destination);
 }
 
 /************************************************************************
@@ -3116,7 +3127,7 @@ void SmallPacket0x05E(map_session_data_t* const PSession, CCharEntity* const PCh
 
 // zone 245 cs 0x00C7 Password
 
-void SmallPacket0x060(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+void SmallPacket0x060(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
 
@@ -3134,7 +3145,7 @@ void SmallPacket0x060(map_session_data_t* const PSession, CCharEntity* const PCh
  *                                                                       *
  ************************************************************************/
 
-void SmallPacket0x061(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+void SmallPacket0x061(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
     PChar->pushPacket<CCharStatusPacket>(PChar);
@@ -3164,7 +3175,7 @@ void SmallPacket0x061(map_session_data_t* const PSession, CCharEntity* const PCh
  *                                                                       *
  ************************************************************************/
 
-void SmallPacket0x063(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+void SmallPacket0x063(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
 }
@@ -3175,7 +3186,7 @@ void SmallPacket0x063(map_session_data_t* const PSession, CCharEntity* const PCh
  *                                                                       *
  ************************************************************************/
 
-void SmallPacket0x064(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+void SmallPacket0x064(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
     uint8 KeyTable = data.ref<uint8>(0x4A);
@@ -3185,8 +3196,6 @@ void SmallPacket0x064(map_session_data_t* const PSession, CCharEntity* const PCh
         return;
     }
 
-    // Write 64 bytes to PChar->keys.tables[KeyTable].seenList (512 bits)
-    // std::memcpy(&PChar->keys.tables[KeyTable].seenList, data[0x08], 0x40);
     for (int i = 0; i < 0x40; i++)
     {
         // copy each bit of byte into std::bit location
@@ -3209,7 +3218,7 @@ void SmallPacket0x064(map_session_data_t* const PSession, CCharEntity* const PCh
  *                                                                       *
  ************************************************************************/
 
-void SmallPacket0x066(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+void SmallPacket0x066(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
     if (settings::get<bool>("map.FISHING_ENABLE") && PChar->GetMLevel() >= settings::get<uint8>("map.FISHING_MIN_LEVEL"))
@@ -3224,7 +3233,7 @@ void SmallPacket0x066(map_session_data_t* const PSession, CCharEntity* const PCh
  *                                                                       *
  ************************************************************************/
 
-void SmallPacket0x06E(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+void SmallPacket0x06E(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
 
@@ -3244,6 +3253,12 @@ void SmallPacket0x06E(map_session_data_t* const PSession, CCharEntity* const PCh
     {
         // Initiator is in prison.  Send error message.
         PInviter->pushPacket<CMessageBasicPacket>(PInviter, PInviter, 0, 0, MSGBASIC_CANNOT_USE_IN_AREA);
+        return;
+    }
+
+    // Block invite if target has blacklisted the initiator
+    if (blacklistutils::IsBlacklisted(inviteeCharId, PInviter->id))
+    {
         return;
     }
 
@@ -3428,7 +3443,7 @@ void SmallPacket0x06E(map_session_data_t* const PSession, CCharEntity* const PCh
  *                                                                       *
  ************************************************************************/
 
-void SmallPacket0x06F(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+void SmallPacket0x06F(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
 
@@ -3501,7 +3516,7 @@ void SmallPacket0x06F(map_session_data_t* const PSession, CCharEntity* const PCh
  *                                                                       *
  ************************************************************************/
 
-void SmallPacket0x070(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+void SmallPacket0x070(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
 
@@ -3540,18 +3555,19 @@ void SmallPacket0x070(map_session_data_t* const PSession, CCharEntity* const PCh
  *                                                                       *
  ************************************************************************/
 
-void SmallPacket0x071(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+void SmallPacket0x071(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
 
-    switch (data.ref<uint8>(0x0A))
+    const auto type       = data.ref<uint8>(0x0A);
+    const auto victimName = db::escapeString(asStringFromUntrustedSource(data[0x0C], 15));
+
+    switch (type)
     {
         case 0: // party - party leader may remove member of his own party
         {
             if (PChar->PParty && PChar->PParty->GetLeader() == PChar)
             {
-                const auto victimName = escapeString(asStringFromUntrustedSource(data[0x0C], 15));
-
                 CCharEntity* PVictim = dynamic_cast<CCharEntity*>(PChar->PParty->GetMemberByName(victimName));
                 if (PVictim)
                 {
@@ -3581,12 +3597,10 @@ void SmallPacket0x071(map_session_data_t* const PSession, CCharEntity* const PCh
                 }
                 else
                 {
-                    const auto victimName = escapeString(asStringFromUntrustedSource(data[0x0C], 15));
-
                     if (const auto victimId = charutils::getCharIdFromName(victimName))
                     {
-                        const auto [rset, affectedRows] = db::preparedStmtWithAffectedRows("DELETE FROM accounts_parties WHERE partyid = ? AND charid = ?", PChar->id, victimId);
-                        if (rset && affectedRows)
+                        const auto rset = db::preparedStmt("DELETE FROM accounts_parties WHERE partyid = ? AND charid = ?", PChar->id, victimId);
+                        if (rset && rset->rowsAffected())
                         {
                             ShowDebug("%s has removed %s from party", PChar->getName(), victimName);
 
@@ -3619,8 +3633,6 @@ void SmallPacket0x071(map_session_data_t* const PSession, CCharEntity* const PCh
             CItemLinkshell* PItemLinkshell = (CItemLinkshell*)PChar->getEquip(SLOT_LINK1);
             if (PChar->PLinkshell1 && PItemLinkshell)
             {
-                const auto victimName = escapeString(asStringFromUntrustedSource(data[0x0C], 15));
-
                 message::send(ipc::LinkshellRemove{
                     .changerId     = PChar->id,
                     .victimName    = victimName,
@@ -3636,8 +3648,6 @@ void SmallPacket0x071(map_session_data_t* const PSession, CCharEntity* const PCh
             CItemLinkshell* PItemLinkshell = (CItemLinkshell*)PChar->getEquip(SLOT_LINK2);
             if (PChar->PLinkshell2 && PItemLinkshell)
             {
-                const auto victimName = escapeString(asStringFromUntrustedSource(data[0x0C], 15));
-
                 message::send(ipc::LinkshellRemove{
                     .changerId     = PChar->id,
                     .victimName    = victimName,
@@ -3654,8 +3664,6 @@ void SmallPacket0x071(map_session_data_t* const PSession, CCharEntity* const PCh
                 CCharEntity* PVictim = nullptr;
                 for (std::size_t i = 0; i < PChar->PParty->m_PAlliance->partyList.size(); ++i)
                 {
-                    const auto victimName = escapeString(asStringFromUntrustedSource(data[0x0C], 15));
-
                     PVictim = dynamic_cast<CCharEntity*>(PChar->PParty->m_PAlliance->partyList[i]->GetMemberByName(victimName));
                     if (PVictim && PVictim->PParty && PVictim->PParty->m_PAlliance) // victim is in this party
                     {
@@ -3680,8 +3688,7 @@ void SmallPacket0x071(map_session_data_t* const PSession, CCharEntity* const PCh
                 }
                 if (!PVictim && PChar->PParty->m_PAlliance->getMainParty() == PChar->PParty)
                 {
-                    const auto victimName = escapeString(asStringFromUntrustedSource(data[0x0C], 15));
-                    uint32     allianceID = PChar->PParty->m_PAlliance->m_AllianceID;
+                    uint32 allianceID = PChar->PParty->m_PAlliance->m_AllianceID;
 
                     if (const auto victimId = charutils::getCharIdFromName(victimName))
                     {
@@ -3693,9 +3700,9 @@ void SmallPacket0x071(map_session_data_t* const PSession, CCharEntity* const PCh
                         {
                             uint32 partyid = rset->get<uint32>("partyid");
 
-                            const auto [rset2, affectedRows] = db::preparedStmtWithAffectedRows("UPDATE accounts_parties SET allianceid = 0, partyflag = partyflag & ~? WHERE partyid = ?",
-                                                                                                PARTY_SECOND | PARTY_THIRD, partyid);
-                            if (rset2 && affectedRows)
+                            const auto rset2 = db::preparedStmt("UPDATE accounts_parties SET allianceid = 0, partyflag = partyflag & ~? WHERE partyid = ?",
+                                                                PARTY_SECOND | PARTY_THIRD, partyid);
+                            if (rset2 && rset2->rowsAffected())
                             {
                                 ShowDebug("%s has removed %s party from alliance", PChar->getName(), victimName);
 
@@ -3729,7 +3736,7 @@ void SmallPacket0x071(map_session_data_t* const PSession, CCharEntity* const PCh
  *                                                                       *
  ************************************************************************/
 
-void SmallPacket0x074(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+void SmallPacket0x074(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
 
@@ -3848,7 +3855,7 @@ void SmallPacket0x074(map_session_data_t* const PSession, CCharEntity* const PCh
  *                                                                       *
  ************************************************************************/
 
-void SmallPacket0x076(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+void SmallPacket0x076(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
 
@@ -3865,23 +3872,24 @@ void SmallPacket0x076(map_session_data_t* const PSession, CCharEntity* const PCh
 
 /************************************************************************
  *                                                                       *
- *                                                                       *
+ *  Group Permission Change                                              *
  *                                                                       *
  ************************************************************************/
 
-void SmallPacket0x077(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+void SmallPacket0x077(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
 
-    switch (data.ref<uint8>(0x14))
+    const auto memberName = db::escapeString(asStringFromUntrustedSource(data[0x04], 15));
+    const auto type       = data.ref<uint8>(0x14);
+    const auto permission = data.ref<uint8>(0x15);
+
+    switch (type)
     {
         case 0: // party
         {
             if (PChar->PParty != nullptr && PChar->PParty->GetLeader() == PChar)
             {
-                const auto memberName = escapeString(asStringFromUntrustedSource(data[0x04], 15));
-                const auto permission = data.ref<uint8>(0x15);
-
                 ShowDebug(fmt::format("(Party) Altering permissions of {} to {}", memberName, permission));
                 PChar->PParty->AssignPartyRole(memberName, permission);
             }
@@ -3891,9 +3899,6 @@ void SmallPacket0x077(map_session_data_t* const PSession, CCharEntity* const PCh
         {
             if (PChar->PLinkshell1 != nullptr)
             {
-                const auto memberName = escapeString(asStringFromUntrustedSource(data[0x04], 15));
-                const auto permission = data.ref<uint8>(0x15);
-
                 message::send(ipc::LinkshellRankChange{
                     .changerId   = PChar->id,
                     .memberName  = memberName,
@@ -3907,9 +3912,6 @@ void SmallPacket0x077(map_session_data_t* const PSession, CCharEntity* const PCh
         {
             if (PChar->PLinkshell2 != nullptr)
             {
-                const auto memberName = escapeString(asStringFromUntrustedSource(data[0x04], 15));
-                const auto permission = data.ref<uint8>(0x15);
-
                 message::send(ipc::LinkshellRankChange{
                     .changerId   = PChar->id,
                     .memberName  = memberName,
@@ -3924,8 +3926,6 @@ void SmallPacket0x077(map_session_data_t* const PSession, CCharEntity* const PCh
             if (PChar->PParty && PChar->PParty->m_PAlliance && PChar->PParty->GetLeader() == PChar &&
                 PChar->PParty->m_PAlliance->getMainParty() == PChar->PParty)
             {
-                const auto memberName = escapeString(asStringFromUntrustedSource(data[0x04], 15));
-
                 ShowDebug(fmt::format("(Alliance) Changing leader to {}", memberName));
                 PChar->PParty->m_PAlliance->assignAllianceLeader(memberName);
 
@@ -3948,7 +3948,7 @@ void SmallPacket0x077(map_session_data_t* const PSession, CCharEntity* const PCh
  *                                                                       *
  ************************************************************************/
 
-void SmallPacket0x078(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+void SmallPacket0x078(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
 
@@ -3961,7 +3961,7 @@ void SmallPacket0x078(map_session_data_t* const PSession, CCharEntity* const PCh
  *                                                                       *
  ************************************************************************/
 
-void SmallPacket0x083(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+void SmallPacket0x083(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
 
@@ -4016,7 +4016,7 @@ void SmallPacket0x083(map_session_data_t* const PSession, CCharEntity* const PCh
  *                                                                       *
  ************************************************************************/
 
-void SmallPacket0x084(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+void SmallPacket0x084(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
 
@@ -4045,7 +4045,7 @@ void SmallPacket0x084(map_session_data_t* const PSession, CCharEntity* const PCh
  *                                                                       *
  ************************************************************************/
 
-void SmallPacket0x085(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+void SmallPacket0x085(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
 
@@ -4108,6 +4108,25 @@ void SmallPacket0x085(map_session_data_t* const PSession, CCharEntity* const PCh
 
     const auto cost = quantity * PItem->getBasePrice();
 
+    if (settings::get<bool>("map.AUDIT_PLAYER_VENDOR"))
+    {
+        Async::getInstance()->submit(
+            [itemid      = PItem->getID(),
+             quantity    = quantity,
+             seller      = PChar->id,
+             seller_name = PChar->getName(),
+             baseprice   = PItem->getBasePrice(),
+             totalprice  = cost,
+             time        = static_cast<uint32>(time(nullptr))]()
+            {
+                const auto query = "INSERT INTO audit_vendor(itemid, quantity, seller, seller_name, baseprice, totalprice, date) VALUES (?, ?, ?, ?, ?, ?, ?)";
+                if (!db::preparedStmt(query, itemid, quantity, seller, seller_name, baseprice, totalprice, time))
+                {
+                    ShowErrorFmt("Failed to log vendor sale (item: {}, quantity: {}, seller: {}, totalprice: {}, time: {})", itemid, quantity, seller, totalprice, time);
+                }
+            });
+    }
+
     charutils::UpdateItem(PChar, LOC_INVENTORY, 0, cost);
     charutils::UpdateItem(PChar, LOC_INVENTORY, slotID, -(int32)quantity);
     ShowInfo("SmallPacket0x085: Player '%s' sold %u of itemID %u (Total: %u gil) [to VENDOR] ", PChar->getName(), quantity, itemID, cost);
@@ -4122,7 +4141,7 @@ void SmallPacket0x085(map_session_data_t* const PSession, CCharEntity* const PCh
  *                                                                       *
  ************************************************************************/
 
-void SmallPacket0x096(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+void SmallPacket0x096(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
 
@@ -4223,7 +4242,7 @@ void SmallPacket0x096(map_session_data_t* const PSession, CCharEntity* const PCh
  *                                                                        *
  ************************************************************************/
 
-void SmallPacket0x09B(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+void SmallPacket0x09B(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
 
@@ -4386,7 +4405,7 @@ void SmallPacket0x09B(map_session_data_t* const PSession, CCharEntity* const PCh
  *                                                                        *
  ************************************************************************/
 
-void SmallPacket0x0AA(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+void SmallPacket0x0AA(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
 
@@ -4440,7 +4459,7 @@ void SmallPacket0x0AA(map_session_data_t* const PSession, CCharEntity* const PCh
  *                                                                       *
  ************************************************************************/
 
-void SmallPacket0x0A2(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+void SmallPacket0x0A2(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
 
@@ -4455,7 +4474,7 @@ void SmallPacket0x0A2(map_session_data_t* const PSession, CCharEntity* const PCh
  *                                                                       *
  ************************************************************************/
 
-void SmallPacket0x0AB(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+void SmallPacket0x0AB(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
 
@@ -4471,7 +4490,7 @@ void SmallPacket0x0AB(map_session_data_t* const PSession, CCharEntity* const PCh
  *                                                                        *
  ************************************************************************/
 
-void SmallPacket0x0AC(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+void SmallPacket0x0AC(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
 
@@ -4485,6 +4504,7 @@ void SmallPacket0x0AC(map_session_data_t* const PSession, CCharEntity* const PCh
             uint8      shopSlotID = PChar->PGuildShop->SearchItem(itemID);
             CItemShop* shopItem   = (CItemShop*)PChar->PGuildShop->GetItem(shopSlotID);
             CItem*     charItem   = PChar->getStorage(LOC_INVENTORY)->GetItem(slot);
+            uint32     basePrice  = shopItem->getBasePrice();
 
             if (PChar->PGuildShop->GetItem(shopSlotID)->getQuantity() + quantity > PChar->PGuildShop->GetItem(shopSlotID)->getStackSize())
             {
@@ -4496,6 +4516,25 @@ void SmallPacket0x0AC(map_session_data_t* const PSession, CCharEntity* const PCh
             {
                 if (charutils::UpdateItem(PChar, LOC_INVENTORY, slot, -quantity) == itemID)
                 {
+                    if (settings::get<bool>("map.AUDIT_PLAYER_VENDOR"))
+                    {
+                        Async::getInstance()->submit(
+                            [itemid      = charItem->getID(),
+                             quantity    = quantity,
+                             seller      = PChar->id,
+                             seller_name = PChar->getName(),
+                             baseprice   = basePrice,
+                             totalprice  = basePrice * quantity,
+                             time        = static_cast<uint32>(time(nullptr))]()
+                            {
+                                const auto query = "INSERT INTO audit_vendor(itemid, quantity, seller, seller_name, baseprice, totalprice, date) VALUES (?, ?, ?, ?, ?, ?, ?)";
+                                if (!db::preparedStmt(query, itemid, quantity, seller, seller_name, baseprice, totalprice, time))
+                                {
+                                    ShowErrorFmt("Failed to log vendor sale (item: {}, quantity: {}, seller: {}, baseprice: {}, totalprice: {}, time: {})",
+                                                 itemid, quantity, seller, baseprice, totalprice, time);
+                                }
+                            });
+                    }
                     charutils::UpdateItem(PChar, LOC_INVENTORY, 0, shopItem->getSellPrice() * quantity);
                     ShowInfo("SmallPacket0x0AC: Player '%s' sold %u of itemID %u [to GUILD] ", PChar->getName(), quantity, itemID);
                     PChar->PGuildShop->GetItem(shopSlotID)->setQuantity(PChar->PGuildShop->GetItem(shopSlotID)->getQuantity() + quantity);
@@ -4516,7 +4555,7 @@ void SmallPacket0x0AC(map_session_data_t* const PSession, CCharEntity* const PCh
  *                                                                       *
  ************************************************************************/
 
-void SmallPacket0x0AD(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+void SmallPacket0x0AD(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
 
@@ -4532,35 +4571,32 @@ void SmallPacket0x0AD(map_session_data_t* const PSession, CCharEntity* const PCh
  *                                                                       *
  ************************************************************************/
 
-void SmallPacket0x0B5(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+void SmallPacket0x0B5(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
 
-    char  msgBuffer[256]  = {};
-    uint8 messagePosition = 0x07;
+    const auto messagePosition            = 0x06;
+    const auto messageLength              = std::min<std::size_t>(data.getSize() - messagePosition, 256);
+    const auto rawMessage                 = asStringFromUntrustedSource(data[messagePosition], messageLength);
+    const auto firstChar                  = rawMessage[0];
+    const auto rawMessageWithoutFirstChar = rawMessage.substr(1);
 
-    std::memcpy(&msgBuffer, data[messagePosition], std::min(data.getSize() - messagePosition, sizeof(msgBuffer)));
-
-    if (data.ref<uint8>(0x06) == '!' && !jailutils::InPrison(PChar) && (CCommandHandler::call(lua, PChar, msgBuffer) == 0 || PChar->m_GMlevel > 0))
+    if (firstChar == '!' && !jailutils::InPrison(PChar) && (CCommandHandler::call(lua, PChar, rawMessageWithoutFirstChar) == 0 || PChar->m_GMlevel > 0))
     {
         // this makes sure a command isn't sent to chat
     }
-    else if (data.ref<uint8>(0x06) == '#' && PChar->m_GMlevel > 0)
+    else if (firstChar == '#' && PChar->m_GMlevel > 0)
     {
-        const auto rawMessage = asStringFromUntrustedSource(data[0x07]);
-
         message::send(ipc::ChatMessageServerMessage{
             .senderId   = PChar->id,
             .senderName = PChar->getName(),
-            .message    = rawMessage,
+            .message    = rawMessageWithoutFirstChar,
             .zoneId     = PChar->getZone(),
             .gmLevel    = PChar->m_GMlevel,
         });
     }
     else
     {
-        const auto rawMessage = asStringFromUntrustedSource(data[0x06]);
-
         if (jailutils::InPrison(PChar))
         {
             if (data.ref<uint8>(0x04) == MESSAGE_SAY)
@@ -4568,8 +4604,6 @@ void SmallPacket0x0B5(map_session_data_t* const PSession, CCharEntity* const PCh
                 if (settings::get<bool>("map.AUDIT_CHAT") && settings::get<uint8>("map.AUDIT_SAY"))
                 {
                     // clang-format off
-                    // NOTE: We capture rawMessage as a copy because if we cast data[0x06] into a const char*, the underlying data might
-                    //     : be gone by the time we action this lambda on the worker thread.
                     Async::getInstance()->submit([name = PChar->getName(), zoneId = PChar->getZone(), rawMessage]()
                     {
                         const auto query = "INSERT INTO audit_chat (speaker, type, zoneid, message, datetime) VALUES(?, 'SAY', ?, ?, current_timestamp())";
@@ -4596,8 +4630,6 @@ void SmallPacket0x0B5(map_session_data_t* const PSession, CCharEntity* const PCh
                     if (settings::get<bool>("map.AUDIT_CHAT") && settings::get<uint8>("map.AUDIT_SAY"))
                     {
                         // clang-format off
-                        // NOTE: We capture rawMessage as a copy because if we cast data[0x06] into a const char*, the underlying data might
-                        //     : be gone by the time we action this lambda on the worker thread.
                         Async::getInstance()->submit([name = PChar->getName(), zoneId = PChar->getZone(), rawMessage]()
                         {
                             const auto query = "INSERT INTO audit_chat (speaker, type, zoneid, message, datetime) VALUES(?, 'SAY', ?, ?, current_timestamp())";
@@ -4621,8 +4653,6 @@ void SmallPacket0x0B5(map_session_data_t* const PSession, CCharEntity* const PCh
                     if (settings::get<bool>("map.AUDIT_CHAT") && settings::get<uint8>("map.AUDIT_SHOUT"))
                     {
                         // clang-format off
-                        // NOTE: We capture rawMessage as a copy because if we cast data[0x06] into a const char*, the underlying data might
-                        //     : be gone by the time we action this lambda on the worker thread.
                         Async::getInstance()->submit([name = PChar->getName(), zoneId = PChar->getZone(), rawMessage]()
                         {
                             const auto query = "INSERT INTO audit_chat (speaker, type, zoneid, message, datetime) VALUES(?, 'SHOUT', ?, ?, current_timestamp())";
@@ -4655,8 +4685,6 @@ void SmallPacket0x0B5(map_session_data_t* const PSession, CCharEntity* const PCh
                             DecodeStringLinkshell(PChar->PLinkshell1->getName(), decodedLinkshellName);
 
                             // clang-format off
-                            // NOTE: We capture rawMessage as a copy because if we cast data[0x06] into a const char*, the underlying data might
-                            //     : be gone by the time we action this lambda on the worker thread.
                             Async::getInstance()->submit([name = PChar->getName(), zoneId = PChar->getZone(), rawMessage, decodedLinkshellName]()
                             {
                                 const auto query = "INSERT INTO audit_chat (speaker, type, lsName, zoneid, message, datetime) VALUES(?, 'LINKSHELL', ?, ?, ?, current_timestamp())";
@@ -4689,8 +4717,6 @@ void SmallPacket0x0B5(map_session_data_t* const PSession, CCharEntity* const PCh
                             DecodeStringLinkshell(PChar->PLinkshell2->getName(), decodedLinkshellName);
 
                             // clang-format off
-                            // NOTE: We capture rawMessage as a copy because if we cast data[0x06] into a const char*, the underlying data might
-                            //     : be gone by the time we action this lambda on the worker thread.
                             Async::getInstance()->submit([name = PChar->getName(), zoneId = PChar->getZone(), rawMessage, decodedLinkshellName]()
                             {
                                 const auto query = "INSERT INTO audit_chat (speaker, type, lsName, zoneid, message, datetime) VALUES(?, 'LINKSHELL', ?, ?, ?, current_timestamp())";
@@ -4734,8 +4760,6 @@ void SmallPacket0x0B5(map_session_data_t* const PSession, CCharEntity* const PCh
                         if (settings::get<bool>("map.AUDIT_CHAT") && settings::get<uint8>("map.AUDIT_PARTY"))
                         {
                             // clang-format off
-                            // NOTE: We capture rawMessage as a copy because if we cast data[0x06] into a const char*, the underlying data might
-                            //     : be gone by the time we action this lambda on the worker thread.
                             Async::getInstance()->submit([name = PChar->getName(), zoneId = PChar->getZone(), rawMessage]()
                             {
                                 const auto query = "INSERT INTO audit_chat (speaker, type, zoneid, message, datetime) VALUES(?, 'PARTY', ?, ?, current_timestamp())";
@@ -4777,8 +4801,6 @@ void SmallPacket0x0B5(map_session_data_t* const PSession, CCharEntity* const PCh
                             if (settings::get<bool>("map.AUDIT_CHAT") && settings::get<uint8>("map.AUDIT_YELL"))
                             {
                                 // clang-format off
-                                // NOTE: We capture rawMessage as a copy because if we cast data[0x06] into a const char*, the underlying data might
-                                //     : be gone by the time we action this lambda on the worker thread.
                                 Async::getInstance()->submit([name = PChar->getName(), zoneId = PChar->getZone(), rawMessage]()
                                 {
                                     const auto query = "INSERT INTO audit_chat (speaker, type, zoneid, message, datetime) VALUES(?, 'YELL', ?, ?, current_timestamp())";
@@ -4819,8 +4841,6 @@ void SmallPacket0x0B5(map_session_data_t* const PSession, CCharEntity* const PCh
                         if (settings::get<bool>("map.AUDIT_CHAT") && settings::get<uint8>("map.AUDIT_UNITY"))
                         {
                             // clang-format off
-                            // NOTE: We capture rawMessage as a copy because if we cast data[0x06] into a const char*, the underlying data might
-                            //     : be gone by the time we action this lambda on the worker thread.
                             Async::getInstance()->submit([name = PChar->getName(), zoneId = PChar->getZone(), unityLeader = PChar->PUnityChat->getLeader(), rawMessage]()
                             {
                                 const auto query = "INSERT INTO audit_chat (speaker, type, zoneid, unity, message, datetime) VALUES(?, 'UNITY', ?, ?, ?, current_timestamp())";
@@ -4847,7 +4867,7 @@ void SmallPacket0x0B5(map_session_data_t* const PSession, CCharEntity* const PCh
  *                                                                       *
  ************************************************************************/
 
-void SmallPacket0x0B6(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+void SmallPacket0x0B6(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
 
@@ -4857,17 +4877,16 @@ void SmallPacket0x0B6(map_session_data_t* const PSession, CCharEntity* const PCh
         return;
     }
 
-    const auto recipientName = escapeString(asStringFromUntrustedSource(data[0x06], 15));
+    const auto recipientName = db::escapeString(asStringFromUntrustedSource(data[0x06], 15));
 
-    char  message[256]    = {}; // /t messages using "<t>" with a long named NPC targeted caps out at 138 bytes, increasing to the nearest power of 2
-    uint8 messagePosition = 0x15;
-
-    std::memcpy(&message, data[messagePosition], std::min(data.getSize() - messagePosition, sizeof(message)));
+    const auto messagePosition = 0x15;
+    const auto messageLength   = std::min<std::size_t>(data.getSize() - messagePosition, 256);
+    const auto rawMessage      = asStringFromUntrustedSource(data[messagePosition], messageLength);
 
     if (strcmp(recipientName.c_str(), "_CUSTOM_MENU") == 0 &&
         luautils::HasCustomMenuContext(PChar))
     {
-        luautils::HandleCustomMenu(PChar, message);
+        luautils::HandleCustomMenu(PChar, rawMessage);
         return;
     }
 
@@ -4875,7 +4894,7 @@ void SmallPacket0x0B6(map_session_data_t* const PSession, CCharEntity* const PCh
         .senderId      = PChar->id,
         .senderName    = PChar->getName(),
         .recipientName = recipientName,
-        .message       = message,
+        .message       = rawMessage,
         .zoneId        = PChar->getZone(),
         .gmLevel       = PChar->m_GMlevel,
     });
@@ -4883,12 +4902,10 @@ void SmallPacket0x0B6(map_session_data_t* const PSession, CCharEntity* const PCh
     if (settings::get<bool>("map.AUDIT_CHAT") && settings::get<bool>("map.AUDIT_TELL"))
     {
         // clang-format off
-        // NOTE: We capture rawMessage as a copy because if we cast data[0x06] into a const char*, the underlying data might
-        //     : be gone by the time we action this lambda on the worker thread.
-        Async::getInstance()->submit([name = PChar->getName(), zoneId = PChar->getZone(), recipient = recipientName, message]()
+        Async::getInstance()->submit([name = PChar->getName(), zoneId = PChar->getZone(), recipient = recipientName, rawMessage]()
         {
             const auto query = "INSERT INTO audit_chat (speaker, type, zoneid, recipient, message, datetime) VALUES(?, 'TELL', ?, ?, ?, current_timestamp())";
-            if (!db::preparedStmt(query, name, zoneId, recipient, message))
+            if (!db::preparedStmt(query, name, zoneId, recipient, rawMessage))
             {
                 ShowError("Failed to insert TELL audit_chat record for player '%s'", name);
             }
@@ -4903,7 +4920,7 @@ void SmallPacket0x0B6(map_session_data_t* const PSession, CCharEntity* const PCh
  *                                                                       *
  ************************************************************************/
 
-void SmallPacket0x0BE(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+void SmallPacket0x0BE(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
 
@@ -4914,7 +4931,7 @@ void SmallPacket0x0BE(map_session_data_t* const PSession, CCharEntity* const PCh
         case 2: // change mode
         {
             // TODO: you can switch mode anywhere except in besieged & under level restriction
-            if (_sql->Query("UPDATE char_exp SET mode = %u WHERE charid = %u", operation, PChar->id) != SQL_ERROR)
+            if (db::preparedStmt("UPDATE char_exp SET mode = ? WHERE charid = ? LIMIT 1", operation, PChar->id))
             {
                 PChar->MeritMode = operation;
                 PChar->pushPacket<CMenuMeritPacket>(PChar);
@@ -4982,7 +4999,7 @@ void SmallPacket0x0BE(map_session_data_t* const PSession, CCharEntity* const PCh
  *                                                                        *
  ************************************************************************/
 
-void SmallPacket0x0BF(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+void SmallPacket0x0BF(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
 
@@ -5005,7 +5022,7 @@ void SmallPacket0x0BF(map_session_data_t* const PSession, CCharEntity* const PCh
  *                                                                       *
  ************************************************************************/
 
-void SmallPacket0x0C0(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+void SmallPacket0x0C0(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
 
@@ -5022,7 +5039,7 @@ void SmallPacket0x0C0(map_session_data_t* const PSession, CCharEntity* const PCh
  *                                                                       *
  ************************************************************************/
 
-void SmallPacket0x0C3(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+void SmallPacket0x0C3(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
 
@@ -5053,7 +5070,7 @@ void SmallPacket0x0C3(map_session_data_t* const PSession, CCharEntity* const PCh
  *                                                                       *
  ************************************************************************/
 
-void SmallPacket0x0C4(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+void SmallPacket0x0C4(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
 
@@ -5078,7 +5095,7 @@ void SmallPacket0x0C4(map_session_data_t* const PSession, CCharEntity* const PCh
             std::memset(&DecodedName, 0, sizeof(DecodedName));
             std::memset(&EncodedName, 0, sizeof(EncodedName));
 
-            const auto incomingName = escapeString(asStringFromUntrustedSource(data[0x0C], 20));
+            const auto incomingName = db::escapeString(asStringFromUntrustedSource(data[0x0C], 20));
 
             DecodeStringLinkshell(incomingName.data(), DecodedName);
             EncodeStringLinkshell(DecodedName, EncodedName);
@@ -5102,13 +5119,9 @@ void SmallPacket0x0C4(map_session_data_t* const PSession, CCharEntity* const PCh
                 PItemLinkshell->setSignature(EncodedName); // because apparently the format from the packet isn't right, and is missing terminators
                 PItemLinkshell->SetLSColor(LinkshellColor);
 
-                char extra[sizeof(PItemLinkshell->m_extra) * 2 + 1];
-                _sql->EscapeStringLen(extra, (const char*)PItemLinkshell->m_extra, sizeof(PItemLinkshell->m_extra));
-
-                const char* Query =
-                    "UPDATE char_inventory SET signature = '%s', extra = '%s', itemId = 513 WHERE charid = %u AND location = 0 AND slot = %u LIMIT 1";
-
-                if (_sql->Query(Query, DecodedName, extra, PChar->id, SlotID) != SQL_ERROR && _sql->AffectedRows() != 0)
+                const auto rset = db::preparedStmt("UPDATE char_inventory SET signature = ?, extra = ?, itemId = 513 WHERE charid = ? AND location = 0 AND slot = ? LIMIT 1",
+                                                   DecodedName, PItemLinkshell->m_extra, PChar->id, SlotID);
+                if (rset && rset->rowsAffected())
                 {
                     PChar->pushPacket<CInventoryItemPacket>(PItemLinkshell, LocationID, SlotID);
                 }
@@ -5151,16 +5164,14 @@ void SmallPacket0x0C4(map_session_data_t* const PSession, CCharEntity* const PCh
                 break;
                 case 1: // equip linkshell
                 {
-                    auto ret = _sql->Query("SELECT broken FROM linkshells WHERE linkshellid = %u LIMIT 1", PItemLinkshell->GetLSID());
-                    if (ret != SQL_ERROR && _sql->NumRows() != 0 && _sql->NextRow() == SQL_SUCCESS && _sql->GetUIntData(0) == 1)
-                    { // if the linkshell has been broken, break the item
+                    const auto rset = db::preparedStmt("SELECT broken FROM linkshells WHERE linkshellid = ? LIMIT 1", PItemLinkshell->GetLSID());
+                    if (rset && rset->rowsCount() && rset->next() && rset->get<uint8>("broken") == 1)
+                    {
+                        // if the linkshell has been broken, break the item
                         PItemLinkshell->SetLSType(LSTYPE_BROKEN);
 
-                        char extra[sizeof(PItemLinkshell->m_extra) * 2 + 1];
-                        _sql->EscapeStringLen(extra, (const char*)PItemLinkshell->m_extra, sizeof(PItemLinkshell->m_extra));
-
-                        const char* Query = "UPDATE char_inventory SET extra = '%s' WHERE charid = %u AND location = %u AND slot = %u LIMIT 1";
-                        _sql->Query(Query, extra, PChar->id, PItemLinkshell->getLocationID(), PItemLinkshell->getSlotID());
+                        db::preparedStmt("UPDATE char_inventory SET extra = ? WHERE charid = ? AND location = ? AND slot = ? LIMIT 1",
+                                         PItemLinkshell->m_extra, PChar->id, PItemLinkshell->getLocationID(), PItemLinkshell->getSlotID());
 
                         PChar->pushPacket<CInventoryItemPacket>(PItemLinkshell, PItemLinkshell->getLocationID(), PItemLinkshell->getSlotID());
                         PChar->pushPacket<CInventoryFinishPacket>();
@@ -5216,7 +5227,7 @@ void SmallPacket0x0C4(map_session_data_t* const PSession, CCharEntity* const PCh
  *                                                                       *
  ************************************************************************/
 
-void SmallPacket0x0CB(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+void SmallPacket0x0CB(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
 
@@ -5263,13 +5274,12 @@ void SmallPacket0x0CB(map_session_data_t* const PSession, CCharEntity* const PCh
         if (type != oldType && PChar->profile.mhflag & 0x0040)
         {
             auto zoneid = PChar->getZone();
-            auto ipp    = zoneutils::GetZoneIPP(zoneid);
 
             PChar->loc.destination = zoneid;
             PChar->status          = STATUS_TYPE::DISAPPEAR;
 
             PChar->clearPacketList();
-            charutils::SendToZone(PChar, ZoningType::Zoning, ipp);
+            charutils::SendToZone(PChar, zoneid);
         }
     }
     else
@@ -5284,16 +5294,20 @@ void SmallPacket0x0CB(map_session_data_t* const PSession, CCharEntity* const PCh
  *                                                                       *
  ************************************************************************/
 
-void SmallPacket0x0D2(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+void SmallPacket0x0D2(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
 
     // clang-format off
     PChar->ForAlliance([PChar](CBattleEntity* PPartyMember)
     {
-        if (PPartyMember->getZone() == PChar->getZone() && ((CCharEntity*)PPartyMember)->m_moghouseID == PChar->m_moghouseID)
+        if (PPartyMember)
         {
-            PChar->pushPacket<CPartyMapPacket>((CCharEntity*)PPartyMember);
+            auto* partyMember = static_cast<CCharEntity*>(PPartyMember);
+            if (partyMember->getZone() == PChar->getZone() && partyMember->m_moghouseID == PChar->m_moghouseID)
+            {
+                PChar->pushPacket<CPartyMapPacket>(partyMember);
+            }
         }
     });
     // clang-format on
@@ -5306,7 +5320,7 @@ void SmallPacket0x0D2(map_session_data_t* const PSession, CCharEntity* const PCh
  *                                                                       *
  ************************************************************************/
 
-void SmallPacket0x0D3(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+void SmallPacket0x0D3(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
 
@@ -5319,7 +5333,7 @@ void SmallPacket0x0D3(map_session_data_t* const PSession, CCharEntity* const PCh
  *                                                                       *
  ************************************************************************/
 
-void SmallPacket0x0DB(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+void SmallPacket0x0DB(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
 
@@ -5408,7 +5422,7 @@ struct GP_CLI_CONFIG
     uint8_t  padding00[3];            // PS2: (New; did not exist.)
 };
 
-void SmallPacket0x0DC(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+void SmallPacket0x0DC(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
 
@@ -5514,7 +5528,7 @@ void SmallPacket0x0DC(map_session_data_t* const PSession, CCharEntity* const PCh
  *                                                                       *
  ************************************************************************/
 
-void SmallPacket0x0DD(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+void SmallPacket0x0DD(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
 
@@ -5686,19 +5700,22 @@ void SmallPacket0x0DD(map_session_data_t* const PSession, CCharEntity* const PCh
  *                                                                       *
  ************************************************************************/
 
-void SmallPacket0x0DE(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+void SmallPacket0x0DE(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
 
-    PChar->bazaar.message.clear();
-    PChar->bazaar.message.insert(0, (const char*)data[4], 120); // Maximum bazaar message limit: 120 characters
+    // Maximum bazaar message limit: 120 characters
+    //
+    // NOTE: We are NOT escaping this because the exact message needs to be stored to
+    //     : be correctly displayed in the bazaar. We're storing through a prepared statement so
+    //     : this is safe from injection.
+    const auto message = asStringFromUntrustedSource(data[4], 120);
 
-    char message[256];
-    _sql->EscapeString(message, PChar->bazaar.message.c_str());
-
-    _sql->Query("UPDATE char_stats SET bazaar_message = '%s' WHERE charid = %u", message, PChar->id);
-
-    DebugBazaarsFmt("Bazaar Interaction [Set Message] - Character: {}, Message: '{}'", PChar->name, message);
+    if (db::preparedStmt("UPDATE char_stats SET bazaar_message = ? WHERE charid = ? LIMIT 1", message, PChar->id))
+    {
+        DebugBazaarsFmt("Bazaar Interaction [Set Message] - Character: {}, Message: '{}'", PChar->name, message);
+        PChar->bazaar.message = message;
+    }
 }
 
 /************************************************************************
@@ -5707,29 +5724,27 @@ void SmallPacket0x0DE(map_session_data_t* const PSession, CCharEntity* const PCh
  *                                                                       *
  ************************************************************************/
 
-void SmallPacket0x0E0(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+void SmallPacket0x0E0(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
 
-    char message[256];
-    _sql->EscapeString(message, (const char*)data[0x04]);
+    // NOTE: As with the bazaar message, we aren't going to escape this because we need the
+    //     : exact message to be stored to be displayed correctly. We're storing through a prepared statement so
+    //     : this is safe from injection.
+    const auto message = asStringFromUntrustedSource(data[0x04], 256);
 
-    uint8 type = strlen(message) == 0 ? 0 : data.ref<uint8>(data.getSize() - 4);
+    uint8 type = message.empty() ? 0 : data.ref<uint8>(data.getSize() - 4);
 
-    if (type == PChar->search.messagetype && strcmp(message, PChar->search.message.c_str()) == 0)
+    if (type == PChar->search.messagetype && strcmp(message.c_str(), PChar->search.message.c_str()) == 0)
     {
         return;
     }
 
-    auto ret = _sql->Query("UPDATE accounts_sessions SET seacom_type = %u, seacom_message = '%s' WHERE charid = %u", type, message, PChar->id);
-
-    if (ret == SQL_SUCCESS)
+    if (db::preparedStmt("UPDATE accounts_sessions SET seacom_type = ?, seacom_message = ? WHERE charid = ? LIMIT 1", type, message, PChar->id))
     {
-        PChar->search.message.clear();
-        PChar->search.message.insert(0, message);
+        PChar->search.message     = message;
         PChar->search.messagetype = type;
     }
-    return;
 }
 
 /************************************************************************
@@ -5738,7 +5753,7 @@ void SmallPacket0x0E0(map_session_data_t* const PSession, CCharEntity* const PCh
  *                                                                       *
  ************************************************************************/
 
-void SmallPacket0x0E1(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+void SmallPacket0x0E1(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
 
@@ -5759,7 +5774,7 @@ void SmallPacket0x0E1(map_session_data_t* const PSession, CCharEntity* const PCh
  *                                                                       *
  ************************************************************************/
 
-void SmallPacket0x0E2(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+void SmallPacket0x0E2(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
 
@@ -5793,7 +5808,10 @@ void SmallPacket0x0E2(map_session_data_t* const PSession, CCharEntity* const PCh
             {
                 if (static_cast<uint8>(PItemLinkshell->GetLSType()) <= PChar->PLinkshell1->m_postRights)
                 {
-                    const auto lsMessage = escapeString(asStringFromUntrustedSource(data[0x10], 128));
+                    // NOTE: We are not escaping this because we need the exact message to be stored
+                    //     : to be displayed correctly. We're storing through a prepared statement so
+                    //     : this is safe from injection.
+                    const auto lsMessage = asStringFromUntrustedSource(data[0x10], 128);
                     PChar->PLinkshell1->setMessage(lsMessage, PChar->getName());
                     return;
                 }
@@ -5813,7 +5831,7 @@ void SmallPacket0x0E2(map_session_data_t* const PSession, CCharEntity* const PCh
  *                                                                       *
  ************************************************************************/
 
-void SmallPacket0x0E7(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+void SmallPacket0x0E7(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
 
@@ -5863,7 +5881,7 @@ void SmallPacket0x0E7(map_session_data_t* const PSession, CCharEntity* const PCh
  *                                                                       *
  ************************************************************************/
 
-void SmallPacket0x0E8(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+void SmallPacket0x0E8(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
 
@@ -5919,7 +5937,7 @@ void SmallPacket0x0E8(map_session_data_t* const PSession, CCharEntity* const PCh
  *                                                                       *
  ************************************************************************/
 
-void SmallPacket0x0EA(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+void SmallPacket0x0EA(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
 
@@ -5959,7 +5977,7 @@ void SmallPacket0x0EA(map_session_data_t* const PSession, CCharEntity* const PCh
  *                                                                       *
  ************************************************************************/
 
-void SmallPacket0x0EB(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+void SmallPacket0x0EB(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
 
@@ -5977,7 +5995,7 @@ void SmallPacket0x0EB(map_session_data_t* const PSession, CCharEntity* const PCh
  *                                                                       *
  ************************************************************************/
 
-void SmallPacket0x0F1(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+void SmallPacket0x0F1(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
 
@@ -5995,7 +6013,7 @@ void SmallPacket0x0F1(map_session_data_t* const PSession, CCharEntity* const PCh
  *                                                                       *
  ************************************************************************/
 
-void SmallPacket0x0F2(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+void SmallPacket0x0F2(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
 
@@ -6010,7 +6028,7 @@ void SmallPacket0x0F2(map_session_data_t* const PSession, CCharEntity* const PCh
  *                                                                       *
  ************************************************************************/
 
-void SmallPacket0x0F4(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+void SmallPacket0x0F4(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
     TracyZoneCString("Wide Scan");
@@ -6024,7 +6042,7 @@ void SmallPacket0x0F4(map_session_data_t* const PSession, CCharEntity* const PCh
  *                                                                       *
  ************************************************************************/
 
-void SmallPacket0x0F5(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+void SmallPacket0x0F5(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
 
@@ -6057,7 +6075,7 @@ void SmallPacket0x0F5(map_session_data_t* const PSession, CCharEntity* const PCh
  *                                                                       *
  ************************************************************************/
 
-void SmallPacket0x0F6(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+void SmallPacket0x0F6(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
 
@@ -6070,7 +6088,7 @@ void SmallPacket0x0F6(map_session_data_t* const PSession, CCharEntity* const PCh
  *                                                                       *
  ************************************************************************/
 
-void SmallPacket0x0FA(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+void SmallPacket0x0FA(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
 
@@ -6225,15 +6243,13 @@ void SmallPacket0x0FA(map_session_data_t* const PSession, CCharEntity* const PCh
 
         PChar->pushPacket<CFurnitureInteractPacket>(PItem, containerID, slotID);
 
-        char extra[sizeof(PItem->m_extra) * 2 + 1];
-        _sql->EscapeStringLen(extra, (const char*)PItem->m_extra, sizeof(PItem->m_extra));
+        const auto rset = db::preparedStmt("UPDATE char_inventory "
+                                           "SET "
+                                           "extra = ? "
+                                           "WHERE location = ? AND slot = ? AND charid = ? LIMIT 1",
+                                           PItem->m_extra, containerID, slotID, PChar->id);
 
-        const char* Query = "UPDATE char_inventory "
-                            "SET "
-                            "extra = '%s' "
-                            "WHERE location = %u AND slot = %u AND charid = %u";
-
-        if (_sql->Query(Query, extra, containerID, slotID, PChar->id) != SQL_ERROR && _sql->AffectedRows() != 0 && !wasInstalled)
+        if (rset && rset->rowsAffected() && !wasInstalled)
         {
             // Storage mods only apply on the 1st floor
             if (!PItem->getOn2ndFloor())
@@ -6258,7 +6274,7 @@ void SmallPacket0x0FA(map_session_data_t* const PSession, CCharEntity* const PCh
  *                                                                       *
  ************************************************************************/
 
-void SmallPacket0x0FB(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+void SmallPacket0x0FB(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
 
@@ -6315,15 +6331,13 @@ void SmallPacket0x0FB(map_session_data_t* const PSession, CCharEntity* const PCh
                 }
             }
 
-            char extra[sizeof(PItem->m_extra) * 2 + 1];
-            _sql->EscapeStringLen(extra, (const char*)PItem->m_extra, sizeof(PItem->m_extra));
+            const auto rset = db::preparedStmt("UPDATE char_inventory "
+                                               "SET "
+                                               "extra = ? "
+                                               "WHERE location = ? AND slot = ? AND charid = ? LIMIT 1",
+                                               PItem->m_extra, containerID, slotID, PChar->id);
 
-            const char* Query = "UPDATE char_inventory "
-                                "SET "
-                                "extra = '%s' "
-                                "WHERE location = %u AND slot = %u AND charid = %u";
-
-            if (_sql->Query(Query, extra, containerID, slotID, PChar->id) != SQL_ERROR && _sql->AffectedRows() != 0)
+            if (rset && rset->rowsAffected())
             {
                 uint8 NewSize = PItemContainer->GetSize() - RemovedSize;
                 for (uint8 SlotID = PItemContainer->GetSize(); SlotID > NewSize; --SlotID)
@@ -6362,7 +6376,7 @@ void SmallPacket0x0FB(map_session_data_t* const PSession, CCharEntity* const PCh
  *                                                                       *
  ************************************************************************/
 
-void SmallPacket0x0FC(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+void SmallPacket0x0FC(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
 
@@ -6441,10 +6455,8 @@ void SmallPacket0x0FC(map_session_data_t* const PSession, CCharEntity* const PCh
 
     if (updatedPot)
     {
-        char extra[sizeof(PPotItem->m_extra) * 2 + 1];
-        _sql->EscapeStringLen(extra, (const char*)PPotItem->m_extra, sizeof(PPotItem->m_extra));
-        const char* Query = "UPDATE char_inventory SET extra = '%s' WHERE charid = %u AND location = %u AND slot = %u";
-        _sql->Query(Query, extra, PChar->id, PPotItem->getLocationID(), PPotItem->getSlotID());
+        db::preparedStmt("UPDATE char_inventory SET extra = ? WHERE charid = ? AND location = ? AND slot = ? LIMIT 1",
+                         PPotItem->m_extra, PChar->id, PPotItem->getLocationID(), PPotItem->getSlotID());
 
         PChar->pushPacket<CFurnitureInteractPacket>(PPotItem, potContainerID, potSlotID);
 
@@ -6461,7 +6473,7 @@ void SmallPacket0x0FC(map_session_data_t* const PSession, CCharEntity* const PCh
  *                                                                       *
  ************************************************************************/
 
-void SmallPacket0x0FD(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+void SmallPacket0x0FD(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
 
@@ -6519,10 +6531,9 @@ void SmallPacket0x0FD(map_session_data_t* const PSession, CCharEntity* const PCh
         if (!PItem->wasExamined())
         {
             PItem->markExamined();
-            char extra[sizeof(PItem->m_extra) * 2 + 1];
-            _sql->EscapeStringLen(extra, (const char*)PItem->m_extra, sizeof(PItem->m_extra));
-            const char* Query = "UPDATE char_inventory SET extra = '%s' WHERE charid = %u AND location = %u AND slot = %u";
-            _sql->Query(Query, extra, PChar->id, PItem->getLocationID(), PItem->getSlotID());
+
+            db::preparedStmt("UPDATE char_inventory SET extra = ? WHERE charid = ? AND location = ? AND slot = ? LIMIT 1",
+                             PItem->m_extra, PChar->id, PItem->getLocationID(), PItem->getSlotID());
         }
     }
 
@@ -6535,7 +6546,7 @@ void SmallPacket0x0FD(map_session_data_t* const PSession, CCharEntity* const PCh
  *                                                                       *
  ************************************************************************/
 
-void SmallPacket0x0FE(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+void SmallPacket0x0FE(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
 
@@ -6601,10 +6612,8 @@ void SmallPacket0x0FE(map_session_data_t* const PSession, CCharEntity* const PCh
         PChar->pushPacket<CFurnitureInteractPacket>(PItem, containerID, slotID);
         PItem->cleanPot();
 
-        char extra[sizeof(PItem->m_extra) * 2 + 1];
-        _sql->EscapeStringLen(extra, (const char*)PItem->m_extra, sizeof(PItem->m_extra));
-        const char* Query = "UPDATE char_inventory SET extra = '%s' WHERE charid = %u AND location = %u AND slot = %u";
-        _sql->Query(Query, extra, PChar->id, PItem->getLocationID(), PItem->getSlotID());
+        db::preparedStmt("UPDATE char_inventory SET extra = ? WHERE charid = ? AND location = ? AND slot = ? LIMIT 1",
+                         PItem->m_extra, PChar->id, PItem->getLocationID(), PItem->getSlotID());
 
         PChar->pushPacket<CInventoryItemPacket>(PItem, containerID, slotID);
         PChar->pushPacket<CInventoryFinishPacket>();
@@ -6617,7 +6626,7 @@ void SmallPacket0x0FE(map_session_data_t* const PSession, CCharEntity* const PCh
  *                                                                       *
  ************************************************************************/
 
-void SmallPacket0x0FF(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+void SmallPacket0x0FF(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
     uint16 itemID = data.ref<uint16>(0x04);
@@ -6642,10 +6651,8 @@ void SmallPacket0x0FF(map_session_data_t* const PSession, CCharEntity* const PCh
         PChar->pushPacket<CFurnitureInteractPacket>(PItem, containerID, slotID);
         PItem->setDried(true);
 
-        char extra[sizeof(PItem->m_extra) * 2 + 1];
-        _sql->EscapeStringLen(extra, (const char*)PItem->m_extra, sizeof(PItem->m_extra));
-        const char* Query = "UPDATE char_inventory SET extra = '%s' WHERE charid = %u AND location = %u AND slot = %u";
-        _sql->Query(Query, extra, PChar->id, PItem->getLocationID(), PItem->getSlotID());
+        db::preparedStmt("UPDATE char_inventory SET extra = ? WHERE charid = ? AND location = ? AND slot = ? LIMIT 1",
+                         PItem->m_extra, PChar->id, PItem->getLocationID(), PItem->getSlotID());
 
         PChar->pushPacket<CInventoryItemPacket>(PItem, containerID, slotID);
         PChar->pushPacket<CInventoryFinishPacket>();
@@ -6658,7 +6665,7 @@ void SmallPacket0x0FF(map_session_data_t* const PSession, CCharEntity* const PCh
  *                                                                       *
  ************************************************************************/
 
-void SmallPacket0x100(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+void SmallPacket0x100(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
     if (PChar->loc.zone->CanUseMisc(MISC_MOGMENU) || PChar->m_moghouseID)
@@ -6692,7 +6699,7 @@ void SmallPacket0x100(map_session_data_t* const PSession, CCharEntity* const PCh
             bool canUseMeritMode = PChar->jobs.job[PChar->GetMJob()] >= 75 && charutils::hasKeyItem(PChar, 606);
             if (!canUseMeritMode && PChar->MeritMode)
             {
-                if (_sql->Query("UPDATE char_exp SET mode = %u WHERE charid = %u", 0, PChar->id) != SQL_ERROR)
+                if (db::preparedStmt("UPDATE char_exp SET mode = ? WHERE charid = ? LIMIT 1", 0, PChar->id))
                 {
                     PChar->MeritMode = false;
                 }
@@ -6782,7 +6789,7 @@ void SmallPacket0x100(map_session_data_t* const PSession, CCharEntity* const PCh
  *                                                                       *
  ************************************************************************/
 
-void SmallPacket0x102(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+void SmallPacket0x102(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
     uint8 job = data.ref<uint8>(0x08);
@@ -6955,7 +6962,7 @@ void SmallPacket0x102(map_session_data_t* const PSession, CCharEntity* const PCh
  *                                                                        *
  ************************************************************************/
 
-void SmallPacket0x104(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+void SmallPacket0x104(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
     CCharEntity* PTarget = (CCharEntity*)PChar->GetEntity(PChar->BazaarID.targid, TYPE_PC);
@@ -6985,7 +6992,7 @@ void SmallPacket0x104(map_session_data_t* const PSession, CCharEntity* const PCh
  *                                                                       *
  ************************************************************************/
 
-void SmallPacket0x105(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+void SmallPacket0x105(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
     if (PChar->BazaarID.id != 0)
@@ -7039,7 +7046,7 @@ void SmallPacket0x105(map_session_data_t* const PSession, CCharEntity* const PCh
  *                                                                       *
  ************************************************************************/
 
-void SmallPacket0x106(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+void SmallPacket0x106(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
     uint8 Quantity = data.ref<uint8>(0x08);
@@ -7128,6 +7135,26 @@ void SmallPacket0x106(map_session_data_t* const PSession, CCharEntity* const PCh
             return;
         }
 
+        if (settings::get<bool>("map.AUDIT_PLAYER_BAZAAR"))
+        {
+            Async::getInstance()->submit(
+                [itemID        = PItem->getID(),
+                 quantity      = Quantity,
+                 sellerID      = PTarget->id,
+                 sellerName    = PTarget->getName(),
+                 purchaserID   = PChar->id,
+                 purchaserName = PChar->getName(),
+                 price         = PriceWithTax,
+                 date          = static_cast<uint32>(time(nullptr))]
+                {
+                    const auto query = "INSERT INTO audit_bazaar(itemid, quantity, seller, seller_name, purchaser, purchaser_name, price, date) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+                    if (!db::preparedStmt(query, itemID, quantity, sellerID, sellerName, purchaserID, purchaserName, price, date))
+                    {
+                        ShowErrorFmt("Failed to log bazaar purchase (ItemID: {}, Quantity: {}, Seller: {}, Purchaser: {}, Price: {})", itemID, quantity, sellerName, purchaserName, price);
+                    }
+                });
+        }
+
         charutils::UpdateItem(PChar, LOC_INVENTORY, 0, -(int32)PriceWithTax);
         charutils::UpdateItem(PTarget, LOC_INVENTORY, 0, Price);
 
@@ -7189,7 +7216,7 @@ void SmallPacket0x106(map_session_data_t* const PSession, CCharEntity* const PCh
  *                                                                       *
  ************************************************************************/
 
-void SmallPacket0x109(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+void SmallPacket0x109(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
 
@@ -7206,7 +7233,7 @@ void SmallPacket0x109(map_session_data_t* const PSession, CCharEntity* const PCh
  *                                                                       *
  ************************************************************************/
 
-void SmallPacket0x10A(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+void SmallPacket0x10A(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
     uint8  slotID = data.ref<uint8>(0x04);
@@ -7233,7 +7260,7 @@ void SmallPacket0x10A(map_session_data_t* const PSession, CCharEntity* const PCh
 
     if ((PItem != nullptr) && !(PItem->getFlag() & ITEM_FLAG_EX) && (!PItem->isSubType(ITEM_LOCKED) || PItem->getCharPrice() != 0))
     {
-        _sql->Query("UPDATE char_inventory SET bazaar = %u WHERE charid = %u AND location = 0 AND slot = %u", price, PChar->id, slotID);
+        db::preparedStmt("UPDATE char_inventory SET bazaar = ? WHERE charid = ? AND location = 0 AND slot = ?", price, PChar->id, slotID);
 
         PItem->setCharPrice(price);
         PItem->setSubType((price == 0 ? ITEM_UNLOCKED : ITEM_LOCKED));
@@ -7251,7 +7278,7 @@ void SmallPacket0x10A(map_session_data_t* const PSession, CCharEntity* const PCh
  *                                                                        *
  ************************************************************************/
 
-void SmallPacket0x10B(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+void SmallPacket0x10B(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
     for (std::size_t i = 0; i < PChar->BazaarCustomers.size(); ++i)
@@ -7279,7 +7306,7 @@ void SmallPacket0x10B(map_session_data_t* const PSession, CCharEntity* const PCh
  *                                                                        *
  ************************************************************************/
 
-void SmallPacket0x10C(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+void SmallPacket0x10C(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
     if (settings::get<bool>("main.ENABLE_ROE"))
@@ -7297,7 +7324,7 @@ void SmallPacket0x10C(map_session_data_t* const PSession, CCharEntity* const PCh
  *                                                                        *
  ************************************************************************/
 
-void SmallPacket0x10D(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+void SmallPacket0x10D(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
     if (settings::get<bool>("main.ENABLE_ROE"))
@@ -7313,7 +7340,7 @@ void SmallPacket0x10D(map_session_data_t* const PSession, CCharEntity* const PCh
  *                                                                        *
  ************************************************************************/
 
-void SmallPacket0x10E(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+void SmallPacket0x10E(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
     if (settings::get<bool>("main.ENABLE_ROE"))
@@ -7329,7 +7356,7 @@ void SmallPacket0x10E(map_session_data_t* const PSession, CCharEntity* const PCh
  *                                                                        *
  ************************************************************************/
 
-void SmallPacket0x10F(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+void SmallPacket0x10F(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
     PChar->pushPacket<CCurrencyPacket1>(PChar);
@@ -7341,7 +7368,7 @@ void SmallPacket0x10F(map_session_data_t* const PSession, CCharEntity* const PCh
  *                                                                       *
  ************************************************************************/
 
-void SmallPacket0x110(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+void SmallPacket0x110(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
     if (settings::get<bool>("map.FISHING_ENABLE") && PChar->GetMLevel() >= settings::get<uint8>("map.FISHING_MIN_LEVEL"))
@@ -7356,7 +7383,7 @@ void SmallPacket0x110(map_session_data_t* const PSession, CCharEntity* const PCh
  *                                                                        *
  ************************************************************************/
 
-void SmallPacket0x111(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+void SmallPacket0x111(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
     charutils::SetStyleLock(PChar, data.ref<uint8>(0x04));
@@ -7369,7 +7396,7 @@ void SmallPacket0x111(map_session_data_t* const PSession, CCharEntity* const PCh
  *                                                                        *
  ************************************************************************/
 
-void SmallPacket0x112(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+void SmallPacket0x112(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
     // Send spark updates
@@ -7400,7 +7427,7 @@ void SmallPacket0x112(map_session_data_t* const PSession, CCharEntity* const PCh
  *  /sitchair                                                            *
  *                                                                       *
  ************************************************************************/
-void SmallPacket0x113(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+void SmallPacket0x113(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
 
@@ -7444,7 +7471,7 @@ void SmallPacket0x113(map_session_data_t* const PSession, CCharEntity* const PCh
  *                                                                       *
  ************************************************************************/
 
-void SmallPacket0x114(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+void SmallPacket0x114(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
     PChar->pushPacket<CMapMarkerPacket>(PChar);
@@ -7456,7 +7483,7 @@ void SmallPacket0x114(map_session_data_t* const PSession, CCharEntity* const PCh
  *                                                                        *
  ************************************************************************/
 
-void SmallPacket0x115(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+void SmallPacket0x115(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
     PChar->pushPacket<CCurrencyPacket2>(PChar);
@@ -7468,7 +7495,7 @@ void SmallPacket0x115(map_session_data_t* const PSession, CCharEntity* const PCh
  *  This stub only handles the needed RoE updates.                        *
  *                                                                        *
  ************************************************************************/
-void SmallPacket0x116(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+void SmallPacket0x116(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
     PChar->pushPacket<CRoeSparkUpdatePacket>(PChar);
@@ -7482,7 +7509,7 @@ void SmallPacket0x116(map_session_data_t* const PSession, CCharEntity* const PCh
  *                                                                        *
  ************************************************************************/
 
-void SmallPacket0x117(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+void SmallPacket0x117(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
     PChar->pushPacket<CRoeSparkUpdatePacket>(PChar);
@@ -7495,7 +7522,7 @@ void SmallPacket0x117(map_session_data_t* const PSession, CCharEntity* const PCh
  *                                                                        *
  ************************************************************************/
 
-void SmallPacket0x118(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+void SmallPacket0x118(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     bool active = data.ref<uint8>(0x04);
     if (PChar->PUnityChat)
@@ -7513,7 +7540,7 @@ void SmallPacket0x118(map_session_data_t* const PSession, CCharEntity* const PCh
  *  Request Emote List                                                    *
  *                                                                        *
  ************************************************************************/
-void SmallPacket0x119(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+void SmallPacket0x119(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     PChar->pushPacket<CCharEmoteListPacket>(PChar);
 }
@@ -7523,7 +7550,7 @@ void SmallPacket0x119(map_session_data_t* const PSession, CCharEntity* const PCh
  *  Set Job Master Display                                                *
  *                                                                        *
  ************************************************************************/
-void SmallPacket0x11B(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+void SmallPacket0x11B(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     PChar->m_jobMasterDisplay = data.ref<uint8>(0x04) > 0;
 
@@ -7537,7 +7564,7 @@ void SmallPacket0x11B(map_session_data_t* const PSession, CCharEntity* const PCh
  *                                                                       *
  ************************************************************************/
 
-void SmallPacket0x11D(map_session_data_t* const PSession, CCharEntity* const PChar, CBasicPacket& data)
+void SmallPacket0x11D(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
 {
     TracyZoneScoped;
     if (jailutils::InPrison(PChar))

@@ -23,6 +23,7 @@
 #define _CITEMCONTAINER_H
 
 #include "common/cbasetypes.h"
+#include "common/logging.h"
 
 enum CONTAINER_ID : uint8
 {

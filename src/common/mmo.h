@@ -19,18 +19,17 @@
 ===========================================================================
 */
 
-#ifndef _MMO_H
-#define _MMO_H
+#pragma once
 
 #include "cbasetypes.h"
+#include "xi.h"
 
 #include <array>
 #include <bitset>
-#include <stdlib.h>
+#include <cstdlib>
+#include <cstring>
+#include <ctime>
 #include <string>
-#include <time.h>
-
-#define FIFOSIZE_SERVERLINK 256 * 1024
 
 #define FFXI_HEADER_SIZE 0x1C // common packet header size
 
@@ -231,31 +230,17 @@ struct skills_t
     };
     // Rank is used for crafts and loads main job or sub job skill rank, prioritizing main job skill rank.
     uint8 rank[64];
-
-    skills_t()
-    {
-        std::memset(&skill, 0, sizeof(skill));
-        std::memset(&rank, 0, sizeof(rank));
-    }
 };
 
 struct keyitems_table_t
 {
-    std::bitset<512> keyList;
-    std::bitset<512> seenList;
-
-    keyitems_table_t()
-    {
-    }
+    xi::bitset<512> keyList;
+    xi::bitset<512> seenList;
 };
 
 struct keyitems_t
 {
     std::array<keyitems_table_t, 7> tables;
-
-    keyitems_t()
-    {
-    }
 };
 
 struct position_t
@@ -273,11 +258,6 @@ struct position_t
 
     position_t()
     {
-        x        = 0.f;
-        y        = 0.f;
-        z        = 0.f;
-        moving   = 0;
-        rotation = 0;
     }
 
     position_t(float _x, float _y, float _z, uint16 _moving, uint8 _rotation)
@@ -299,29 +279,12 @@ struct stats_t
     uint16 INT;
     uint16 MND;
     uint16 CHR;
-
-    stats_t()
-    {
-        STR = 0;
-        DEX = 0;
-        VIT = 0;
-        AGI = 0;
-        INT = 0;
-        MND = 0;
-        CHR = 0;
-    }
 };
 
 struct questlog_t
 {
     uint8 current[32];
     uint8 complete[32];
-
-    questlog_t()
-    {
-        std::memset(&current, 0, sizeof(current));
-        std::memset(&complete, 0, sizeof(complete));
-    }
 };
 
 struct missionlog_t
@@ -330,39 +293,18 @@ struct missionlog_t
     uint16 statusUpper;
     uint16 statusLower;
     bool   complete[64];
-
-    missionlog_t()
-    {
-        current     = 0;
-        statusUpper = 0;
-        statusLower = 0;
-
-        std::memset(&complete, 0, sizeof(complete));
-    }
 };
 
 struct assaultlog_t
 {
     uint16 current;
     bool   complete[128];
-
-    assaultlog_t()
-    {
-        current = 0;
-        std::memset(&complete, 0, sizeof(complete));
-    }
 };
 
 struct campaignlog_t
 {
     uint16 current;
     bool   complete[512];
-
-    campaignlog_t()
-    {
-        current = 0;
-        std::memset(&complete, 0, sizeof(complete));
-    }
 };
 
 struct eminencelog_t
@@ -370,27 +312,13 @@ struct eminencelog_t
     uint16 active[31]; // slot 31 is for time-limited records
     uint32 progress[31];
     uint8  complete[512]; // bitmap of all 4096 possible records.
-
-    eminencelog_t()
-    {
-        std::memset(&active, 0, sizeof(active));
-        std::memset(&progress, 0, sizeof(progress));
-        std::memset(&complete, 0, sizeof(complete));
-    }
 };
 
 struct eminencecache_t
 {
-    std::bitset<4096> activemap;
-    uint32            lastWriteout;
-    bool              notifyTimedRecord;
-    ;
-
-    eminencecache_t()
-    {
-        lastWriteout      = 0;
-        notifyTimedRecord = false;
-    }
+    xi::bitset<4096> activemap;
+    uint32           lastWriteout;
+    bool             notifyTimedRecord;
 };
 
 struct nameflags_t
@@ -406,11 +334,6 @@ struct nameflags_t
         };
         uint32 flags;
     };
-
-    nameflags_t()
-    {
-        flags = 0;
-    }
 };
 
 struct search_t
@@ -418,28 +341,18 @@ struct search_t
     uint8       language;
     uint8       messagetype;
     std::string message;
-
-    search_t()
-    {
-        language    = 0;
-        messagetype = 0;
-    }
 };
 
 struct bazaar_t
 {
     std::string message;
-
-    bazaar_t()
-    {
-    }
 };
 
 struct pathpoint_t
 {
-    position_t position{};
-    uint32     wait        = 0;
-    bool       setRotation = false;
+    position_t position;
+    uint32     wait;
+    bool       setRotation;
 };
 
 // A comment on the packets below, defined as macros.
@@ -514,15 +427,6 @@ public:
     uint8  m_nation;
 
     look_t m_look;
-
-    char_mini()
-    {
-        std::memset(&m_name, 0, sizeof(m_name));
-
-        m_mjob   = 0;
-        m_zone   = 0;
-        m_nation = 0;
-    };
 };
 
 // https://github.com/atom0s/XiPackets/tree/main/world/client/0x000A
@@ -546,5 +450,3 @@ struct GP_CLI_LOGIN
     uint16_t uCliLang;         // PS2: uCliLang
     uint16_t dammyArea;        // PS2: dammyArea
 };
-
-#endif // _MMO_H

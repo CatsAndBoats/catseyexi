@@ -170,10 +170,6 @@ xi.einherjar.onLampDrop = function(player, lampObj)
         return
     end
 
-    if lampData.startTime ~= chamberData.startTime then
-        return
-    end
-
     if #xi.einherjar.getMatchingLamps(player, lampData.chamber, lampData.startTime) == 0 then
         xi.einherjar.onChamberExit(chamberData, player)
     end

@@ -35,6 +35,7 @@ return {
     ['Kototo']             = { event = 410 },
     ['Kuu_Lohro']          = { event = 430 },
     ['Mahoh_Mahborogho']   = { event = 257 },
+    ['Matata']             = { event = 223 },
     ['Meh_Kotomaihro']     = { event = 258 },
     ['Miiri-Wohri']        = { event = 111 },
     ['Mocchi_Katsartbih']  = { event = 264 },

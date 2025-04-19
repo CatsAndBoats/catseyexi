@@ -716,8 +716,8 @@ public:
     uint16     getAoEMsg() const;
     uint16     getRecastTime() const;
     uint16     getRecastId() const;
-    uint16     getCE() const;
-    uint16     getVE() const;
+    int32      getCE() const;
+    int32      getVE() const;
     uint16     getMeritModID() const;
     ACTIONTYPE getActionType();
     EFFECT     getPostActionEffectCleanup();
@@ -736,8 +736,8 @@ public:
     void setMessage(uint16 message);
     void setRecastTime(uint16 recastTime);
     void setRecastId(uint16 recastId);
-    void setCE(uint16 CE);
-    void setVE(uint16 VE);
+    void setCE(int32 CE);
+    void setVE(int32 VE);
     void setMeritModID(uint16 value);
     void setActionType(ACTIONTYPE type);
     void setPostActionEffectCleanup(EFFECT effectToCleanup);
@@ -759,8 +759,8 @@ private:
     uint16      m_message;
     uint16      m_recastTime;
     uint16      m_recastId;
-    uint16      m_CE;
-    uint16      m_VE;
+    int32       m_CE;
+    int32       m_VE;
     uint16      m_meritModID;
     std::string m_name;
     uint16      m_mobskillId;
@@ -777,7 +777,6 @@ private:
 namespace ability
 {
     void LoadAbilitiesList();
-    void CleanupAbilitiesList();
 
     CAbility* GetAbility(uint16 AbilityID);
 

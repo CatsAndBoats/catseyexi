@@ -14,6 +14,7 @@ zones[xi.zone.LOWER_DELKFUTTS_TOWER] =
         ITEM_OBTAINED                    = 6580,  -- Obtained: <item>.
         GIL_OBTAINED                     = 6581,  -- Obtained <number> gil.
         KEYITEM_OBTAINED                 = 6583,  -- Obtained key item: <keyitem>.
+        NOTHING_OUT_OF_ORDINARY          = 6594,  -- There is nothing out of the ordinary here.
         FELLOW_MESSAGE_OFFSET            = 6609,  -- I'm ready. I suppose.
         CARRIED_OVER_POINTS              = 7191,  -- You have carried over <number> login point[/s].
         LOGIN_CAMPAIGN_UNDERWAY          = 7192,  -- The [/January/February/March/April/May/June/July/August/September/October/November/December] <number> Login Campaign is currently underway!

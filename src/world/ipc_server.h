@@ -24,7 +24,6 @@
 #include "common/ipc.h"
 #include "common/ipp.h"
 #include "common/mmo.h"
-#include "common/socket.h"
 #include "common/zmq_dealer_wrapper.h"
 
 #include "character_cache.h"

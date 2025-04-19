@@ -24,6 +24,7 @@
 #include "common/database.h"
 #include "common/logging.h"
 #include "common/settings.h"
+#include "common/timer.h"
 #include "common/tracy.h"
 
 #include "entities/charentity.h"
@@ -306,10 +307,10 @@ void auctionutils::PurchasingItems(CCharEntity* PChar, uint8 action, uint32 pric
 
             if (gil != nullptr && gil->isType(ITEM_CURRENCY) && gil->getQuantity() >= price && gil->getReserve() == 0)
             {
-                const auto [rset, affectedRows] = db::preparedStmtWithAffectedRows("UPDATE auction_house SET buyer_name = ?, sale = ?, sell_date = ? WHERE itemid = ? AND buyer_name IS NULL "
-                                                                                   "AND stack = ? AND price <= ? ORDER BY price LIMIT 1",
-                                                                                   PChar->getName(), price, (uint32)time(nullptr), itemid, quantity == 0, price);
-                if (rset && affectedRows)
+                const auto rset = db::preparedStmt("UPDATE auction_house SET buyer_name = ?, sale = ?, sell_date = ? WHERE itemid = ? AND buyer_name IS NULL "
+                                                   "AND stack = ? AND price <= ? ORDER BY price LIMIT 1",
+                                                   PChar->getName(), price, (uint32)time(nullptr), itemid, quantity == 0, price);
+                if (rset && rset->rowsAffected())
                 {
                     uint8 SlotID = charutils::AddItem(PChar, LOC_INVENTORY, itemid, (quantity == 0 ? PItem->getStackSize() : 1));
 
@@ -348,9 +349,9 @@ void auctionutils::CancelSale(CCharEntity* PChar, uint8 action, uint8 slotid)
         // clang-format off
         const auto success = db::transaction([&]()
         {
-            const auto [rset, affectedRows] = db::preparedStmtWithAffectedRows("DELETE FROM auction_house WHERE seller = ? AND itemid = ? AND stack = ? AND price = ? AND sale = 0 LIMIT 1",
+            const auto rset = db::preparedStmt("DELETE FROM auction_house WHERE seller = ? AND itemid = ? AND stack = ? AND price = ? AND sale = 0 LIMIT 1",
                                                                                PChar->id, canceledItem.itemid, canceledItem.stack, canceledItem.price);
-            if (rset && affectedRows)
+            if (rset && rset->rowsAffected())
             {
                 CItem* PDelItem = itemutils::GetItemPointer(canceledItem.itemid);
                 if (PDelItem)

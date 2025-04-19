@@ -104,6 +104,7 @@ add_definitions(
     -DSOL_DEFAULT_PASS_ON_ERROR=1
     -DSOL_PRINT_ERRORS=0
     -DRC_FAST_MATH=1
+    -DSPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_DEBUG
 )
 
 # For external libs

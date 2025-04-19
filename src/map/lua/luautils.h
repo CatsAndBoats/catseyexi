@@ -25,7 +25,7 @@
 #include <optional>
 
 #include "common/cbasetypes.h"
-#include "common/taskmgr.h"
+#include "common/task_manager.h"
 
 #include "common/lua.h"
 extern sol::state lua;
@@ -127,7 +127,7 @@ namespace luautils
         auto findGlobalLuaFunction(const std::string& funcName) -> sol::function;
     } // namespace detail
 
-    void init();
+    void init(IPP mapIPP, bool isRunningInCI);
     void garbageCollectStep();
     void garbageCollectFull();
     void cleanup();
@@ -227,6 +227,9 @@ namespace luautils
     void  SetRegionalConquestOverseers(uint8 regionID); // Update NPC Conquest Guard
     void  SendLuaFuncStringToZone(uint16 requestingZoneId, uint16 executorZoneId, std::string const& str);
 
+    void UpdateSanrakusMobs(); // Update sanraku's (ZNM) subject of interest and recommended fauna
+    void ZNMPopPriceDecay();   // Price of ZNM pop items decay over time
+
     auto GetReadOnlyItem(uint32 id) -> CItem*; // Returns a read only lookup item object of the specified ID
     auto GetAbility(uint16 id) -> CAbility*;
     auto GetSpell(uint16 id) -> CSpell*;
@@ -275,7 +278,7 @@ namespace luautils
     void  Terminate();                                                                                   // Logs off all characters and terminates the server
 
     int32 GetTextIDVariable(uint16 ZoneID, const char* variable); // Load the value of the TextID variable of the specified zone
-    bool  IsContentEnabled(const char* content);
+    bool  IsContentEnabled(const std::string& content);
 
     void OnGameDay(CZone* PZone);
     void OnGameHour(CZone* PZone);

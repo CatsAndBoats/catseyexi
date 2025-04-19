@@ -27,9 +27,8 @@ Write code in an easily readable manner. Ensure that a layman can understand and
 
 
 
-## LandSandBoat Resources
-- [Contributing Guide](https://github.com/LandSandBoat/server/blob/base/CONTRIBUTING.md)
-- [Development Guide](https://github.com/LandSandBoat/server/wiki/Development-Guide)
-- [Git Etiquette](https://github.com/LandSandBoat/server/wiki/Development-Guide-Git)
-- [Development Articles](https://github.com/LandSandBoat/server/wiki/Development)
-- [Code of Conduct](https://github.com/LandSandBoat/server/blob/base/CODE_OF_CONDUCT.md)
+## Thanks
+
+Thanks to all contributors past and present, we wouldn't be here without you!
+
+Thanks to GitHub for hosting us, and for all the CI minutes we use!

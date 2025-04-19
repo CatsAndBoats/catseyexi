@@ -22,10 +22,10 @@ zones[xi.zone.MAMOOK] =
         THE_PARTY_WILL_BE_REMOVED     = 7913, -- If all party members' HP are still zero after # minute[/s], the party will be removed from the battlefield.
         IMPENDING_BATTLE              = 8070, -- You feel the rush of impending battle!
         PECULIAR_SENSATION            = 8128, -- % is overcome by a peculiar sensation.
-        NUMEROUS_STRANDS              = 8669, -- Numerous strands of hair are scattered all over...
-        SICKLY_SWEET                  = 8671, -- A sickly sweet fragrance pervades the air...
-        DRAWS_NEAR                    = 8693, -- Something draws near!
-        COMMON_SENSE_SURVIVAL         = 9564, -- It appears that you have arrived at a new survival guide provided by the Adventurers' Mutual Aid Network. Common sense dictates that you should now be able to teleport here from similar tomes throughout the world.
+        NUMEROUS_STRANDS              = 8670, -- Numerous strands of hair are scattered all over...
+        SICKLY_SWEET                  = 8672, -- A sickly sweet fragrance pervades the air...
+        DRAWS_NEAR                    = 8694, -- Something draws near!
+        COMMON_SENSE_SURVIVAL         = 9565, -- It appears that you have arrived at a new survival guide provided by the Adventurers' Mutual Aid Network. Common sense dictates that you should now be able to teleport here from similar tomes throughout the world.
     },
     mob =
     {

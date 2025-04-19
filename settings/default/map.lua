@@ -274,6 +274,13 @@ xi.settings.map =
     AUDIT_UNITY     = 1,
     AUDIT_PARTY     = 1,
 
+    -- Player Item Transaction Logging (Default: Off)
+    -- Logs player item transactions to the database for persistence.
+    AUDIT_PLAYER_TRADES = false,
+    AUDIT_PLAYER_BAZAAR = false,
+    AUDIT_PLAYER_DBOX   = false,
+    AUDIT_PLAYER_VENDOR = false,
+
     -- Seconds between healing ticks. Default is 10
     HEALING_TICK_DELAY = 10,
 

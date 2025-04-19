@@ -10,7 +10,7 @@ local ID = zones[xi.zone.WINDURST_WATERS]
 local entity = {}
 
 entity.onTrigger = function(player, npc)
-    local regionOwner = GetRegionOwner(xi.region.ELSHIMOLOWLANDS)
+    local regionOwner = GetRegionOwner(xi.region.ELSHIMO_LOWLANDS)
 
     if regionOwner ~= xi.nation.WINDURST then
         player:showText(npc, ID.text.FOMINA_CLOSED_DIALOG)

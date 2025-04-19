@@ -22,8 +22,8 @@
 #pragma once
 
 #include "common/cbasetypes.h"
-#include "common/socket.h"
 #include "common/tracy.h"
+#include "common/utils.h"
 
 #include <cstdio>
 #include <cstring>
@@ -130,6 +130,12 @@ public:
         return ::ref<T>(buffer_.data(), index);
     }
 
+    template <typename T>
+    auto ref(std::size_t index) const -> const T&
+    {
+        return ::ref<T>(buffer_.data(), index);
+    }
+
     // Reinterpret and use the underlying buffer as a different type
     template <typename T>
     auto as() -> T*
@@ -142,6 +148,12 @@ public:
     void as(const auto& fn)
     {
         fn(::as<T>(*buffer_.data()));
+    }
+
+    template <typename T>
+    auto as() const -> const T*
+    {
+        return ::as<T>(*buffer_.data());
     }
 
     operator uint8*()

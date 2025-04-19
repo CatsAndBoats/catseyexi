@@ -42,7 +42,7 @@ INSERT INTO `mob_pool_mods` VALUES (44,368,150,0); -- REGAIN: 150
 INSERT INTO `mob_pool_mods` VALUES (60,370,20,0); -- REGEN: 20
 
 -- Animated Shield
-INSERT INTO `mob_pool_mods` VALUES (154,163,-70,0); -- DMGMAGIC: -70
+INSERT INTO `mob_pool_mods` VALUES (154,163,-1250,0); -- DMGMAGIC: -1250
 
 -- Antican Praetor
 INSERT INTO `mob_pool_mods` VALUES (181,1,6000,1); -- GIL_MIN: 6000
@@ -136,7 +136,7 @@ INSERT INTO `mob_pool_mods` VALUES (979,9,60,1); -- HP_HEAL_CHANCE: 60
 INSERT INTO `mob_pool_mods` VALUES (1013,28,-100,1); -- EXP_BONUS: -100
 
 -- Effigy Prototype
-INSERT INTO `mob_pool_mods` VALUES (1178,163,-100,0); -- DMGMAGIC: -100
+INSERT INTO `mob_pool_mods` VALUES (1178,163,-1000,0); -- DMGMAGIC: -1000
 
 -- Enkidu
 INSERT INTO `mob_pool_mods` VALUES (1234,4,4,1); -- SIGHT_RANGE: 4
@@ -190,7 +190,7 @@ INSERT INTO `mob_pool_mods` VALUES (2032,35,0,1);   -- STANDBACK_COOL: 0
 INSERT INTO `mob_pool_mods` VALUES (2032,244,15,0); -- SILENCERES: 15
 
 -- Icon Prototype
-INSERT INTO `mob_pool_mods` VALUES (2047,163,-100,0); -- DMGMAGIC: -100
+INSERT INTO `mob_pool_mods` VALUES (2047,163,-1000,0); -- DMGMAGIC: -1000
 
 -- Intulo
 INSERT INTO `mob_pool_mods` VALUES (2083,29,25,0); -- MDEF: 25
@@ -335,11 +335,9 @@ INSERT INTO `mob_pool_mods` VALUES (3540,3,100,1); -- MP_BASE: 100
 INSERT INTO `mob_pool_mods` VALUES (3549,370,50,0); -- REGEN: 50
 
 -- Shikaree X
-INSERT INTO `mob_pool_mods` VALUES (3598,161,30,0); -- DMGPHYS: 30
 INSERT INTO `mob_pool_mods` VALUES (3598,368,70,0); -- REGAIN: 70
 
 -- Shikaree Y
-INSERT INTO `mob_pool_mods` VALUES (3600,161,30,0); -- DMGPHYS: 30
 INSERT INTO `mob_pool_mods` VALUES (3600,368,70,0); -- REGAIN: 70
 
 -- Shikaree Z
@@ -353,7 +351,7 @@ INSERT INTO `mob_pool_mods` VALUES (3667,28,-100,1); -- EXP_BONUS: -100
 INSERT INTO `mob_pool_mods` VALUES (3684,3,30,1); -- MP_BASE: 30
 
 -- Statue Prototype
-INSERT INTO `mob_pool_mods` VALUES (3759,163,-100,0); -- DMGMAGIC: -100
+INSERT INTO `mob_pool_mods` VALUES (3759,163,-1000,0); -- DMGMAGIC: -1000
 
 -- Stone Golem
 INSERT INTO `mob_pool_mods` VALUES (3781,4,4,1); -- SIGHT_RANGE: 4
@@ -375,7 +373,7 @@ INSERT INTO `mob_pool_mods` VALUES (3824,29,2,1); -- ASSIST: 2
 INSERT INTO `mob_pool_mods` VALUES (3853,28,23,1); -- EXP_BONUS: 23
 
 -- Tombstone Prototype
-INSERT INTO `mob_pool_mods` VALUES (3941,163,-100,0); -- DMGMAGIC: -100
+INSERT INTO `mob_pool_mods` VALUES (3941,163,-1000,0); -- DMGMAGIC: -1000
 
 -- Tuchulcha
 INSERT INTO `mob_pool_mods` VALUES (4046,23,6191,1); -- IMMUNITY: 6191

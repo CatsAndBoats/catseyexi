@@ -38,6 +38,8 @@ xi.mobSkill =
 
     RANGED_ATTACK_2          =  412,
 
+    VULTURE_3                =  626,
+
     DISPELLING_WIND          =  813,
     DEADLY_DRIVE             =  814,
     WIND_WALL                =  815,
@@ -96,6 +98,10 @@ xi.mobSkill =
     RANGED_ATTACK_12         = 1212,
     RANGED_ATTACK_13         = 1213,
     RANGED_ATTACK_14         = 1214,
+
+    MANTLE_PIERCE            = 1349,
+    AERIAL_COLLISION         = 1353,
+    SINUATE_RUSH             = 1367,
 
     HOWLING_MOON_3           = 1520, -- Unknown usage.
 

@@ -161,7 +161,7 @@ function getCureFinal(caster, spell, basecure, minCure, isBlueMagic)
     local curePot         = math.min(caster:getMod(xi.mod.CURE_POTENCY), 50) / 100 -- caps at 50%
     local curePotII       = math.min(caster:getMod(xi.mod.CURE_POTENCY_II), 30) / 100 -- caps at 30%
     local potency         = 1 + curePot + curePotII
-    local dayWeatherBonus = xi.spells.damage.calculateDayAndWeather(caster, spell:getID(), spell:getElement())
+    local dayWeatherBonus = xi.spells.damage.calculateDayAndWeather(caster, spell:getElement(), false)
     local dSeal           = 1
 
     if caster:hasStatusEffect(xi.effect.DIVINE_SEAL) then
@@ -333,7 +333,7 @@ function addBonuses(caster, spell, target, dmg, params)
     local ele             = spell:getElement()
     local affinityBonus   = xi.spells.damage.calculateElementalStaffBonus(caster, ele)
     local magicDefense    = xi.spells.damage.calculateSDT(target, ele)
-    local dayWeatherBonus = xi.spells.damage.calculateDayAndWeather(caster, spell:getID(), ele)
+    local dayWeatherBonus = xi.spells.damage.calculateDayAndWeather(caster, ele, false)
     local casterJob       = caster:getMainJob()
 
     params = params or {}
@@ -410,7 +410,7 @@ function addBonusesAbility(caster, ele, target, dmg, params)
     local magicDefense = xi.spells.damage.calculateSDT(target, ele)
     dmg = math.floor(dmg * magicDefense)
 
-    local dayWeatherBonus = xi.spells.damage.calculateDayAndWeather(caster, 0, ele)
+    local dayWeatherBonus = xi.spells.damage.calculateDayAndWeather(caster, ele, false)
     dmg = math.floor(dmg * dayWeatherBonus)
 
     local mab = 1

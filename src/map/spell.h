@@ -1072,8 +1072,8 @@ public:
     uint16             getMessage() const;
     uint16             getDefaultMessage();
     uint16             getMagicBurstMessage() const;
-    uint16             getCE() const;
-    uint16             getVE() const;
+    int32              getCE() const;
+    int32              getVE() const;
     uint32             getModifiedRecast() const;
     float              getRadius() const;
     uint16             getAoEMessage() const; // returns the single target message for AoE moves
@@ -1116,8 +1116,8 @@ public:
     void setModifier(MODIFIER modifier); // set Spell modifier message, MUST reset the modifier on use otherwise it will be stale
     void setPrimaryTargetID(uint32);
 
-    void setCE(uint16 ce);
-    void setVE(uint16 ve);
+    void setCE(int32 ce);
+    void setVE(int32 ve);
     void setRequirements(uint8 requirements);
     void setMeritId(uint16 meritId);
     void setModifiedRecast(uint32 mrec);
@@ -1156,8 +1156,8 @@ private:
     uint16      m_message{};                       // message id
     uint16      m_MagicBurstMessage{};             // Message used for magic bursts.
     MODIFIER    m_MessageModifier{};               // Message modifier, "Cover!", "Resist!" or "Immunobreak!"
-    uint16      m_CE{};                            // cumulative enmity of spell
-    uint16      m_VE{};                            // volatile enmity of spell
+    int32       m_CE{};                            // cumulative enmity of spell
+    int32       m_VE{};                            // volatile enmity of spell
     std::string m_name;                            // spell name
     uint32      m_modifiedRecastTime{};            // recast time after modifications
     uint8       m_requirements{};                  // requirements before being able to cast spell

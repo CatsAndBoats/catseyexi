@@ -509,3 +509,4 @@ INSERT INTO `mob_resistances` VALUES (515,'Wyvern - Ajattara',0,0,0,0,0,0,0,0,0,
 INSERT INTO `mob_resistances` VALUES (516,'Gigas - Alkyoneus',0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0);
 INSERT INTO `mob_resistances` VALUES (517,'Gigas - Blizzard',0,0,0,0,0,0,0,0,0,0,0,0,0,-2,4,0,0,0,0,0,0);
 INSERT INTO `mob_resistances` VALUES (518,'Proto - Omega',0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,0,11);
+INSERT INTO `mob_resistances` VALUES (519,'Avatar-Carbuncle_Prime_WTB',0,0,0,0,0,0,0,0,0,0,0,0,0,6,6,6,6,6,6,11,0);

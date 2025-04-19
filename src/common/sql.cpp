@@ -19,6 +19,7 @@
 ===========================================================================
 */
 
+#include "application.h"
 #include "logging.h"
 #include "settings.h"
 #include "timer.h"
@@ -33,12 +34,6 @@
 #include <cstring>
 #include <string>
 #include <thread>
-
-// TODO: Since kernel.cpp isn't used by the processes which now use Application, we can't
-//     : store this global flag there. So we're storing it here until all processes are
-//     : refactored to use Application. Once that's done this should be moved out of static
-//     : storage in this unit to a member of Application.
-std::atomic<bool> gProcessLoaded = false;
 
 SqlConnection::SqlConnection()
 : SqlConnection(settings::get<std::string>("network.SQL_LOGIN").c_str(),
@@ -87,6 +82,8 @@ SqlConnection::SqlConnection(const char* user, const char* passwd, const char* h
     // these members will be set up in SetupKeepalive(), they need to be init'd here to appease clang-tidy
     m_PingInterval = 0;
     m_LastPing     = 0;
+
+    m_TimersEnabled = false;
 
     SetupKeepalive();
 }
@@ -143,36 +140,6 @@ int32 SqlConnection::GetTimeout(uint32* out_timeout)
     return SQL_ERROR;
 }
 
-int32 SqlConnection::GetColumnNames(const char* table, char* out_buf, size_t buf_len, char sep)
-{
-    char*  data = nullptr;
-    size_t len  = 0;
-    size_t off  = 0;
-
-    if (self == nullptr || SQL_ERROR == Query("EXPLAIN `%s`", table))
-    {
-        return SQL_ERROR;
-    }
-
-    out_buf[off] = '\0';
-    while (SQL_SUCCESS == NextRow() && SQL_SUCCESS == GetData(0, &data, &len))
-    {
-        len = strnlen(data, len);
-        if (off + len + 2 > buf_len)
-        {
-            ShowDebug("GetColumns: output buffer is too small");
-            *out_buf = '\0';
-            return SQL_ERROR;
-        }
-        memcpy(out_buf + off, data, len);
-        off += len;
-        out_buf[off++] = sep;
-    }
-    out_buf[off] = '\0';
-    FreeResult();
-    return SQL_SUCCESS;
-}
-
 int32 SqlConnection::SetEncoding(const char* encoding)
 {
     if (mysql_set_character_set(&self->handle, encoding) == 0)
@@ -205,33 +172,8 @@ void SqlConnection::SetupKeepalive()
     m_PingInterval = timeout + reserve;
 }
 
-void SqlConnection::CheckCharset()
+void SqlConnection::EnableTimers()
 {
-    // Check that the SQL charset is what we require
-    auto ret = QueryStr("SELECT @@character_set_database, @@collation_database");
-    if (ret != SQL_ERROR && NumRows())
-    {
-        bool foundError = false;
-        while (NextRow() == SQL_SUCCESS)
-        {
-            auto charsetSetting   = GetStringData(0);
-            auto collationSetting = GetStringData(1);
-            if (!starts_with(charsetSetting, "utf8") || !starts_with(collationSetting, "utf8"))
-            {
-                foundError = true;
-                // clang-format off
-                ShowWarning(fmt::format("Unexpected character_set or collation setting in database: {}: {}. Expected utf8*.",
-                    charsetSetting, collationSetting).c_str());
-                // clang-format on
-            }
-        }
-
-        if (foundError)
-        {
-            ShowWarning("Non utf8 charset can result in data reads and writes being corrupted!");
-            ShowWarning("Non utf8 collation can be indicative that the database was not set up per required specifications.");
-        }
-    }
 }
 
 int32 SqlConnection::TryPing()
@@ -272,53 +214,6 @@ int32 SqlConnection::TryPing()
     return SQL_ERROR;
 }
 
-size_t SqlConnection::EscapeStringLen(char* out_to, const char* from, size_t from_len)
-{
-    TracyZoneScoped;
-
-    if (self)
-    {
-        return mysql_real_escape_string(&self->handle, out_to, from, static_cast<uint32>(from_len));
-    }
-
-    return mysql_escape_string(out_to, from, static_cast<uint32>(from_len));
-}
-
-size_t SqlConnection::EscapeStringLen(char* out_to, std::string_view from)
-{
-    TracyZoneScoped;
-
-    return EscapeStringLen(out_to, from.data(), from.size());
-}
-
-size_t SqlConnection::EscapeString(char* out_to, const char* from)
-{
-    TracyZoneScoped;
-
-    return EscapeStringLen(out_to, from, strlen(from));
-}
-
-std::string SqlConnection::EscapeString(std::string_view from)
-{
-    TracyZoneScoped;
-
-    if (from.empty())
-    {
-        return {};
-    }
-
-    auto buffer = std::vector<char>(from.size() * 2 + 1);
-    auto len    = EscapeStringLen(buffer.data(), from);
-    return std::string(buffer.data(), len);
-}
-
-std::string SqlConnection::EscapeString(const std::string& from)
-{
-    TracyZoneScoped;
-
-    return EscapeString(std::string_view(from));
-}
-
 int32 SqlConnection::QueryStr(const char* query)
 {
     TracyZoneScoped;
@@ -341,7 +236,7 @@ int32 SqlConnection::QueryStr(const char* query)
     FreeResult();
     self->buf.clear();
 
-    auto startTime = hires_clock::now();
+    auto startTime = server_clock::now();
 
     {
         self->buf += query;
@@ -363,10 +258,10 @@ int32 SqlConnection::QueryStr(const char* query)
         }
     }
 
-    auto endTime = hires_clock::now();
+    auto endTime = server_clock::now();
     auto dTime   = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
 
-    if (gProcessLoaded && settings::get<bool>("logging.SQL_SLOW_QUERY_LOG_ENABLE"))
+    if (m_TimersEnabled && settings::get<bool>("logging.SQL_SLOW_QUERY_LOG_ENABLE"))
     {
         if (dTime > std::chrono::milliseconds(settings::get<uint32>("logging.SQL_SLOW_QUERY_ERROR_TIME")))
         {
@@ -379,15 +274,6 @@ int32 SqlConnection::QueryStr(const char* query)
     }
 
     return SQL_SUCCESS;
-}
-
-uint64 SqlConnection::AffectedRows()
-{
-    if (self)
-    {
-        return (uint64)mysql_affected_rows(&self->handle);
-    }
-    return 0;
 }
 
 uint64 SqlConnection::LastInsertId()

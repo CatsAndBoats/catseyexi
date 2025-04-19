@@ -22,7 +22,7 @@
 #include "char_status.h"
 
 #include "common/logging.h"
-#include "common/socket.h"
+
 #include "common/vana_time.h"
 
 #include <cstring>

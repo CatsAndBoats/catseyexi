@@ -24,7 +24,7 @@
 
 #include "common/cbasetypes.h"
 #include "common/mmo.h"
-#include "common/taskmgr.h"
+#include "common/task_manager.h"
 #include "common/vana_time.h"
 
 #include <list>
@@ -33,10 +33,15 @@
 
 #include "battlefield_handler.h"
 #include "campaign_handler.h"
-#include "los/zone_los.h"
-#include "navmesh.h"
 #include "packets/weather.h"
 #include "trigger_area.h"
+
+//
+// Forward Declarations
+//
+
+class CNavMesh;
+class ZoneLos;
 
 enum ZONEID : uint16
 {
@@ -372,8 +377,8 @@ enum class REGION_TYPE : uint8
     LITELOR          = 11,
     KUZOTZ           = 12,
     VOLLBOW          = 13,
-    ELSHIMOLOWLANDS  = 14,
-    ELSHIMOUPLANDS   = 15,
+    ELSHIMO_LOWLANDS = 14,
+    ELSHIMO_UPLANDS  = 15,
     TULIA            = 16,
     MOVALPOLOS       = 17,
     TAVNAZIA         = 18,
@@ -537,7 +542,7 @@ typedef std::map<uint16, CBaseEntity*> EntityList_t;
 
 using QueryByNameResult_t = std::vector<CBaseEntity*>;
 
-int32 zone_update_weather(uint32 tick, CTaskMgr::CTask* PTask);
+int32 zone_update_weather(uint32 tick, CTaskManager::CTask* PTask);
 
 class CZone
 {
@@ -642,8 +647,8 @@ public:
     CBattlefieldHandler* m_BattlefieldHandler; // BCNM Instances in this zone
     CCampaignHandler*    m_CampaignHandler;    // WOTG campaign information for this zone
 
-    CNavMesh* m_navMesh   = nullptr;
-    ZoneLos*  lineOfSight = nullptr;
+    std::unique_ptr<CNavMesh> m_navMesh;
+    std::unique_ptr<ZoneLos>  lineOfSight;
 
     time_point m_LoadedAt; // The time the zone was loaded
 
@@ -686,8 +691,8 @@ private:
     std::unordered_map<std::string, QueryByNameResult_t> m_queryByNameResults;
 
 protected:
-    CTaskMgr::CTask* ZoneTimer; // The pointer to the created timer is Zoneserver.necessary for the possibility of stopping it
-    CTaskMgr::CTask* ZoneTimerTriggerAreas;
+    CTaskManager::CTask* ZoneTimer; // The pointer to the created timer is Zoneserver.necessary for the possibility of stopping it
+    CTaskManager::CTask* ZoneTimerTriggerAreas;
 
     triggerAreaList_t m_triggerAreaList;
 

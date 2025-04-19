@@ -25,6 +25,7 @@ zones[xi.zone.RABAO] =
         HUNT_RECORDED                 = 6907,  -- You record your hunt.
         OBTAIN_SCYLDS                 = 6909,  -- You obtain <number> [scyld/scylds]! Current balance: <number> [scyld/scylds].
         HUNT_CANCELED                 = 6913,  -- Hunt canceled.
+        ACCEPTED_KEYITEM              = 10003, -- Accepted Key Items: <keyitem> and <keyitem>.
         PAKHI_DELIVERY_DIALOG         = 10045, -- When your pack is fit to burrrst, send your non-essential items to your delivery box and bam, prrroblem solved!
         SPIRIT_DELIVERY_DIALOG        = 10046, -- We can deliver goods to your residence or to the residences of your friends.
         SHINY_TEETH_SHOP_DIALOG       = 10050, -- Well met, adventurer. If you're looking for a weapon to carve through those desert beasts, you've come to the right place.

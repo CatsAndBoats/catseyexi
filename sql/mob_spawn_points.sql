@@ -43752,7 +43752,7 @@ INSERT INTO `mob_spawn_points` VALUES (17277007,'Water_Elemental','Water Element
 INSERT INTO `mob_spawn_points` VALUES (17277008,'Apocalyptic_Weapon','Apocalyptic Weapon',10,-202.351,-8.500,-46.018,127);
 INSERT INTO `mob_spawn_points` VALUES (17277009,'Infernal_Weapon','Infernal Weapon',11,-200.057,-8.500,-38.039,58);
 INSERT INTO `mob_spawn_points` VALUES (17277010,'Cursed_Puppet','Cursed Puppet',4,-190.027,-8.499,-34.157,127);
-INSERT INTO `mob_spawn_points` VALUES (17277011,'Martinet','Martinet',12,-196.000,-8.000,-48.000,32); -- Pos data needs correction
+INSERT INTO `mob_spawn_points` VALUES (17277011,'Martinet','Martinet',12,-189.696,-8.500,-33.497,32);
 INSERT INTO `mob_spawn_points` VALUES (17277012,'Apocalyptic_Weapon','Apocalyptic Weapon',10,-163.567,-8.499,-21.382,127);
 INSERT INTO `mob_spawn_points` VALUES (17277013,'Infernal_Weapon','Infernal Weapon',11,-185.180,-8.500,-12.199,16);
 INSERT INTO `mob_spawn_points` VALUES (17277014,'Cursed_Puppet','Cursed Puppet',4,-79.223,-11.480,60.435,115);
@@ -43844,7 +43844,7 @@ INSERT INTO `mob_spawn_points` VALUES (17277099,'Magic_Flagon','Magic Flagon',7,
 INSERT INTO `mob_spawn_points` VALUES (17277100,'Apocalyptic_Weapon','Apocalyptic Weapon',10,-158.640,-7.837,50.393,127);
 INSERT INTO `mob_spawn_points` VALUES (17277101,'Infernal_Weapon','Infernal Weapon',11,-150.077,3.500,108.614,127);
 INSERT INTO `mob_spawn_points` VALUES (17277102,'Darksteel_Golem','Darksteel Golem',14,-143.373,3.499,101.769,127);
-INSERT INTO `mob_spawn_points` VALUES (17277103,'Nargun','Nargun',16,-171.571,3.884,108.852,127);
+INSERT INTO `mob_spawn_points` VALUES (17277103,'Nargun','Nargun',16,-127.626,4.000,106.828,127);
 INSERT INTO `mob_spawn_points` VALUES (17277104,'Apocalyptic_Weapon','Apocalyptic Weapon',10,-162.479,2.352,85.123,127);
 INSERT INTO `mob_spawn_points` VALUES (17277105,'Darksteel_Golem','Darksteel Golem',14,-172.296,3.167,71.227,83);
 INSERT INTO `mob_spawn_points` VALUES (17277106,'Apocalyptic_Weapon','Apocalyptic Weapon',10,209.381,-4.499,65.228,61);
@@ -50130,9 +50130,9 @@ INSERT INTO `mob_spawn_points` VALUES (17346741,'Dragonian_Berzerker','Dragonian
 INSERT INTO `mob_spawn_points` VALUES (17346742,'Dragonian_Minstrel','Dragonian Minstrel',33,86.928,-146.026,299.804,52);
 
 -- Today's Horoscope
-INSERT INTO `mob_spawn_points` VALUES (17346744,'Aries','Aries',34,0.000,0.000,0.000,0);
-INSERT INTO `mob_spawn_points` VALUES (17346746,'Aries','Aries',34,0.000,0.000,0.000,0);
-INSERT INTO `mob_spawn_points` VALUES (17346748,'Aries','Aries',34,0.000,0.000,0.000,0);
+INSERT INTO `mob_spawn_points` VALUES (17346744,'Aries','Aries',34,-396.153,94.703,-64.349,46);
+INSERT INTO `mob_spawn_points` VALUES (17346746,'Aries','Aries',34,-156.218,-25.306,115.621,46);
+INSERT INTO `mob_spawn_points` VALUES (17346748,'Aries','Aries',34,83.775,-145.323,295.455,46);
 
 -- Contaminated Colosseum
 INSERT INTO `mob_spawn_points` VALUES (17346750,'Evil_Oscar','Evil Oscar',35,-396.000,94.000,-63.000,46);
@@ -56531,10 +56531,10 @@ INSERT INTO `mob_spawn_points` VALUES (17428485,'Bouncing_Ball','Bouncing Ball',
 
 INSERT INTO `mob_spawn_points` VALUES (17428486,'Bonze_Marberry','Bonze Marberry',4,340.103,-0.001,222.666,127);
 INSERT INTO `mob_spawn_points` VALUES (17428487,'Trompe_LOeil','Trompe L\'Oeil',5,80.031,-0.500,-38.824,197);
-INSERT INTO `mob_spawn_points` VALUES (17428488,'Cook_Solberry','Cook Solberry',6,0.000,0.000,0.000,0);
-INSERT INTO `mob_spawn_points` VALUES (17428489,'Cook_Nalberry','Cook Nalberry',7,0.000,0.000,0.000,0);
-INSERT INTO `mob_spawn_points` VALUES (17428490,'Cook_Minberry','Cook Minberry',8,0.000,0.000,0.000,64);
-INSERT INTO `mob_spawn_points` VALUES (17428491,'Cook_Fulberry','Cook Fulberry',9,0.000,0.000,0.000,0);
+INSERT INTO `mob_spawn_points` VALUES (17428488,'Cook_Solberry','Cook Solberry',6,-144.0,0.000,-97.0,231);
+INSERT INTO `mob_spawn_points` VALUES (17428489,'Cook_Nalberry','Cook Nalberry',7,-130.0,0.000,-101.0,186);
+INSERT INTO `mob_spawn_points` VALUES (17428490,'Cook_Minberry','Cook Minberry',8,-142.0,0.000,-101.0,234);
+INSERT INTO `mob_spawn_points` VALUES (17428491,'Cook_Fulberry','Cook Fulberry',9,-132.0,0.000,-97.0,123);
 INSERT INTO `mob_spawn_points` VALUES (17428492,'Tonberrys_Elemental','Tonberry\'s Elemental',10,1.000,1.000,1.000,0);
 INSERT INTO `mob_spawn_points` VALUES (17428493,'Tonberrys_Avatar','Tonberry\'s Avatar',11,0.000,0.000,0.000,127);
 INSERT INTO `mob_spawn_points` VALUES (17428494,'Temple_Guardian','Temple Guardian',12,-64.472,-0.023,-102.889,191);
@@ -59720,39 +59720,39 @@ INSERT INTO `mob_spawn_points` VALUES (17473556,'Tatzlwurm','Tatzlwurm',6,-359.9
 INSERT INTO `mob_spawn_points` VALUES (17473557,'Yali','Yali',7,-401.943,-52.000,409.974,36);
 
 -- Waking the Beast
-INSERT INTO `mob_spawn_points` VALUES (17473558,'Carbuncle_Prime','Carbuncle Prime',8,0.000,0.000,0.000,0);
-INSERT INTO `mob_spawn_points` VALUES (17473559,'Carbuncle_Prime','Carbuncle Prime',8,0.000,0.000,0.000,0);
-INSERT INTO `mob_spawn_points` VALUES (17473560,'Carbuncle_Prime','Carbuncle Prime',8,0.000,0.000,0.000,0);
-INSERT INTO `mob_spawn_points` VALUES (17473561,'Carbuncle_Prime','Carbuncle Prime',8,0.000,0.000,0.000,0);
-INSERT INTO `mob_spawn_points` VALUES (17473562,'Carbuncle_Prime','Carbuncle Prime',8,0.000,0.000,0.000,0);
-INSERT INTO `mob_spawn_points` VALUES (17473563,'Ifrit_Prime','Ifrit Prime',9,0.000,0.000,0.000,0);
-INSERT INTO `mob_spawn_points` VALUES (17473564,'Shiva_Prime','Shiva Prime',10,0.000,0.000,0.000,0);
-INSERT INTO `mob_spawn_points` VALUES (17473565,'Garuda_Prime','Garuda Prime',11,0.000,0.000,0.000,0);
-INSERT INTO `mob_spawn_points` VALUES (17473566,'Titan_Prime','Titan Prime',12,0.000,0.000,0.000,0);
-INSERT INTO `mob_spawn_points` VALUES (17473567,'Ramuh_Prime','Ramuh Prime',13,0.000,0.000,0.000,0);
-INSERT INTO `mob_spawn_points` VALUES (17473568,'Leviathan_Prime','Leviathan Prime',14,0.000,0.000,0.000,0);
-INSERT INTO `mob_spawn_points` VALUES (17473569,'Carbuncle_Prime','Carbuncle Prime',8,0.000,0.000,0.000,0);
-INSERT INTO `mob_spawn_points` VALUES (17473570,'Carbuncle_Prime','Carbuncle Prime',8,0.000,0.000,0.000,0);
-INSERT INTO `mob_spawn_points` VALUES (17473571,'Carbuncle_Prime','Carbuncle Prime',8,0.000,0.000,0.000,0);
-INSERT INTO `mob_spawn_points` VALUES (17473572,'Carbuncle_Prime','Carbuncle Prime',8,0.000,0.000,0.000,0);
-INSERT INTO `mob_spawn_points` VALUES (17473573,'Carbuncle_Prime','Carbuncle Prime',8,0.000,0.000,0.000,0);
-INSERT INTO `mob_spawn_points` VALUES (17473574,'Ifrit_Prime','Ifrit Prime',9,0.000,0.000,0.000,0);
-INSERT INTO `mob_spawn_points` VALUES (17473575,'Shiva_Prime','Shiva Prime',10,0.000,0.000,0.000,0);
-INSERT INTO `mob_spawn_points` VALUES (17473576,'Garuda_Prime','Garuda Prime',11,0.000,0.000,0.000,0);
-INSERT INTO `mob_spawn_points` VALUES (17473577,'Titan_Prime','Titan Prime',12,0.000,0.000,0.000,0);
-INSERT INTO `mob_spawn_points` VALUES (17473578,'Ramuh_Prime','Ramuh Prime',13,0.000,0.000,0.000,0);
-INSERT INTO `mob_spawn_points` VALUES (17473579,'Leviathan_Prime','Leviathan Prime',14,0.000,0.000,0.000,0);
-INSERT INTO `mob_spawn_points` VALUES (17473580,'Carbuncle_Prime','Carbuncle Prime',8,0.000,0.000,0.000,0);
-INSERT INTO `mob_spawn_points` VALUES (17473581,'Carbuncle_Prime','Carbuncle Prime',8,0.000,0.000,0.000,0);
-INSERT INTO `mob_spawn_points` VALUES (17473582,'Carbuncle_Prime','Carbuncle Prime',8,0.000,0.000,0.000,0);
-INSERT INTO `mob_spawn_points` VALUES (17473583,'Carbuncle_Prime','Carbuncle Prime',8,0.000,0.000,0.000,0);
-INSERT INTO `mob_spawn_points` VALUES (17473584,'Carbuncle_Prime','Carbuncle Prime',8,0.000,0.000,0.000,0);
-INSERT INTO `mob_spawn_points` VALUES (17473585,'Ifrit_Prime','Ifrit Prime',9,0.000,0.000,0.000,0);
-INSERT INTO `mob_spawn_points` VALUES (17473586,'Shiva_Prime','Shiva Prime',10,0.000,0.000,0.000,0);
-INSERT INTO `mob_spawn_points` VALUES (17473587,'Garuda_Prime','Garuda Prime',11,0.000,0.000,0.000,0);
-INSERT INTO `mob_spawn_points` VALUES (17473588,'Titan_Prime','Titan Prime',12,0.000,0.000,0.000,0);
-INSERT INTO `mob_spawn_points` VALUES (17473589,'Ramuh_Prime','Ramuh Prime',13,0.000,0.000,0.000,0);
-INSERT INTO `mob_spawn_points` VALUES (17473590,'Leviathan_Prime','Leviathan Prime',14,0.000,0.000,0.000,0);
+INSERT INTO `mob_spawn_points` VALUES (17473558,'Carbuncle_Prime','Carbuncle Prime',8,340.000,46.907,-340.000,64);
+INSERT INTO `mob_spawn_points` VALUES (17473559,'Carbuncle_Prime','Carbuncle Prime',8,338.606,47.236,-344.516,46);
+INSERT INTO `mob_spawn_points` VALUES (17473560,'Carbuncle_Prime','Carbuncle Prime',8,341.109,47.301,-345.059,110);
+INSERT INTO `mob_spawn_points` VALUES (17473561,'Carbuncle_Prime','Carbuncle Prime',8,337.198,47.342,-345.470,22);
+INSERT INTO `mob_spawn_points` VALUES (17473562,'Carbuncle_Prime','Carbuncle Prime',8,342.070,47.405,-346.664,136);
+INSERT INTO `mob_spawn_points` VALUES (17473563,'Ifrit_Prime','Ifrit Prime',9,339.127,47.288,-350.148,17);
+INSERT INTO `mob_spawn_points` VALUES (17473564,'Shiva_Prime','Shiva Prime',10,339.063,47.257,-348.851,12);
+INSERT INTO `mob_spawn_points` VALUES (17473565,'Garuda_Prime','Garuda Prime',11,338.257,47.227,-344.050,45);
+INSERT INTO `mob_spawn_points` VALUES (17473566,'Titan_Prime','Titan Prime',12,336.691,47.352,-344.315,30);
+INSERT INTO `mob_spawn_points` VALUES (17473567,'Ramuh_Prime','Ramuh Prime',13,337.710,47.638,-345.801,25);
+INSERT INTO `mob_spawn_points` VALUES (17473568,'Leviathan_Prime','Leviathan Prime',14,340.472,47.271,-349.137,15);
+INSERT INTO `mob_spawn_points` VALUES (17473569,'Carbuncle_Prime','Carbuncle Prime',8,-60,9,63,65);
+INSERT INTO `mob_spawn_points` VALUES (17473570,'Carbuncle_Prime','Carbuncle Prime',8,-63,9,60,46);
+INSERT INTO `mob_spawn_points` VALUES (17473571,'Carbuncle_Prime','Carbuncle Prime',8,-66,9,57,110);
+INSERT INTO `mob_spawn_points` VALUES (17473572,'Carbuncle_Prime','Carbuncle Prime',8,-57,9,60,22);
+INSERT INTO `mob_spawn_points` VALUES (17473573,'Carbuncle_Prime','Carbuncle Prime',8,-54,9,57,136);
+INSERT INTO `mob_spawn_points` VALUES (17473574,'Ifrit_Prime','Ifrit Prime',9,1,1,1,0);
+INSERT INTO `mob_spawn_points` VALUES (17473575,'Shiva_Prime','Shiva Prime',10,1,1,1,0);
+INSERT INTO `mob_spawn_points` VALUES (17473576,'Garuda_Prime','Garuda Prime',11,1,1,1,0);
+INSERT INTO `mob_spawn_points` VALUES (17473577,'Titan_Prime','Titan Prime',12,1,1,1,0);
+INSERT INTO `mob_spawn_points` VALUES (17473578,'Ramuh_Prime','Ramuh Prime',13,1,1,1,0);
+INSERT INTO `mob_spawn_points` VALUES (17473579,'Leviathan_Prime','Leviathan Prime',14,1,1,1,0);
+INSERT INTO `mob_spawn_points` VALUES (17473580,'Carbuncle_Prime','Carbuncle Prime',8,-380,-53,423,65);
+INSERT INTO `mob_spawn_points` VALUES (17473581,'Carbuncle_Prime','Carbuncle Prime',8,-383,-53,420,46);
+INSERT INTO `mob_spawn_points` VALUES (17473582,'Carbuncle_Prime','Carbuncle Prime',8,-386,-53,417,110);
+INSERT INTO `mob_spawn_points` VALUES (17473583,'Carbuncle_Prime','Carbuncle Prime',8,-377,-53,420,22);
+INSERT INTO `mob_spawn_points` VALUES (17473584,'Carbuncle_Prime','Carbuncle Prime',8,-374,-53,417,136);
+INSERT INTO `mob_spawn_points` VALUES (17473585,'Ifrit_Prime','Ifrit Prime',9,1,1,1,0);
+INSERT INTO `mob_spawn_points` VALUES (17473586,'Shiva_Prime','Shiva Prime',10,1,1,1,0);
+INSERT INTO `mob_spawn_points` VALUES (17473587,'Garuda_Prime','Garuda Prime',11,1,1,1,0);
+INSERT INTO `mob_spawn_points` VALUES (17473588,'Titan_Prime','Titan Prime',12,1,1,1,0);
+INSERT INTO `mob_spawn_points` VALUES (17473589,'Ramuh_Prime','Ramuh Prime',13,1,1,1,0);
+INSERT INTO `mob_spawn_points` VALUES (17473590,'Leviathan_Prime','Leviathan Prime',14,1,1,1,0);
 
 -- Battaru Royale (ASA10)
 INSERT INTO `mob_spawn_points` VALUES (17473591,'Clone_of_Flames','Clone of Flames',15,0.000,0.000,0.000,0);

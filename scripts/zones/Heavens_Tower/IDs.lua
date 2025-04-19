@@ -22,6 +22,7 @@ zones[xi.zone.HEAVENS_TOWER] =
         MEMBERS_LEVELS_ARE_RESTRICTED = 7193, -- Your party is unable to participate because certain members' levels are restricted.
         YOU_LEARNED_TRUST             = 7195, -- You learned Trust: <name>!
         CALL_MULTIPLE_ALTER_EGO       = 7196, -- You are now able to call multiple alter egos.
+        YOU_ACCEPT_THE_MISSION        = 7332, -- You have accepted the mission.
         FISHING_MESSAGE_OFFSET        = 7385, -- You can't fish here.
         CELEBRATORY_GOODS             = 9118, -- An assortment of celebratory goods is available for purchase.
         OBTAINED_NUM_KEYITEMS         = 9196, -- Obtained key item: <number> <keyitem>!

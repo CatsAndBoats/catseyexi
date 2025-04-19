@@ -25,7 +25,7 @@
 #include "common/ipc.h"
 #include "common/lua.h"
 #include "common/mmo.h"
-#include "common/socket.h"
+
 #include "common/sql.h"
 #include "common/zmq_dealer_wrapper.h"
 
@@ -33,10 +33,15 @@
 #include <zmq.hpp>
 #include <zmq_addon.hpp>
 
+class MapNetworking;
+
 class IPCClient final : public ipc::IPCMessageHandlerBase<IPCClient>
 {
 public:
-    IPCClient();
+    IPCClient(MapNetworking& networking);
+
+    auto getZMQEndpointString() -> std::string;
+    auto getZMQRoutingId() -> uint64;
 
     void handleIncomingMessages();
 
@@ -84,6 +89,7 @@ public:
     void handleUnknownMessage(const IPP& ipp, const std::span<uint8_t> message);
 
 private:
+    MapNetworking&   networking_;
     ZMQDealerWrapper zmqDealerWrapper_;
 };
 
@@ -95,6 +101,7 @@ template <typename T>
 void IPCClient::sendMessage(const T& message)
 {
     TracyZoneScoped;
+    TracyZoneCString(ipc::toStringV<T>);
 
     // TODO: IPP for World Server
     DebugIPCFmt("Sending message: {}", ipc::toStringV<T>);
@@ -112,7 +119,7 @@ extern std::unique_ptr<IPCClient> ipcClient_;
 
 namespace message
 {
-    void init();
+    void init(MapNetworking& networking);
 
     template <typename T>
     void send(const T& message)

@@ -123,22 +123,11 @@ namespace puppetutils
     {
         if (PChar->GetMJob() == JOBTYPE::JOB_PUP || PChar->GetSJob() == JOBTYPE::JOB_PUP)
         {
-            const char* Query = "UPDATE char_pet SET "
-                                "unlocked_attachments = '%s', "
-                                "equipped_attachments = '%s' "
-                                "WHERE charid = %u";
-
-            char unlockedAttachmentsEscaped[sizeof(PChar->m_unlockedAttachments) * 2 + 1];
-            char unlockedAttachments[sizeof(PChar->m_unlockedAttachments)];
-            std::memcpy(unlockedAttachments, &PChar->m_unlockedAttachments, sizeof(unlockedAttachments));
-            _sql->EscapeStringLen(unlockedAttachmentsEscaped, unlockedAttachments, sizeof(unlockedAttachments));
-
-            char equippedAttachmentsEscaped[sizeof(PChar->automatonInfo.m_Equip) * 2 + 1];
-            char equippedAttachments[sizeof(PChar->automatonInfo.m_Equip)];
-            std::memcpy(equippedAttachments, &PChar->automatonInfo.m_Equip, sizeof(equippedAttachments));
-            _sql->EscapeStringLen(equippedAttachmentsEscaped, equippedAttachments, sizeof(equippedAttachments));
-
-            _sql->Query(Query, unlockedAttachmentsEscaped, equippedAttachmentsEscaped, PChar->id);
+            db::preparedStmt("UPDATE char_pet SET "
+                             "unlocked_attachments = ?, "
+                             "equipped_attachments = ? "
+                             "WHERE charid = ? LIMIT 1",
+                             PChar->m_unlockedAttachments, PChar->automatonInfo.m_Equip, PChar->id);
         }
     }
 

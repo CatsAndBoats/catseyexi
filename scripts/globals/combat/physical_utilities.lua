@@ -48,26 +48,26 @@ local wsElementalProperties =
 -- Table with pDIF caps per weapon/skill type.
 xi.combat.physical.pDifWeaponCapTable =
 {
-    -- [Skill/weapon type used] = {pre-randomizer_pDIF_cap}, Values from: https://www.bg-wiki.com/ffxi/PDIF
-    [xi.skill.NONE            ] = { 3    }, -- We will use this for mobs.
-    [xi.skill.HAND_TO_HAND    ] = { 3.5  },
-    [xi.skill.DAGGER          ] = { 3.25 },
-    [xi.skill.SWORD           ] = { 3.25 },
-    [xi.skill.GREAT_SWORD     ] = { 3.75 },
-    [xi.skill.AXE             ] = { 3.25 },
-    [xi.skill.GREAT_AXE       ] = { 3.75 },
-    [xi.skill.SCYTHE          ] = { 4    },
-    [xi.skill.POLEARM         ] = { 3.75 },
-    [xi.skill.KATANA          ] = { 3.25 },
-    [xi.skill.GREAT_KATANA    ] = { 3.5  },
-    [xi.skill.CLUB            ] = { 3.25 },
-    [xi.skill.STAFF           ] = { 3.75 },
-    [xi.skill.AUTOMATON_MELEE ] = { 3    }, -- Unknown value. Copy of value below.
-    [xi.skill.AUTOMATON_RANGED] = { 3    }, -- Unknown value. Reference found in an old post: https://forum.square-enix.com/ffxi/archive/index.php/t-52778.html?s=d906df07788334a185a902b0a6ae6a99
-    [xi.skill.AUTOMATON_MAGIC ] = { 3    }, -- Unknown value. Here for completion sake.
-    [xi.skill.ARCHERY         ] = { 3.25 },
-    [xi.skill.MARKSMANSHIP    ] = { 3.5  },
-    [xi.skill.THROWING        ] = { 3.25 },
+    -- [Skill/weapon type used] = { pre-cRatio caps, pre-randomizer pDIF cap }, Values from: https://www.bg-wiki.com/ffxi/PDIF
+    [xi.skill.NONE            ] = { 3,      3    }, -- We will use this for mobs.
+    [xi.skill.HAND_TO_HAND    ] = { 3.875,  3.5  },
+    [xi.skill.DAGGER          ] = { 3.625,  3.25 },
+    [xi.skill.SWORD           ] = { 3.625,  3.25 },
+    [xi.skill.GREAT_SWORD     ] = { 4.125,  3.75 },
+    [xi.skill.AXE             ] = { 3.625,  3.25 },
+    [xi.skill.GREAT_AXE       ] = { 4.125,  3.75 },
+    [xi.skill.SCYTHE          ] = { 4.375,  4    },
+    [xi.skill.POLEARM         ] = { 4.125,  3.75 },
+    [xi.skill.KATANA          ] = { 3.625,  3.25 },
+    [xi.skill.GREAT_KATANA    ] = { 3.875,  3.5  },
+    [xi.skill.CLUB            ] = { 3.625,  3.25 },
+    [xi.skill.STAFF           ] = { 4.125,  3.75 },
+    [xi.skill.AUTOMATON_MELEE ] = { 3,      3    }, -- Unknown value. Copy of value below.
+    [xi.skill.AUTOMATON_RANGED] = { 3,      3    }, -- Unknown value. Reference found in an old post: https://forum.square-enix.com/ffxi/archive/index.php/t-52778.html?s=d906df07788334a185a902b0a6ae6a99
+    [xi.skill.AUTOMATON_MAGIC ] = { 3,      3    }, -- Unknown value. Here for completion sake.
+    [xi.skill.ARCHERY         ] = { 3.2375, 3.25 },
+    [xi.skill.MARKSMANSHIP    ] = { 3.475,  3.5  },
+    [xi.skill.THROWING        ] = { 3.2375, 3.25 },
 }
 
 local shieldSizeToBlockRateTable =
@@ -399,8 +399,8 @@ xi.combat.physical.calculateMeleePDIF = function(actor, target, weaponType, wsAt
     local baseRatio     = 0
     local actorAttack   = 0
     local targetDefense = math.max(1, target:getStat(xi.mod.DEF))
-    local flourishBonus = 1.0
-
+    local flourishBonus = 1
+    local firstCap      = xi.combat.physical.pDifWeaponCapTable[weaponType][1]
     -- Actor Weaponskill Specific Attack modifiers.
     if isWeaponskill then
         local flourishEffect = actor:getStatusEffect(xi.effect.BUILDING_FLOURISH)
@@ -427,10 +427,12 @@ xi.combat.physical.calculateMeleePDIF = function(actor, target, weaponType, wsAt
     end
 
     -- Actor Attack / Target Defense ratio
-    baseRatio = actorAttack / targetDefense
+    if targetDefense ~= 0 then
+        baseRatio = actorAttack / targetDefense
+    end
 
     -- Apply cap to baseRatio.
-    baseRatio = utils.clamp(baseRatio, 0, 10) -- Can't be negative.
+    baseRatio = utils.clamp(baseRatio, 0, firstCap)
 
     ----------------------------------------
     -- Step 2: cRatio (Level correction, corrected ratio) Zone based!
@@ -467,7 +469,7 @@ xi.combat.physical.calculateMeleePDIF = function(actor, target, weaponType, wsAt
     local pDifLowerCap       = 0
     local damageLimitPlus    = actor:getMod(xi.mod.DAMAGE_LIMIT) / 100
     local damageLimitPercent = 1 + actor:getMod(xi.mod.DAMAGE_LIMITP) / 100
-    local pDifFinalCap       = (xi.combat.physical.pDifWeaponCapTable[weaponType][1] + damageLimitPlus) * damageLimitPercent + (isCritical and 1 or 0)
+    local pDifFinalCap       = (xi.combat.physical.pDifWeaponCapTable[weaponType][2] + damageLimitPlus) * damageLimitPercent + (isCritical and 1 or 0)
 
     -- pDIF upper cap.
     if wRatio < 0.5 then
@@ -511,7 +513,7 @@ xi.combat.physical.calculateMeleePDIF = function(actor, target, weaponType, wsAt
 
     -- Crit damage bonus is a final modifier
     if isCritical then
-        local critDamageBonus = utils.clamp(actor:getMod(xi.mod.CRIT_DMG_INCREASE) + actor:getMod(xi.mod.RANGED_CRIT_DMG_INCREASE) - target:getMod(xi.mod.CRIT_DEF_BONUS), 0, 100)
+        local critDamageBonus = utils.clamp(actor:getMod(xi.mod.CRIT_DMG_INCREASE) - target:getMod(xi.mod.CRIT_DEF_BONUS), 0, 100)
         pDif                  = pDif * (100 + critDamageBonus) / 100
     end
 
@@ -537,7 +539,8 @@ xi.combat.physical.calculateRangedPDIF = function(actor, target, weaponType, wsA
     local baseRatio     = 0
     local actorAttack   = 0
     local targetDefense = math.max(1, target:getStat(xi.mod.DEF))
-    local flourishBonus = 1.0
+    local flourishBonus = 1
+    local firstCap      = xi.combat.physical.pDifWeaponCapTable[weaponType][1]
 
     -- Actor Weaponskill Specific Attack modifiers.
     -- TODO: verify this actually works on ranged WS
@@ -563,10 +566,12 @@ xi.combat.physical.calculateRangedPDIF = function(actor, target, weaponType, wsA
 
     targetDefense = math.floor(targetDefense * ignoreDefenseFactor)
 
-    baseRatio = actorAttack / targetDefense
+    if targetDefense ~= 0 then
+        baseRatio = actorAttack / targetDefense
+    end
 
     -- Apply cap to baseRatio.
-    baseRatio = utils.clamp(baseRatio, 0, 10) -- Can't be negative.
+    baseRatio = utils.clamp(baseRatio, 0, firstCap)
 
     ----------------------------------------
     -- Step 2: cRatio (Level correction, corrected ratio) Zone based!
@@ -622,7 +627,7 @@ xi.combat.physical.calculateRangedPDIF = function(actor, target, weaponType, wsA
     ----------------------------------------
     local damageLimitPlus    = actor:getMod(xi.mod.DAMAGE_LIMIT) / 100
     local damageLimitPercent = 1 + actor:getMod(xi.mod.DAMAGE_LIMITP) / 100
-    local pDifFinalCap       = (xi.combat.physical.pDifWeaponCapTable[weaponType][1] + damageLimitPlus) * damageLimitPercent -- Added damage limit bonuses
+    local pDifFinalCap       = (xi.combat.physical.pDifWeaponCapTable[weaponType][2] + damageLimitPlus) * damageLimitPercent -- Added damage limit bonuses
 
     pDif = utils.clamp(pDif, 0, pDifFinalCap)
 
@@ -638,7 +643,7 @@ xi.combat.physical.calculateRangedPDIF = function(actor, target, weaponType, wsA
 
     -- Crit damage bonus is a final modifier
     if isCritical then
-        local critDamageBonus = utils.clamp(actor:getMod(xi.mod.CRIT_DMG_INCREASE) - target:getMod(xi.mod.CRIT_DEF_BONUS), 0, 100)
+        local critDamageBonus = utils.clamp(actor:getMod(xi.mod.CRIT_DMG_INCREASE) + actor:getMod(xi.mod.RANGED_CRIT_DMG_INCREASE) - target:getMod(xi.mod.CRIT_DEF_BONUS), 0, 100)
         pDif = pDif * (100 + critDamageBonus) / 100
     end
 

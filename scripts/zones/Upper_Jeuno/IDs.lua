@@ -31,6 +31,7 @@ zones[xi.zone.UPPER_JEUNO] =
         IT_READS_STAFF_ONLY              = 7003,  -- It reads, Staff Only.
         LEILLAINE_SHOP_DIALOG            = 7026,  -- Hello. Are you feeling all right?
         YOU_CAN_NOW_BECOME_A_BEASTMASTER = 7206,  -- You can now become a beastmaster.
+        YOU_ARE_GIVEN_THREE_SPRIGS       = 7733,  -- You are given three sprigs of <item>.
         CONQUEST                         = 7762,  -- You've earned conquest points!
         ITEM_DELIVERY_DIALOG             = 8095,  -- Delivering goods to residences everywhere!
         DECIMATION_LEARNED               = 8218,  -- You have learned the weapon skill Decimation!

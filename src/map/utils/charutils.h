@@ -27,6 +27,7 @@
 #include "entities/charentity.h"
 #include "items/item_equipment.h"
 #include "trait.h"
+#include "zone.h"
 
 class CPetEntity;
 class CMobEntity;
@@ -48,12 +49,6 @@ enum class EMobDifficulty : uint8
     VeryTough,
     IncrediblyTough,
     MAX
-};
-
-enum class ZoningType
-{
-    Logout = 1,
-    Zoning = 2,
 };
 
 // Capacity Bonuses applied based on RoE Completion
@@ -243,7 +238,8 @@ namespace charutils
     int32 GetPoints(CCharEntity* PChar, const char* type);
     void  SetUnityLeader(CCharEntity* PChar, uint8 leaderID);
     auto  GetConquestPointsName(CCharEntity* PChar) -> std::string;
-    void  SendToZone(CCharEntity* PChar, ZoningType type, uint64 ipp);
+    void  SendToZone(CCharEntity* PChar, uint16 zoneId);
+    void  SendDisconnect(CCharEntity* PChar);
     void  ForceLogout(CCharEntity* PChar);
     void  ForceRezone(CCharEntity* PChar);
     void  HomePoint(CCharEntity* PChar, bool resetHPMP);
@@ -291,7 +287,12 @@ namespace charutils
 
     void removeCharFromZone(CCharEntity* PChar);
 
+    void updateSession(MapSession* PSession, CCharEntity* PChar, CZone* currentZone);
+    void loadDeathTimestamp(CCharEntity* PChar);
+    void loadZoningFlag(CCharEntity* PChar);
+
     bool isOrchestrionPlaced(CCharEntity* PChar);
+    void updateMannequins(CCharEntity* PChar);
 }; // namespace charutils
 
 #endif // _CHARUTILS_H

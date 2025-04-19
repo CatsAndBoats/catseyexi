@@ -19,8 +19,7 @@
 ===========================================================================
 */
 
-#ifndef _COMMON_SQL_H
-#define _COMMON_SQL_H
+#pragma once
 
 #include "cbasetypes.h"
 
@@ -33,8 +32,6 @@
 #ifdef WIN32
 #include <winsock2.h>
 #endif
-
-#include "logging.h"
 
 // NOTE: This is just a shim to allow easy adoption of database.h
 #include "database.h"
@@ -113,11 +110,6 @@ public:
     /// @return SQL_SUCCESS or SQL_ERROR
     int32 GetTimeout(uint32* out_timeout);
 
-    /// Retrieves the name of the columns of a table into out_buf, with the separator after each name.
-    ///
-    /// @return SQL_SUCCESS or SQL_ERROR
-    int32 GetColumnNames(const char* table, char* out_buf, size_t buf_len, char sep);
-
     /// Changes the encoding of the connection.
     ///
     /// @return SQL_SUCCESS or SQL_ERROR
@@ -125,19 +117,12 @@ public:
 
     void SetupKeepalive();
 
-    void CheckCharset();
+    void EnableTimers();
 
     /// Pings the connection.
     ///
     /// @return SQL_SUCCESS or SQL_ERROR
     int32 TryPing();
-
-    /// Escapes a string.
-    auto EscapeStringLen(char* out_to, const char* from, size_t from_len) -> size_t;
-    auto EscapeStringLen(char* out_to, std::string_view from) -> size_t;
-    auto EscapeString(char* out_to, const char* from) -> size_t;
-    auto EscapeString(std::string_view from) -> std::string;
-    auto EscapeString(const std::string& from) -> std::string;
 
     /// Executes a query.
     /// Any previous result is freed.
@@ -169,8 +154,6 @@ public:
         std::string query_v = fmt::format(query, args...);
         return QueryStr(query_v.c_str());
     }
-
-    uint64 AffectedRows();
 
     /// Returns the number of the AUTO_INCREMENT column of the last INSERT/UPDATE query.
     ///
@@ -212,27 +195,6 @@ public:
 
     std::string GetStringData(size_t col);
 
-    template <typename T>
-    void GetBlobData(size_t col, T* destination)
-    {
-        size_t length = 0;
-        char*  buffer = nullptr;
-        GetData(col, &buffer, &length);
-        std::memcpy(destination, buffer, (length > sizeof(T) ? sizeof(T) : length));
-    }
-
-    template <typename T>
-    std::string ObjectToBlobString(T* destination)
-    {
-        char buffer[sizeof(T) * 2 + 1];
-        {
-            char dataBlob[sizeof(T)];
-            std::memcpy(dataBlob, destination, sizeof(dataBlob));
-            EscapeStringLen(buffer, dataBlob, sizeof(dataBlob));
-        }
-        return std::string(buffer);
-    }
-
     /// Frees the result of the query.
     void FreeResult();
 
@@ -249,10 +211,6 @@ private:
     uint32 m_LastPing;
 
     std::thread::id m_ThreadId;
+
+    bool m_TimersEnabled;
 };
-
-//
-// Outside of SQL class/namespace
-//
-
-#endif // _COMMON_SQL_H

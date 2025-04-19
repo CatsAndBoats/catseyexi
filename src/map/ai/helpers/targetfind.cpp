@@ -35,8 +35,6 @@
 #include "status_effect_container.h"
 #include "utils/zoneutils.h"
 
-#include <cmath>
-
 CTargetFind::CTargetFind(CBattleEntity* PBattleEntity)
 : isPlayer(false)
 , m_radius(0.0f)

@@ -9,7 +9,7 @@ local ID = zones[xi.zone.PORT_SAN_DORIA]
 local entity = {}
 
 entity.onTrigger = function(player, npc)
-    if GetRegionOwner(xi.region.ELSHIMOLOWLANDS) ~= xi.nation.SANDORIA then
+    if GetRegionOwner(xi.region.ELSHIMO_LOWLANDS) ~= xi.nation.SANDORIA then
         player:showText(npc, ID.text.NIMIA_CLOSED_DIALOG)
     else
         local stock =

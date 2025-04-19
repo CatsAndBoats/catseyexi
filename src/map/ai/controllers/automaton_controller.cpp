@@ -20,10 +20,12 @@
 */
 
 #include "automaton_controller.h"
+
 #include "ai/ai_container.h"
 #include "ai/states/ability_state.h"
 #include "ai/states/magic_state.h"
 #include "ai/states/weaponskill_state.h"
+#include "common/database.h"
 #include "common/utils.h"
 #include "enmity_container.h"
 #include "entities/trustentity.h"
@@ -466,9 +468,9 @@ bool CAutomatonController::TryHeal(const CurrentManeuvers& maneuvers)
         }
         else
         {
-            uint16 selfEnmity   = selfEnmity_obj->second.CE + selfEnmity_obj->second.VE;
-            uint16 masterEnmity = masterEnmity_obj->second.CE + masterEnmity_obj->second.VE;
-            haveHate            = selfEnmity > masterEnmity;
+            int32 selfEnmity   = selfEnmity_obj->second.CE + selfEnmity_obj->second.VE;
+            int32 masterEnmity = masterEnmity_obj->second.CE + masterEnmity_obj->second.VE;
+            haveHate           = selfEnmity > masterEnmity;
         }
     }
 
@@ -1648,31 +1650,25 @@ namespace automaton
 
     void LoadAutomatonSpellList()
     {
-        const char* Query = "SELECT spellid, skilllevel, heads, enfeeble, immunity, removes FROM automaton_spells";
-
-        int32 ret = _sql->Query(Query);
-
-        if (ret != SQL_ERROR && _sql->NumRows() != 0)
+        const auto rset = db::preparedStmt("SELECT spellid, skilllevel, heads, enfeeble, immunity, removes FROM automaton_spells");
+        if (rset && rset->rowsCount())
         {
-            while (_sql->NextRow() == SQL_SUCCESS)
+            while (rset->next())
             {
-                SpellID id = (SpellID)_sql->GetUIntData(0);
+                SpellID id = static_cast<SpellID>(rset->get<uint16>("spellid"));
 
-                // clang-format off
-                AutomatonSpell PSpell
-                {
-                    (uint16)_sql->GetUIntData(1),
-                    (uint8)_sql->GetUIntData(2),
-                    (EFFECT)_sql->GetUIntData(3),
-                    (IMMUNITY)_sql->GetUIntData(4),
-                    {} // Will handle in a moment
+                AutomatonSpell PSpell{
+                    .skilllevel = rset->get<uint16>("skilllevel"),
+                    .heads      = rset->get<uint8>("heads"),
+                    .enfeeble   = static_cast<EFFECT>(rset->get<uint16>("enfeeble")),
+                    .immunity   = static_cast<IMMUNITY>(rset->get<uint32>("immunity")),
+                    .removes    = {}, // Will handle in a moment
                 };
-                // clang-format on
 
-                uint32 removes = _sql->GetUIntData(5);
+                uint32 removes = rset->get<uint32>("removes");
                 while (removes > 0)
                 {
-                    PSpell.removes.emplace_back((EFFECT)(removes & 0xFF));
+                    PSpell.removes.emplace_back(static_cast<EFFECT>(removes & 0xFF));
                     removes = removes >> 8;
                 }
 
@@ -1723,20 +1719,24 @@ namespace automaton
 
     void LoadAutomatonAbilities()
     {
-        const char* Query = "SELECT abilityid, abilityname, reqframe, skilllevel FROM automaton_abilities";
+        const auto rset = db::preparedStmt("SELECT abilityid, abilityname, reqframe, skilllevel FROM automaton_abilities");
 
-        int32 ret = _sql->Query(Query);
-
-        if (ret != SQL_ERROR && _sql->NumRows() != 0)
+        if (rset && rset->rowsCount())
         {
-            while (_sql->NextRow() == SQL_SUCCESS)
+            while (rset->next())
             {
-                uint16           id = (uint16)_sql->GetUIntData(0);
-                AutomatonAbility PAbility{ (uint8)_sql->GetUIntData(2), (uint16)_sql->GetUIntData(3) };
+                uint16 id = rset->get<uint16>("abilityid");
+
+                AutomatonAbility PAbility{
+                    .requiredFrame = rset->get<uint8>("reqframe"),
+                    .skillLevel    = rset->get<uint16>("skilllevel"),
+                };
 
                 autoAbilityList[id] = PAbility;
 
-                auto filename = fmt::format("./scripts/actions/abilities/pets/automaton/{}.lua", _sql->GetStringData(1));
+                const auto abilityName = rset->get<std::string>("abilityname");
+
+                const auto filename = fmt::format("./scripts/actions/abilities/pets/automaton/{}.lua", abilityName);
                 luautils::CacheLuaObjectFromFile(filename);
             }
         }
