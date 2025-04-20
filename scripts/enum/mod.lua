@@ -67,18 +67,21 @@ xi.mod =
     TWOHAND_ACC                     = 219, -- Same as ACC, but only active when using a two handed weapon (e.g. Hasso)
     ENMITY                          = 27,
     ENMITY_LOSS_REDUCTION           = 427,
-    MATT                            = 28,
+    MATT                            = 28, -- Magic attack bonus
     MDEF                            = 29,
     MACC                            = 30, -- This is NOT item level "magic accuracy skill" ! That happens in item_weapon.sql instead
     MEVA                            = 31,
-    FIREATT                         = 32,
-    ICEATT                          = 33,
-    WINDATT                         = 34,
-    EARTHATT                        = 35,
-    THUNDERATT                      = 36,
-    WATERATT                        = 37,
-    LIGHTATT                        = 38,
-    DARKATT                         = 39,
+
+    -- Elemental mods
+    FIRE_MAB                        = 32, -- Elemental "Magic Attack Bonus" aka "Affinity"
+    ICE_MAB                         = 33, -- Elemental "Magic Attack Bonus" aka "Affinity"
+    WIND_MAB                        = 34, -- Elemental "Magic Attack Bonus" aka "Affinity"
+    EARTH_MAB                       = 35, -- Elemental "Magic Attack Bonus" aka "Affinity"
+    THUNDER_MAB                     = 36, -- Elemental "Magic Attack Bonus" aka "Affinity"
+    WATER_MAB                       = 37, -- Elemental "Magic Attack Bonus" aka "Affinity"
+    LIGHT_MAB                       = 38, -- Elemental "Magic Attack Bonus" aka "Affinity"
+    DARK_MAB                        = 39, -- Elemental "Magic Attack Bonus" aka "Affinity"
+
     FIRE_MACC                       = 40,
     ICE_MACC                        = 41,
     WIND_MACC                       = 42,
@@ -87,6 +90,25 @@ xi.mod =
     WATER_MACC                      = 45,
     LIGHT_MACC                      = 46,
     DARK_MACC                       = 47,
+
+    FIRE_STAFF_BONUS                = 347, -- Elemental staff bonus (DMG and MACC).
+    ICE_STAFF_BONUS                 = 348, -- Elemental staff bonus (DMG and MACC).
+    WIND_STAFF_BONUS                = 349, -- Elemental staff bonus (DMG and MACC).
+    EARTH_STAFF_BONUS               = 350, -- Elemental staff bonus (DMG and MACC).
+    THUNDER_STAFF_BONUS             = 351, -- Elemental staff bonus (DMG and MACC).
+    WATER_STAFF_BONUS               = 352, -- Elemental staff bonus (DMG and MACC).
+    LIGHT_STAFF_BONUS               = 353, -- Elemental staff bonus (DMG and MACC).
+    DARK_STAFF_BONUS                = 354, -- Elemental staff bonus (DMG and MACC).
+
+    FIRE_AFFINITY_PERP              = 553,
+    ICE_AFFINITY_PERP               = 554,
+    WIND_AFFINITY_PERP              = 555,
+    EARTH_AFFINITY_PERP             = 556,
+    THUNDER_AFFINITY_PERP           = 557,
+    WATER_AFFINITY_PERP             = 558,
+    LIGHT_AFFINITY_PERP             = 559,
+    DARK_AFFINITY_PERP              = 560,
+
     WSACC                           = 48,
     ATTP                            = 62,
     DEFP                            = 63,
@@ -522,33 +544,6 @@ xi.mod =
     SPECIAL_ATTACK_EVASION      = 1024, -- Foil "Special Attack" evasion
     AUGMENTS_SLEIGHT_OF_SWORD   = 277,  -- Enhances bonus "Subtle Blow" per merit.
 
-    FIRE_AFFINITY_DMG               = 347,
-    ICE_AFFINITY_DMG                = 348,
-    WIND_AFFINITY_DMG               = 349,
-    EARTH_AFFINITY_DMG              = 350,
-    THUNDER_AFFINITY_DMG            = 351,
-    WATER_AFFINITY_DMG              = 352,
-    LIGHT_AFFINITY_DMG              = 353,
-    DARK_AFFINITY_DMG               = 354,
-
-    FIRE_AFFINITY_ACC               = 544,
-    ICE_AFFINITY_ACC                = 545,
-    WIND_AFFINITY_ACC               = 546,
-    EARTH_AFFINITY_ACC              = 547,
-    THUNDER_AFFINITY_ACC            = 548,
-    WATER_AFFINITY_ACC              = 549,
-    LIGHT_AFFINITY_ACC              = 550,
-    DARK_AFFINITY_ACC               = 551,
-
-    FIRE_AFFINITY_PERP              = 553,
-    ICE_AFFINITY_PERP               = 554,
-    WIND_AFFINITY_PERP              = 555,
-    EARTH_AFFINITY_PERP             = 556,
-    THUNDER_AFFINITY_PERP           = 557,
-    WATER_AFFINITY_PERP             = 558,
-    LIGHT_AFFINITY_PERP             = 559,
-    DARK_AFFINITY_PERP              = 560,
-
     ADDS_WEAPONSKILL                = 355,
     ADDS_WEAPONSKILL_DYN            = 356,
     BP_DELAY                        = 357,
@@ -826,7 +821,7 @@ xi.mod =
     AUTO_RANGED_DAMAGEP             = 1002, -- Increases Automaton Ranged Weapon damage by a %
 
     -- Mythic Weapon Mods
-    AUGMENTS_ABSORB                 = 521, -- Direct Absorb spell increase while Liberator is equipped (percentage based)
+    AUGMENTS_ABSORB_LIBERATOR       = 521, -- Direct Absorb spell increase while Liberator is equipped (percentage based) (Augments "Absorb" spells)
     AOE_NA                          = 524, -- Set to 1 to make -na spells/erase always AoE w/ Divine Veil
     AUGMENTS_CONVERT                = 525, -- Convert HP to MP Ratio Multiplier. Value = MP multiplier rate.
     AUGMENTS_SA                     = 526, -- Adds Critical Attack Bonus to Sneak Attack, percentage based.
@@ -1026,6 +1021,10 @@ xi.mod =
     DESPAWN_TIME_REDUCTION = 1134, -- Reduction in seconds. 1 = 1 second less to despawn.
 
     PARRY_HP_RECOVERY = 1135, -- Recover <Mod Value> HP on successful parry.
+
+    ENHANCES_ABSORB_EFFECTS = 1136, -- Absorb Spell duration +x seconds (Enhances "Absorb" effects)
+    AUGMENTS_ABSORB         = 1337, -- Non-Liberator Absorb Spell potency +x% (Augments "Absorb" effects)
+    ABSORB_EFFECT_DURATION  = 1138, -- Absorb Spell duration +% ("Absorb" effect duration +x%)
 
     -- IF YOU ADD ANY NEW MODIFIER HERE, ADD IT IN src/map/modifier.h ASWELL!
 

@@ -1,6 +1,11 @@
 -----------------------------------
 -- Area: Hazhalm Testing Grounds
 --   NM: Nihhus (Einherjar)
+-- Notes: Standard Wivre moves + Crippling Slam
+-- Unverified/unimplemented claims:
+--  - Crippling Slam is only used under 30%
+--  - Batterhorn seems to reset hate.
+--  - Magic damage is reduced by 35%
 -----------------------------------
 mixins =
 {
@@ -11,12 +16,7 @@ mixins =
 local entity = {}
 
 entity.onMobInitialize = function(mob)
-end
-
-entity.onMobSpawn = function(mob)
-end
-
-entity.onMobDeath = function(mob, player, optParams)
+    xi.einherjar.onBossInitialize(mob)
 end
 
 return entity

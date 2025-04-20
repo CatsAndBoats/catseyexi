@@ -86,14 +86,14 @@ enum class Mod
     MEVA = 31, // Magic Evasion
 
     // Magic Accuracy and Elemental Attacks
-    FIREATT      = 32, // Fire Damage
-    ICEATT       = 33, // Ice Damage
-    WINDATT      = 34, // Wind Damage
-    EARTHATT     = 35, // Earth Damage
-    THUNDERATT   = 36, // Thunder Damage
-    WATERATT     = 37, // Water Damage
-    LIGHTATT     = 38, // Light Damage
-    DARKATT      = 39, // Dark Damage
+    FIRE_MAB     = 32, // Elemental "Magic Attack Bonus" aka "Affinity"
+    ICE_MAB      = 33, // Elemental "Magic Attack Bonus" aka "Affinity"
+    WIND_MAB     = 34, // Elemental "Magic Attack Bonus" aka "Affinity"
+    EARTH_MAB    = 35, // Elemental "Magic Attack Bonus" aka "Affinity"
+    THUNDER_MAB  = 36, // Elemental "Magic Attack Bonus" aka "Affinity"
+    WATER_MAB    = 37, // Elemental "Magic Attack Bonus" aka "Affinity"
+    LIGHT_MAB    = 38, // Elemental "Magic Attack Bonus" aka "Affinity"
+    DARK_MAB     = 39, // Elemental "Magic Attack Bonus" aka "Affinity"
     FIRE_MACC    = 40, // Fire Accuracy
     ICE_MACC     = 41, // Ice Accuracy
     WIND_MACC    = 42, // Wind Accuracy
@@ -764,24 +764,14 @@ enum class Mod
     SPECIAL_ATTACK_EVASION      = 1024, // Foil "Special Attack" evasion
     AUGMENTS_SLEIGHT_OF_SWORD   = 277,  // Enhances bonus "Subtle Blow" per merit.
 
-    // Stores the amount of elemental affinity (elemental staves mostly) - damage, acc, and perpetuation is all handled separately
-    FIRE_AFFINITY_DMG    = 347, // They're stored separately due to Magian stuff - they can grant different levels of
-    ICE_AFFINITY_DMG     = 348, // the damage/acc/perp affinity on the same weapon, so they must be separated.
-    WIND_AFFINITY_DMG    = 349, // Each level of damage affinity is +/-5% damage, acc is +/-10 acc, and perp is
-    EARTH_AFFINITY_DMG   = 350, // +/-1 mp/tic. This means that anyone adding these modifiers will have to add
-    THUNDER_AFFINITY_DMG = 351, // 1 to the wiki amount. For example, Fire Staff has 2 in fire affinity for
-    WATER_AFFINITY_DMG   = 352, // DMG, ACC, and PERP, while the wiki lists it as having 1 in each.
-    LIGHT_AFFINITY_DMG   = 353,
-    DARK_AFFINITY_DMG    = 354,
-
-    FIRE_AFFINITY_ACC    = 544,
-    ICE_AFFINITY_ACC     = 545,
-    WIND_AFFINITY_ACC    = 546,
-    EARTH_AFFINITY_ACC   = 547,
-    THUNDER_AFFINITY_ACC = 548,
-    WATER_AFFINITY_ACC   = 549,
-    LIGHT_AFFINITY_ACC   = 550,
-    DARK_AFFINITY_ACC    = 551,
+    FIRE_STAFF_BONUS    = 347,
+    ICE_STAFF_BONUS     = 348,
+    WIND_STAFF_BONUS    = 349,
+    EARTH_STAFF_BONUS   = 350,
+    THUNDER_STAFF_BONUS = 351,
+    WATER_STAFF_BONUS   = 352,
+    LIGHT_STAFF_BONUS   = 353,
+    DARK_STAFF_BONUS    = 354,
 
     FIRE_AFFINITY_PERP    = 553,
     ICE_AFFINITY_PERP     = 554,
@@ -905,7 +895,7 @@ enum class Mod
     SHIELDBLOCKRATE           = 518, // Affects shield block rate, percent based
     DIA_DOT                   = 313, // Increases the DoT damage of Dia
     ENH_DRAIN_ASPIR           = 315, // % damage boost to Drain and Aspir
-    AUGMENTS_ABSORB           = 521, // Direct Absorb spell increase while Liberator is equipped (percentage based)
+    AUGMENTS_ABSORB_LIBERATOR = 521, // Direct Absorb spell increase while Liberator is equipped (percentage based) (Augments "Absorb" spells)
     AMMO_SWING                = 523, // Follow-up swing rate w/ virtue stone ammo (Jailer weapons). Does nothing for non-players.
     AUGMENTS_CONVERT          = 525, // Convert HP to MP Ratio Multiplier. Value = MP multiplier rate.
     AUGMENTS_SA               = 526, // Adds Critical Attack Bonus to Sneak Attack, percentage based.
@@ -1072,12 +1062,17 @@ enum class Mod
 
     PARRY_HP_RECOVERY = 1135, // Recover <Mod Value> HP on successful parry.
 
+    ENHANCES_ABSORB_EFFECTS = 1136, // Absorb Spell duration +x seconds (Enhances "Absorb" effects)
+    AUGMENTS_ABSORB         = 1337, // Non-Liberator Absorb Spell potency +x% (Augments "Absorb" effects)
+    ABSORB_EFFECT_DURATION  = 1138, // Absorb Spell duration +% ("Absorb" effect duration +x%)
+
     // IF YOU ADD ANY NEW MODIFIER HERE, ADD IT IN scripts/enum/mod.lua ASWELL!
 
     // The spares take care of finding the next ID to use so long as we don't forget to list IDs that have been freed up by refactoring.
     // 570 through 825 used by WS DMG mods these are not spares.
     //
-    // SPARE IDs: 1136 and onward
+    // SPARE IDs: 544 to 551, both included.
+    // SPARE IDs: 1139 and onward
 };
 
 // temporary workaround for using enum class as unordered_map key until compilers support it

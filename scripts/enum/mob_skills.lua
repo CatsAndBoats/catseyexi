@@ -38,6 +38,8 @@ xi.mobSkill =
 
     RANGED_ATTACK_2          =  412,
 
+    DANSE_MACABRE            =  533,
+
     VULTURE_3                =  626,
 
     DISPELLING_WIND          =  813,
@@ -121,7 +123,12 @@ xi.mobSkill =
 
     HYPNIC_LAMP              = 1695, -- Unique entry.
 
+    PROBOSCIS_SHOWER         = 1708,
+
     FORCEFUL_BLOW            = 1731, -- Used with Mamool's weapons break.
+
+    LAVA_SPIT                = 1785,
+    GATES_OF_HADES           = 1790,
 
     XENOGLOSSIA              = 1823, -- Unique entry.
 
@@ -133,11 +140,25 @@ xi.mobSkill =
 
     RANGED_ATTACK_15         = 1949,
 
+    WATER_BOMB               = 1959,
+
+    IMMORTAL_SHIELD          = 1965,
+
     ECLOSION                 = 1970, -- Unique entry.
 
     DEATHGNASH               = 1977, -- Unique entry.
 
     BOREAS_MANTLE            = 1980, -- Unique entry.
+
+    NOCTURNAL_SERVITUDE      = 2112,
+
+    HELLSNAP                 = 2113,
+    HELLCLAP                 = 2114,
+    CACKLE                   = 2115,
+    NECROBANE                = 2116,
+    NECROPURGE               = 2117,
+    BILGESTORM               = 2118,
+    THUNDRIS_SHRIEK          = 2119,
 
     HELL_SCISSORS            = 2221,
 

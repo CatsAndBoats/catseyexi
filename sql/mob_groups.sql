@@ -4128,7 +4128,7 @@ INSERT INTO `mob_groups` VALUES (15,3782,78,'Stoorworm',0,128,0,82000,0,85,85,0)
 INSERT INTO `mob_groups` VALUES (16,1422,78,'Freke',0,128,0,80000,0,85,85,0);
 INSERT INTO `mob_groups` VALUES (17,4130,78,'Vampyr_Jarl',0,128,0,50000,0,85,85,0);
 INSERT INTO `mob_groups` VALUES (18,2756,78,'Motsognir',0,128,0,100000,0,85,85,0);
-INSERT INTO `mob_groups` VALUES (19,913,78,'Dark_Elemental',0,128,3410,10000,0,82,82,0);
+INSERT INTO `mob_groups` VALUES (19,7079,78,'Dark_Elemental',0,128,3410,10000,0,82,82,0);
 INSERT INTO `mob_groups` VALUES (20,3397,78,'Rotting_Huskarl_war',0,128,3410,7000,0,82,82,0);
 INSERT INTO `mob_groups` VALUES (21,829,78,'Craven_Einherjar',0,128,3410,10000,0,82,82,0);
 INSERT INTO `mob_groups` VALUES (22,2037,78,'Hyndla',0,128,3410,17500,0,82,82,0);
@@ -4147,11 +4147,11 @@ INSERT INTO `mob_groups` VALUES (34,4110,78,'Utgarth_Bats',0,128,3410,9000,0,82,
 INSERT INTO `mob_groups` VALUES (35,4111,78,'Utgarth_Leech',0,128,3410,9000,0,82,82,0);
 INSERT INTO `mob_groups` VALUES (36,1273,78,'Experimental_Poroggo',0,128,3410,7500,0,82,82,0);
 INSERT INTO `mob_groups` VALUES (37,2422,78,'Liquified_Einherjar',0,128,3410,6800,0,82,82,0);
-INSERT INTO `mob_groups` VALUES (38,3704,78,'Soulflayer',0,128,3410,6500,0,82,82,0);
+INSERT INTO `mob_groups` VALUES (38,7080,78,'Soulflayer',0,128,3410,6500,0,82,82,0);
 INSERT INTO `mob_groups` VALUES (39,283,78,'Audhumbla',0,128,3410,11000,0,82,82,0);
 INSERT INTO `mob_groups` VALUES (40,2563,78,'Marid-X',0,128,3410,42000,0,82,82,0);
 INSERT INTO `mob_groups` VALUES (41,4356,78,'Wivre-X',0,128,3410,50000,0,82,82,0);
-INSERT INTO `mob_groups` VALUES (42,397,78,'Berserkr',0,128,3410,7000,0,82,82,0);
+INSERT INTO `mob_groups` VALUES (42,397,78,'Berserkr_war',0,128,3410,7000,0,82,82,0);
 INSERT INTO `mob_groups` VALUES (43,2561,78,'Margygr',0,128,3410,7500,0,82,82,0);
 INSERT INTO `mob_groups` VALUES (44,2943,78,'Odins_Jester',0,128,3410,7700,0,82,82,0);
 INSERT INTO `mob_groups` VALUES (45,800,78,'Corrupt_Einherjar',0,128,3410,8800,0,82,82,0);
@@ -4159,7 +4159,7 @@ INSERT INTO `mob_groups` VALUES (46,2555,78,'Manticore-X',0,128,3410,13500,0,82,
 INSERT INTO `mob_groups` VALUES (47,3054,78,'Ormr',0,128,3410,32000,0,82,82,0);
 INSERT INTO `mob_groups` VALUES (48,7074,78,'Chigoe',0,128,3410,7200,0,82,82,0);
 INSERT INTO `mob_groups` VALUES (49,1071,78,'Djigga',0,128,3410,9000,0,82,82,0);
-INSERT INTO `mob_groups` VALUES (50,2430,78,'Logi',0,128,3410,7500,0,82,82,0);
+INSERT INTO `mob_groups` VALUES (50,2430,78,'Logi_grow',0,128,3410,7500,0,82,82,0);
 INSERT INTO `mob_groups` VALUES (51,1356,78,'Flames_of_Muspelheim',0,128,3410,18000,0,82,82,0);
 INSERT INTO `mob_groups` VALUES (52,2076,78,'Infected_Wamoura',0,128,3410,11500,0,82,82,0);
 INSERT INTO `mob_groups` VALUES (53,3641,78,'Sjokrakjen',0,128,3410,22300,0,82,82,0);
@@ -4179,7 +4179,7 @@ INSERT INTO `mob_groups` VALUES (66,1870,78,'Hadding_the_Elder',0,128,3410,15000
 INSERT INTO `mob_groups` VALUES (67,1871,78,'Hadding_the_Younger',0,128,3410,15000,0,82,82,0);
 INSERT INTO `mob_groups` VALUES (68,4129,78,'Vampyr_Dog',0,128,3410,7350,0,82,82,0);
 INSERT INTO `mob_groups` VALUES (69,2049,78,'Idun',0,128,3410,6000,0,82,82,0);
-INSERT INTO `mob_groups` VALUES (70,4201,78,'Vanquished_Einherjar',0,128,3410,6500,0,82,82,0);
+INSERT INTO `mob_groups` VALUES (70,4201,78,'Vanquished_Einherjar_blm',0,128,3410,6500,0,82,82,0);
 INSERT INTO `mob_groups` VALUES (71,558,78,'Bugard-X',0,128,3410,17000,0,82,82,0);
 INSERT INTO `mob_groups` VALUES (72,4128,78,'Vampyr_Bats',0,128,0,6000,0,82,82,0);
 INSERT INTO `mob_groups` VALUES (73,4131,78,'Vampyr_Wolf',0,128,0,6000,0,82,82,0);
@@ -4203,7 +4203,13 @@ INSERT INTO `mob_groups` VALUES (90,7075,78,'Craven_Einherjar_bhoot',0,128,3410,
 INSERT INTO `mob_groups` VALUES (91,7076,78,'Rotting_Huskarl_blm',0,128,3410,7000,0,82,82,0);
 INSERT INTO `mob_groups` VALUES (92,7077,78,'Rotting_Huskarl_drk',0,128,3410,7000,0,82,82,0);
 INSERT INTO `mob_groups` VALUES (93,7078,78,'Rotting_Huskarl_thf',0,128,3410,7000,0,82,82,0);
-INSERT INTO `mob_groups` VALUES (94,1071,78,'Djigga_Hildesvini',0,128,0,9000,0,82,82,0);
+INSERT INTO `mob_groups` VALUES (94,1071,78,'Djigga_Hildesvini',0,128,0,900,0,82,82,0);
+INSERT INTO `mob_groups` VALUES (95,7081,78,'Berserkr_blm',0,128,3410,7000,0,82,82,0);
+INSERT INTO `mob_groups` VALUES (96,7082,78,'Berserkr_drk',0,128,3410,7000,0,82,82,0);
+INSERT INTO `mob_groups` VALUES (97,7083,78,'Logi',0,128,3410,7500,0,82,82,0);
+INSERT INTO `mob_groups` VALUES (98,7084,78,'Vanquished_Einherjar_thf',0,128,3410,6500,0,82,82,0);
+INSERT INTO `mob_groups` VALUES (99,7085,78,'Vanquished_Einherjar_drk',0,128,3410,6500,0,82,82,0);
+INSERT INTO `mob_groups` VALUES (100,7086,78,'Hrungnir_clone',0,128,0,53000,0,85,85,0);
 
 -- ------------------------------------------------------------
 -- Caedarva_Mire (Zone 79)
