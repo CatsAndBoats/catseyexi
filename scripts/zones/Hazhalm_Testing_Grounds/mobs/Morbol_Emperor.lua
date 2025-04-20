@@ -1,6 +1,9 @@
 -----------------------------------
 -- Area: Hazhalm Testing Grounds
 --   NM: Morbol Emperor (Einherjar)
+-- Notes: Uses Ameretat TP moves, including Vampiric Root.
+-- Unverified claims:
+--   - Supposedly follows a certain pattern for TP moves but captures did not show it
 -----------------------------------
 mixins =
 {
@@ -11,12 +14,7 @@ mixins =
 local entity = {}
 
 entity.onMobInitialize = function(mob)
-end
-
-entity.onMobSpawn = function(mob)
-end
-
-entity.onMobDeath = function(mob, player, optParams)
+    xi.einherjar.onBossInitialize(mob)
 end
 
 return entity

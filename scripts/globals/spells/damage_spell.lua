@@ -454,24 +454,26 @@ xi.spells.damage.calculateMTDR = function(spell)
     return multipleTargetReduction
 end
 
+-- Bonus elemental damage from Elemetal Staves.
 xi.spells.damage.calculateElementalStaffBonus = function(caster, spellElement)
     local elementalStaffBonus = 1
 
     if spellElement > xi.element.NONE then
-        elementalStaffBonus = elementalStaffBonus + caster:getMod(xi.combat.element.getElementalAffinityDMGModifier(spellElement)) * 0.05
+        elementalStaffBonus = 1 + caster:getMod(xi.combat.element.getElementalStaffModifier(spellElement)) * 5 / 100
     end
 
     return elementalStaffBonus
 end
 
-xi.spells.damage.calculateMagianAffinity = function()
-    -- TODO: IMPLEMENT MAGIAN TRIALS AFFINITY SYSTEM, which could be as simple as introducing a new modifier. Out of the scope of this rewrite, for now
-    local magianAffinity = 1
+-- Elemental "Magic Attack Bonus" from Magian trials staves, Atmas, etc...
+xi.spells.damage.calculateElementalAffinityBonus = function(caster, spellElement)
+    local affinityFactor = 1
 
-    -- TODO: Code Magian Trials affinity.
-    -- TODO: ADD (because it's additive) bonuses from atmas. Also, not sure the current affinity mod is the ACTUAL "affinity" mod as understood in wikis.
+    if spellElement > xi.element.NONE then
+        affinityFactor = 1 + caster:getMod(xi.combat.element.getElementalMABModifier(spellElement)) / 100
+    end
 
-    return magianAffinity
+    return affinityFactor
 end
 
 -- Elemental Specific Damage Taken (Elemental SDT)
@@ -1074,7 +1076,7 @@ xi.spells.damage.useDamageSpell = function(caster, target, spell)
     local spellDamage               = xi.spells.damage.calculateBaseDamage(caster, target, spellId, spellGroup, skillType, statUsed)
     local multipleTargetReduction   = xi.spells.damage.calculateMTDR(spell)
     local elementalStaffBonus       = xi.spells.damage.calculateElementalStaffBonus(caster, spellElement)
-    local magianAffinity            = xi.spells.damage.calculateMagianAffinity()
+    local elementalAffinityBonus    = xi.spells.damage.calculateElementalAffinityBonus(caster, spellElement)
     local additionalResistTier      = xi.spells.damage.calculateAdditionalResistTier(caster, target, spellElement)
     local sdt                       = xi.spells.damage.calculateSDT(target, spellElement)
     local dayAndWeather             = xi.spells.damage.calculateDayAndWeather(caster, spellElement, forceDayWeatherBonus)
@@ -1094,7 +1096,7 @@ xi.spells.damage.useDamageSpell = function(caster, target, spell)
     -- Calculate finalDamage. It MUST be floored after EACH multiplication.
     finalDamage = math.floor(spellDamage * multipleTargetReduction)
     finalDamage = math.floor(finalDamage * elementalStaffBonus)
-    finalDamage = math.floor(finalDamage * magianAffinity)
+    finalDamage = math.floor(finalDamage * elementalAffinityBonus)
     finalDamage = math.floor(finalDamage * sdt)
     finalDamage = math.floor(finalDamage * resistTier)
     finalDamage = math.floor(finalDamage * additionalResistTier)
