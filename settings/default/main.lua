@@ -15,8 +15,11 @@ xi.settings.main =
     SERVER_NAME = "CatsEyeXI",
 
     SERVER_MESSAGE =
-        "Welcome to CatsEyeXI! Please be sure to check out our Wiki Pages.\n" ..
-        "If you require any assistance, you may reach a GM by opening a ticket on our Discord.",
+        "Welcome to CatsEyeXI - a journey forged in nostalgia, shaped by you!\n" ..
+        "\x81\xA1 Visit our Wiki for guides, updates, and event info: catseyexi.com/wiki\n" ..
+        "\x81\xA1 Join the conversation on Discord: discord.gg/catseyexi\n" ..
+        "\x81\xA1 Need help? Open a ticket in #gm-support and we'll be with you shortly.\n" ..
+        "Thank you for being part of the adventure - now go make your mark in Vana'diel!",
 
     -- Setting to lock content more accurately to the expansions defined below.
     -- This generally results in a more accurate presentation of your selected expansions,
@@ -329,6 +332,7 @@ xi.settings.main =
     ENABLE_CAMPAIGN              = false,
     ENABLE_WEW_TO_ACE            = true,
     ENABLE_SUMMIT_OF_THE_STARS   = true,
+    ENABLE_SUMMIT_RIFTS          = false, -- Stronghold Invasion / Augmentation system
 
     -- Crystal Warrior
     ENABLE_CW      = 1,
