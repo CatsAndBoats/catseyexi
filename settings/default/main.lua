@@ -192,7 +192,7 @@ xi.settings.main =
 
     -- GARRISON SETTINGS
     ENABLE_GARRISON        = true,  -- If true, enables garrison functionality
-    GARRISON_LOCKOUT       = 1800,  -- Time in seconds before a new garrison can be started (default: 1800)
+    GARRISON_LOCKOUT       = 900,   -- Time in seconds before a new garrison can be started (default: 1800)
     GARRISON_TIME_LIMIT    = 1800,  -- Time in seconds before lose ongoing garrison (default: 1800)
     GARRISON_ONCE_PER_WEEK = false, -- Set to false to bypass the limit of one garrison per Conquest Tally Week.
     GARRISON_PARTY_LIMIT   = 18,    -- Set to max party members you want to do garrison (default: 18).
