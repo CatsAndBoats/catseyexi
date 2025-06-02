@@ -73,6 +73,9 @@ xi.settings.main =
     -- VoidWalker
     ENABLE_VOIDWALKER = 1,
 
+    -- Moblin Maze Mongers
+    ENABLE_MMM = 0,
+
     -- Monstrosity (Heavily in development, use at your own risk!)
     ENABLE_MONSTROSITY               = 0,
     MONSTROSITY_INFAMY_RATIO         = 0.1, -- (float) The ratio of exp gained to infamy gained on defeating a mob.

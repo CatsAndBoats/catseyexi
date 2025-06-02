@@ -24,6 +24,7 @@
 
 #include "common/cbasetypes.h"
 #include "common/mmo.h"
+#include "common/timer.h"
 #include "packets/message_basic.h"
 
 #include <map>
@@ -294,7 +295,7 @@ public:
     auto   GetLocalVars() -> std::map<std::string, uint32>&;
 
     // pre-tick update
-    virtual void Tick(time_point) = 0;
+    virtual void Tick(timer::time_point) = 0;
     // post-tick update
     virtual void PostTick() = 0;
 
@@ -334,7 +335,7 @@ public:
     CBattlefield*                 PBattlefield; // pointer to battlefield (if in one)
     CInstance*                    PInstance;
 
-    std::chrono::steady_clock::time_point m_nextUpdateTimer; // next time the entity should push an update packet
+    timer::time_point m_nextUpdateTimer; // next time the entity should push an update packet
 
 protected:
     std::map<std::string, uint32> m_localVars;

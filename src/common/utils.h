@@ -28,6 +28,7 @@
 #include "common/sql.h"
 #include "common/stdext.h"
 #include "common/synchronized.h"
+#include "common/timer.h"
 #include "common/xirand.h"
 
 // Ahead of <math.h> (not <cmath>)
@@ -38,7 +39,6 @@
 
 #include <cstdlib>
 #include <cstring>
-#include <ctime>
 #include <filesystem>
 #include <iostream>
 #include <set>
@@ -210,10 +210,10 @@ namespace utils
 } // namespace utils
 
 // clang-format off
-static Synchronized<std::unordered_map<std::string, time_point>> lastExecutionTimes;
+static Synchronized<std::unordered_map<std::string, timer::time_point>> lastExecutionTimes;
 #define RATE_LIMIT(duration, code)                                                    \
 {                                                                                     \
-    const auto currentTime = server_clock::now();                                     \
+    const auto currentTime = timer::now();                                            \
     const auto key         = std::string(__FILE__) + ":" + std::to_string(__LINE__);  \
     lastExecutionTimes.write([&](auto& lastExecutionTimes)                            \
     {                                                                                 \

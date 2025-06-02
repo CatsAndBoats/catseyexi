@@ -282,7 +282,7 @@ local function magicAccuracyFromDayElement(actor, actionElement)
             magicAcc = magicAcc + 5
 
         -- Weak day.
-        elseif dayElement == xi.combat.element.getOppositeElement(actionElement) then
+        elseif dayElement == xi.combat.element.getElementWeakness(actionElement) then
             magicAcc = magicAcc - 5
         end
     end
@@ -312,6 +312,21 @@ local function magicAccuracyFromWeatherElement(actor, actionElement)
             magicAcc = magicAcc - actor:getMod(xi.mod.IRIDESCENCE) * 5 - 5
         elseif actorWeather == xi.combat.element.getOppositeDoubleWeather(actionElement) then
             magicAcc = magicAcc - actor:getMod(xi.mod.IRIDESCENCE) * 5 - 10
+        end
+    end
+
+    return magicAcc
+end
+
+-- Magic Accuracy from Tandem Strike (BST trait).
+local function magicAccuracyFromTandemStrike(actor)
+    local magicAcc = 0
+
+    if actor:isTandemActive() then
+        if actor:getMaster() ~= nil and actor:getMaster():isPC() then
+            magicAcc = actor:getMaster():getMod(xi.mod.TANDEM_STRIKE_POWER)
+        else
+            magicAcc = actor:getMod(xi.mod.TANDEM_STRIKE_POWER)
         end
     end
 
@@ -369,13 +384,14 @@ xi.combat.magicHitRate.calculateActorMagicAccuracy = function(actor, target, spe
     local magicAccBurst     = magicAccuracyFromMagicBurst(target, actionElement, statUsed)
     local magicAccDay       = magicAccuracyFromDayElement(actor, actionElement)
     local magicAccWeather   = magicAccuracyFromWeatherElement(actor, actionElement)
+    local magicAccTandem    = magicAccuracyFromTandemStrike(actor)
 
     -- Multipliers
     local magicAccFoodFactor      = magicAccuracyFromFoodMultiplier(actor)
     local magicAccSoulVoiceFactor = magicAccuracyFromSoulVoiceMultiplier(actor, skillType, effectId)
 
     -- Add up food magic accuracy.
-    finalMagicAcc = magicAccBase + magicAccSkill + magicAccElement + magicAccStatDiff + magicAccEffects + magicAccMerits + magicAccJobPoints + magicAccBurst + magicAccDay + magicAccWeather + bonusMacc
+    finalMagicAcc = magicAccBase + magicAccSkill + magicAccElement + magicAccStatDiff + magicAccEffects + magicAccMerits + magicAccJobPoints + magicAccBurst + magicAccDay + magicAccWeather + magicAccTandem + bonusMacc
     finalMagicAcc = math.floor(finalMagicAcc * magicAccFoodFactor * magicAccSoulVoiceFactor)
 
     return finalMagicAcc

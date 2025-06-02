@@ -1580,7 +1580,7 @@ namespace mobutils
                 PMob->name.insert(0, (const char*)_sql->GetData(1));
                 PMob->packetName.insert(0, (const char*)_sql->GetData(2));
 
-                PMob->m_RespawnTime = _sql->GetUIntData(3) * 1000;
+                PMob->m_RespawnTime = std::chrono::seconds(_sql->GetUIntData(3));
                 PMob->m_SpawnType   = (SPAWNTYPE)_sql->GetUIntData(4);
                 PMob->m_DropID      = _sql->GetUIntData(5);
 
@@ -1738,7 +1738,7 @@ namespace mobutils
                 PMob->name.insert(0, (const char*)_sql->GetData(1));
                 PMob->packetName.insert(0, (const char*)_sql->GetData(2));
 
-                PMob->m_RespawnTime = _sql->GetUIntData(3) * 1000;
+                PMob->m_RespawnTime = std::chrono::seconds(_sql->GetUIntData(3));
                 PMob->m_SpawnType   = (SPAWNTYPE)_sql->GetUIntData(4);
                 PMob->m_DropID      = _sql->GetUIntData(5);
 

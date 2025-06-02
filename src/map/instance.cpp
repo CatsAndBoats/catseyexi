@@ -38,7 +38,7 @@ CInstance::CInstance(CZone* zone, uint32 instanceid)
     TracyZoneScoped;
     LoadInstance();
 
-    m_startTime = server_clock::now();
+    m_startTime = timer::now();
     m_wipeTimer = m_startTime;
 }
 
@@ -99,10 +99,10 @@ void CInstance::LoadInstance()
         m_entryloc.y                      = rset->get<float>("start_y");
         m_entryloc.z                      = rset->get<float>("start_z");
         m_entryloc.rotation               = rset->get<uint8>("start_rot");
-        m_zone_music_override.m_songDay   = rset->get<uint16>("music_day");
-        m_zone_music_override.m_songNight = rset->get<uint16>("music_night");
-        m_zone_music_override.m_bSongS    = rset->get<uint16>("battlesolo");
-        m_zone_music_override.m_bSongM    = rset->get<uint16>("battlemulti");
+        m_zone_music_override.m_songDay   = !rset->isNull("music_day") ? xi::optional(rset->get<uint16>("music_day")) : std::nullopt;
+        m_zone_music_override.m_songNight = !rset->isNull("music_night") ? xi::optional(rset->get<uint16>("music_night")) : std::nullopt;
+        m_zone_music_override.m_bSongS    = !rset->isNull("battlesolo") ? xi::optional(rset->get<uint16>("battlesolo")) : std::nullopt;
+        m_zone_music_override.m_bSongM    = !rset->isNull("battlemulti") ? xi::optional(rset->get<uint16>("battlemulti")) : std::nullopt;
 
         // Add to Lua cache
         // TODO: This will happen more often than needed, but not so often that it's a performance concern
@@ -148,27 +148,27 @@ position_t CInstance::GetEntryLoc()
     return m_entryloc;
 }
 
-duration CInstance::GetTimeLimit()
+timer::duration CInstance::GetTimeLimit()
 {
     return m_timeLimit;
 }
 
-void CInstance::SetTimeLimit(duration time)
+void CInstance::SetTimeLimit(timer::duration time)
 {
     m_timeLimit = time;
 }
 
-duration CInstance::GetLastTimeUpdate()
+timer::duration CInstance::GetLastTimeUpdate()
 {
     return m_lastTimeUpdate;
 }
 
-duration CInstance::GetWipeTime()
+timer::duration CInstance::GetWipeTime()
 {
     return m_wipeTimer - m_startTime;
 }
 
-duration CInstance::GetElapsedTime(time_point tick)
+timer::duration CInstance::GetElapsedTime(timer::time_point tick)
 {
     return tick - m_startTime;
 }
@@ -192,7 +192,7 @@ void CInstance::SetEntryLoc(float x, float y, float z, float rot)
     m_entryloc.rotation = (uint8)rot;
 }
 
-void CInstance::SetLastTimeUpdate(duration lastTime)
+void CInstance::SetLastTimeUpdate(timer::duration lastTime)
 {
     m_lastTimeUpdate = lastTime;
 }
@@ -208,7 +208,7 @@ void CInstance::SetStage(uint32 stage)
     m_stage = stage;
 }
 
-void CInstance::SetWipeTime(duration time)
+void CInstance::SetWipeTime(timer::duration time)
 {
     m_wipeTimer = time + m_startTime;
 }
@@ -224,11 +224,11 @@ void CInstance::SetLocalVar(std::string const& name, uint64_t value)
  *                                                                       *
  ************************************************************************/
 
-void CInstance::CheckTime(time_point tick)
+void CInstance::CheckTime(timer::time_point tick)
 {
     if (m_lastTimeCheck + 1s <= tick && !Failed())
     {
-        luautils::OnInstanceTimeUpdate(GetZone(), this, (uint32)std::chrono::duration_cast<std::chrono::milliseconds>(GetElapsedTime(tick)).count());
+        luautils::OnInstanceTimeUpdate(GetZone(), this, static_cast<uint32>(timer::count_milliseconds(GetElapsedTime(tick))));
         m_lastTimeCheck = tick;
     }
 }
@@ -319,20 +319,20 @@ bool CInstance::CheckFirstEntry(uint32 id)
 
 uint16 CInstance::GetSoloBattleMusic()
 {
-    return m_zone_music_override.m_bSongS != (uint16)-1 ? m_zone_music_override.m_bSongS : GetZone()->GetSoloBattleMusic();
+    return m_zone_music_override.m_bSongS ? *m_zone_music_override.m_bSongS : GetZone()->GetSoloBattleMusic();
 }
 
 uint16 CInstance::GetPartyBattleMusic()
 {
-    return m_zone_music_override.m_bSongM != (uint16)-1 ? m_zone_music_override.m_bSongM : GetZone()->GetPartyBattleMusic();
+    return m_zone_music_override.m_bSongM ? *m_zone_music_override.m_bSongM : GetZone()->GetPartyBattleMusic();
 }
 
 uint16 CInstance::GetBackgroundMusicDay()
 {
-    return m_zone_music_override.m_songDay != (uint16)-1 ? m_zone_music_override.m_songDay : GetZone()->GetBackgroundMusicDay();
+    return m_zone_music_override.m_songDay ? *m_zone_music_override.m_songDay : GetZone()->GetBackgroundMusicDay();
 }
 
 uint16 CInstance::GetBackgroundMusicNight()
 {
-    return m_zone_music_override.m_songNight != (uint16)-1 ? m_zone_music_override.m_songNight : GetZone()->GetBackgroundMusicNight();
+    return m_zone_music_override.m_songNight ? *m_zone_music_override.m_songNight : GetZone()->GetBackgroundMusicNight();
 }

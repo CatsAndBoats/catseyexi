@@ -33,7 +33,7 @@ CAttackState::CAttackState(CBattleEntity* PEntity, uint16 targid)
 , m_PEntity(PEntity)
 {
     PEntity->SetBattleTargetID(targid);
-    PEntity->SetBattleStartTime(server_clock::now());
+    PEntity->SetBattleStartTime(timer::now());
     CAttackState::UpdateTarget();
 
     if (!GetTarget() || m_errorMsg)
@@ -55,7 +55,7 @@ CAttackState::CAttackState(CBattleEntity* PEntity, uint16 targid)
     }
 }
 
-bool CAttackState::Update(time_point tick)
+bool CAttackState::Update(timer::time_point tick)
 {
     auto* PTarget = static_cast<CBattleEntity*>(GetTarget());
     if (!PTarget || PTarget->isDead())
@@ -97,7 +97,7 @@ bool CAttackState::Update(time_point tick)
     return false;
 }
 
-void CAttackState::Cleanup(time_point tick)
+void CAttackState::Cleanup(timer::time_point tick)
 {
     if (!m_PEntity->isDead())
     {

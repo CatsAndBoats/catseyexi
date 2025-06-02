@@ -195,7 +195,7 @@ namespace battleutils
 
     bool HasNinjaTool(CBattleEntity* PEntity, CSpell* PSpell, bool ConsumeTool);
 
-    void applyCharm(CBattleEntity* PCharmer, CBattleEntity* PVictim, duration charmTime = 0s);
+    void applyCharm(CBattleEntity* PCharmer, CBattleEntity* PVictim, timer::duration charmTime = 0s);
     void unCharm(CBattleEntity* PEntity);
 
     uint16 doSoulEaterEffect(CCharEntity* m_PChar, uint32 damage);
@@ -256,13 +256,13 @@ namespace battleutils
     void AddTraits(CBattleEntity* PEntity, TraitList_t* TraitList, uint8 level);
     bool HasClaim(CBattleEntity* PEntity, CBattleEntity* PTarget);
 
-    uint32 CalculateSpellCastTime(CBattleEntity*, CMagicState*);
-    uint16 CalculateSpellCost(CBattleEntity*, CSpell*);
-    uint32 CalculateSpellRecastTime(CBattleEntity*, CSpell*);
-    int16  CalculateSpellTP(CBattleEntity* PEntity, CSpell* PSpell);
-    int16  CalculateWeaponSkillTP(CBattleEntity*, CWeaponSkill*, int16);
-    bool   RemoveAmmo(CCharEntity*, int quantity = 1);
-    int32  GetMeritValue(CBattleEntity*, MERIT_TYPE);
+    timer::duration CalculateSpellCastTime(CBattleEntity*, CMagicState*);
+    uint16          CalculateSpellCost(CBattleEntity*, CSpell*);
+    timer::duration CalculateSpellRecastTime(CBattleEntity*, CSpell*);
+    int16           CalculateSpellTP(CBattleEntity* PEntity, CSpell* PSpell);
+    int16           CalculateWeaponSkillTP(CBattleEntity*, CWeaponSkill*, int16);
+    bool            RemoveAmmo(CCharEntity*, int quantity = 1);
+    int32           GetMeritValue(CBattleEntity*, MERIT_TYPE);
 
     int32       GetScaledItemModifier(CBattleEntity*, CItemEquipment*, Mod);
     DAMAGE_TYPE GetSpikesDamageType(SUBEFFECT spikesType);

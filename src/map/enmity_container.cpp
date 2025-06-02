@@ -20,6 +20,7 @@
 */
 
 #include "common/logging.h"
+#include "common/settings.h"
 #include "common/utils.h"
 
 #include "ai/ai_container.h"

@@ -8,6 +8,9 @@ local ID = zones[xi.zone.YUHTUNGA_JUNGLE]
 local entity = {}
 
 entity.onMobInitialize = function(mob)
+    mob:addImmunity(xi.immunity.SILENCE)
+    mob:addImmunity(xi.immunity.LIGHT_SLEEP)
+    mob:addImmunity(xi.immunity.DARK_SLEEP)
     mob:setMobMod(xi.mobMod.IDLE_DESPAWN, 300)
 end
 

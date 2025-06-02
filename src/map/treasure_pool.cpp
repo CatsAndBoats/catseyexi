@@ -32,8 +32,8 @@
 #include "utils/charutils.h"
 #include "utils/itemutils.h"
 
-static constexpr duration treasure_checktime = 3s;
-static constexpr duration treasure_livetime  = 5min;
+static constexpr timer::duration treasure_checktime = 3s;
+static constexpr timer::duration treasure_livetime  = 5min;
 
 CTreasurePool::CTreasurePool(const TreasurePoolType PoolType)
 : m_count(0)
@@ -165,10 +165,10 @@ void CTreasurePool::delMember(CCharEntity* PChar)
 
 uint8 CTreasurePool::addItem(uint16 ItemID, CBaseEntity* PEntity)
 {
-    uint8      SlotID     = 0;
-    uint8      FreeSlotID = -1;
-    time_point oldest     = time_point::max();
-    CItem*     PNewItem   = itemutils::GetItemPointer(ItemID);
+    uint8             SlotID     = 0;
+    uint8             FreeSlotID = -1;
+    timer::time_point oldest     = timer::time_point::max();
+    CItem*            PNewItem   = itemutils::GetItemPointer(ItemID);
 
     if (!PNewItem)
     {
@@ -254,13 +254,13 @@ uint8 CTreasurePool::addItem(uint16 ItemID, CBaseEntity* PEntity)
 
     if (SlotID == 10)
     {
-        m_PoolItems[FreeSlotID].TimeStamp = get_server_start_time();
-        checkTreasureItem(server_clock::now(), FreeSlotID);
+        m_PoolItems[FreeSlotID].TimeStamp = timer::start_time;
+        checkTreasureItem(timer::now(), FreeSlotID);
     }
 
     m_count++;
     m_PoolItems[FreeSlotID].ID        = ItemID;
-    m_PoolItems[FreeSlotID].TimeStamp = server_clock::now() - treasure_checktime;
+    m_PoolItems[FreeSlotID].TimeStamp = timer::now() - treasure_checktime;
 
     for (const auto& member : m_Members)
     {
@@ -269,7 +269,7 @@ uint8 CTreasurePool::addItem(uint16 ItemID, CBaseEntity* PEntity)
 
     if (memberCount() == 1)
     {
-        checkTreasureItem(server_clock::now(), FreeSlotID);
+        checkTreasureItem(timer::now(), FreeSlotID);
     }
 
     return m_count;
@@ -296,7 +296,7 @@ void CTreasurePool::flush()
 {
     if (m_count != 0)
     {
-        const auto tick = server_clock::now() + treasure_checktime + std::chrono::seconds(1);
+        const auto tick = timer::now() + treasure_checktime + 1s;
 
         for (uint8 i = 0; i < TREASUREPOOL_SIZE; ++i)
         {
@@ -472,7 +472,7 @@ bool CTreasurePool::hasPassedItem(CCharEntity* PChar, uint8 SlotID)
     return false;
 }
 
-void CTreasurePool::checkItems(time_point tick)
+void CTreasurePool::checkItems(timer::time_point tick)
 {
     if (m_count != 0)
     {
@@ -487,7 +487,7 @@ void CTreasurePool::checkItems(time_point tick)
     }
 }
 
-void CTreasurePool::checkTreasureItem(time_point tick, uint8 SlotID)
+void CTreasurePool::checkTreasureItem(timer::time_point tick, uint8 SlotID)
 {
     if (m_PoolItems[SlotID].ID == 0)
     {
@@ -576,7 +576,7 @@ void CTreasurePool::treasureWon(CCharEntity* winner, uint8 SlotID)
         return;
     }
 
-    m_PoolItems[SlotID].TimeStamp = get_server_start_time();
+    m_PoolItems[SlotID].TimeStamp = timer::start_time;
 
     roeutils::event(ROE_EVENT::ROE_LOOTITEM, winner, RoeDatagram("itemid", m_PoolItems[SlotID].ID));
 
@@ -598,7 +598,7 @@ void CTreasurePool::treasureError(CCharEntity* winner, uint8 SlotID)
         return;
     }
 
-    m_PoolItems[SlotID].TimeStamp = get_server_start_time();
+    m_PoolItems[SlotID].TimeStamp = timer::start_time;
 
     for (const auto& member : m_Members)
     {
@@ -618,7 +618,7 @@ void CTreasurePool::treasureLost(uint8 SlotID)
         return;
     }
 
-    m_PoolItems[SlotID].TimeStamp = get_server_start_time();
+    m_PoolItems[SlotID].TimeStamp = timer::start_time;
 
     for (const auto& member : m_Members)
     {

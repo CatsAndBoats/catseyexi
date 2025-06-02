@@ -23,6 +23,7 @@
 
 #include "common/database.h"
 #include "common/logging.h"
+#include "common/timer.h"
 #include "common/utils.h"
 #include "common/vana_time.h"
 
@@ -1062,7 +1063,7 @@ namespace synthutils
 
     int32 startSynth(CCharEntity* PChar)
     {
-        PChar->m_LastSynthTime = server_clock::now();
+        PChar->m_LastSynthTime = timer::now();
 
         if (!isRightRecipe(PChar))
         {

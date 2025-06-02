@@ -27,10 +27,9 @@ entity.onTrigger = function(player, npc)
         player:startEvent(114, xi.item.DISH_OF_GUSGEN_CLAY) -- get me dish_of_gusgen_clay  as soon as you can
     elseif player:getQuestStatus(xi.questLog.OTHER_AREAS, xi.quest.id.otherAreas.A_POTTERS_PREFERENCE) == xi.questStatus.QUEST_COMPLETED then
         if
-            player:getCharVar('QuestAPotterPrefeCompDay_var') + 7 < VanadielDayOfTheYear() or
-            player:getCharVar('QuestAPotterPrefeCompYear_var') < VanadielYear()
+            player:getCharVar('QuestAPotterPrefeCompDay_var') + 8 <= VanadielUniqueDay()
         then
-            -- seven days after copletition, allow to do the quest again
+            -- eight days after completion, allow to do the quest again
             player:startEvent(112) -- repeat quest
         else
             player:startEvent(115) -- i have enough for now, come later
@@ -48,8 +47,7 @@ entity.onEventFinish = function(player, csid, option, npc)
         player:addFame(xi.fameArea.WINDURST, 120)
         npcUtil.giveCurrency(player, 'gil', 2160)
         player:setCharVar('QuestAPotterPrefeRepeat_var', 0)
-        player:setCharVar('QuestAPotterPrefeCompDay_var', VanadielDayOfTheYear())
-        player:setCharVar('QuestAPotterPrefeCompYear_var', VanadielYear())
+        player:setCharVar('QuestAPotterPrefeCompDay_var', VanadielUniqueDay())
         player:completeQuest(xi.questLog.OTHER_AREAS, xi.quest.id.otherAreas.A_POTTERS_PREFERENCE)
     elseif csid == 112 then --repeat quest
         player:setCharVar('QuestAPotterPrefeRepeat_var', 1)

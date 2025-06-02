@@ -30,6 +30,10 @@ namespace dailytally
 {
     void UpdateDailyTallyPoints()
     {
+        if (!settings::get<bool>("main.ENABLE_DAILY_TALLY"))
+        {
+            return;
+        }
         int32 dailyTallyLimit  = std::clamp<int32>(settings::get<int32>("main.DAILY_TALLY_LIMIT"), std::numeric_limits<uint16>::min(), std::numeric_limits<uint16>::max());
         int32 dailyTallyAmount = std::clamp<int32>(settings::get<int32>("main.DAILY_TALLY_AMOUNT"), std::numeric_limits<uint16>::min(), std::numeric_limits<uint16>::max());
 

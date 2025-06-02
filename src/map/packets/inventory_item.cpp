@@ -55,18 +55,17 @@ CInventoryItemPacket::CInventoryItemPacket(CItem* PItem, uint8 LocationID, uint8
 
             if (((CItemUsable*)PItem)->getCurrentCharges() > 0)
             {
-                if (((CItemUsable*)PItem)->getReuseTime() == 0)
+                if (((CItemUsable*)PItem)->getReuseTime() == 0s)
                 {
                     flags |= 0x40; // Ready to use
                 }
                 else
                 {
-                    uint32 CurrentTime = CVanaTime::getInstance()->getVanaTime();
-                    ref<uint32>(0x15)  = ((CItemUsable*)PItem)->getNextUseTime();
+                    timer::time_point nextUseTime = static_cast<CItemUsable*>(PItem)->getNextUseTime();
+                    ref<uint32>(0x15)             = earth_time::vanadiel_timestamp(timer::to_utc(nextUseTime));
 
                     // Not sent if the item is unequipped.
-
-                    ref<uint32>(0x19) = ((CItemUsable*)PItem)->getUseDelay() + CurrentTime;
+                    ref<uint32>(0x19) = static_cast<uint32>(timer::count_seconds(static_cast<CItemUsable*>(PItem)->getUseDelay()) + earth_time::vanadiel_timestamp());
                 }
             }
             else

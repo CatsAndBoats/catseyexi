@@ -2216,7 +2216,6 @@ INSERT INTO `mob_skill_lists` VALUES ('Zeid',480,980); -- Freeze Bite
 INSERT INTO `mob_skill_lists` VALUES ('Zeid',480,981); -- GroundStrike
 INSERT INTO `mob_skill_lists` VALUES ('Zeid',480,982); -- Abyssal Drain
 INSERT INTO `mob_skill_lists` VALUES ('Zeid',480,983); -- Abyssal strike
-INSERT INTO `mob_skill_lists` VALUES ('Zeid',480,1002); -- Summonshadows
 INSERT INTO `mob_skill_lists` VALUES ('Ajido-Marujido',481,988); -- Warp In (Works the same as Ealdnarche's)
 INSERT INTO `mob_skill_lists` VALUES ('Ajido-Marujido',481,989); -- Warp Out (Works the same as Ealdnarche's)
 INSERT INTO `mob_skill_lists` VALUES ('Volker',482,973); -- Red Lotus Blade
@@ -2663,16 +2662,16 @@ INSERT INTO `mob_skill_lists` VALUES ('Alexander',784,2142); -- Mega Holy       
 INSERT INTO `mob_skill_lists` VALUES ('Alexander',784,2144); -- Divine Spear       "My divine flames...shall melt thy flesh...sear thy bones...unshackle thy soul..."
 INSERT INTO `mob_skill_lists` VALUES ('Alexander',784,2145); -- Gospel of the Lost "Bask in my Glory"
 INSERT INTO `mob_skill_lists` VALUES ('Alexander',784,2146); -- Void of Repentance "Repent thy irreverence..."
--- Divine Judgement (2147) is forced once by mobscript at 50% HP.
+-- Divine Judgment (2147) is forced once by mobscript at 50% HP.
 -- Per wiki, Alexander may use Perfect Defense (2143) as a regular skill at 10%
--- From info on both wiki's, I am assuming this is also the case for Divine Judgement.
+-- From info on both wiki's, I am assuming this is also the case for Divine Judgment.
 INSERT INTO `mob_skill_lists` VALUES ('Alexander_LowHP',785,2141); -- Radiant Sacrament  "Offer thy worship..."
 INSERT INTO `mob_skill_lists` VALUES ('Alexander_LowHP',785,2142); -- Mega Holy          "My radiance...shall guide thee..."
 INSERT INTO `mob_skill_lists` VALUES ('Alexander_LowHP',785,2143); -- Perfect Defense    "Cease thy struggles..."
 INSERT INTO `mob_skill_lists` VALUES ('Alexander_LowHP',785,2144); -- Divine Spear       "My divine flames...shall melt thy flesh...sear thy bones...unshackle thy soul..."
 INSERT INTO `mob_skill_lists` VALUES ('Alexander_LowHP',785,2145); -- Gospel of the Lost "Bask in my Glory"
 INSERT INTO `mob_skill_lists` VALUES ('Alexander_LowHP',785,2146); -- Void of Repentance "Repent thy irreverence..."
-INSERT INTO `mob_skill_lists` VALUES ('Alexander_LowHP',785,2147); -- Divine Judgement   "Accept thy destruction..."
+INSERT INTO `mob_skill_lists` VALUES ('Alexander_LowHP',785,2147); -- Divine Judgment    "Accept thy destruction..."
 INSERT INTO `mob_skill_lists` VALUES ('Alkonost',786,576); -- back heel
 INSERT INTO `mob_skill_lists` VALUES ('Alkonost',786,578); -- nihlity song
 -- INSERT INTO `mob_skill_lists` VALUES ('Alkonost',786,579); -- choke breath
@@ -3797,6 +3796,7 @@ INSERT INTO `mob_skill_lists` VALUES ('Snoll_Tzar',1164,598); -- Berserk
 
 INSERT INTO `mob_skill_lists` VALUES ('Shikaree_X',1165,18); -- Shadowstitch
 INSERT INTO `mob_skill_lists` VALUES ('Shikaree_X',1165,23); -- Dancing edge
+INSERT INTO `mob_skill_lists` VALUES ('Shikaree_X',1165,24); -- Shark Bite
 INSERT INTO `mob_skill_lists` VALUES ('Shikaree_X',1165,25); -- Evisceration
 
 INSERT INTO `mob_skill_lists` VALUES ('Shikaree_Y',1166,101); -- Vorpal Scythe

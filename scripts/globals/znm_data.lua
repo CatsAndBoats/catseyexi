@@ -220,70 +220,74 @@ xi.znm.TROPHIES =
 xi.znm.POP_ITEMS =
 {
     -- Ordered to match the csid options
-    -- { popitemID, ZNMtier (for pop price updating), seals_to_remove}
-    { item = xi.item.HELLCAGE_BUTTERFLY,            tier = 1, seal = 0 },                           -- Vulpangue
-    { item = xi.item.JUG_OF_FLORAL_NECTAR,          tier = 1, seal = 0 },                           -- Chamrosh
-    { item = xi.item.WEDGE_OF_RODENT_CHEESE,        tier = 1, seal = 0 },                           -- Cheese Hoarder Gigiroon
-    { item = xi.item.BUNCH_OF_SENORITA_PAMAMAS,     tier = 2, seal = xi.keyItem.MAROON_SEAL },      -- Iriz Ima
-    { item = xi.item.JAR_OF_OILY_BLOOD,             tier = 2, seal = xi.keyItem.MAROON_SEAL },      -- Lividroot Amooshah
-    { item = xi.item.STRAND_OF_SAMARIRI_CORPSEHAIR, tier = 2, seal = xi.keyItem.MAROON_SEAL },      -- Iriri Samariri
-    { item = xi.item.BAR_OF_FERRITE,                tier = 3, seal = xi.keyItem.APPLE_GREEN_SEAL }, -- Armed Gear
-    { item = xi.item.BAGGED_SHEEP_BOTFLY,           tier = 3, seal = xi.keyItem.APPLE_GREEN_SEAL }, -- Gotoh Zha the Redolent
-    { item = xi.item.OLZHIRYAN_CACTUS_PADDLE,       tier = 3, seal = xi.keyItem.APPLE_GREEN_SEAL }, -- Dea
+    -- { mob, popitemID, ZNMtier (for pop price updating), seals_to_remove}
+    { mob = 'Vulpangue',               item = xi.item.HELLCAGE_BUTTERFLY,            tier = 1, seal = 0 },
+    { mob = 'Chamrosh',                item = xi.item.JUG_OF_FLORAL_NECTAR,          tier = 1, seal = 0 },
+    { mob = 'Cheese Hoarder Gigiroon', item = xi.item.WEDGE_OF_RODENT_CHEESE,        tier = 1, seal = 0 },
+    { mob = 'Iriz Ima',                item = xi.item.BUNCH_OF_SENORITA_PAMAMAS,     tier = 2, seal = xi.keyItem.MAROON_SEAL },
+    { mob = 'Lividroot Amooshah',      item = xi.item.JAR_OF_OILY_BLOOD,             tier = 2, seal = xi.keyItem.MAROON_SEAL },
+    { mob = 'Iriri Samariri',          item = xi.item.STRAND_OF_SAMARIRI_CORPSEHAIR, tier = 2, seal = xi.keyItem.MAROON_SEAL },
+    { mob = 'Armed Gear',              item = xi.item.BAR_OF_FERRITE,                tier = 3, seal = xi.keyItem.APPLE_GREEN_SEAL },
+    { mob = 'Gotoh Zha the Redolent',  item = xi.item.BAGGED_SHEEP_BOTFLY,           tier = 3, seal = xi.keyItem.APPLE_GREEN_SEAL },
+    { mob = 'Dea',                     item = xi.item.OLZHIRYAN_CACTUS_PADDLE,       tier = 3, seal = xi.keyItem.APPLE_GREEN_SEAL },
     {
+        mob = 'Tinnin',
         item = xi.item.JUG_OF_MONKEY_WINE,
         tier = 4,
         seal =
         {
-            xi.keyItem.CHARCOAL_GREY_SEAL, -- Tinnin
+            xi.keyItem.CHARCOAL_GREY_SEAL,
             xi.keyItem.DEEP_PURPLE_SEAL,
             xi.keyItem.CHESTNUT_COLORED_SEAL,
         },
     },
-    { item = xi.item.CLUMP_OF_SHADELEAVES,      tier = 1, seal = 0 },                              -- Brass Borer
-    { item = xi.item.BEAKER_OF_PECTIN,          tier = 1, seal = 0 },                              -- Claret
-    { item = xi.item.FLASK_OF_COG_LUBRICANT,    tier = 1, seal = 0 },                              -- Ob
-    { item = xi.item.SLAB_OF_RAW_BUFFALO,       tier = 2, seal = xi.keyItem.CERISE_SEAL },         -- Anantaboga
-    { item = xi.item.LUMP_OF_BONE_CHARCOAL,     tier = 2, seal = xi.keyItem.CERISE_SEAL },         -- Reacton
-    { item = xi.item.PINCH_OF_GRANULATED_SUGAR, tier = 2, seal = xi.keyItem.CERISE_SEAL },         -- Dextrose
-    { item = xi.item.VIAL_OF_PURE_BLOOD,        tier = 3, seal = xi.keyItem.SALMON_COLORED_SEAL }, -- Nosferatu
-    { item = xi.item.VINEGAR_PIE,               tier = 3, seal = xi.keyItem.SALMON_COLORED_SEAL }, -- Khromasoul Bhurborlor
-    { item = xi.item.JAR_OF_ROCK_JUICE,         tier = 3, seal = xi.keyItem.SALMON_COLORED_SEAL }, -- Achamoth
+    { mob = 'Brass Borer',           item = xi.item.CLUMP_OF_SHADELEAVES,      tier = 1, seal = 0 },
+    { mob = 'Claret',                item = xi.item.BEAKER_OF_PECTIN,          tier = 1, seal = 0 },
+    { mob = 'Ob',                    item = xi.item.FLASK_OF_COG_LUBRICANT,    tier = 1, seal = 0 },
+    { mob = 'Anantaboga',            item = xi.item.SLAB_OF_RAW_BUFFALO,       tier = 2, seal = xi.keyItem.CERISE_SEAL },
+    { mob = 'Reacton',               item = xi.item.LUMP_OF_BONE_CHARCOAL,     tier = 2, seal = xi.keyItem.CERISE_SEAL },
+    { mob = 'Dextrose',              item = xi.item.PINCH_OF_GRANULATED_SUGAR, tier = 2, seal = xi.keyItem.CERISE_SEAL },
+    { mob = 'Nosferatu',             item = xi.item.VIAL_OF_PURE_BLOOD,        tier = 3, seal = xi.keyItem.SALMON_COLORED_SEAL },
+    { mob = 'Khromasoul Bhurborlor', item = xi.item.VINEGAR_PIE,               tier = 3, seal = xi.keyItem.SALMON_COLORED_SEAL },
+    { mob = 'Achamoth',              item = xi.item.JAR_OF_ROCK_JUICE,         tier = 3, seal = xi.keyItem.SALMON_COLORED_SEAL },
     {
+        mob = 'Sarameya',
         item = xi.item.CHUNK_OF_BUFFALO_CORPSE,
         tier = 4,
         seal =
         {
-            xi.keyItem.COPPER_COLORED_SEAL, -- Sarameya
+            xi.keyItem.COPPER_COLORED_SEAL,
             xi.keyItem.GOLD_COLORED_SEAL,
             xi.keyItem.PURPLISH_GREY_SEAL,
         },
     },
-    { item = xi.item.GOLDEN_TEETH,            tier = 1, seal = 0 },                             -- Velionis
-    { item = xi.item.GREENLING,               tier = 1, seal = 0 },                             -- Lil' Apkallu
-    { item = xi.item.BOTTLE_OF_SPOILT_BLOOD,  tier = 1, seal = 0 },                             -- Chigre
-    { item = xi.item.OPALUS_GEM,              tier = 2, seal = xi.keyItem.PINE_GREEN_SEAL },    -- Wulgaru
-    { item = xi.item.MERROW_NO_11_MOLTING,    tier = 2, seal = xi.keyItem.PINE_GREEN_SEAL },    -- Zareehkl the Jubilant
-    { item = xi.item.MINT_DROP,               tier = 2, seal = xi.keyItem.PINE_GREEN_SEAL },    -- Verdelet
-    { item = xi.item.BOUND_EXORCISM_TREATISE, tier = 3, seal = xi.keyItem.AMBER_COLORED_SEAL }, -- Mahjlaef the Paintorn
-    { item = xi.item.CLUMP_OF_MYRRH,          tier = 3, seal = xi.keyItem.AMBER_COLORED_SEAL }, -- Experimental Lamia
-    { item = xi.item.WHOLE_ROSE_SCAMPI,       tier = 3, seal = xi.keyItem.AMBER_COLORED_SEAL }, -- Nuhn
+    { mob = 'Velionis',              item = xi.item.GOLDEN_TEETH,            tier = 1, seal = 0 },
+    { mob = 'Lil\' Apkallu',         item = xi.item.GREENLING,               tier = 1, seal = 0 },
+    { mob = 'Chigre',                item = xi.item.BOTTLE_OF_SPOILT_BLOOD,  tier = 1, seal = 0 },
+    { mob = 'Wulgaru',               item = xi.item.OPALUS_GEM,              tier = 2, seal = xi.keyItem.PINE_GREEN_SEAL },
+    { mob = 'Zareehkl the Jubilant', item = xi.item.MERROW_NO_11_MOLTING,    tier = 2, seal = xi.keyItem.PINE_GREEN_SEAL },
+    { mob = 'Verdelet',              item = xi.item.MINT_DROP,               tier = 2, seal = xi.keyItem.PINE_GREEN_SEAL },
+    { mob = 'Mahjlaef the Paintorn', item = xi.item.BOUND_EXORCISM_TREATISE, tier = 3, seal = xi.keyItem.AMBER_COLORED_SEAL },
+    { mob = 'Experimental Lamia',    item = xi.item.CLUMP_OF_MYRRH,          tier = 3, seal = xi.keyItem.AMBER_COLORED_SEAL },
+    { mob = 'Nuhn',                  item = xi.item.WHOLE_ROSE_SCAMPI,       tier = 3, seal = xi.keyItem.AMBER_COLORED_SEAL },
     {
+        mob = 'Tyger',
         item = xi.item.CHUNK_OF_SINGED_BUFFALO,
         tier = 4,
         seal =
         {
-            xi.keyItem.TAUPE_COLORED_SEAL, -- Tyger
+            xi.keyItem.TAUPE_COLORED_SEAL,
             xi.keyItem.FALLOW_COLORED_SEAL,
             xi.keyItem.SIENNA_COLORED_SEAL,
         },
     },
     {
+        mob = 'Pandemonium Warden',
         item = xi.item.PANDEMONIUM_KEY,
         tier = 5,
         seal =
         {
-            xi.keyItem.LILAC_COLORED_SEAL, -- Pandemonium Warden
+            xi.keyItem.LILAC_COLORED_SEAL,
             xi.keyItem.LAVENDER_COLORED_SEAL,
             xi.keyItem.BRIGHT_BLUE_SEAL,
         },

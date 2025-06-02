@@ -1,12 +1,15 @@
 -----------------------------------
 -- Area: Throne Room
 --  Mob: Shadow of Rage
--- Mission 9-2 BCNM Fight
+-- Bastok mission 9-2 BCNM Fight (Phase 2)
 -----------------------------------
 ---@type TMobEntity
 local entity = {}
 
-entity.onMobDeath = function(mob, player, optParams)
+entity.onMobInitialize = function(mob)
+    mob:addImmunity(xi.immunity.PETRIFY)
+    mob:addImmunity(xi.immunity.LIGHT_SLEEP)
+    mob:addImmunity(xi.immunity.DARK_SLEEP)
 end
 
 return entity

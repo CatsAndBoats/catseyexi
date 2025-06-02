@@ -369,6 +369,7 @@ xi.mod =
     SUBTLE_BLOW                     = 289,
     SUBTLE_BLOW_II                  = 973, -- Subtle Blow II Effect (Cap 50%) Total Effect (SB + SB_II cap 75%)
     ENF_MAG_POTENCY                 = 290, -- Increases Enfeebling magic potency %
+    ENF_MAG_DURATION                = 1151, -- Increases enfeebling magic duration %
     COUNTER                         = 291,
     KICK_ATTACK_RATE                = 292,
     AFFLATUS_SOLACE                 = 293,
@@ -446,6 +447,18 @@ xi.mod =
     PERPETUATION_REDUCTION          = 346,
     SPIKES_DMG_BONUS                = 1079, -- Increases Blaze/Ice/Shock spikes damage by percentage (e.g. mod value 50 = +50% spikes damage)
 
+    -- fTP modifiers
+    FIRE_FTP_BONUS                  = 544,  -- Gives bonus fTP when weaponskill has a Fire property. (Elemental beltes and gorgets) /256
+    ICE_FTP_BONUS                   = 545,  -- Gives bonus fTP when weaponskill has a Ice property. (Elemental beltes and gorgets) /256
+    WIND_FTP_BONUS                  = 546,  -- Gives bonus fTP when weaponskill has a Wind property. (Elemental beltes and gorgets) /256
+    EARTH_FTP_BONUS                 = 547,  -- Gives bonus fTP when weaponskill has a Earth property. (Elemental beltes and gorgets) /256
+    THUNDER_FTP_BONUS               = 548,  -- Gives bonus fTP when weaponskill has a Thunder property. (Elemental beltes and gorgets) /256
+    WATER_FTP_BONUS                 = 549,  -- Gives bonus fTP when weaponskill has a Water property. (Elemental beltes and gorgets) /256
+    LIGHT_FTP_BONUS                 = 550,  -- Gives bonus fTP when weaponskill has a Light property. (Elemental beltes and gorgets) /256
+    DARK_FTP_BONUS                  = 551,  -- Gives bonus fTP when weaponskill has a Dark property. (Elemental beltes and gorgets) /256
+    ANY_FTP_BONUS                   = 1144, -- Gives bonus fTP when weaponskill has a (any) property. (Fotia Gorget, Fotia Belt) /256
+    DAY_FTP_BONUS                   = 1145, -- Gives bonus fTP when weaponskill has a property that matches current day. (Mekira Oto, Gavialis helm, etc...) /256
+
     -- Warrior
     BERSERK_POTENCY                 = 948,  -- Augments "Berserk"/Enhances "Berserk" effect (Conqueror)
     BERSERK_DURATION                = 954,  -- Berserk Duration
@@ -457,6 +470,10 @@ xi.mod =
     -- Monk
     ADDITIVE_GUARD                  = 1092, -- Additive % bonus to final Guard rate (adds after clamp)
     AUGMENTS_IMPETUS                = 1097, -- see https://www.bg-wiki.com/ffxi/Impetus, adds Crit Hit Damage & Accuracy for Impetus
+
+    -- Black Mage
+    ENHANCES_ELEMENTAL_SEAL         = 1149, -- Bonus magic damage when using Elemental Seal (percent)
+    ELEMENTAL_DEBUFF_EFFECT         = 1150, -- Increase stat reduction by N, and DoT by N/2 HP per tick
 
     -- Paladin
     ENHANCES_CHIVALRY               = 1061, -- Enhances "Chivalry" effect (increases the base TP modifier by the provided value / 100, e.g. mod value 5 = +0.05)
@@ -487,10 +504,15 @@ xi.mod =
     ENHANCES_DIABOLIC_EYE           = 275,  -- Diabolic Eye duration + "modifier-value" seconds per Diabolic Eye merit.
     ENHANCES_NETHER_VOID            = 1083, -- Enhances "Nether Void" effect (Increases the potency of the next Absorb or Drain Dark Magic by <value>%
     ENHANCES_MUTED_SOUL             = 1084, -- Enhances "Muted Soul" effect (Adds 3% Zanshin rate per MUTED_SOUL merit level)
+    ENHANCES_ABSORB_EFFECTS         = 1136, -- Absorb Spell duration +x seconds (Enhances "Absorb" effects)
+    AUGMENTS_ABSORB                 = 1137, -- Non-Liberator Absorb Spell potency +x% (Augments "Absorb" effects)
+    ABSORB_EFFECT_DURATION          = 1138, -- Absorb Spell duration +% ("Absorb" effect duration +x%)
+    AUGMENTS_ABSORB_TP              = 1153, -- Increases absorb-TP potency, stacks with AUGMENTS_ABSORB
 
     -- Beastmaster
     TANDEM_STRIKE_POWER             = 271,  -- Grants a bonus to your and your pet's accuracy and magic accuracy when you and your pet are attacking the same target.
     TANDEM_BLOW_POWER               = 272,  -- Reduces amount of TP gained by enemies when striking them if you and your pet are attacking the same target.
+    ENHANCES_MONSTER_CORRELATION    = 1155, -- Grants acc +X and attp +X% against a weaker opposing ecosystem. Typically applied to pet, not owner (item_mods_pet.sql)
 
     -- Samurai
     SENGIKORI_SC_DMG_DEBUFF         = 1088, -- % Increase to closing skillchain damage. Applied to defender.
@@ -499,6 +521,7 @@ xi.mod =
 
     -- Ninja
     ENHANCES_SANGE                  = 1091, -- 1 = +1 attack for Daken during Sange per Sange merit (i.e. 20 with 5 merits = +100 attack during Sange)
+    ENHANCES_FUTAE                  = 1148, -- Adds to the +50% bonus damage to elemental ninjutsu provided by Futae (percent)
 
     -- Dragoon
     WYVERN_LVL_BONUS                = 1043, -- Wyvern: Lv.+ (Increases wyvern's base level above 99)
@@ -513,6 +536,11 @@ xi.mod =
 
     -- Puppetmaster
     AUTOMATON_LVL_BONUS             = 1044, -- Automaton: Lv. (Increases automaton's base level above 99)
+
+    -- Blue Mage
+    ENHANCES_BURST_AFFINITY         = 1139, -- Increases WSC bonus on spells cast with Burst Affinity (percent)
+    ENHANCES_CHAIN_AFFINITY         = 1140, -- TODO: Increases WSC bonus on spells cast with Chain Affinity (base damage +)
+    BLUE_MAGIC_RECAST               = 1147, -- Recast time for blue magic spells (percent, usually negative)
 
     -- Geomancer
     FULL_CIRCLE                     = 1025, -- Increases the initial multiplier on MP returned via Full Circle
@@ -596,6 +624,7 @@ xi.mod =
     WHITE_MAGIC_CAST                = 396,
     BLACK_MAGIC_RECAST              = 397,
     WHITE_MAGIC_RECAST              = 398,
+    ELEMENTAL_MAGIC_RECAST          = 1146, -- Recast time for elemental magic spells (percent, usually negative)
     ALACRITY_CELERITY_EFFECT        = 399,
     LIGHT_ARTS_EFFECT               = 334,
     DARK_ARTS_EFFECT                = 335,
@@ -671,7 +700,7 @@ xi.mod =
     SONG_DURATION_BONUS             = 454, --
     SONG_SPELLCASTING_TIME          = 455, --
 
-    AVATARS_FAVOR_ENHANCE           = 141, -- Adds 1 rank to avatars favor
+    AVATARS_FAVOR_ENHANCE           = 1154, -- Adds 1 rank to avatars favor
 
     QUICK_DRAW_DMG                  = 411, --
     QUICK_DRAW_MACC                 = 191, -- Quick draw magic accuracy
@@ -928,7 +957,10 @@ xi.mod =
 
     -- Circle Abilities Extended Duration from AF/AF+1
     HOLY_CIRCLE_DURATION            = 857,
+    HOLY_CIRCLE_POTENCY             = 1141, -- Increases the potency of the Holy Circle effect (e.g. mod value 2 = +2% Undead Killer)
     ANCIENT_CIRCLE_DURATION         = 859,
+    ANCIENT_CIRCLE_POTENCY          = 1142, -- Increases the potency of the Ancient Circle effect (e.g. mod value 2 = +2% Dragon Killer)
+    WARDING_CIRCLE_POTENCY          = 1143, -- Increases the potency of the Warding Circle effect (e.g. mod value 2 = +2% Demon Killer)
 
     -- Other
     CURE2MP_PERCENT                 = 860, -- Converts % of "Cure" amount to MP
@@ -937,7 +969,7 @@ xi.mod =
     SMITE                           = 898, -- Att increase with H2H or 2H weapons
     TACTICAL_GUARD                  = 899, -- Tp gain increase when guarding
     GUARD_PERCENT                   = 976, -- Guard Percent
-    COUNTER_DAMAGE                  = 1047, -- TODO: Increases Damage from Counter Attacks (Percent)
+    COUNTER_DAMAGE                  = 1047, -- Increases Damage from Counter Attacks (adds to base damage)
     FENCER_TP_BONUS                 = 903, -- TP Bonus to weapon skills from Fencer Trait
     FENCER_CRITHITRATE              = 904, -- Increased Crit chance from Fencer Trait
     SHIELD_DEF_BONUS                = 905, -- Shield Defense Bonus
@@ -1022,9 +1054,8 @@ xi.mod =
 
     PARRY_HP_RECOVERY = 1135, -- Recover <Mod Value> HP on successful parry.
 
-    ENHANCES_ABSORB_EFFECTS = 1136, -- Absorb Spell duration +x seconds (Enhances "Absorb" effects)
-    AUGMENTS_ABSORB         = 1337, -- Non-Liberator Absorb Spell potency +x% (Augments "Absorb" effects)
-    ABSORB_EFFECT_DURATION  = 1138, -- Absorb Spell duration +% ("Absorb" effect duration +x%)
+    -- TODO: These mods are not yet implemented.
+    REWARD_RECAST                   = 1152, -- TODO: Reduces Reward recast time (seconds)
 
     -- IF YOU ADD ANY NEW MODIFIER HERE, ADD IT IN src/map/modifier.h ASWELL!
 

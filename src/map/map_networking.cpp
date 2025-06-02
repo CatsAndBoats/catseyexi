@@ -146,22 +146,21 @@ void MapNetworking::tapStatistics()
     TotalPacketsDelayedPerTick = 0U;
 }
 
-auto MapNetworking::doSocketsBlocking(duration next) -> duration
+auto MapNetworking::doSocketsBlocking(timer::duration next) -> timer::duration
 {
     TracyZoneScoped;
 
-    const auto start = server_clock::now();
+    const auto start = timer::now();
 
     message::handle_incoming();
 
-    const auto duration = std::chrono::duration_cast<std::chrono::microseconds>(next - std::chrono::duration_cast<std::chrono::seconds>(next));
-    mapSocket_->recvFor(duration);
+    mapSocket_->recvFor(next);
 
     _sql->TryPing();
 
     tapStatistics();
 
-    return server_clock::now() - start;
+    return timer::now() - start;
 }
 
 void MapNetworking::handle_incoming_packet(const std::error_code& ec, std::span<uint8> buffer, IPP ipp)
@@ -454,7 +453,7 @@ int32 MapNetworking::parse(uint8* buff, size_t* buffsize, MapSession* map_sessio
     {
         // Update the time we last got a char sync packet
         // The client can spam some other packets when trying to zone, preventing timely session deletions
-        map_session_data->last_update = time(nullptr);
+        map_session_data->last_update = timer::now();
     }
 
     for (uint8* SmallPD_ptr = PacketData_Begin; SmallPD_ptr + (ref<uint8>(SmallPD_ptr, 1) & 0xFE) * 2 <= PacketData_End && (ref<uint8>(SmallPD_ptr, 1) & 0xFE);
@@ -551,7 +550,7 @@ int32 MapNetworking::parse(uint8* buff, size_t* buffsize, MapSession* map_sessio
         }
 
         ref<uint16>(map_session_data->server_packet_data.data(), 2) = SmallPD_Code;
-        ref<uint16>(map_session_data->server_packet_data.data(), 8) = (uint32)time(nullptr);
+        ref<uint16>(map_session_data->server_packet_data.data(), 8) = earth_time::timestamp();
 
         PBuff     = map_session_data->server_packet_data;
         *buffsize = map_session_data->server_packet_size;
@@ -582,7 +581,7 @@ int32 MapNetworking::send_parse(uint8* buff, size_t* buffsize, MapSession* map_s
     ref<uint16>(buff, 2) = map_session_data->client_packet_id;
 
     // save the current time (32 BIT!)
-    ref<uint32>(buff, 8) = (uint32)time(nullptr);
+    ref<uint32>(buff, 8) = earth_time::timestamp();
 
     // build a large package, consisting of several small packets
     CCharEntity* PChar = map_session_data->PChar;

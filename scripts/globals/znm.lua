@@ -185,7 +185,7 @@ xi.znm.soultrapper = xi.znm.soultrapper or {}
 -- onItemCheck
 -----------------------------------
 
-xi.znm.soultrapper.onItemCheck = function(target, item, player, caster)
+xi.znm.soultrapper.onItemCheck = function(target, item, param, caster)
     -- can not be used on non mobs or Structure type mobs
     if
         not target:isMob() or
@@ -195,16 +195,16 @@ xi.znm.soultrapper.onItemCheck = function(target, item, player, caster)
     end
 
     if
-        player:hasStatusEffect(xi.effect.INVISIBLE) or
-        player:hasStatusEffect(xi.effect.SNEAK) or
-        player:hasStatusEffect(xi.effect.DEODORIZE) or
-        player:hasStatusEffect(xi.effect.HIDE) or
-        player:hasStatusEffect(xi.effect.CAMOUFLAGE)
+        caster:hasStatusEffect(xi.effect.INVISIBLE) or
+        caster:hasStatusEffect(xi.effect.SNEAK) or
+        caster:hasStatusEffect(xi.effect.DEODORIZE) or
+        caster:hasStatusEffect(xi.effect.HIDE) or
+        caster:hasStatusEffect(xi.effect.CAMOUFLAGE)
     then
-        return xi.msg.basic.ITEM_NO_USE_SNEAK, player:getEquipID(xi.slot.RANGED)
+        return xi.msg.basic.ITEM_NO_USE_SNEAK, caster:getEquipID(xi.slot.RANGED)
     end
 
-    local id = player:getEquipID(xi.slot.AMMO)
+    local id = caster:getEquipID(xi.slot.AMMO)
     if
         id ~= xi.item.BLANK_SOUL_PLATE and
         id ~= xi.item.BLANK_HIGH_SPEED_SOUL_PLATE
@@ -212,7 +212,7 @@ xi.znm.soultrapper.onItemCheck = function(target, item, player, caster)
         return xi.msg.basic.ITEM_NO_ITEMS_EQUIPPED
     end
 
-    if player:getFreeSlotsCount() == 0 then
+    if caster:getFreeSlotsCount() == 0 then
         return xi.msg.basic.FULL_INVENTORY
     end
 
@@ -223,7 +223,7 @@ end
 -- onItemUse
 -----------------------------------
 
-xi.znm.soultrapper.onItemUse = function(target, item, player)
+xi.znm.soultrapper.onItemUse = function(target, player, item)
     -- Soul plate not guaranteed
     -- to validate long term: some posts hint at level correction on success rate vs. higher level mobs.
     if math.random(100) > xi.znm.SOULTRAPPER_SUCCESS * xi.znm.SOULPLATE_HS_MULT then
@@ -382,7 +382,7 @@ end
 -----------------------------------
 
 xi.znm.ryo.onEventUpdate = function(player, csid, option, npc)
-    if csid == 914 then  -- Get approximate value of traded soulplate
+    if csid == 914 then -- Get approximate value of traded soulplate
         local zeniValue = xi.znm.ryo.tradedPlateValue(player)
 
         xi.znm.ryo.setTradedPlateValue(player, 0)
@@ -485,7 +485,7 @@ xi.znm.sanraku.handleTradeWithPlate = function(player, npc, item)
 end
 
 xi.znm.sanraku.platesTradedToday = function(player)
-    local currentDay = VanadielYear() * 360 + VanadielDayOfTheYear()
+    local currentDay = VanadielUniqueDay()
     local storedDay  = xi.znm.playerTradingDay(player)
 
     if currentDay ~= storedDay then
@@ -666,7 +666,7 @@ end
 
 xi.znm.sanraku.handleCompletedTradeWithPlate = function(player)
     player:tradeComplete()
-    xi.znm.setPlayerTradingDay(player, VanadielYear() * 360 + VanadielDayOfTheYear())
+    xi.znm.setPlayerTradingDay(player, VanadielUniqueDay())
     xi.znm.incrementTradedPlates(player)
 
     local zeniValue = xi.znm.sanraku.tradedPlateValue(player)
@@ -713,7 +713,7 @@ xi.znm.getPopPrice = function(mob, znmTier)
         popCost == nil or
         popCost == 0
     then
-        popCost = xi.znm.ZNM_popCostS[znmTier].minPrice
+        popCost = xi.znm.ZNM_POP_COSTS[znmTier].minPrice
         SetServerVariable('[ZNM][' .. mob .. ']PopCost', popCost)
     end
 
@@ -723,8 +723,8 @@ end
 -- pop prices update per purchase at the mob level
 xi.znm.updatePopPrice = function(mob, znmTier)
     if not xi.znm.ZNM_STATIC_POP_PRICES then
-        local popCost = math.min(xi.znm.getPopPrice(mob, znmTier) + xi.znm.ZNM_popCostS[znmTier].addedPrice,
-                xi.znm.ZNM_popCostS[znmTier].maxPrice)
+        local popCost = math.min(xi.znm.getPopPrice(mob, znmTier) + xi.znm.ZNM_POP_COSTS[znmTier].addedPrice,
+            xi.znm.ZNM_POP_COSTS[znmTier].maxPrice)
         SetServerVariable('[ZNM][' .. mob .. ']PopCost', popCost)
     end
 end
@@ -739,8 +739,8 @@ xi.znm.ZNMPopPriceDecay = function()
         for i = 1, 31 do
             mob     = xi.znm.POP_ITEMS[i].mob
             znmTier = xi.znm.POP_ITEMS[i].tier
-            popCost = math.max(xi.znm.getPopPrice(mob, znmTier) - xi.znm.ZNM_popCostS[znmTier].decayPrice,
-                    xi.znm.ZNM_popCostS[znmTier].minPrice)
+            popCost = math.max(xi.znm.getPopPrice(mob, znmTier) - xi.znm.ZNM_POP_COSTS[znmTier].decayPrice,
+                xi.znm.ZNM_POP_COSTS[znmTier].minPrice)
 
             SetServerVariable('[ZNM][' .. mob .. ']PopCost', popCost)
         end
@@ -772,7 +772,7 @@ xi.znm.numberOfTradedPlates = function(player)
 end
 
 xi.znm.incrementTradedPlates = function(player)
-    player:addVar('[ZNM][Sanraku]TradedPlates', 1)
+    player:incrementCharVar('[ZNM][Sanraku]TradedPlates', 1)
 end
 
 xi.znm.resetDailyTrackingVars = function(player)

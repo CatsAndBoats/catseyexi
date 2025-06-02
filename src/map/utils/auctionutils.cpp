@@ -152,9 +152,9 @@ void auctionutils::OpenListOfSales(CCharEntity* PChar, uint8 action, uint16 item
 {
     TracyZoneScoped;
 
-    const uint32 curTick = gettick();
+    const auto curTick = timer::now();
 
-    if (curTick - PChar->m_AHHistoryTimestamp > 5000)
+    if (curTick > PChar->m_AHHistoryTimestamp + 5s)
     {
         PChar->m_ah_history.clear();
         PChar->m_AHHistoryTimestamp = curTick;
@@ -263,7 +263,7 @@ void auctionutils::ProofOfPurchase(CCharEntity* PChar, uint8 action, uint32 pric
         }
 
         if (!db::preparedStmt("INSERT INTO auction_house(itemid, stack, seller, seller_name, date, price) VALUES(?, ?, ?, ?, ?, ?)",
-                              PItem->getID(), quantity == 0, PChar->id, PChar->getName(), (uint32)time(nullptr), price))
+                              PItem->getID(), quantity == 0, PChar->id, PChar->getName(), earth_time::timestamp(), price))
         {
             ShowErrorFmt("AH: Cannot insert item {} to database", PItem->getName());
             PChar->pushPacket<CAuctionHousePacket>(action, 197, 0, 0, 0, 0); // failed to place up
@@ -278,7 +278,7 @@ void auctionutils::ProofOfPurchase(CCharEntity* PChar, uint8 action, uint32 pric
     }
 }
 
-void auctionutils::PurchasingItems(CCharEntity* PChar, uint8 action, uint32 price, uint16 itemid, uint8 quantity)
+bool auctionutils::PurchasingItems(CCharEntity* PChar, uint8 action, uint32 price, uint16 itemid, uint8 quantity)
 {
     TracyZoneScoped;
 
@@ -299,7 +299,7 @@ void auctionutils::PurchasingItems(CCharEntity* PChar, uint8 action, uint32 pric
                     if (PChar->getStorage(LocID)->SearchItem(itemid) != ERROR_SLOTID)
                     {
                         PChar->pushPacket<CAuctionHousePacket>(action, 0xE5, 0, 0, 0, 0);
-                        return;
+                        return false;
                     }
                 }
             }
@@ -309,7 +309,7 @@ void auctionutils::PurchasingItems(CCharEntity* PChar, uint8 action, uint32 pric
             {
                 const auto rset = db::preparedStmt("UPDATE auction_house SET buyer_name = ?, sale = ?, sell_date = ? WHERE itemid = ? AND buyer_name IS NULL "
                                                    "AND stack = ? AND price <= ? ORDER BY price LIMIT 1",
-                                                   PChar->getName(), price, (uint32)time(nullptr), itemid, quantity == 0, price);
+                                                   PChar->getName(), price, earth_time::timestamp(), itemid, quantity == 0, price);
                 if (rset && rset->rowsAffected())
                 {
                     uint8 SlotID = charutils::AddItem(PChar, LOC_INVENTORY, itemid, (quantity == 0 ? PItem->getStackSize() : 1));
@@ -320,8 +320,9 @@ void auctionutils::PurchasingItems(CCharEntity* PChar, uint8 action, uint32 pric
 
                         PChar->pushPacket<CAuctionHousePacket>(action, 0x01, itemid, price, quantity, PItem->getStackSize());
                         PChar->pushPacket<CInventoryFinishPacket>();
+
+                        return true;
                     }
-                    return;
                 }
             }
         }
@@ -336,6 +337,8 @@ void auctionutils::PurchasingItems(CCharEntity* PChar, uint8 action, uint32 pric
             PChar->pushPacket<CAuctionHousePacket>(action, 0xC5, itemid, price, quantity, 0);
         }
     }
+
+    return false;
 }
 
 void auctionutils::CancelSale(CCharEntity* PChar, uint8 action, uint8 slotid)

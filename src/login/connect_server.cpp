@@ -21,6 +21,8 @@
 
 #include "connect_server.h"
 
+#include "common/timer.h"
+
 namespace
 {
     auto getZMQEndpointString() -> std::string
@@ -60,7 +62,7 @@ void ConnectServer::run()
     handler<auth_session> auth(io_context_, settings::get<uint32>("network.LOGIN_AUTH_PORT"), zmqDealerWrapper_);
     handler<view_session> view(io_context_, settings::get<uint32>("network.LOGIN_VIEW_PORT"), zmqDealerWrapper_);
     handler<data_session> data(io_context_, settings::get<uint32>("network.LOGIN_DATA_PORT"), zmqDealerWrapper_);
-    asio::steady_timer    cleanup_callback(io_context_, std::chrono::minutes(15));
+    asio::steady_timer    cleanup_callback(io_context_, 15min);
 
     cleanup_callback.async_wait(std::bind(&ConnectServer::periodicCleanup, this, std::placeholders::_1, &cleanup_callback));
 
@@ -133,7 +135,7 @@ void ConnectServer::periodicCleanup(const asio::error_code& error, asio::steady_
                 // If it's been 15 minutes, erase it from the session list
                 if (!session.data_session &&
                     !session.view_session &&
-                    (server_clock::now() - session.authorizedTime) > std::chrono::minutes(15))
+                    timer::now() > session.authorizedTime + 15min)
                 {
                     sessionIterator = ipAddrIterator->second.erase(sessionIterator);
                 }
@@ -157,7 +159,7 @@ void ConnectServer::periodicCleanup(const asio::error_code& error, asio::steady_
         if (Application::isRunning())
         {
             // reset timer
-            timer->expires_at(timer->expiry() + std::chrono::minutes(15));
+            timer->expires_at(timer->expiry() + 15min);
             timer->async_wait(std::bind(&ConnectServer::periodicCleanup, this, std::placeholders::_1, timer));
         }
     }

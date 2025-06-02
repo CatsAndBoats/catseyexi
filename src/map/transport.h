@@ -25,6 +25,7 @@
 #include "common/cbasetypes.h"
 #include "common/ipp.h"
 #include "common/singleton.h"
+#include "common/vana_time.h"
 
 #include "entities/npcentity.h"
 
@@ -58,11 +59,11 @@ enum ELEVATORSTATE
 
 struct Transport_Time
 {
-    uint16 timeOffset;
-    uint16 timeInterval;
-    uint16 timeArriveDock;
-    uint16 timeDepartDock;
-    uint16 timeVoyageStart;
+    vanadiel_time::duration timeOffset;
+    vanadiel_time::duration timeInterval;
+    vanadiel_time::duration timeArriveDock;
+    vanadiel_time::duration timeDepartDock;
+    vanadiel_time::duration timeVoyageStart;
 };
 
 struct Transport_Ship : Transport_Time
@@ -75,7 +76,7 @@ struct Transport_Ship : Transport_Time
     location_t   dock;
 
     void setVisible(bool) const;
-    void animateSetup(uint8, uint32) const;
+    void animateSetup(uint8, vanadiel_time::time_point) const;
     void spawn() const;
 };
 
@@ -102,11 +103,11 @@ struct Elevator_t
     uint8 id;
     uint8 state;
 
-    uint16 zoneID;
-    uint32 lastTrigger;
+    uint16                    zoneID;
+    vanadiel_time::time_point lastTrigger;
 
-    uint16 interval;
-    uint16 movetime;
+    vanadiel_time::duration interval;
+    vanadiel_time::duration movetime;
 
     CNpcEntity* Elevator;
     CNpcEntity* LowerDoor;

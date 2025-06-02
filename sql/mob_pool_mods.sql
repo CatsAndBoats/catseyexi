@@ -335,10 +335,10 @@ INSERT INTO `mob_pool_mods` VALUES (3540,3,100,1); -- MP_BASE: 100
 INSERT INTO `mob_pool_mods` VALUES (3549,370,50,0); -- REGEN: 50
 
 -- Shikaree X
-INSERT INTO `mob_pool_mods` VALUES (3598,368,70,0); -- REGAIN: 70
+INSERT INTO `mob_pool_mods` VALUES (3598,368,43,0); -- REGAIN: 43
 
 -- Shikaree Y
-INSERT INTO `mob_pool_mods` VALUES (3600,368,70,0); -- REGAIN: 70
+INSERT INTO `mob_pool_mods` VALUES (3600,368,43,0); -- REGAIN: 43
 
 -- Shikaree Z
 INSERT INTO `mob_pool_mods` VALUES (3601,168,30,0); -- SPELLINTERRUPT: 30

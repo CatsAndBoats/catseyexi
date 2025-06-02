@@ -527,7 +527,7 @@ void dboxutils::SendNewItems(CCharEntity* PChar, uint8 action, uint8 boxtype, ui
                                  sender_name   = PItem->getSender(),
                                  receiver      = PChar->id,
                                  receiver_name = PChar->getName(),
-                                 date          = static_cast<uint32>(time(nullptr))]()
+                                 date          = earth_time::timestamp()]()
                                 {
                                     const auto query = "INSERT INTO audit_dbox(itemid, quantity, sender, sender_name, receiver, receiver_name, date) VALUES (?, ?, ?, ?, ?, ?, ?)";
                                     if (!db::preparedStmt(query, itemid, quantity, sender, sender_name, receiver, receiver_name, date))

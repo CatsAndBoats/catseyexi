@@ -22,6 +22,7 @@
 #pragma once
 
 #include "cbasetypes.h"
+#include "timer.h"
 
 #include <string>
 #include <thread>
@@ -207,8 +208,8 @@ private:
     uint16      m_Port;
     const char* m_Db;
 
-    uint32 m_PingInterval;
-    uint32 m_LastPing;
+    timer::duration   m_PingInterval;
+    timer::time_point m_LastPing;
 
     std::thread::id m_ThreadId;
 

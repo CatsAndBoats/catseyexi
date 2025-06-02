@@ -24,6 +24,7 @@
 
 #include "common/cbasetypes.h"
 #include "common/logging.h"
+#include "common/timer.h"
 
 enum CONTAINER_ID : uint8
 {
@@ -73,8 +74,8 @@ public:
     uint8 InsertItem(CItem* PItem);               // add a pre-created item to a free cell
     uint8 InsertItem(CItem* PItem, uint8 slotID); // add a pre-created item to the selected cell
 
-    uint32 SortingPacket; // number of sort requests per clock
-    uint32 LastSortingTime;
+    uint32            SortingPacket; // number of sort requests per clock
+    timer::time_point LastSortingTime;
 
     CItem* GetItem(uint8 slotID); // get a pointer to the object located in the specified cell.
     void   Clear();               // remove all items from container

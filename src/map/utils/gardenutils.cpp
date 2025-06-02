@@ -87,7 +87,7 @@ namespace gardenutils
     void UpdateGardening(CCharEntity* PChar, bool sendPacket)
     {
         TracyZoneScoped;
-        uint32 vanatime = CVanaTime::getInstance()->getVanaTime();
+        uint32 vanatime = earth_time::vanadiel_timestamp();
         for (auto containerID : { LOC_MOGSAFE, LOC_MOGSAFE2 })
         {
             CItemContainer* PContainer = PChar->getStorage(containerID);
@@ -170,8 +170,9 @@ namespace gardenutils
 
         if (settings::get<bool>("map.GARDEN_DAY_MATTERS"))
         {
-            uint32 vanaDate   = PItem->getPlantTimestamp();
-            uint32 dayElement = ((vanaDate % VTIME_WEEK) / VTIME_DAY) + 1;
+            earth_time::duration      vanaTimestamp = std::chrono::seconds(PItem->getPlantTimestamp());
+            vanadiel_time::time_point vanaDate      = vanadiel_time::time_point(std::chrono::duration_cast<vanadiel_time::duration>(vanaTimestamp));
+            uint32                    dayElement    = vanadiel_time::get_weekday(vanaDate) + 1;
             elements[dayElement] += 10;
         }
 
@@ -239,7 +240,7 @@ namespace gardenutils
 
         if (settings::get<bool>("map.GARDEN_MOONPHASE_MATTERS"))
         {
-            strength += (int16)std::ceil(CVanaTime::getInstance()->getMoonPhase() / 10.0f);
+            strength += static_cast<int16>(std::ceil(vanadiel_time::moon::get_phase() / 10.0f));
         }
 
         if (settings::get<bool>("map.GARDEN_MH_AURA_MATTERS"))
@@ -357,7 +358,8 @@ namespace gardenutils
                 break;
         }
 
-        PItem->setStageTimestamp(CVanaTime::getInstance()->getVanaTime() + GetStageDuration(PItem, growFromFeed) * VANADAY_SECONDS);
+        vanadiel_time::time_point stageTimestamp = vanadiel_time::now() + xi::vanadiel_clock::days(GetStageDuration(PItem, growFromFeed));
+        PItem->setStageTimestamp(earth_time::vanadiel_timestamp(vanadiel_time::to_earth_time(stageTimestamp)));
     }
 
     uint8 GetStageDuration(CItemFlowerpot* PItem, bool growFromFeed /*= false*/)

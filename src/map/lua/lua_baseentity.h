@@ -251,7 +251,7 @@ public:
     bool breakLinkshell(std::string const& lsname);
     bool addLinkpearl(std::string const& lsname, bool equip);
 
-    auto addSoulPlate(std::string const& name, uint16 mobFamily, uint8 zeni, uint16 skillIndex, uint8 fp) -> CItem*;
+    auto addSoulPlate(std::string const& name, uint32 interestData, uint8 zeni, uint16 skillIndex, uint8 fp) -> CItem*;
 
     // Trading
     uint8 getContainerSize(uint8 locationID);
@@ -264,7 +264,7 @@ public:
     // Equipping
     bool canEquipItem(uint16 itemID, sol::object const& chkLevel);
     void equipItem(uint16 itemID, sol::object const& container);
-    void unequipItem(uint8 itemID);
+    void unequipItem(uint8 slotID);
 
     void setEquipBlock(uint16 equipBlock);
     void lockEquipSlot(uint8 slot);
@@ -342,7 +342,7 @@ public:
     void  setAnimationSpeed(uint8 speedVal);
 
     uint32 getPlaytime(sol::object const& shouldUpdate);
-    int32  getTimeCreated();
+    uint32 getTimeCreated();
 
     // Player Jobs and Levels
     uint8 getMainJob();
@@ -656,7 +656,7 @@ public:
     void  updateEnmityFromCure(CLuaBaseEntity* PEntity, int32 amount, sol::object const& fixedCE, sol::object const& fixedVE);
     void  resetEnmity(CLuaBaseEntity* PEntity);
     void  updateClaim(sol::object const& entity);
-    bool  hasClaim(CBattleEntity* PTarget);
+    bool  hasClaim(CLuaBaseEntity* PTarget);
     bool  hasEnmity();
     auto  getNotorietyList() -> sol::table;
     void  clearEnmityForEntity(CLuaBaseEntity* PEntity);
@@ -708,6 +708,7 @@ public:
 
     void charm(CLuaBaseEntity const* target, sol::object const& p0);
     void uncharm();
+    bool isTandemActive();
 
     uint8 addBurden(uint8 element, uint8 burden);
     uint8 getOverloadChance(uint8 element);
@@ -725,7 +726,6 @@ public:
     bool   isSpellAoE(uint16 spellId);
 
     int32 physicalDmgTaken(double damage, sol::variadic_args va);
-    int32 magicDmgTaken(double damage, sol::variadic_args va);
     int32 rangedDmgTaken(double damage, sol::variadic_args va);
     int32 breathDmgTaken(double damage);
     void  handleAfflatusMiseryDamage(double damage);
@@ -911,11 +911,12 @@ public:
     uint16 getDespoilItem();                // gets ItemID of droplist despoil item from mob (steal item if no despoil item)
     uint16 getDespoilDebuff(uint16 itemID); // gets the status effect id to apply to the mob on successful despoil
     bool   itemStolen();                    // sets mob's ItemStolen var = true
+    bool   itemDespoiled();                 // sets mob's ItemDespoiled var = true
     int16  getTHlevel();                    // Returns the Monster's current Treasure Hunter Tier
     void   setTHlevel(int16 newLevel);      // Sets the Monster's current Treasure Hunter Tier
 
     uint32 getAvailableTraverserStones();
-    time_t getTraverserEpoch();
+    uint32 getTraverserEpoch();
     void   setTraverserEpoch();
     uint32 getClaimedTraverserStones();
     void   addClaimedTraverserStones(uint16 numStones);

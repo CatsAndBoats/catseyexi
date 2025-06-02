@@ -95,8 +95,8 @@ public:
     bool   IsFull() const;
     uint32 LoadPartySize() const;
 
-    uint32 GetTimeLastMemberJoined();
-    bool   HasTrusts();
+    timer::time_point GetTimeLastMemberJoined();
+    bool              HasTrusts();
 
     std::size_t GetMemberCountAcrossAllProcesses();
 

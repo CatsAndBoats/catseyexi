@@ -36,7 +36,7 @@ CFishRankingPacket::CFishRankingPacket(const std::vector<FishingContestEntry>& e
     ref<uint8>(0x05)  = 1;
     ref<uint8>(0x06)  = 2; // 1 = Svr Message, 2 = Fishing Rank.  Packets otherwise identical.
     ref<uint8>(0x07)  = language;
-    ref<uint32>(0x08) = (timestamp == 0 ? CVanaTime::getInstance()->getSysTime() : timestamp);
+    ref<uint32>(0x08) = (timestamp == 0 ? earth_time::timestamp() : timestamp);
     ref<uint32>(0x0C) = 0;            // Message Length (Total)
     ref<uint32>(0x10) = 0;            // Message Offset
     ref<uint32>(0x14) = 0;            // Message Length

@@ -125,13 +125,13 @@ public:
 
     uint16 TPUseChance(); // return % chance to use TP move per 400ms tick
 
-    bool       CanDeaggro() const;
-    time_point GetDespawnTime();
-    void       SetDespawnTime(duration _duration);
-    uint32     GetRandomGil();   // returns a random amount of gil
-    bool       CanRoamHome();    // is it possible for me to walk back?
-    bool       CanRoam();        // check if mob can walk around
-    void       TapDeaggroTime(); // call CMobController->TapDeaggroTime if PAI->GetController() is a CMobController, otherwise do nothing.
+    bool              CanDeaggro() const;
+    timer::time_point GetDespawnTime();
+    void              SetDespawnTime(timer::duration _duration);
+    uint32            GetRandomGil();   // returns a random amount of gil
+    bool              CanRoamHome();    // is it possible for me to walk back?
+    bool              CanRoam();        // check if mob can walk around
+    void              TapDeaggroTime(); // call CMobController->TapDeaggroTime if PAI->GetController() is a CMobController, otherwise do nothing.
 
     bool CanLink(position_t* pos, int16 superLink = 0);
 
@@ -185,9 +185,9 @@ public:
     virtual void FadeOut() override;
     virtual bool isWideScannable() override;
 
-    bool   m_AllowRespawn; // if true, allow respawn
-    uint32 m_RespawnTime;  // respawn time
-    uint32 m_DropItemTime; // time until monster death animation
+    bool            m_AllowRespawn; // if true, allow respawn
+    timer::duration m_RespawnTime;  // respawn time
+    timer::duration m_DropItemTime; // time until monster death animation
 
     uint32 m_DropID; // dropid of items to be dropped. dropid in Database (mob_droplist)
 
@@ -238,10 +238,11 @@ public:
     position_t m_SpawnPoint; // spawn point of mob
 
     uint8  m_Element;
-    uint8  m_HiPCLvl;     // Highest Level of Player Character that hit the Monster
-    uint8  m_HiPartySize; // Largest party size that hit the Monster
-    int16  m_THLvl;       // Highest Level of Treasure Hunter that apply to drops
-    bool   m_ItemStolen;  // if true, mob has already been robbed. reset on respawn. also used for thf maat fight
+    uint8  m_HiPCLvl;       // Highest Level of Player Character that hit the Monster
+    uint8  m_HiPartySize;   // Largest party size that hit the Monster
+    int16  m_THLvl;         // Highest Level of Treasure Hunter that apply to drops
+    bool   m_ItemStolen;    // if true, mob has already been robbed. reset on respawn. also used for thf maat fight
+    bool   m_ItemDespoiled; // if true, mob has already been despoiled. reset on respawn.
     uint16 m_Family;
     uint16 m_SuperFamily;
     uint16 m_MobSkillList; // Mob skill list defined from mob_pools
@@ -274,7 +275,7 @@ protected:
     void DropItems(CCharEntity* PChar);
 
 private:
-    time_point                     m_DespawnTimer{ time_point::min() }; // Despawn Timer to despawn mob after set duration
+    timer::time_point              m_DespawnTimer{ timer::time_point::min() }; // Despawn Timer to despawn mob after set duration
     std::unordered_map<int, int16> m_mobModStat;
     std::unordered_map<int, int16> m_mobModStatSave;
     static constexpr float         roam_home_distance{ 60.f };

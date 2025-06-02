@@ -338,7 +338,7 @@ void data_session::read_func()
                     hasActiveSession = true;
                 }
 
-                uint64 exceptionTime = 0;
+                auto exceptionTime = earth_time::time_point::min();
 
                 const auto rset3 = db::preparedStmt("SELECT UNIX_TIMESTAMP(exception) "
                                                     "FROM ip_exceptions "
@@ -346,13 +346,13 @@ void data_session::read_func()
                                                     session.accountID);
                 if (rset3 && rset3->rowsCount() != 0 && rset3->next())
                 {
-                    exceptionTime = rset3->get<uint64>("UNIX_TIMESTAMP(exception)");
+                    exceptionTime = earth_time::time_point(std::chrono::seconds(rset3->get<uint64>("UNIX_TIMESTAMP(exception)")));
                 }
 
-                const auto timeStamp    = static_cast<uint64>(std::chrono::duration_cast<std::chrono::seconds>(server_clock::now().time_since_epoch()).count());
+                const auto currentTime  = earth_time::now();
                 const auto isNotMaint   = !settings::get<bool>("login.MAINT_MODE");
                 const auto loginLimit   = settings::get<uint8>("login.LOGIN_LIMIT");
-                const auto excepted     = exceptionTime > timeStamp;
+                const auto excepted     = exceptionTime > currentTime;
                 const auto loginLimitOK = loginLimit == 0 || sessionCount < loginLimit || excepted;
                 const auto isGM         = gmlevel > 0;
 
@@ -445,11 +445,7 @@ void data_session::read_func()
             if (settings::get<bool>("login.LOG_USER_IP"))
             {
                 // Log clients IP info when player spawns into map server
-
-                time_t rawtime{};
-                tm     convertedTime{};
-                time(&rawtime);
-                _localtime_s(&convertedTime, &rawtime);
+                std::tm convertedTime = earth_time::to_local_tm();
 
                 char timeAndDate[128];
                 strftime(timeAndDate, sizeof(timeAndDate), "%Y:%m:%d %H:%M:%S", &convertedTime);

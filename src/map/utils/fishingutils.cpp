@@ -24,6 +24,7 @@
 #include "common/database.h"
 #include "common/logging.h"
 #include "common/sql.h"
+#include "common/timer.h"
 #include "common/utils.h"
 #include "common/vana_time.h"
 
@@ -156,20 +157,12 @@ namespace fishingutils
      *                             CALCULATIONS                              *
      *                                                                       *
      ************************************************************************/
-    uint32 GetSundayMidnightTimestamp()
-    {
-        uint32 timestamp = (uint32)time(nullptr);
-        uint32 day       = 6 - CVanaTime::getInstance()->getSysWeekDay();
-        uint32 hour      = 23 - CVanaTime::getInstance()->getSysHour();
-        uint32 mins      = 59 - CVanaTime::getInstance()->getSysMinute();
-        uint32 secs      = 59 - CVanaTime::getInstance()->getSysSecond();
-        return timestamp + secs + (mins * 60) + (hour * 3600) + (day * 86400) + 1;
-    }
 
     uint8 GetMoonPhase()
     {
-        uint8 phase     = (uint8)CVanaTime::getInstance()->getMoonPhase();
-        uint8 direction = CVanaTime::getInstance()->getMoonDirection();
+        vanadiel_time::time_point vanaTime  = vanadiel_time::now();
+        uint8                     phase     = static_cast<uint8>(vanadiel_time::moon::get_phase(vanaTime));
+        uint8                     direction = vanadiel_time::moon::get_direction(vanaTime);
 
         if (phase <= 5 || (phase <= 10 && direction == 1)) // New Moon
         {
@@ -210,7 +203,7 @@ namespace fishingutils
     {
         uint8          waitTime  = 13;
         uint8          moonPhase = GetMoonPhase();
-        uint8          hour      = (uint8)CVanaTime::getInstance()->getHour();
+        uint8          hour      = static_cast<uint8>(vanadiel_time::get_hour());
         fishing_gear_t gear      = GetFishingGear(PChar);
 
         if (moonPhase == MOONPHASE_NEW || moonPhase == MOONPHASE_FULL)
@@ -234,7 +227,7 @@ namespace fishingutils
     float GetMonthlyTidalInfluence(fish_t* fish) // 0.25 to 1.25
     {
         float modifier = 0.5f;
-        uint8 month    = (uint8)CVanaTime::getInstance()->getMonth();
+        uint8 month    = static_cast<uint8>(vanadiel_time::get_month() - 1);
 
         switch (fish->monthPattern)
         {
@@ -276,7 +269,7 @@ namespace fishingutils
     float GetHourlyModifier(fish_t* fish)
     { // 0.25 to 1.25
         float modifier = 0.5f;
-        uint8 hour     = (uint8)CVanaTime::getInstance()->getHour();
+        uint8 hour     = static_cast<uint8>(vanadiel_time::get_hour());
 
         switch (fish->hourPattern)
         {
@@ -531,7 +524,7 @@ namespace fishingutils
         bonus += (moonModifier * 5) + (moonModifier * xirand::GetRandomNumber(1, 5));
 
         // Time of Day modifier
-        uint32 gameHour = CVanaTime::getInstance()->getHour();
+        uint32 gameHour = vanadiel_time::get_hour();
 
         if ((gameHour == 6 || gameHour == 7) || (gameHour >= 16 && gameHour <= 18))
         {
@@ -1622,7 +1615,7 @@ namespace fishingutils
         PMob->Spawn();
         PMob->setMobMod(MOBMOD_CHARMABLE, 0);
         PMob->setMobMod(MOBMOD_IDLE_DESPAWN, 180);
-        PMob->SetDespawnTime(std::chrono::seconds(180));
+        PMob->SetDespawnTime(180s);
         PMob->SetLocalVar("hooked", 0);
 
         if (mob->maxRespawn > mob->minRespawn)
@@ -1817,9 +1810,12 @@ namespace fishingutils
         // Configuration multiplier.
         maxChance = maxChance * settings::get<float>("map.FISHING_SKILL_MULTIPLIER");
 
+        vanadiel_time::time_point vanaTime = vanadiel_time::now();
+
         // Moon phase skillup modifiers
-        uint8 phase         = CVanaTime::getInstance()->getMoonPhase();
-        uint8 moonDirection = CVanaTime::getInstance()->getMoonDirection();
+        uint8 phase         = static_cast<uint8>(vanadiel_time::moon::get_phase(vanaTime));
+        uint8 moonDirection = vanadiel_time::moon::get_direction(vanaTime);
+
         switch (moonDirection)
         {
             case 0: // None
@@ -1942,6 +1938,8 @@ namespace fishingutils
 
     void StartFishing(CCharEntity* PChar)
     {
+        auto currentTime = earth_time::now();
+
         if (!settings::get<bool>("map.FISHING_ENABLE"))
         {
             ShowWarning("Fishing is currently disabled");
@@ -1964,7 +1962,7 @@ namespace fishingutils
         CItemWeapon* Rod           = nullptr;
         CItemWeapon* Bait          = nullptr;
         uint8        FishingAreaID = 0;
-        uint32       vanaTime      = CVanaTime::getInstance()->getVanaTime();
+        uint32       vanaTime      = earth_time::vanadiel_timestamp(currentTime);
 
         if (PChar->nextFishTime > vanaTime)
         {
@@ -1974,8 +1972,7 @@ namespace fishingutils
         }
         else
         {
-            auto secs = std::chrono::duration_cast<std::chrono::seconds>(server_clock::now().time_since_epoch());
-            PChar->setCharVar("[Fish]LastCastTime", secs.count());
+            PChar->setCharVar("[Fish]LastCastTime", earth_time::timestamp(currentTime));
             PChar->lastCastTime = vanaTime;
             PChar->nextFishTime = PChar->lastCastTime + 5;
         }
@@ -2099,7 +2096,7 @@ namespace fishingutils
 
                 if (lost && PChar->hookedFish->nm && PChar->hookedFish->nmFlags & FISHINGNM_RESET_RESPAWN_ON_FAIL)
                 {
-                    PMob->SetLocalVar("lastTOD", (uint32)time(nullptr));
+                    PMob->SetLocalVar("lastTOD", earth_time::timestamp());
                 }
             }
         }
@@ -2309,7 +2306,7 @@ namespace fishingutils
                         else if (mob->maxRespawn > 0)
                         {
                             uint32 respawnTime = PMob->GetLocalVar("lastTOD") + PMob->GetLocalVar("respawnTime");
-                            if ((uint32)time(nullptr) > respawnTime)
+                            if (earth_time::timestamp() > respawnTime)
                             {
                                 mobAdd = true;
                                 MobPoolWeight += 50;
@@ -2569,7 +2566,7 @@ namespace fishingutils
             if (PMob != nullptr && PMob->GetLocalVar("hooked") == 0)
             {
                 PMob->SetLocalVar("hooked", 1);
-                PMob->SetLocalVar("hookedTime", (uint32)time(nullptr));
+                PMob->SetLocalVar("hookedTime", earth_time::timestamp());
 
                 response->hooked              = true;
                 response->catchid             = MobSelection->mobId;
@@ -2680,7 +2677,7 @@ namespace fishingutils
         }
 
         uint16 MessageOffset = GetMessageOffset(PChar->getZone());
-        uint32 vanaTime      = CVanaTime::getInstance()->getVanaTime();
+        uint32 vanaTime      = earth_time::vanadiel_timestamp();
 
         switch (action)
         {

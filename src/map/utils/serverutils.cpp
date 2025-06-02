@@ -47,9 +47,7 @@ namespace serverutils
             value  = rset->get<int32>("value");
             expiry = rset->get<uint32>("expiry");
 
-            uint32 currentTimestamp = CVanaTime::getInstance()->getSysTime();
-
-            if (expiry > 0 && expiry <= currentTimestamp)
+            if (expiry > 0 && expiry <= earth_time::timestamp())
             {
                 value = 0;
                 db::preparedStmt("DELETE FROM server_variables WHERE name = ? LIMIT 1", name);
@@ -75,12 +73,11 @@ namespace serverutils
     {
         if (auto var = serverVarCache.find(name); var != serverVarCache.end())
         {
-            std::pair cachedVarData    = var->second;
-            uint32    currentTimestamp = CVanaTime::getInstance()->getSysTime();
+            std::pair cachedVarData = var->second;
 
             // If the cached variable is not expired, return it.  Else, fall through so that the
             // database can be cleaned up.
-            if (cachedVarData.second == 0 || cachedVarData.second > currentTimestamp)
+            if (cachedVarData.second == 0 || cachedVarData.second > earth_time::timestamp())
             {
                 return cachedVarData.first;
             }
@@ -89,7 +86,7 @@ namespace serverutils
         return GetServerVar(name);
     }
 
-    int32 PersistVolatileServerVars(time_point tick, CTaskManager::CTask* PTask)
+    int32 PersistVolatileServerVars(timer::time_point tick, CTaskManager::CTask* PTask)
     {
         if (serverVarChanges.empty())
         {

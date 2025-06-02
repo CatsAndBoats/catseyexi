@@ -29,9 +29,12 @@
 CGuild::CGuild(uint8 id, const std::string& _pointsName)
 : m_id(id)
 {
+    earth_time::duration currentTime = std::chrono::seconds(earth_time::vanadiel_timestamp()) - 24h;
+    uint32               elapsedDays = std::chrono::floor<std::chrono::days>(currentTime).count();
+
     for (size_t i = 0; i < m_GPItemsRank.size(); ++i)
     {
-        m_GPItemsRank[i] = (uint8)((CVanaTime::getInstance()->getVanaTime() / (60 * 60 * 24)) % (i + 4));
+        m_GPItemsRank[i] = static_cast<uint8>(elapsedDays % (i + 4));
     }
 
     pointsName = _pointsName;
@@ -67,7 +70,7 @@ void CGuild::updateGuildPointsPattern(uint8 pattern)
                 const auto points    = rset->get<uint16>("points");
                 const auto maxPoints = rset->get<uint16>("max_points");
 
-                m_GPItems[i].emplace_back(itemutils::GetItemPointer(itemId), points, maxPoints);
+                m_GPItems[i].emplace_back(itemutils::GetItemPointer(itemId), maxPoints, points);
             }
         }
     }

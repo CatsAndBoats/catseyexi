@@ -113,7 +113,7 @@ void CWeaponSkillState::SpendCost()
     m_spent = tp;
 }
 
-bool CWeaponSkillState::Update(time_point tick)
+bool CWeaponSkillState::Update(timer::time_point tick)
 {
     if (m_PEntity && m_PEntity->isAlive() && !IsCompleted())
     {
@@ -196,7 +196,7 @@ bool CWeaponSkillState::Update(time_point tick)
     return false;
 }
 
-void CWeaponSkillState::Cleanup(time_point tick)
+void CWeaponSkillState::Cleanup(timer::time_point tick)
 {
     // TODO: interrupt an in progress ws
 }

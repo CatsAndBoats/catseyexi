@@ -36,7 +36,7 @@ namespace zoneutils
     void LoadZoneList(IPP mapIPP);
     void FreeZoneList();
     void InitializeWeather();
-    void TOTDChange(TIMETYPE TOTD);
+    void TOTDChange(vanadiel_time::TOTD TOTD);
     void SavePlayTime();
 
     REGION_TYPE    GetCurrentRegion(uint16 ZoneID);

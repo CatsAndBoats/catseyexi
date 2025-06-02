@@ -24,6 +24,7 @@
 #include "pch.h"
 
 #include "common/application.h"
+#include "common/timer.h"
 #include "common/watchdog.h"
 
 #include "zone.h"
@@ -72,8 +73,8 @@ public:
     // Maintenance
     //
 
-    int32 map_cleanup(time_point tick, CTaskManager::CTask* PTask); // Clean up timed out players
-    int32 map_garbage_collect(time_point tick, CTaskManager::CTask* PTask);
+    int32 map_cleanup(timer::time_point tick, CTaskManager::CTask* PTask); // Clean up timed out players
+    int32 map_garbage_collect(timer::time_point tick, CTaskManager::CTask* PTask);
 
     //
     // Accessors

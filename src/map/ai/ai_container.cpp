@@ -56,8 +56,8 @@ CAIContainer::CAIContainer(CBaseEntity* _PEntity, std::unique_ptr<CPathFind>&& _
 : TargetFind(std::move(_targetfind))
 , PathFind(std::move(_pathfind))
 , Controller(std::move(_controller))
-, m_Tick(server_clock::now())
-, m_PrevTick(server_clock::now())
+, m_Tick(timer::now())
+, m_PrevTick(timer::now())
 , PEntity(_PEntity)
 , ActionQueue(_PEntity)
 {
@@ -174,12 +174,12 @@ bool CAIContainer::UseItem(uint16 targid, uint8 loc, uint8 slotid)
     return false;
 }
 
-bool CAIContainer::Inactive(duration _duration, bool canChangeState)
+bool CAIContainer::Inactive(timer::duration _duration, bool canChangeState)
 {
     return ForceChangeState<CInactiveState>(PEntity, _duration, canChangeState, false);
 }
 
-bool CAIContainer::Untargetable(duration _duration, bool canChangeState)
+bool CAIContainer::Untargetable(timer::duration _duration, bool canChangeState)
 {
     return ForceChangeState<CInactiveState>(PEntity, _duration, canChangeState, true);
 }
@@ -335,7 +335,7 @@ bool CAIContainer::Internal_RangedAttack(uint16 targetid)
     return false;
 }
 
-bool CAIContainer::Internal_Die(duration deathTime)
+bool CAIContainer::Internal_Die(timer::duration deathTime)
 {
     auto* entity = dynamic_cast<CBattleEntity*>(PEntity);
     if (entity)
@@ -412,7 +412,7 @@ void CAIContainer::Reset()
     }
 }
 
-void CAIContainer::Tick(time_point _tick)
+void CAIContainer::Tick(timer::time_point _tick)
 {
     TracyZoneScoped;
     m_PrevTick = m_Tick;
@@ -464,7 +464,7 @@ void CAIContainer::ClearStateStack()
 {
     while (!m_stateStack.empty())
     {
-        m_stateStack.top()->Cleanup(server_clock::now());
+        m_stateStack.top()->Cleanup(timer::now());
         m_stateStack.pop();
     }
 }
@@ -473,7 +473,7 @@ void CAIContainer::InterruptStates()
 {
     while (!m_stateStack.empty() && m_stateStack.top()->CanInterrupt())
     {
-        m_stateStack.top()->Cleanup(server_clock::now());
+        m_stateStack.top()->Cleanup(timer::now());
         m_stateStack.pop();
     }
 }
@@ -498,12 +498,12 @@ bool CAIContainer::IsUntargetable()
     return (PEntity->PAI->IsCurrentState<CInactiveState>() && static_cast<CInactiveState*>(PEntity->PAI->GetCurrentState())->GetUntargetable()) || PEntity->GetUntargetable();
 }
 
-time_point CAIContainer::getTick()
+timer::time_point CAIContainer::getTick()
 {
     return m_Tick;
 }
 
-time_point CAIContainer::getPrevTick()
+timer::time_point CAIContainer::getPrevTick()
 {
     return m_PrevTick;
 }
@@ -542,7 +542,7 @@ void CAIContainer::ClearTimerQueue()
 
 void CAIContainer::checkQueueImmediately()
 {
-    ActionQueue.checkAction(server_clock::now());
+    ActionQueue.checkAction(timer::now());
 }
 
 bool CAIContainer::Internal_Despawn(bool instantDespawn)
@@ -554,7 +554,7 @@ bool CAIContainer::Internal_Despawn(bool instantDespawn)
     return false;
 }
 
-bool CAIContainer::Internal_Respawn(duration _duration)
+bool CAIContainer::Internal_Respawn(timer::duration _duration)
 {
     if (!IsCurrentState<CRespawnState>())
     {
@@ -577,7 +577,7 @@ void CAIContainer::CheckCompletedStates()
 {
     while (!m_stateStack.empty() && m_stateStack.top()->IsCompleted())
     {
-        m_stateStack.top()->Cleanup(server_clock::now());
+        m_stateStack.top()->Cleanup(timer::now());
         m_stateStack.pop();
     }
 }

@@ -131,7 +131,7 @@ local function getElementalDebuffPotency(caster, statUsed)
         potency = potency + 1
     end
 
-    potency = potency + caster:getMerit(xi.merit.ELEMENTAL_DEBUFF_EFFECT) -- TODO: Add BLM Toban gear effect (potency) here.
+    potency = potency + caster:getMerit(xi.merit.ELEMENTAL_DEBUFF_EFFECT) + caster:getMod(xi.mod.ELEMENTAL_DEBUFF_EFFECT) / 2
 
     return potency
 end
@@ -324,6 +324,8 @@ xi.spells.enfeebling.calculateDuration = function(caster, target, spellId, spell
                 duration = duration + caster:getJobPointLevel(xi.jp.STYMIE_EFFECT)
             end
         end
+
+        duration = math.floor(duration * (1 + caster:getMod(xi.mod.ENF_MAG_DURATION) / 100))
     end
 
     ---@cast duration integer

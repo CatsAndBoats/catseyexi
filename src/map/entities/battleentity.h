@@ -742,13 +742,13 @@ public:
     virtual void TryHitInterrupt(CBattleEntity* PAttacker);
     virtual void OnDespawn(CDespawnState&);
 
-    void     SetBattleStartTime(time_point);
-    duration GetBattleTime();
+    void            SetBattleStartTime(timer::time_point);
+    timer::duration GetBattleTime();
 
     void   setBattleID(uint16 battleID);
     uint16 getBattleID();
 
-    virtual void Tick(time_point) override;
+    virtual void Tick(timer::time_point) override;
     virtual void PostTick() override;
 
     health_t health{}; // hp,mp,tp
@@ -758,8 +758,8 @@ public:
     uint16   m_magicEvasion; // store this so it can be removed easily
     bool     m_unkillable;   // entity is not able to die (probably until some action removes this flag)
 
-    time_point charmTime; // to hold the time entity is charmed
-    bool       isCharmed; // is the battle entity charmed?
+    timer::time_point charmTime; // to hold the time entity is charmed
+    bool              isCharmed; // is the battle entity charmed?
 
     float           m_ModelRadius;  // The radius of the entity model, for calculating the range of a physical attack
     ECOSYSTEM       m_EcoSystem{};  // Entity eco system
@@ -773,25 +773,25 @@ public:
 
     ActionList_t m_ActionList{}; // List of actions performed in one attack (you will need to write a structure that includes an ActionList in which there will be categories, animations, etc.)
 
-    CParty*         PParty;
-    CBattleEntity*  PPet;
-    CBattleEntity*  PMaster; // Owner/owner of the entity (applies to all combat entities)
-    CBattleEntity*  PLastAttacker;
-    time_point      LastAttacked;
-    battlehistory_t BattleHistory{}; // Stores info related to most recent combat actions taken towards this entity.
+    CParty*           PParty;
+    CBattleEntity*    PPet;
+    CBattleEntity*    PMaster; // Owner/owner of the entity (applies to all combat entities)
+    CBattleEntity*    PLastAttacker;
+    timer::time_point LastAttacked;
+    battlehistory_t   BattleHistory{}; // Stores info related to most recent combat actions taken towards this entity.
 
     std::unique_ptr<CStatusEffectContainer> StatusEffectContainer;
     std::unique_ptr<CRecastContainer>       PRecastContainer;
     std::unique_ptr<CNotorietyContainer>    PNotorietyContainer;
 
 private:
-    JOBTYPE    m_mjob;
-    JOBTYPE    m_sjob;
-    uint8      m_mlvl; // CURRENT level of the main job
-    uint8      m_slvl; // CURRENT level of the sub job
-    uint16     m_battleTarget{ 0 };
-    time_point m_battleStartTime;
-    uint16     m_battleID = 0; // Current battle the entity is participating in. Battle ID must match in order for entities to interact with each other.
+    JOBTYPE           m_mjob;
+    JOBTYPE           m_sjob;
+    uint8             m_mlvl; // CURRENT level of the main job
+    uint8             m_slvl; // CURRENT level of the sub job
+    uint16            m_battleTarget{ 0 };
+    timer::time_point m_battleStartTime;
+    uint16            m_battleID = 0; // Current battle the entity is participating in. Battle ID must match in order for entities to interact with each other.
 
     std::unordered_map<Mod, int16, EnumClassHash>                                                m_modStat;     // array of modifiers
     std::unordered_map<Mod, int16, EnumClassHash>                                                m_modStatSave; // saved state

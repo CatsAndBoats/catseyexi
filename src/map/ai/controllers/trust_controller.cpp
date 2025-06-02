@@ -83,7 +83,7 @@ void CTrustController::Despawn()
     CMobController::Despawn();
 }
 
-void CTrustController::Tick(time_point tick)
+void CTrustController::Tick(timer::time_point tick)
 {
     TracyZoneScoped;
     TracyZoneString(POwner->getName());
@@ -110,7 +110,7 @@ void CTrustController::Tick(time_point tick)
     }
 }
 
-void CTrustController::DoCombatTick(time_point tick)
+void CTrustController::DoCombatTick(timer::time_point tick)
 {
     TracyZoneScoped;
 
@@ -215,13 +215,13 @@ void CTrustController::DoCombatTick(time_point tick)
     }
 }
 
-void CTrustController::DoRoamTick(time_point tick)
+void CTrustController::DoRoamTick(timer::time_point tick)
 {
     TracyZoneScoped;
 
     auto* PMaster              = static_cast<CCharEntity*>(POwner->PMaster);
     auto  masterLastAttackTime = static_cast<CPlayerController*>(PMaster->PAI->GetController())->getLastAttackTime();
-    bool  masterMeleeSwing     = masterLastAttackTime > server_clock::now() - 1s;
+    bool  masterMeleeSwing     = masterLastAttackTime > timer::now() - 1s;
 
     bool trustEngageCondition = false;
     // NOTE: charvars are now cached, this is essentially a localvar read now.
@@ -407,7 +407,7 @@ bool CTrustController::Ability(uint16 targid, uint16 abilityid)
 {
     TracyZoneScoped;
 
-    if (static_cast<CMobEntity*>(POwner)->PRecastContainer->HasRecast(RECAST_ABILITY, abilityid, 0))
+    if (static_cast<CMobEntity*>(POwner)->PRecastContainer->HasRecast(RECAST_ABILITY, abilityid, 0s))
     {
         return false;
     }
@@ -424,7 +424,7 @@ bool CTrustController::RangedAttack(uint16 targid)
 {
     TracyZoneScoped;
 
-    duration rangedDelay = 10s;
+    timer::duration rangedDelay = 10s;
     if (CItemWeapon* PRange = dynamic_cast<CItemWeapon*>(POwner->m_Weapons[SLOT_RANGED]))
     {
         rangedDelay = std::chrono::milliseconds(PRange->getDelay());

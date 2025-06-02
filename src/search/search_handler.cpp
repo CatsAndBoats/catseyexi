@@ -22,6 +22,7 @@
 #include "search_handler.h"
 
 #include "common/md52.h"
+#include "common/timer.h"
 #include "common/utils.h"
 
 #include "data_loader.h"
@@ -76,7 +77,7 @@ void search_handler::start()
 {
     if (socket_.lowest_layer().is_open())
     {
-        deadline_.expires_after(std::chrono::milliseconds(10000)); // AH searches can take quite a while
+        deadline_.expires_after(10s); // AH searches can take quite a while
         deadline_.async_wait(std::bind(&search_handler::checkDeadline, this, shared_from_this()));
 
         do_read();
@@ -907,7 +908,7 @@ void search_handler::addToUsedIPAddresses(std::string const& ipAddressStr)
 
 void search_handler::checkDeadline(std::shared_ptr<search_handler> self) // self to keep the object alive
 {
-    if (std::chrono::steady_clock::now() > deadline_.expiry())
+    if (timer::now() > deadline_.expiry())
     {
         DebugSocketsFmt("Socket timed out from {}", ipAddress);
         socket_.cancel();

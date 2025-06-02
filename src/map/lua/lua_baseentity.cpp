@@ -44,6 +44,7 @@
 #include "instance.h"
 #include "ipc_client.h"
 #include "item_container.h"
+#include "items.h"
 #include "latent_effect_container.h"
 #include "linkshell.h"
 #include "map_server.h"
@@ -640,7 +641,7 @@ void CLuaBaseEntity::setCharVar(std::string const& varName, int32 value, sol::ob
     {
         uint32 varTimestamp = expiry.is<uint32>() ? expiry.as<uint32>() : 0;
 
-        if (varTimestamp > 0 && varTimestamp <= CVanaTime::getInstance()->getSysTime())
+        if (varTimestamp > 0 && varTimestamp <= earth_time::timestamp())
         {
             ShowWarning(fmt::format("Attempting to set variable '{}' with an expired time: {}", varName, varTimestamp));
             return;
@@ -661,7 +662,7 @@ void CLuaBaseEntity::setCharVarExpiration(std::string const& varName, uint32 exp
 {
     if (auto* PChar = dynamic_cast<CCharEntity*>(m_PBaseEntity))
     {
-        if (expiry > 0 && expiry <= CVanaTime::getInstance()->getSysTime())
+        if (expiry > 0 && expiry <= earth_time::timestamp())
         {
             ShowWarning(fmt::format("Attempting to set variable '{}' with an expired time: {}", varName, expiry));
             return;
@@ -701,7 +702,7 @@ void CLuaBaseEntity::setVolatileCharVar(std::string const& varName, int32 value,
     {
         uint32 varTimestamp = expiry.is<uint32>() ? expiry.as<uint32>() : 0;
 
-        if (varTimestamp > 0 && varTimestamp <= CVanaTime::getInstance()->getSysTime())
+        if (varTimestamp > 0 && varTimestamp <= earth_time::timestamp())
         {
             ShowWarning(fmt::format("Attempting to set variable '{}' with an expired time: {}", varName, varTimestamp));
             return;
@@ -823,7 +824,7 @@ uint32 CLuaBaseEntity::getLastOnline()
 
     if (auto* PChar = dynamic_cast<CCharEntity*>(m_PBaseEntity))
     {
-        return PChar->lastOnline;
+        return earth_time::timestamp(PChar->lastOnline);
     }
 
     return 0;
@@ -1939,7 +1940,7 @@ bool CLuaBaseEntity::pathThrough(sol::table const& pointsTable, sol::object cons
             }
 
             auto wait  = pointData["wait"];
-            point.wait = wait.valid() ? wait.get<uint32>() : 0;
+            point.wait = wait.valid() ? std::chrono::seconds(wait.get<uint32>()) : 0s;
             points.emplace_back(point);
         }
     }
@@ -1948,7 +1949,7 @@ bool CLuaBaseEntity::pathThrough(sol::table const& pointsTable, sol::object cons
         // Grab points from array and store in points array
         for (std::size_t i = 1; i < pointsTable.size(); i += 3)
         {
-            points.emplace_back(pathpoint_t{ { (float)pointsTable[i], (float)pointsTable[i + 1], (float)pointsTable[i + 2], 0, 0 }, 0, false });
+            points.emplace_back(pathpoint_t{ { (float)pointsTable[i], (float)pointsTable[i + 1], (float)pointsTable[i + 2], 0, 0 }, 0s, false });
         }
     }
 
@@ -2239,7 +2240,7 @@ void CLuaBaseEntity::setElevator(uint8 id, uint32 lowerDoor, uint32 upperDoor, u
     elevator.Elevator           = static_cast<CNpcEntity*>(zoneutils::GetEntity(elevatorId, TYPE_NPC));
     elevator.animationsReversed = reversed;
     elevator.state              = STATE_ELEVATOR_BOTTOM;
-    elevator.lastTrigger        = 0;
+    elevator.lastTrigger        = vanadiel_time::time_point::min();
 
     if (!elevator.Elevator || !elevator.LowerDoor || !elevator.UpperDoor)
     {
@@ -2251,8 +2252,8 @@ void CLuaBaseEntity::setElevator(uint8 id, uint32 lowerDoor, uint32 upperDoor, u
     elevator.activated   = elevator.id == 0;
     elevator.isPermanent = elevator.id == 0;
 
-    elevator.movetime = 3;
-    elevator.interval = 8;
+    elevator.movetime = xi::vanadiel_clock::minutes(3);
+    elevator.interval = xi::vanadiel_clock::minutes(8);
 
     elevator.zoneID = m_PBaseEntity->loc.zone->GetID();
 
@@ -2282,8 +2283,8 @@ void CLuaBaseEntity::addPeriodicTrigger(uint8 id, uint16 period, uint16 minOffse
     Trigger_t trigger{};
 
     trigger.id           = id;
-    trigger.period       = period;
-    trigger.minuteOffset = minOffset;
+    trigger.period       = xi::vanadiel_clock::minutes(period);
+    trigger.minuteOffset = xi::vanadiel_clock::minutes(minOffset);
     trigger.npc          = dynamic_cast<CNpcEntity*>(zoneutils::GetEntity(m_PBaseEntity->id, TYPE_NPC));
     trigger.lastTrigger  = 0;
 
@@ -2499,12 +2500,13 @@ bool CLuaBaseEntity::sendGuild(uint16 guildID, uint8 open, uint8 close, uint8 ho
         return GUILD_OPEN;
     }
 
-    uint8 VanadielHour = (uint8)CVanaTime::getInstance()->getHour();
+    vanadiel_time::time_point vanaTime     = vanadiel_time::now();
+    uint8                     VanadielHour = static_cast<uint8>(vanadiel_time::get_hour(vanaTime));
 
     GUILDSTATUS status = GUILD_OPEN;
 
     // Guild holiday - Removed in 2014
-    // uint8 vanadielDay = (uint8)CVanaTime::getInstance()->getWeekday();
+    // uint8 vanadielDay = static_cast<uint8>(vanadiel_time::get_weekday(vanaTime));
     //
     // if (vanadielDay == holiday)
     // {
@@ -2938,7 +2940,7 @@ void CLuaBaseEntity::updateToEntireZone(uint8 statusID, uint8 animation, sol::ob
     // If this flag is high, update the NPC's name to match the current time
     if (updateForTime == true)
     {
-        PNpc->SetLocalVar("TransportTimestamp", CVanaTime::getInstance()->getVanaTime());
+        PNpc->SetLocalVar("TransportTimestamp", earth_time::vanadiel_timestamp());
     }
 
     PNpc->loc.zone->UpdateEntityPacket(PNpc, ENTITY_UPDATE, UPDATE_COMBAT, true);
@@ -4293,7 +4295,7 @@ bool CLuaBaseEntity::addUsedItem(uint16 itemID)
             {
                 auto* PUsable = static_cast<CItemUsable*>(PItem);
                 PUsable->setQuantity(1);
-                PUsable->setLastUseTime(CVanaTime::getInstance()->getVanaTime());
+                PUsable->setLastUseTime(timer::now());
                 SlotID = charutils::AddItem(PChar, LOC_INVENTORY, PUsable, false);
             }
             else
@@ -4695,7 +4697,7 @@ bool CLuaBaseEntity::addLinkpearl(std::string const& lsname, bool equip)
     return false;
 }
 
-auto CLuaBaseEntity::addSoulPlate(std::string const& name, uint16 mobFamily, uint8 zeni, uint16 skillIndex, uint8 fp) -> CItem*
+auto CLuaBaseEntity::addSoulPlate(std::string const& name, uint32 interestData, uint8 zeni, uint16 skillIndex, uint8 fp) -> CItem*
 {
     if (m_PBaseEntity->objtype != TYPE_PC)
     {
@@ -4711,7 +4713,7 @@ auto CLuaBaseEntity::addSoulPlate(std::string const& name, uint16 mobFamily, uin
         PChar->pushPacket<CInventoryFinishPacket>();
 
         // Used Soul Plate
-        CItem* PItem = itemutils::GetItem(2477);
+        CItem* PItem = itemutils::GetItem(ITEMID::SOUL_PLATE);
 
         if (PItem == nullptr)
         {
@@ -4720,7 +4722,7 @@ auto CLuaBaseEntity::addSoulPlate(std::string const& name, uint16 mobFamily, uin
         }
 
         PItem->setQuantity(1);
-        PItem->setSoulPlateData(name, mobFamily, zeni, skillIndex, fp);
+        PItem->setSoulPlateData(name, interestData, zeni, skillIndex, fp);
         auto SlotID = charutils::AddItem(PChar, LOC_INVENTORY, PItem, true);
         if (SlotID == ERROR_SLOTID)
         {
@@ -4974,17 +4976,17 @@ void CLuaBaseEntity::equipItem(uint16 itemID, sol::object const& container)
 
 /************************************************************************
  *  Function: unequipItem()
- *  Purpose : Unequips an item from player
- *  Example : player:unequipItem(17845)
- *  Notes   :
+ *  Purpose : Unequips an item from player based on slot id
+ *  Example : player:unequipItem(4) -- Head
+ *  Notes   : Range 0 - 15
  ************************************************************************/
 
-void CLuaBaseEntity::unequipItem(uint8 itemID)
+void CLuaBaseEntity::unequipItem(uint8 slotID)
 {
     if (m_PBaseEntity->objtype == TYPE_PC)
     {
         auto* PChar = static_cast<CCharEntity*>(m_PBaseEntity);
-        charutils::UnequipItem(PChar, itemID);
+        charutils::UnequipItem(PChar, slotID);
     }
 }
 
@@ -6318,7 +6320,7 @@ uint32 CLuaBaseEntity::getPlaytime(sol::object const& shouldUpdate)
     bool  update = (shouldUpdate != sol::lua_nil) ? shouldUpdate.as<bool>() : true;
     auto* PChar  = static_cast<CCharEntity*>(m_PBaseEntity);
 
-    return PChar->GetPlayTime(update);
+    return static_cast<uint32>(timer::count_seconds(PChar->GetPlayTime(update)));
 }
 
 /************************************************************************
@@ -6327,7 +6329,7 @@ uint32 CLuaBaseEntity::getPlaytime(sol::object const& shouldUpdate)
  *  Example : player:getTimeCreated()
  ************************************************************************/
 
-int32 CLuaBaseEntity::getTimeCreated()
+uint32 CLuaBaseEntity::getTimeCreated()
 {
     if (m_PBaseEntity->objtype != TYPE_PC)
     {
@@ -6337,7 +6339,7 @@ int32 CLuaBaseEntity::getTimeCreated()
 
     auto* PChar = static_cast<CCharEntity*>(m_PBaseEntity);
 
-    return PChar->GetTimeCreated();
+    return earth_time::timestamp(PChar->GetTimeCreated());
 }
 
 /************************************************************************
@@ -11116,7 +11118,7 @@ void CLuaBaseEntity::addPartyEffect(sol::variadic_args va)
     }
 
     CStatusEffect* PEffect =
-        new CStatusEffect(static_cast<EFFECT>(args[0]), args[1], args[2], args[3], args[4], args[5], args[6]);
+        new CStatusEffect(static_cast<EFFECT>(args[0]), args[1], args[2], std::chrono::seconds(args[3]), std::chrono::seconds(args[4]), args[5], args[6]);
 
     CBattleEntity* PEntity = ((CBattleEntity*)m_PBaseEntity);
 
@@ -11309,7 +11311,7 @@ uint32 CLuaBaseEntity::getPartyLastMemberJoinedTime()
 
     if (PChar->PParty != nullptr)
     {
-        return PChar->PParty->GetTimeLastMemberJoined();
+        return earth_time::timestamp(timer::to_utc(PChar->PParty->GetTimeLastMemberJoined()));
     }
 
     return 0;
@@ -12048,7 +12050,7 @@ void CLuaBaseEntity::countdown(sol::object const& secondsObj)
                 strongholdNameOverride = 0
             },
             fence = {
-                pos = {x = 0.000, y = 0.000}, -- center of fence
+                pos = {x = 0.000, z = 0.000}, -- center of fence
                 radius = 25.00, -- radius from pos in yalms
                 render = 25.00, -- distance from fence it becomes visible
                 blue = true -- optional, turns default red fence bars blue
@@ -12135,18 +12137,18 @@ void CLuaBaseEntity::objectiveUtility(sol::object const& obj)
         {
             sol::object fencePosObj = fenceObj.as<sol::table>()["pos"];
             float       posX        = 0.000;
-            float       posY        = 0.000;
+            float       posZ        = 0.000;
             if (fencePosObj.valid() && fencePosObj.is<sol::table>())
             {
                 posX = fencePosObj.as<sol::table>().get<float>("x");
-                posY = fencePosObj.as<sol::table>().get<float>("y");
+                posZ = fencePosObj.as<sol::table>().get<float>("z");
             }
 
             float radius = fenceObj.as<sol::table>().get_or<float>("radius", 0.00);
             float render = fenceObj.as<sol::table>().get_or<float>("render", 25.00);
             bool  blue   = fenceObj.as<sol::table>().get_or<bool, std::string, bool>("blue", false);
 
-            packet->addFence(posX, posY, radius, render, blue);
+            packet->addFence(posX, posZ, radius, render, blue);
         }
 
         sol::object helpObj = obj.as<sol::table>()["help"];
@@ -12282,7 +12284,7 @@ void CLuaBaseEntity::addRecast(uint8 recastCont, uint16 recastID, uint32 duratio
     {
         RECASTTYPE recastContainer = static_cast<RECASTTYPE>(recastCont);
 
-        PBattleEntity->PRecastContainer->Add(recastContainer, recastID, duration);
+        PBattleEntity->PRecastContainer->Add(recastContainer, recastID, std::chrono::seconds(duration));
         if (PBattleEntity->objtype == TYPE_PC)
         {
             CCharEntity* PChar = (CCharEntity*)m_PBaseEntity;
@@ -12307,7 +12309,7 @@ bool CLuaBaseEntity::hasRecast(uint8 rType, uint16 recastID, sol::object const& 
     if (PBattleEntity)
     {
         RECASTTYPE recastContainer = static_cast<RECASTTYPE>(rType);
-        uint32     recast          = (arg2 != sol::lua_nil) ? arg2.as<uint32>() : 0;
+        auto       recast          = (arg2 != sol::lua_nil) ? std::chrono::seconds(arg2.as<uint32>()) : 0s;
 
         hasRecast = PBattleEntity->PRecastContainer->HasRecast(recastContainer, recastID, recast);
     }
@@ -12334,7 +12336,7 @@ void CLuaBaseEntity::resetRecast(uint8 rType, uint16 recastID)
         if (PChar->PRecastContainer->Has(recastContainer, recastID))
         {
             PChar->PRecastContainer->Del(recastContainer, recastID);
-            PChar->PRecastContainer->Add(recastContainer, recastID, 0);
+            PChar->PRecastContainer->Add(recastContainer, recastID, 0s);
         }
 
         PChar->pushPacket<CCharSkillsPacket>(PChar);
@@ -13122,21 +13124,16 @@ void CLuaBaseEntity::updateClaim(sol::object const& entity)
  *  Notes   :
  ************************************************************************/
 
-bool CLuaBaseEntity::hasClaim(CBattleEntity* PTarget)
+bool CLuaBaseEntity::hasClaim(CLuaBaseEntity* PTarget)
 {
-    if (m_PBaseEntity->objtype == TYPE_NPC)
+    auto* PBattleEntity = dynamic_cast<CBattleEntity*>(m_PBaseEntity);
+    if (!PBattleEntity)
     {
         ShowWarning("Attempting to check claim for invalid entity type (%s).", m_PBaseEntity->getName());
         return false;
     }
 
-    if (PTarget->objtype == TYPE_NPC)
-    {
-        ShowWarning("Attempting to check claim for invalid target type (%s).", PTarget->getName());
-        return false;
-    }
-
-    return battleutils::HasClaim(dynamic_cast<CBattleEntity*>(m_PBaseEntity), PTarget);
+    return battleutils::HasClaim(dynamic_cast<CBattleEntity*>(m_PBaseEntity), PBattleEntity);
 }
 
 /************************************************************************
@@ -13244,8 +13241,8 @@ bool CLuaBaseEntity::addStatusEffect(sol::variadic_args va)
         CStatusEffect* PEffect = new CStatusEffect(effectID,
                                                    effectIcon,
                                                    power,
-                                                   tick,
-                                                   duration,
+                                                   std::chrono::seconds(tick),
+                                                   std::chrono::seconds(duration),
                                                    subType,
                                                    subPower,
                                                    tier);
@@ -13260,7 +13257,7 @@ bool CLuaBaseEntity::addStatusEffect(sol::variadic_args va)
             int16 durationModifier = PBattleEntity->getMod(Mod::FOOD_DURATION);
             if (durationModifier)
             {
-                PEffect->SetDuration((uint32)(PEffect->GetDuration() + PEffect->GetDuration() * (durationModifier / 100.0f)));
+                PEffect->SetDuration(PEffect->GetDuration() + std::chrono::floor<std::chrono::milliseconds>(PEffect->GetDuration() * (durationModifier / 100.0f)));
             }
         }
 
@@ -13311,8 +13308,8 @@ bool CLuaBaseEntity::addStatusEffectEx(sol::variadic_args va)
         new CStatusEffect(effectID,
                           effectIcon,
                           power,
-                          tick,
-                          duration,
+                          std::chrono::seconds(tick),
+                          std::chrono::seconds(duration),
                           subType,
                           subPower,
                           tier,
@@ -13470,7 +13467,7 @@ bool CLuaBaseEntity::canGainStatusEffect(uint16 effect, sol::object const& power
         return false;
     }
 
-    CStatusEffect statusEffect(static_cast<EFFECT>(effect), 0, power, 0, 0);
+    CStatusEffect statusEffect(static_cast<EFFECT>(effect), 0, power, 0s, 0s);
 
     return PBattleEntity->StatusEffectContainer->CanGainStatusEffect(&statusEffect);
 }
@@ -14107,8 +14104,8 @@ bool CLuaBaseEntity::addCorsairRoll(uint8 casterJob, uint8 bustDuration, uint16 
     CStatusEffect* PEffect = new CStatusEffect(static_cast<EFFECT>(effectID),                  // Effect ID
                                                effectID,                                       // Effect Icon (Associated with ID)
                                                power,                                          // Power
-                                               tick,                                           // Tick
-                                               duration,                                       // Duration
+                                               std::chrono::seconds(tick),                     // Tick
+                                               std::chrono::seconds(duration),                 // Duration
                                                (arg6 != sol::lua_nil) ? arg6.as<uint32>() : 0, // SubType or 0
                                                (arg7 != sol::lua_nil) ? arg7.as<uint16>() : 0, // SubPower or 0
                                                (arg8 != sol::lua_nil) ? arg8.as<uint16>() : 0  // Tier or 0
@@ -14215,14 +14212,14 @@ bool CLuaBaseEntity::addBardSong(CLuaBaseEntity* PEntity, uint16 effectID, uint1
         return false;
     }
 
-    CStatusEffect* PEffect = new CStatusEffect(static_cast<EFFECT>(effectID), // Effect ID
-                                               effectID,                      // Effect Icon (Associated with ID)
-                                               power,                         // Power
-                                               tick,                          // Tick
-                                               duration,                      // Duration
-                                               subType,                       // SubType
-                                               subPower,                      // SubPower
-                                               tier                           // Tier
+    CStatusEffect* PEffect = new CStatusEffect(static_cast<EFFECT>(effectID),  // Effect ID
+                                               effectID,                       // Effect Icon (Associated with ID)
+                                               power,                          // Power
+                                               std::chrono::seconds(tick),     // Tick
+                                               std::chrono::seconds(duration), // Duration
+                                               subType,                        // SubType
+                                               subPower,                       // SubPower
+                                               tier                            // Tier
     );
 
     uint8 maxSongs = 2;
@@ -14283,6 +14280,24 @@ void CLuaBaseEntity::uncharm()
     {
         ShowError("Invalid entity type calling function (%s).", m_PBaseEntity->getName());
     }
+}
+
+/************************************************************************
+ *  Function: isTandemActive()
+ *  Purpose : If entity is pet or master, checks to see if both are fighting same target
+ *  Example : player:isTandemActive()
+ *  Notes   : used for BST traits Tandem Strike / Tandem Blow
+ ************************************************************************/
+
+bool CLuaBaseEntity::isTandemActive()
+{
+    auto* PBattle = dynamic_cast<CBattleEntity*>(m_PBaseEntity);
+    if (!PBattle)
+    {
+        ShowError("Invalid entity type calling function (%s).", m_PBaseEntity->getName());
+        return false;
+    }
+    return petutils::IsTandemActive(static_cast<CBattleEntity*>(m_PBaseEntity));
 }
 
 /************************************************************************
@@ -14402,7 +14417,16 @@ uint16 CLuaBaseEntity::getStat(uint16 statId, sol::variadic_args va)
                 }
                 else
                 {
-                    value = PEntity->RATT(SKILL_MARKSMANSHIP); // TODO: does this edge case exist? will mobs or trusts hit this?
+                    PWeapon = dynamic_cast<CItemWeapon*>(PEntity->m_Weapons[SLOTTYPE::SLOT_AMMO]);
+                    if (PWeapon)
+                    {
+                        value = PEntity->RATT(PWeapon->getSkillType());
+                    }
+                    else
+                    {
+                        ShowError("CLuaBaseEntity::getStat(): Ranged attack with no ranged weapon or ammo, defaulting to marksmanship");
+                        value = PEntity->RATT(SKILL_MARKSMANSHIP); // TODO: does this edge case exist? will mobs or trusts hit this?
+                    }
                 }
             }
         }
@@ -14640,26 +14664,6 @@ int32 CLuaBaseEntity::physicalDmgTaken(double damage, sol::variadic_args va)
     DAMAGE_TYPE damageType = va[0].is<uint32>() ? va[0].as<DAMAGE_TYPE>() : DAMAGE_TYPE::NONE;
 
     return battleutils::PhysicalDmgTaken(static_cast<CBattleEntity*>(m_PBaseEntity), static_cast<int32>(damage), damageType);
-}
-
-/************************************************************************
- *  Function: magicDmgTaken()
- *  Purpose : Returns the value of Magic Damage taken after calculation
- *  Example : dmg = target:magicDmgTaken(dmg)
- *  Notes   : Passes argument to MagicDmgTaken member of battleutils
- ************************************************************************/
-
-int32 CLuaBaseEntity::magicDmgTaken(double damage, sol::variadic_args va)
-{
-    if (m_PBaseEntity->objtype == TYPE_NPC)
-    {
-        ShowWarning("Invalid Entity (NPC: %s) calling function.", m_PBaseEntity->getName());
-        return 0;
-    }
-
-    ELEMENT elementType = va[0].is<uint32>() ? va[0].as<ELEMENT>() : ELEMENT_NONE;
-
-    return battleutils::MagicDmgTaken(static_cast<CBattleEntity*>(m_PBaseEntity), static_cast<int32>(damage), elementType);
 }
 
 /************************************************************************
@@ -16069,8 +16073,8 @@ bool CLuaBaseEntity::hasAttachment(uint16 itemID)
 
 /************************************************************************
  *  Function: getAutomatonName()
- *  Purpose : Returns the string name of the automation pet
- *  Example : local name = pet:getAutomatonName()
+ *  Purpose : Returns the string name of the player's automaton
+ *  Example : local name = player:getAutomatonName()
  *  Notes   :
  ************************************************************************/
 
@@ -16084,7 +16088,7 @@ auto CLuaBaseEntity::getAutomatonName() -> std::string
 
     const auto rset = db::preparedStmt("SELECT name FROM "
                                        "char_pet LEFT JOIN pet_name ON automatonid = id "
-                                       "WHERE charid = %u LIMIT 1",
+                                       "WHERE charid = ? LIMIT 1",
                                        m_PBaseEntity->id);
 
     if (rset && rset->rowsCount() && rset->next())
@@ -16891,7 +16895,7 @@ void CLuaBaseEntity::spawn(sol::object const& despawnSec, sol::object const& res
 
     if (respawnSec != sol::lua_nil)
     {
-        PMob->m_RespawnTime  = respawnSec.as<uint32>() * 1000;
+        PMob->m_RespawnTime  = std::chrono::seconds(respawnSec.as<uint32>());
         PMob->m_AllowRespawn = true;
     }
     else
@@ -17001,7 +17005,7 @@ uint32 CLuaBaseEntity::getRespawnTime()
 
     if (PMob->m_AllowRespawn)
     {
-        return PMob->m_RespawnTime;
+        return static_cast<uint32>(timer::count_seconds(PMob->m_RespawnTime));
     }
 
     return 0;
@@ -17030,7 +17034,7 @@ void CLuaBaseEntity::setRespawnTime(uint32 seconds)
 
     auto* PMob = static_cast<CMobEntity*>(m_PBaseEntity);
 
-    PMob->m_RespawnTime = seconds * 1000;
+    PMob->m_RespawnTime = std::chrono::seconds(seconds);
     if (PMob->PAI->IsCurrentState<CRespawnState>())
     {
         PMob->PAI->GetCurrentState()->ResetEntryTime();
@@ -17503,7 +17507,8 @@ uint32 CLuaBaseEntity::getBattleTime()
         return 0;
     }
 
-    return static_cast<uint32>(std::chrono::duration_cast<std::chrono::seconds>(((CBattleEntity*)m_PBaseEntity)->GetBattleTime()).count());
+    auto seconds = timer::count_seconds(static_cast<CBattleEntity*>(m_PBaseEntity)->GetBattleTime());
+    return static_cast<uint32>(seconds);
 }
 
 /************************************************************************
@@ -18324,7 +18329,7 @@ uint16 CLuaBaseEntity::getDespoilItem()
 
     DropList_t* PDropList = itemutils::GetDropList(PMob->m_DropID);
 
-    if (PDropList && !PMob->m_ItemStolen)
+    if (PDropList && !PMob->m_ItemDespoiled)
     {
         std::vector<DropItem_t> despoilableItems;
 
@@ -18361,7 +18366,7 @@ uint16 CLuaBaseEntity::getDespoilDebuff(uint16 itemID)
  *  Function: itemStolen()
  *  Purpose : Flags a mob's item as stolen, returns true upon update
  *  Example : target:itemStolen()
- *  Notes   : Used in scripts/actions/abilities/steal.lua
+ *  Notes   : Used in scripts/globals/job_utils/thief.lua
  ************************************************************************/
 
 bool CLuaBaseEntity::itemStolen()
@@ -18373,6 +18378,25 @@ bool CLuaBaseEntity::itemStolen()
     }
 
     static_cast<CMobEntity*>(m_PBaseEntity)->m_ItemStolen = true;
+    return true;
+}
+
+/************************************************************************
+ *  Function: itemDespoiled()
+ *  Purpose : Flags a mob's item as despoiled, returns true upon update
+ *  Example : target:itemDespoiled()
+ *  Notes   : Used in scripts/globals/job_utils/thief.lua
+ ************************************************************************/
+
+bool CLuaBaseEntity::itemDespoiled()
+{
+    if (m_PBaseEntity->objtype != TYPE_MOB)
+    {
+        ShowWarning("Attempting to flag despoiled item for invalid entity type (%s).", m_PBaseEntity->getName());
+        return false;
+    }
+
+    static_cast<CMobEntity*>(m_PBaseEntity)->m_ItemDespoiled = true;
     return true;
 }
 
@@ -18429,7 +18453,7 @@ uint32 CLuaBaseEntity::getAvailableTraverserStones()
  *  Purpose : Returns the number of Traverser Stones claimed by the player
  ************************************************************************/
 
-time_t CLuaBaseEntity::getTraverserEpoch()
+uint32 CLuaBaseEntity::getTraverserEpoch()
 {
     if (m_PBaseEntity->objtype != TYPE_PC)
     {
@@ -18437,7 +18461,7 @@ time_t CLuaBaseEntity::getTraverserEpoch()
     }
 
     auto* PChar = static_cast<CCharEntity*>(m_PBaseEntity);
-    return charutils::getTraverserEpoch(PChar);
+    return earth_time::timestamp(charutils::getTraverserEpoch(PChar));
 }
 
 /************************************************************************
@@ -19596,6 +19620,7 @@ void CLuaBaseEntity::Register()
     // BST
     SOL_REGISTER("charm", CLuaBaseEntity::charm);
     SOL_REGISTER("uncharm", CLuaBaseEntity::uncharm);
+    SOL_REGISTER("isTandemActive", CLuaBaseEntity::isTandemActive);
 
     // PUP
     SOL_REGISTER("addBurden", CLuaBaseEntity::addBurden);
@@ -19616,7 +19641,6 @@ void CLuaBaseEntity::Register()
     SOL_REGISTER("isSpellAoE", CLuaBaseEntity::isSpellAoE);
 
     SOL_REGISTER("physicalDmgTaken", CLuaBaseEntity::physicalDmgTaken);
-    SOL_REGISTER("magicDmgTaken", CLuaBaseEntity::magicDmgTaken);
     SOL_REGISTER("rangedDmgTaken", CLuaBaseEntity::rangedDmgTaken);
     SOL_REGISTER("breathDmgTaken", CLuaBaseEntity::breathDmgTaken);
     SOL_REGISTER("handleAfflatusMiseryDamage", CLuaBaseEntity::handleAfflatusMiseryDamage);
@@ -19800,6 +19824,7 @@ void CLuaBaseEntity::Register()
     SOL_REGISTER("getDespoilItem", CLuaBaseEntity::getDespoilItem);
     SOL_REGISTER("getDespoilDebuff", CLuaBaseEntity::getDespoilDebuff);
     SOL_REGISTER("itemStolen", CLuaBaseEntity::itemStolen);
+    SOL_REGISTER("itemDespoiled", CLuaBaseEntity::itemDespoiled);
     SOL_REGISTER("getTHlevel", CLuaBaseEntity::getTHlevel);
     SOL_REGISTER("setTHlevel", CLuaBaseEntity::setTHlevel);
 

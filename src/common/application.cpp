@@ -100,7 +100,6 @@ Application::Application(std::string const& serverName, int argc, char** argv)
 
     // TODO: How much of this interferes with the signal handler in here?
     debug::init();
-    timer_init();
 
     lua_init();
     settings::init();
@@ -112,7 +111,7 @@ Application::Application(std::string const& serverName, int argc, char** argv)
     ShowInfoFmt("=======================================================================");
     ShowInfoFmt("Begin {}-server init...", serverName);
 
-    srand((uint32)time(nullptr));
+    srand(earth_time::timestamp());
     xirand::seed();
 
 #ifdef ENV64BIT
@@ -165,7 +164,7 @@ void Application::usercheck()
     {
         std::cerr << "You are running as the root superuser or admin.\n";
         std::cerr << "It is unnecessary and unsafe to run with root privileges.\n";
-        std::this_thread::sleep_for(std::chrono::seconds(5));
+        std::this_thread::sleep_for(5s);
     }
 #endif // TRACY_ENABLE
 }

@@ -99,7 +99,7 @@ bool CPathFind::RoamAround(const position_t& point, float maxRadius, uint8 maxTu
             return false;
         }
 
-        m_points.emplace_back(pathpoint_t{ { point.x - 1 + rand() % 2, point.y, point.z - 1 + rand() % 2, 0, 0 }, 0, false });
+        m_points.emplace_back(pathpoint_t{ { point.x - 1 + rand() % 2, point.y, point.z - 1 + rand() % 2, 0, 0 }, 0s, false });
     }
 
     return true;
@@ -148,7 +148,7 @@ bool CPathFind::PathTo(const position_t& point, uint8 pathFlags, bool clear)
             Clear();
         }
 
-        m_points.emplace_back(pathpoint_t{ point, 0, false });
+        m_points.emplace_back(pathpoint_t{ point, 0s, false });
     }
 
     return true;
@@ -280,7 +280,7 @@ void CPathFind::PrunePathWithin(float within)
     }
 }
 
-void CPathFind::FollowPath(time_point tick)
+void CPathFind::FollowPath(timer::time_point tick)
 {
     TracyZoneScoped;
     if (!IsFollowingPath())
@@ -288,12 +288,12 @@ void CPathFind::FollowPath(time_point tick)
         return;
     }
 
-    if (m_timeAtPoint.time_since_epoch().count() != 0)
+    if (m_timeAtPoint != timer::time_point::min())
     {
         // Continue to wait until full wait time has elapsed
         if (tick >= m_timeAtPoint)
         {
-            m_timeAtPoint = {};
+            m_timeAtPoint = timer::time_point::min();
             ++m_currentPoint;
             luautils::OnPathPoint(m_POwner);
             if (m_currentPoint >= (int16)m_points.size())
@@ -336,9 +336,9 @@ void CPathFind::FollowPath(time_point tick)
                 m_POwner->loc.p.rotation = targetPoint.position.rotation;
                 m_POwner->updatemask |= UPDATE_POS;
             }
-            if (targetPoint.wait != 0 && m_timeAtPoint.time_since_epoch().count() == 0)
+            if (targetPoint.wait != 0s && m_timeAtPoint == timer::time_point::min())
             {
-                m_timeAtPoint = tick + std::chrono::milliseconds(targetPoint.wait);
+                m_timeAtPoint = tick + targetPoint.wait;
                 return;
             }
 
@@ -538,7 +538,7 @@ bool CPathFind::FindClosestPath(const position_t& start, const position_t& end)
 
     m_points       = m_POwner->loc.zone->m_navMesh->findPath(start, end);
     m_currentPoint = 0;
-    m_points.emplace_back(pathpoint_t{ end, 0, false }); // this prevents exploits with navmesh / impassible terrain
+    m_points.emplace_back(pathpoint_t{ end, 0s, false }); // this prevents exploits with navmesh / impassible terrain
 
     /* this check requirement is never met as intended since m_points are never empty when mob has a path
     if (m_points.empty())
@@ -619,7 +619,7 @@ void CPathFind::Clear()
     m_pathFlags         = 0;
     m_roamFlags         = 0;
     m_points.clear();
-    m_timeAtPoint = {};
+    m_timeAtPoint = timer::time_point::min();
 
     m_currentPoint  = 0;
     m_maxDistance   = 0;

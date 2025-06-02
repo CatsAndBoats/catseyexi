@@ -736,7 +736,7 @@ namespace db
             }
 
             ShowCritical("Query Failed after %d retries: %s", queryRetryCount, rawQuery.c_str());
-            std::this_thread::sleep_for(std::chrono::seconds(1));
+            std::this_thread::sleep_for(1s);
             std::terminate();
         });
         // clang-format on

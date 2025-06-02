@@ -22,6 +22,7 @@
 #pragma once
 
 #include "common/cbasetypes.h"
+#include "common/timer.h"
 
 #include <array>
 #include <chrono>
@@ -50,10 +51,10 @@ static constexpr auto kLogicUpdateInterval = std::chrono::milliseconds(static_ca
 static constexpr auto kTriggerAreaInterval = std::chrono::milliseconds(static_cast<uint64>(1000.0f / (kLogicUpdateRate * 2.0f)));
 
 // Split betweek task manager and networking workload (200ms)
-static constexpr auto kMainLoopInterval = std::chrono::milliseconds(200);
+static constexpr auto kMainLoopInterval = 200ms;
 
 // If the main loop is more than 100ms behind, we're in trouble.
-static constexpr auto kMainLoopBacklogThreshold = std::chrono::milliseconds(100);
+static constexpr auto kMainLoopBacklogThreshold = 100ms;
 
 // Packet & networking constants
 static constexpr auto kMaxBufferSize           = 2500U;

@@ -157,7 +157,7 @@ void CZoneInstance::DecreaseZoneCounter(CCharEntity* PChar)
         {
             if (!(PInstance->Failed() || PInstance->Completed()))
             {
-                PInstance->SetWipeTime(PInstance->GetElapsedTime(server_clock::now()));
+                PInstance->SetWipeTime(PInstance->GetElapsedTime(timer::now()));
             }
         }
     }
@@ -217,7 +217,7 @@ void CZoneInstance::IncreaseZoneCounter(CCharEntity* PChar)
 
         if (PChar->PInstance->GetLevelCap() > 0)
         {
-            PChar->StatusEffectContainer->AddStatusEffect(new CStatusEffect(EFFECT_LEVEL_RESTRICTION, EFFECT_LEVEL_RESTRICTION, PChar->PInstance->GetLevelCap(), 0, 0));
+            PChar->StatusEffectContainer->AddStatusEffect(new CStatusEffect(EFFECT_LEVEL_RESTRICTION, EFFECT_LEVEL_RESTRICTION, PChar->PInstance->GetLevelCap(), 0s, 0s));
         }
 
         if (PChar->PInstance->CheckFirstEntry(PChar->id))
@@ -323,7 +323,7 @@ void CZoneInstance::SpawnTransport(CCharEntity* PChar)
     }
 }
 
-void CZoneInstance::TOTDChange(TIMETYPE TOTD)
+void CZoneInstance::TOTDChange(vanadiel_time::TOTD TOTD)
 {
     TracyZoneScoped;
     for (const auto& PInstance : m_InstanceList)
@@ -382,7 +382,7 @@ void CZoneInstance::WideScan(CCharEntity* PChar, uint16 radius)
     }
 }
 
-void CZoneInstance::ZoneServer(time_point tick)
+void CZoneInstance::ZoneServer(timer::time_point tick)
 {
     TracyZoneScoped;
 

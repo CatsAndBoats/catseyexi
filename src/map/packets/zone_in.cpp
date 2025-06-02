@@ -333,16 +333,18 @@ CZoneInPacket::CZoneInPacket(CCharEntity* PChar, const EventInfo* currentEvent)
     auto const& nameStr = PChar->getName();
     std::memcpy(buffer_.data() + 0x84, nameStr.data(), nameStr.size());
 
-    ref<uint32>(0xA0) = PChar->GetPlayTime(); // time spent by the character in the game from the moment of creation
+    ref<uint32>(0xA0) = static_cast<uint32>(timer::count_seconds(PChar->GetPlayTime())); // time spent by the character in the game from the moment of creation
 
     ref<uint8>(0xAE) = GetMogHouseLeavingFlag(PChar);
 
-    uint32 pktTime = CVanaTime::getInstance()->getVanaTime();
+    auto currentTime  = earth_time::now();
+    ref<uint32>(0x38) = earth_time::timestamp(currentTime);
+    ref<uint32>(0x3C) = earth_time::vanadiel_timestamp(currentTime);
 
-    ref<uint32>(0x38) = pktTime + VTIME_BASEDATE;
-    ref<uint32>(0x3C) = pktTime;
-
-    ref<uint32>(0xA4) = PChar->GetTimeRemainingUntilDeathHomepoint();
+    // The client uses 66min as the maximum amount of time for death
+    // Once this value reaches below 6min then the client will force homepoint the character
+    auto deadRemaining = timer::count_seconds(6min + PChar->GetTimeUntilDeathHomepoint());
+    ref<uint32>(0xA4)  = static_cast<uint32>(60 * deadRemaining);
 
     ref<uint8>(0xB4) = PChar->GetMJob();
     ref<uint8>(0xB7) = PChar->GetSJob();

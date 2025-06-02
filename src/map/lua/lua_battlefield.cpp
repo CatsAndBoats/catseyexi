@@ -61,32 +61,32 @@ uint8 CLuaBattlefield::getArea()
 
 uint32 CLuaBattlefield::getTimeLimit()
 {
-    return std::chrono::duration_cast<std::chrono::seconds>(m_PLuaBattlefield->GetTimeLimit()).count();
+    return static_cast<uint32>(timer::count_seconds(m_PLuaBattlefield->GetTimeLimit()));
 }
 
 uint32 CLuaBattlefield::getTimeInside()
 {
-    return std::chrono::duration_cast<std::chrono::seconds>(m_PLuaBattlefield->GetTimeInside()).count();
+    return static_cast<uint32>(timer::count_seconds(m_PLuaBattlefield->GetTimeInside()));
 }
 
 uint32 CLuaBattlefield::getRemainingTime()
 {
-    return std::chrono::duration_cast<std::chrono::seconds>(m_PLuaBattlefield->GetRemainingTime()).count();
+    return static_cast<uint32>(timer::count_seconds(m_PLuaBattlefield->GetRemainingTime()));
 }
 
 uint32 CLuaBattlefield::getFightTick()
 {
-    return std::chrono::duration_cast<std::chrono::seconds>(m_PLuaBattlefield->GetFightTime() - m_PLuaBattlefield->GetStartTime()).count();
+    return static_cast<uint32>(timer::count_seconds(m_PLuaBattlefield->GetFightTime() - m_PLuaBattlefield->GetStartTime()));
 }
 
 uint32 CLuaBattlefield::getWipeTime()
 {
-    return std::chrono::duration_cast<std::chrono::seconds>(m_PLuaBattlefield->GetWipeTime() - get_server_start_time()).count();
+    return static_cast<uint32>(timer::count_seconds(m_PLuaBattlefield->GetWipeTime() - timer::start_time));
 }
 
 uint32 CLuaBattlefield::getFightTime()
 {
-    return std::chrono::duration_cast<std::chrono::seconds>(get_server_start_time() - m_PLuaBattlefield->GetFightTime()).count();
+    return static_cast<uint32>(timer::count_seconds(timer::start_time - m_PLuaBattlefield->GetFightTime()));
 }
 
 uint32 CLuaBattlefield::getMaxParticipants()
@@ -193,7 +193,7 @@ std::tuple<std::string, uint32, uint32> CLuaBattlefield::getRecord()
     const auto& record = m_PLuaBattlefield->GetRecord();
 
     auto   name = record.name;
-    uint32 time = std::chrono::duration_cast<std::chrono::seconds>(record.time).count();
+    uint32 time = timer::count_seconds(record.time);
     uint32 size = static_cast<uint32>(record.partySize);
 
     return std::make_tuple(name, time, size);
@@ -211,7 +211,7 @@ uint64_t CLuaBattlefield::getLocalVar(std::string const& name)
 
 uint32 CLuaBattlefield::getLastTimeUpdate()
 {
-    auto count = std::chrono::duration_cast<std::chrono::seconds>(m_PLuaBattlefield->GetLastTimeUpdate()).count();
+    auto count = timer::count_seconds(m_PLuaBattlefield->GetLastTimeUpdate());
     return count;
 }
 
@@ -243,7 +243,7 @@ void CLuaBattlefield::setTimeLimit(uint32 seconds)
 
 void CLuaBattlefield::setWipeTime(uint32 seconds)
 {
-    m_PLuaBattlefield->SetWipeTime(get_server_start_time() + std::chrono::seconds(seconds));
+    m_PLuaBattlefield->SetWipeTime(timer::start_time + std::chrono::seconds(seconds));
 }
 
 void CLuaBattlefield::setRecord(std::string const& name, uint32 seconds)

@@ -911,6 +911,24 @@ uint16 CBattleEntity::ATT(SLOTTYPE slot)
     {
         ATT += this->GetSkill(SKILL_AUTOMATON_MELEE);
     }
+    else if (this->objtype == TYPE_PET)
+    {
+        auto getEcoStrBonusFunc = lua["utils"]["getEcosystemStrengthBonus"];
+
+        if (getEcoStrBonusFunc.valid())
+        {
+            CBattleEntity* thisTarget = nullptr;
+            if (this->PAI->IsEngaged())
+            {
+                thisTarget = this->GetBattleTarget();
+            }
+
+            if (thisTarget != nullptr && (int8)getEcoStrBonusFunc(this->m_EcoSystem, thisTarget->m_EcoSystem) > 0)
+            {
+                ATTP += this->getMod(Mod::ENHANCES_MONSTER_CORRELATION);
+            }
+        }
+    }
     // use max to prevent underflow
     return std::max(1, ATT + (ATT * ATTP / 100) + std::min<int16>((ATT * m_modStat[Mod::FOOD_ATTP] / 100), m_modStat[Mod::FOOD_ATT_CAP]));
 }
@@ -1024,6 +1042,11 @@ uint16 CBattleEntity::ACC(uint8 attackNumber, uint16 offsetAccuracy)
             ACC += this->getMod(Mod::ENSPELL_DMG);
         }
 
+        if (petutils::IsTandemActive(this))
+        {
+            ACC += this->getMod(Mod::TANDEM_STRIKE_POWER);
+        }
+
         auto* PChar = dynamic_cast<CCharEntity*>(this);
         if (PChar)
         {
@@ -1045,6 +1068,14 @@ uint16 CBattleEntity::ACC(uint8 attackNumber, uint16 offsetAccuracy)
             ACC += this->getMod(Mod::ENSPELL_DMG);
         }
 
+        if (petutils::IsTandemActive(this))
+        {
+            if (this->PMaster && this->PMaster->objtype == TYPE_PC)
+            {
+                ACC += this->PMaster->getMod(Mod::TANDEM_STRIKE_POWER);
+            }
+        }
+
         ACC = ACC + std::min<int16>((ACC * m_modStat[Mod::FOOD_ACCP] / 100), m_modStat[Mod::FOOD_ACC_CAP]);
         return std::max<int16>(0, ACC);
     }
@@ -1057,6 +1088,31 @@ uint16 CBattleEntity::ACC(uint8 attackNumber, uint16 offsetAccuracy)
             ACC += this->getMod(Mod::ENSPELL_DMG);
         }
 
+        if (petutils::IsTandemActive(this))
+        {
+            if (this->PMaster && this->PMaster->objtype == TYPE_PC)
+            {
+                ACC += this->PMaster->getMod(Mod::TANDEM_STRIKE_POWER);
+            }
+        }
+        if (this->objtype == TYPE_PET)
+        {
+            auto getEcoStrBonusFunc = lua["utils"]["getEcosystemStrengthBonus"];
+
+            if (getEcoStrBonusFunc.valid())
+            {
+                CBattleEntity* thisTarget = nullptr;
+                if (this->PAI->IsEngaged())
+                {
+                    thisTarget = this->GetBattleTarget();
+                }
+
+                if (thisTarget != nullptr && (int8)getEcoStrBonusFunc(this->m_EcoSystem, thisTarget->m_EcoSystem) > 0)
+                {
+                    ACC += this->getMod(Mod::ENHANCES_MONSTER_CORRELATION);
+                }
+            }
+        }
         ACC = ACC + std::min<int16>((ACC * m_modStat[Mod::FOOD_ACCP] / 100), m_modStat[Mod::FOOD_ACC_CAP]) + DEX() / 2; // Account for food mods here for Snatch Morsel
         return std::max<int16>(0, ACC);
     }
@@ -1948,7 +2004,7 @@ void CBattleEntity::OnCastInterrupted(CMagicState& state, action_t& action, MSGB
     {
         action.id         = id;
         action.spellgroup = PSpell->getSpellGroup();
-        action.recast     = 0;
+        action.recast     = 0s;
         action.actiontype = ACTION_MAGIC_INTERRUPT;
 
         actionList_t& actionList  = action.getNewActionList();
@@ -2137,7 +2193,7 @@ void CBattleEntity::OnMobSkillFinished(CMobSkillState& state, action_t& action)
         {
             damage = luautils::OnMobWeaponSkill(PTargetFound, this, PSkill, &action);
             this->PAI->EventHandler.triggerListener("WEAPONSKILL_USE", this, PTargetFound, PSkill->getID(), state.GetSpentTP(), &action, damage);
-            PTarget->PAI->EventHandler.triggerListener("WEAPONSKILL_TAKE", PTargetFound, this, PSkill->getID(), state.GetSpentTP(), &action);
+            PTargetFound->PAI->EventHandler.triggerListener("WEAPONSKILL_TAKE", PTargetFound, this, PSkill->getID(), state.GetSpentTP(), &action);
         }
 
         if (msg == 0)
@@ -2298,7 +2354,7 @@ bool CBattleEntity::OnAttack(CAttackState& state, action_t& action)
     }
 
     battleutils::ClaimMob(PTarget, this); // Mobs get claimed whether or not your attack actually is intimidated/paralyzed
-    PTarget->LastAttacked = server_clock::now();
+    PTarget->LastAttacked = timer::now();
 
     if (battleutils::IsParalyzed(this))
     {
@@ -2433,8 +2489,9 @@ bool CBattleEntity::OnAttack(CAttackState& state, action_t& action)
                             attBonus += ((static_cast<float>(targetDex) / 100) * csJpModifier);
                         }
 
-                        float DamageRatio = battleutils::GetDamageRatio(PTarget, this, attack.IsCritical(), attBonus, skilltype, SLOT_MAIN, false);
-                        auto  damage      = (int32)((PTarget->GetMainWeaponDmg() + naturalh2hDMG + battleutils::GetFSTR(PTarget, this, SLOT_MAIN)) * DamageRatio);
+                        float DamageRatio     = battleutils::GetDamageRatio(PTarget, this, attack.IsCritical(), attBonus, skilltype, SLOT_MAIN, false);
+                        int16 extraCounterDMG = (int16)(PTarget->getMod(Mod::COUNTER_DAMAGE));
+                        auto  damage          = (int32)((PTarget->GetMainWeaponDmg() + naturalh2hDMG + extraCounterDMG + battleutils::GetFSTR(PTarget, this, SLOT_MAIN)) * DamageRatio);
 
                         actionTarget.spikesParam =
                             battleutils::TakePhysicalDamage(PTarget, this, attack.GetAttackType(), damage, false, SLOT_MAIN, 1, nullptr, true, false, true);
@@ -2495,7 +2552,7 @@ bool CBattleEntity::OnAttack(CAttackState& state, action_t& action)
                 // Apply Feint
                 if (CStatusEffect* PFeintEffect = StatusEffectContainer->GetStatusEffect(EFFECT_FEINT))
                 {
-                    if (PTarget->StatusEffectContainer->AddStatusEffect(new CStatusEffect(EFFECT_EVASION_DOWN, EFFECT_EVASION_DOWN, PFeintEffect->GetPower(), 3, 30)))
+                    if (PTarget->StatusEffectContainer->AddStatusEffect(new CStatusEffect(EFFECT_EVASION_DOWN, EFFECT_EVASION_DOWN, PFeintEffect->GetPower(), 3s, 30s)))
                     {
                         auto PEffect = PTarget->StatusEffectContainer->GetStatusEffect(EFFECT_EVASION_DOWN);
 
@@ -2677,14 +2734,14 @@ void CBattleEntity::OnDespawn(CDespawnState& /*unused*/)
     PAI->Internal_Respawn(0s);
 }
 
-void CBattleEntity::SetBattleStartTime(time_point time)
+void CBattleEntity::SetBattleStartTime(timer::time_point time)
 {
     m_battleStartTime = time;
 }
 
-duration CBattleEntity::GetBattleTime()
+timer::duration CBattleEntity::GetBattleTime()
 {
-    return server_clock::now() - m_battleStartTime;
+    return timer::now() - m_battleStartTime;
 }
 
 void CBattleEntity::setBattleID(uint16 battleID)
@@ -2697,7 +2754,7 @@ uint16 CBattleEntity::getBattleID()
     return m_battleID;
 }
 
-void CBattleEntity::Tick(time_point /*unused*/)
+void CBattleEntity::Tick(timer::time_point /*unused*/)
 {
     TracyZoneScoped;
 }

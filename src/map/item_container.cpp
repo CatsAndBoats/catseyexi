@@ -28,7 +28,7 @@
 
 CItemContainer::CItemContainer(uint16 LocationID)
 : SortingPacket(0)
-, LastSortingTime(0)
+, LastSortingTime(timer::time_point::min())
 , m_id(LocationID)
 , m_buff(0)
 , m_size(0)

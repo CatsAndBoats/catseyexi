@@ -2,6 +2,7 @@
 ===========================================================================
 
   Copyright (c) 2010-2015 Darkstar Dev Teams
+  Copyright (c) 2025 LandSandBoat Dev Teams
 
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -21,16 +22,58 @@
 
 #pragma once
 
-#include "common/cbasetypes.h"
+#include <chrono>
 
-uint32 gettick(void);
-uint32 gettick_nocache(void);
+#include "cbasetypes.h"
+#include "earth_time.h"
 
-time_point get_server_start_time(void);
+namespace timer
+{
+    // This clock is not stable across reboots.
+    // Use earth_time if you need real time.
+    // Use timer::to_utc/timer::from_utc to persist timestamps to the database (status effects).
+    using clock      = std::chrono::steady_clock;
+    using duration   = clock::duration;
+    using time_point = clock::time_point;
 
-void timer_init(void);
-void timer_final(void);
+    inline const time_point start_time = clock::now();
 
-uint32 getCurrentTimeMs();
+    inline time_point now()
+    {
+        return clock::now();
+    }
 
-auto getMilliseconds(const duration& d) -> int64;
+    inline duration get_uptime()
+    {
+        return clock::now() - start_time;
+    }
+
+    // https://stackoverflow.com/questions/35282308/convert-between-c11-clocks/35282833#35282833
+    inline earth_time::time_point to_utc(const time_point& timer_tp = now())
+    {
+        auto utc_now   = earth_time::now();
+        auto timer_now = clock::now();
+        return std::chrono::time_point_cast<earth_time::duration>(timer_tp - timer_now + utc_now);
+    };
+
+    inline time_point from_utc(const earth_time::time_point& utc_tp = earth_time::now())
+    {
+        auto timer_now = clock::now();
+        auto utc_now   = earth_time::now();
+        return utc_tp - utc_now + timer_now;
+    };
+
+    // Gets the Earth milliseconds of a duration.
+    template <typename Rep, typename Period>
+    auto count_milliseconds(const std::chrono::duration<Rep, Period>& d) -> int64
+    {
+        return std::chrono::floor<std::chrono::milliseconds>(d).count();
+    };
+
+    // Gets the Earth seconds of a duration.
+    template <typename Rep, typename Period>
+    auto count_seconds(const std::chrono::duration<Rep, Period>& d) -> int64
+    {
+        return std::chrono::floor<std::chrono::seconds>(d).count();
+    };
+}; // namespace timer

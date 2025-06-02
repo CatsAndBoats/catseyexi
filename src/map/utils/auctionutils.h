@@ -36,7 +36,7 @@ namespace auctionutils
     void OpenListOfSales(CCharEntity* PChar, uint8 action, uint16 itemid);
     void RetrieveListOfItemsSoldByPlayer(CCharEntity* PChar);
     void ProofOfPurchase(CCharEntity* PChar, uint8 action, uint32 price, uint8 slot, uint8 quantity);
-    void PurchasingItems(CCharEntity* PChar, uint8 action, uint32 price, uint16 itemid, uint8 quantity);
+    bool PurchasingItems(CCharEntity* PChar, uint8 action, uint32 price, uint16 itemid, uint8 quantity);
     void CancelSale(CCharEntity* PChar, uint8 action, uint8 slotid);
     void UpdateSaleListByPlayer(CCharEntity* PChar, uint8 action, uint8 slotid);
 }; // namespace auctionutils

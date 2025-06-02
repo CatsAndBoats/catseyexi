@@ -401,7 +401,7 @@ auto CNavMesh::findPath(const position_t& start, const position_t& end) -> std::
 
         CNavMesh::ToFFXIPos(pathPos);
 
-        outPoints.emplace_back(pathpoint_t{ { pathPos[0], pathPos[1], pathPos[2], 0, 0 }, 0, false });
+        outPoints.emplace_back(pathpoint_t{ { pathPos[0], pathPos[1], pathPos[2], 0, 0 }, 0s, false });
     }
 
     return outPoints;

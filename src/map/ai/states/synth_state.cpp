@@ -64,7 +64,7 @@ CSynthState::CSynthState(CCharEntity* PChar, SKILLTYPE skill)
     }
 }
 
-bool CSynthState::Update(time_point tick)
+bool CSynthState::Update(timer::time_point tick)
 {
     if (SynthReady())
     {
@@ -78,7 +78,7 @@ bool CSynthState::Update(time_point tick)
     return false;
 }
 
-void CSynthState::Cleanup(time_point tick)
+void CSynthState::Cleanup(timer::time_point tick)
 {
     std::ignore = tick;
 }

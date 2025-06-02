@@ -7,6 +7,10 @@
 local entity = {}
 
 entity.onMobInitialize = function(mob)
+    mob:addImmunity(xi.immunity.SILENCE)
+    mob:addImmunity(xi.immunity.PETRIFY)
+    mob:addImmunity(xi.immunity.LIGHT_SLEEP)
+    mob:addImmunity(xi.immunity.DARK_SLEEP)
     mob:addMod(xi.mod.REGAIN, 50)
 end
 
@@ -17,33 +21,39 @@ entity.onMobSpawn = function(mob)
 end
 
 entity.onMobFight = function(mob, target)
-    local shifts = mob:getLocalVar('shifts')
-    local shiftTime = mob:getLocalVar('shiftTime')
+    local animationSub = mob:getAnimationSub()
+    local mobHPP       = mob:getHPP()
+    local shifts       = mob:getLocalVar('shifts')
+    local shiftTime    = mob:getLocalVar('shiftTime')
+    local battleTime   = mob:getBattleTime()
 
-    if mob:getAnimationSub() == 0 and shifts == 0 and mob:getHPP() <= 67 then
-        mob:useMobAbility(993)
-        mob:setLocalVar('shifts', shifts + 1)
-        mob:setLocalVar('shiftTime', mob:getBattleTime() + 5)
-    elseif mob:getAnimationSub() == 1 and shifts <= 1 and mob:getHPP() <= 33 then
-        mob:useMobAbility(997)
-        mob:setLocalVar('shifts', shifts + 1)
-        mob:setLocalVar('shiftTime', mob:getBattleTime() + 5)
-    elseif mob:getAnimationSub() == 2 and shifts <= 2 and mob:getHPP() <= 2 then
-        mob:useMobAbility(1001)
-        mob:setLocalVar('shifts', shifts + 1)
-        mob:setLocalVar('shiftTime', mob:getBattleTime() + 5)
-    elseif
-        mob:getHPP() <= 67 and
-        mob:getAnimationSub() == 0 and
-        mob:getBattleTime() >= shiftTime
-    then
-        mob:setAnimationSub(1)
-    elseif
-        mob:getHPP() <= 33 and
-        mob:getAnimationSub() == 1 and
-        mob:getBattleTime() >= shiftTime
-    then
-        mob:setAnimationSub(2)
+    if animationSub == 0 and mobHPP <= 66 then
+        if shifts == 0 then
+            mob:useMobAbility(xi.mobSkill.PHASE_SHIFT_1_EXOPLATES)
+            mob:setLocalVar('shifts', shifts + 1)
+            mob:setLocalVar('shiftTime', battleTime + 5)
+        elseif battleTime >= shiftTime then
+            mob:setAnimationSub(1)
+        end
+    elseif animationSub == 1 and mobHPP <= 33 then
+        if shifts == 1 then
+            mob:useMobAbility(xi.mobSkill.PHASE_SHIFT_2_EXOPLATES)
+            mob:setLocalVar('shifts', shifts + 1)
+            mob:setLocalVar('shiftTime', battleTime + 5)
+        elseif battleTime >= shiftTime then
+            mob:setAnimationSub(2)
+        end
+    elseif animationSub == 2 and mobHPP <= 2 then
+        if shifts == 2 then
+            mob:useMobAbility(xi.mobSkill.PHASE_SHIFT_2_EXOPLATES)
+            mob:setLocalVar('shifts', shifts + 1)
+        end
+    end
+end
+
+entity.onMobWeaponSkill = function(target, mob, skill)
+    if skill:getID() == xi.mobSkill.PHASE_SHIFT_3_EXOPLATES then
+        mob:setUnkillable(false)
     end
 end
 

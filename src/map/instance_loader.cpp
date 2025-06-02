@@ -106,7 +106,7 @@ CInstance* CInstanceLoader::LoadInstance()
             PMob->m_SpawnPoint.z        = _sql->GetFloatData(5);
             PMob->loc.p                 = PMob->m_SpawnPoint;
 
-            PMob->m_RespawnTime = _sql->GetUIntData(6) * 1000;
+            PMob->m_RespawnTime = std::chrono::seconds(_sql->GetUIntData(6));
             PMob->m_SpawnType   = (SPAWNTYPE)_sql->GetUIntData(7);
             PMob->m_DropID      = _sql->GetUIntData(8);
 

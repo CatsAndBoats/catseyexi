@@ -129,7 +129,7 @@ bool CRangeState::CanChangeState()
     return false;
 }
 
-bool CRangeState::Update(time_point tick)
+bool CRangeState::Update(timer::time_point tick)
 {
     if (m_PEntity && m_PEntity->isAlive() && (tick > GetEntryTime() + m_aimTime && !IsCompleted()))
     {
@@ -159,7 +159,7 @@ bool CRangeState::Update(time_point tick)
                 PChar->pushPacket(m_errorMsg->copy());
             }
             // reset aim time so interrupted players only have to wait the correct 2.7s until next shot
-            m_aimTime = std::chrono::seconds(0);
+            m_aimTime = 0s;
             m_PEntity->loc.zone->PushPacket(m_PEntity, CHAR_INRANGE_SELF, std::make_unique<CActionPacket>(action));
             m_PEntity->PAI->EventHandler.triggerListener("RANGE_STATE_EXIT", m_PEntity, nullptr, &action);
         }
@@ -187,7 +187,7 @@ bool CRangeState::Update(time_point tick)
     return false;
 }
 
-void CRangeState::Cleanup(time_point tick)
+void CRangeState::Cleanup(timer::time_point tick)
 {
 }
 

@@ -280,7 +280,9 @@ xi.crafting.guildPointOnEventUpdate = function(player, option, target, guildId)
             end
         end
 
-        player:updateEvent(player:getCurrency(currency), player:getCharVar('[GUILD]currentGuild') - 1, keyItem.cost, remainingPoints, skillCap, 0, calculateKeyItemBitmask(player, rank, guildKeyItemTable[guildId]), 1)
+        player:updateEvent(keyItem.id, 0, keyItem.cost, remainingPoints, skillCap, 0, calculateKeyItemBitmask(player, rank, guildKeyItemTable[guildId]), 1)
+        -- TODO: Revisit parameter 2. Smithing guild returns 0. Guild ID would be 2.
+        -- TODO: Revisit parameter 8. Theory: 1 = successful purchuase. 0 = failed purchuase.
 
     -- GP Item Option.
     elseif category == 2 or category == 1 then
@@ -311,6 +313,8 @@ xi.crafting.guildPointOnEventUpdate = function(player, option, target, guildId)
         end
 
         player:updateEvent(player:getCurrency(currency), player:getCharVar('[GUILD]currentGuild') - 1, item.cost, remainingPoints, skillCap, 0, calculateKeyItemBitmask(player, rank, guildKeyItemTable[guildId]), 1)
+        -- Todo: Revisit parameter 1 and 2. Theory: Parameter 1 will be item ID. Parameter 2 will be 0 or 1 (0 like KIs or quantity like with crystals).
+        -- TODO: Revisit parameter 8. Theory: 1 = successful purchuase. 0 = failed purchuase.
 
     -- HQ crystal Option.
     elseif
@@ -332,7 +336,8 @@ xi.crafting.guildPointOnEventUpdate = function(player, option, target, guildId)
             end
         end
 
-        player:updateEvent(player:getCurrency(currency), player:getCharVar('[GUILD]currentGuild') - 1, crystal.cost, remainingPoints, skillCap, 0, calculateKeyItemBitmask(player, rank, guildKeyItemTable[guildId]), 1)
+        player:updateEvent(crystal.id, quantity, crystal.cost, remainingPoints, skillCap, 0, calculateKeyItemBitmask(player, rank, guildKeyItemTable[guildId]), 1)
+        -- TODO: Revisit parameter 8. Theory: 1 = successful purchuase. 0 = failed purchuase.
     end
 end
 

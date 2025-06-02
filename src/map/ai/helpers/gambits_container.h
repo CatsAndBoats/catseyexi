@@ -214,7 +214,7 @@ namespace gambits
         std::vector<Action_t>         actions;
         G_TARGET                      target_selector;
         uint16                        retry_delay;
-        time_point                    last_used;
+        timer::time_point             last_used;
         std::string                   identifier;
 
         Gambit_t()
@@ -275,7 +275,7 @@ namespace gambits
         auto AddGambit(Gambit_t const& gambit) -> std::string;
         void RemoveGambit(std::string const& id);
         void RemoveAllGambits();
-        void Tick(time_point tick);
+        void Tick(timer::time_point tick);
 
         // TODO: make private
         std::vector<TrustSkill_t> tp_skills;
@@ -290,7 +290,7 @@ namespace gambits
         bool PartyHasTank();
 
         CTrustEntity*         POwner;
-        time_point            m_lastAction;
+        timer::time_point     m_lastAction;
         std::vector<Gambit_t> gambits;
 
         // clang-format off

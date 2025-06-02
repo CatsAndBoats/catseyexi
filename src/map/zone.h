@@ -25,6 +25,7 @@
 #include "common/cbasetypes.h"
 #include "common/mmo.h"
 #include "common/task_manager.h"
+#include "common/timer.h"
 #include "common/vana_time.h"
 
 #include <list>
@@ -615,7 +616,7 @@ public:
 
     void InsertTriggerArea(std::unique_ptr<ITriggerArea>&& triggerArea); // Add an active area to the zone
 
-    virtual void TOTDChange(TIMETYPE TOTD);
+    virtual void TOTDChange(vanadiel_time::TOTD TOTD);
     virtual void PushPacket(CBaseEntity*, GLOBAL_MESSAGE_TYPE, const std::unique_ptr<CBasicPacket>&);
 
     virtual void UpdateEntityPacket(CBaseEntity* PEntity, ENTITYUPDATE type, uint8 updatemask, bool alwaysInclude = false);
@@ -625,7 +626,7 @@ public:
 
     weatherVector_t m_WeatherVector; // The probability of each weather type
 
-    virtual void ZoneServer(time_point tick);
+    virtual void ZoneServer(timer::time_point tick);
     virtual void CheckTriggerAreas();
 
     virtual void ForEachChar(std::function<void(CCharEntity*)> const& func);
@@ -650,7 +651,7 @@ public:
     std::unique_ptr<CNavMesh> m_navMesh;
     std::unique_ptr<ZoneLos>  lineOfSight;
 
-    time_point m_LoadedAt; // The time the zone was loaded
+    timer::time_point m_LoadedAt; // The time the zone was loaded
 
     void LoadNavMesh();
     void LoadZoneLos();
@@ -686,7 +687,7 @@ private:
 
     CTreasurePool* m_TreasurePool;
 
-    time_point m_timeZoneEmpty; // The time point when the last player left the zone
+    timer::time_point m_timeZoneEmpty; // The time point when the last player left the zone
 
     std::unordered_map<std::string, QueryByNameResult_t> m_queryByNameResults;
 

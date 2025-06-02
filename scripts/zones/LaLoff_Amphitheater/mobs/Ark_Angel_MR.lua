@@ -42,6 +42,14 @@ local function spawnArkAngelPet(mob, target)
     end
 end
 
+entity.onMobInitialize = function(mob)
+    mob:addImmunity(xi.immunity.SILENCE)
+    mob:addImmunity(xi.immunity.PETRIFY)
+    mob:addImmunity(xi.immunity.LIGHT_SLEEP)
+    mob:addImmunity(xi.immunity.DARK_SLEEP)
+    mob:setMobMod(xi.mobMod.CAN_PARRY, 3)
+end
+
 entity.onMobSpawn = function(mob)
     xi.mix.jobSpecial.config(mob, {
         specials =
@@ -74,9 +82,6 @@ entity.onMobFight = function(mob, target)
         battlefield:setLocalVar('petRespawnMR', 0)
         spawnArkAngelPet(mob, target)
     end
-end
-
-entity.onMobDeath = function(mob, player, optParams)
 end
 
 return entity

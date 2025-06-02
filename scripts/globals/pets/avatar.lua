@@ -63,7 +63,7 @@ local setMagicCastCooldown = function(pet)
     if dayElement == petElement then
         castingCooldown = castingCooldown - 3
     -- Weak day.
-    elseif dayElement == xi.combat.element.getOppositeElement(petElement) then
+    elseif dayElement == xi.combat.element.getElementWeakness(petElement) then
         castingCooldown = castingCooldown + 3
     end
 
