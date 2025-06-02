@@ -226,14 +226,8 @@ end
 -----------------------------------
 xi.promyvion.emptyOnMobSpawn = function(mob, mobType)
     local element    = math.random(xi.element.FIRE, xi.element.DARK)
-    local opposite   = xi.combat.element.getOppositeElement(element)
-    local complement = xi.element.NONE
-
-    if element == xi.element.WATER then
-        complement = xi.element.FIRE
-    elseif element < xi.element.WATER then
-        complement = element + 1
-    end
+    local opposite   = xi.combat.element.getElementWeakness(element)
+    local complement = xi.combat.element.getElementStrength(element)
 
     -- Setup resistances.
     for i = xi.element.FIRE, xi.element.DARK do

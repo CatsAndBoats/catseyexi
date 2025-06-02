@@ -116,7 +116,7 @@ namespace petutils
 
                 Pet->minLevel  = (uint8)_sql->GetIntData(3);
                 Pet->maxLevel  = (uint8)_sql->GetIntData(4);
-                Pet->time      = _sql->GetUIntData(5);
+                Pet->time      = std::chrono::seconds(_sql->GetUIntData(5));
                 Pet->radius    = _sql->GetUIntData(6);
                 Pet->EcoSystem = (ECOSYSTEM)_sql->GetIntData(7);
                 Pet->m_Family  = (uint16)_sql->GetIntData(8);
@@ -1167,15 +1167,15 @@ namespace petutils
 
         if (PMaster->StatusEffectContainer->HasStatusEffect(EFFECT_DEBILITATION))
         {
-            PPet->StatusEffectContainer->AddStatusEffect(new CStatusEffect(EFFECT_DEBILITATION, EFFECT_DEBILITATION, PMaster->StatusEffectContainer->GetStatusEffect(EFFECT_DEBILITATION)->GetPower(), 0, PMaster->StatusEffectContainer->GetStatusEffect(EFFECT_DEBILITATION)->GetDuration()), EffectNotice::Silent);
+            PPet->StatusEffectContainer->AddStatusEffect(new CStatusEffect(EFFECT_DEBILITATION, EFFECT_DEBILITATION, PMaster->StatusEffectContainer->GetStatusEffect(EFFECT_DEBILITATION)->GetPower(), 0s, PMaster->StatusEffectContainer->GetStatusEffect(EFFECT_DEBILITATION)->GetDuration()), EffectNotice::Silent);
         }
         if (PMaster->StatusEffectContainer->HasStatusEffect(EFFECT_OMERTA))
         {
-            PPet->StatusEffectContainer->AddStatusEffect(new CStatusEffect(EFFECT_OMERTA, EFFECT_OMERTA, PMaster->StatusEffectContainer->GetStatusEffect(EFFECT_OMERTA)->GetPower(), 0, PMaster->StatusEffectContainer->GetStatusEffect(EFFECT_OMERTA)->GetDuration()), EffectNotice::Silent);
+            PPet->StatusEffectContainer->AddStatusEffect(new CStatusEffect(EFFECT_OMERTA, EFFECT_OMERTA, PMaster->StatusEffectContainer->GetStatusEffect(EFFECT_OMERTA)->GetPower(), 0s, PMaster->StatusEffectContainer->GetStatusEffect(EFFECT_OMERTA)->GetDuration()), EffectNotice::Silent);
         }
         if (PMaster->StatusEffectContainer->HasStatusEffect(EFFECT_IMPAIRMENT))
         {
-            PPet->StatusEffectContainer->AddStatusEffect(new CStatusEffect(EFFECT_IMPAIRMENT, EFFECT_IMPAIRMENT, PMaster->StatusEffectContainer->GetStatusEffect(EFFECT_IMPAIRMENT)->GetPower(), 0, PMaster->StatusEffectContainer->GetStatusEffect(EFFECT_IMPAIRMENT)->GetDuration()), EffectNotice::Silent);
+            PPet->StatusEffectContainer->AddStatusEffect(new CStatusEffect(EFFECT_IMPAIRMENT, EFFECT_IMPAIRMENT, PMaster->StatusEffectContainer->GetStatusEffect(EFFECT_IMPAIRMENT)->GetPower(), 0s, PMaster->StatusEffectContainer->GetStatusEffect(EFFECT_IMPAIRMENT)->GetDuration()), EffectNotice::Silent);
         }
     }
 
@@ -1360,7 +1360,7 @@ namespace petutils
 
             PMob->isCharmed  = false;
             PMob->allegiance = ALLEGIANCE_TYPE::MOB;
-            PMob->charmTime  = time_point::min();
+            PMob->charmTime  = timer::time_point::min();
             PMob->PMaster    = nullptr;
 
             PMob->PAI->SetController(std::make_unique<CMobController>(PMob));
@@ -1913,6 +1913,40 @@ namespace petutils
         {
             return true;
         }
+        return false;
+    }
+
+    bool IsTandemActive(CBattleEntity* PAttacker)
+    {
+        /*  This is used for Tandem Strike (acc/m.acc+) and Tandem Blow (subtle blow II+).
+            To get the bonus, both pet and master must be engaged in combat with the same target.
+            Inspired by TiberonKalkaz's approach in ASB.
+            https://github.com/AirSkyBoat/AirSkyBoat/pull/3134/files#diff-dea0a7c8d005d1e7507dcb2370aff3a46df84ab53d87ba50beeab376c3082621
+        */
+        CBattleEntity* tandemPartner;
+        if (PAttacker->objtype == TYPE_PC)
+        {
+            if (PAttacker->PPet == nullptr)
+                return false;
+
+            tandemPartner = PAttacker->PPet;
+        }
+        else
+        {
+            if (PAttacker->PMaster == nullptr || PAttacker->PMaster->objtype != TYPE_PC)
+                return false;
+
+            tandemPartner = PAttacker->PMaster;
+        }
+
+        if (
+            tandemPartner->PAI->IsEngaged() &&
+            tandemPartner->GetBattleTarget() != nullptr &&
+            tandemPartner->GetBattleTargetID() == PAttacker->GetBattleTargetID())
+        {
+            return true;
+        }
+
         return false;
     }
 

@@ -40,6 +40,7 @@ enum ITEMID : uint16
     SAIRUI_RAN          = 1188,
     KODOKU              = 1191,
     SHINOBI_TABI        = 1194,
+    SOUL_PLATE          = 2477,
     SANJAKU_TENUGUI     = 2553,
     SOSHI               = 2555,
     KABENRO             = 2642,

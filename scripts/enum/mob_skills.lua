@@ -36,11 +36,26 @@ xi.mobSkill =
     SILENCE_GAS_1            =  314,
     DARK_SPORE_1             =  315,
 
+    DRILL_BRANCH             =  328,
+    PINECONE_BOMB            =  329,
+
+    LEAFSTORM                =  331,
+    ENTANGLE                 =  332,
+
     RANGED_ATTACK_2          =  412,
 
     DANSE_MACABRE            =  533,
 
     VULTURE_3                =  626,
+
+    BENEDICTION_1            =  689, -- Season's Greetings KSNM 30 (Gilagoge Tlugvi)
+    HUNDRED_FISTS_1          =  690, -- Season's Greetings KSNM 30 (Goga Tlugvi)
+
+    BLOOD_WEAPON_1           =  695,
+
+    MIJIN_GAKURE_1           =  731, -- Season's Greetings KSNM 30 (Ulagohvsdi Tlugvi)
+
+    FAMILIAR_1               =  740, -- "Tango with a Tracker" Shikaree X
 
     DISPELLING_WIND          =  813,
     DEADLY_DRIVE             =  814,
@@ -78,6 +93,18 @@ xi.mobSkill =
     DIAMOND_DUST_2           =  917, -- Confirmed usage: Untargetable avatar astral flow. (Ex. Kirin) (Shiva model avatar)
     JUDGMENT_BOLT_2          =  918, -- Confirmed usage: Untargetable avatar astral flow. (Ex. Kirin) (Ramuh model avatar)
     SEARING_LIGHT_2          =  919, -- Confirmed usage: Untargetable avatar astral flow. (Ex. Kirin, Crimson-toothed Pawberry) (Carbuncle model avatar)
+
+    PHASE_SHIFT_1_EXOPLATES  =  993,
+
+    PHASE_SHIFT_2_EXOPLATES  =  997,
+
+    PHASE_SHIFT_3_EXOPLATES  = 1001,
+
+    ZEID_SUMMON_SHADOWS_1    = 1002, -- TODO: Investigate why was this in sql, where it came from and why wasnt it actually used in an scripted way.
+
+    ZEID_SUMMON_SHADOWS_2    = 1007, -- Captured. Bastok mission 9-2 BCNM, phase 2. No actual name in log.
+
+    CALL_BEAST               = 1017, -- "Tango with a Tracker" Shikaree X
 
     RANGED_ATTACK_3          = 1154,
 
@@ -159,6 +186,14 @@ xi.mobSkill =
     NECROPURGE               = 2117,
     BILGESTORM               = 2118,
     THUNDRIS_SHRIEK          = 2119,
+
+    RADIANT_SACRAMENT        = 2141,
+    MEGA_HOLY                = 2142,
+    PERFECT_DEFENSE          = 2143,
+    DIVINE_SPEAR             = 2144,
+    GOSPEL_OF_THE_LOST       = 2145,
+    VOID_OF_REPENTANCE       = 2146,
+    DIVINE_JUDGMENT          = 2147,
 
     HELL_SCISSORS            = 2221,
 

@@ -547,7 +547,7 @@ void CZone::updateCharLevelRestriction(CCharEntity* PChar)
         PChar->StatusEffectContainer->DelStatusEffectsByFlag(EFFECTFLAG_ROLL, EffectNotice::Silent);
         PChar->StatusEffectContainer->DelStatusEffectsByFlag(EFFECTFLAG_SYNTH_SUPPORT, EffectNotice::Silent);
         PChar->StatusEffectContainer->DelStatusEffectsByFlag(EFFECTFLAG_BLOODPACT, EffectNotice::Silent);
-        PChar->StatusEffectContainer->AddStatusEffect(new CStatusEffect(EFFECT_LEVEL_RESTRICTION, EFFECT_LEVEL_RESTRICTION, m_levelRestriction, 0, 0));
+        PChar->StatusEffectContainer->AddStatusEffect(new CStatusEffect(EFFECT_LEVEL_RESTRICTION, EFFECT_LEVEL_RESTRICTION, m_levelRestriction, 0s, 0s));
     }
 }
 
@@ -569,7 +569,7 @@ void CZone::SetWeather(WEATHER weather)
     m_zoneEntities->WeatherChange(weather);
 
     m_Weather           = weather;
-    m_WeatherChangeTime = CVanaTime::getInstance()->getVanaTime();
+    m_WeatherChangeTime = earth_time::vanadiel_timestamp();
 
     m_zoneEntities->PushPacket(nullptr, CHAR_INZONE, std::make_unique<CWeatherPacket>(m_WeatherChangeTime, m_Weather, xirand::GetRandomNumber(4, 28)));
 }
@@ -578,22 +578,19 @@ void CZone::UpdateWeather()
 {
     TracyZoneScoped;
 
-    uint32 CurrentVanaDate   = CVanaTime::getInstance()->getDate();                                  // Current Vanadiel timestamp in minutes
-    uint32 StartFogVanaDate  = (CurrentVanaDate - (CurrentVanaDate % VTIME_DAY)) + (VTIME_HOUR * 2); // Vanadiel timestamp of 2 AM in minutes
-    uint32 EndFogVanaDate    = StartFogVanaDate + (VTIME_HOUR * 5);                                  // Vanadiel timestamp of 7 AM in minutes
-    uint32 WeatherNextUpdate = 0;
-    uint32 WeatherDay        = 0;
-    uint8  WeatherChance     = 0;
+    vanadiel_time::time_point CurrentVanaDate   = vanadiel_time::now(); // Current Vanadiel time
+    vanadiel_time::time_point nextVanaMidnight  = vanadiel_time::get_next_midnight(CurrentVanaDate);
+    vanadiel_time::time_point StartFogVanaDate  = nextVanaMidnight - xi::vanadiel_clock::days(1) + xi::vanadiel_clock::hours(2); // Vanadiel timestamp of 2 AM in minutes
+    vanadiel_time::time_point EndFogVanaDate    = StartFogVanaDate + xi::vanadiel_clock::hours(5);                               // Vanadiel timestamp of 7 AM in minutes
+    vanadiel_time::duration   WeatherNextUpdate = 0s;
+    uint32                    WeatherDay        = 0;
+    uint8                     WeatherChance     = 0;
 
     // Random time between 3 minutes and 30 minutes for the next weather change
-    WeatherNextUpdate = (xirand::GetRandomNumber(180, 1801));
-
-    // Find the timestamp since the start of vanadiel
-    WeatherDay = CVanaTime::getInstance()->getVanaTime();
+    WeatherNextUpdate = xi::vanadiel_clock::seconds(xirand::GetRandomNumber(180, 1801));
 
     // Calculate what day we are on since the start of vanadiel time
-    // 1 Vana'diel Day = 57 minutes 36 seconds or 3456 seconds
-    WeatherDay = WeatherDay / 3456;
+    WeatherDay = vanadiel_time::count_days(CurrentVanaDate.time_since_epoch());
 
     // The weather starts over again every 2160 days
     WeatherDay = WeatherDay % WEATHER_CYCLE;
@@ -638,16 +635,16 @@ void CZone::UpdateWeather()
     {
         Weather = WEATHER_FOG;
         // Force the weather to change by 7 am
-        //  2.4 vanadiel minutes = 1 earth second
-        WeatherNextUpdate = (uint32)((EndFogVanaDate - CurrentVanaDate) * 2.4);
+        WeatherNextUpdate = EndFogVanaDate - CurrentVanaDate;
     }
 
     SetWeather((WEATHER)Weather);
     luautils::OnZoneWeatherChange(GetID(), Weather);
 
     // clang-format off
-    CTaskManager::getInstance()->AddTask("zone_update_weather", server_clock::now() + std::chrono::seconds(WeatherNextUpdate), this, CTaskManager::TASK_ONCE, 1s,
-    [](time_point tick, CTaskManager::CTask* PTask)
+    timer::time_point nextWeatherTick = timer::now() + std::chrono::duration_cast<earth_time::duration>(WeatherNextUpdate);
+    CTaskManager::getInstance()->AddTask("zone_update_weather", nextWeatherTick, this, CTaskManager::TASK_ONCE, 1s,
+    [](timer::time_point tick, CTaskManager::CTask* PTask)
     {
         CZone* PZone = std::any_cast<CZone*>(PTask->m_data);
         if (!PZone->IsWeatherStatic())
@@ -696,7 +693,7 @@ void CZone::DecreaseZoneCounter(CCharEntity* PChar)
 
     if (m_zoneEntities->CharListEmpty())
     {
-        m_timeZoneEmpty = server_clock::now();
+        m_timeZoneEmpty = timer::now();
     }
     else
     {
@@ -790,7 +787,7 @@ CBaseEntity* CZone::GetEntity(uint16 targid, uint8 filter)
  *                                                                       *
  ************************************************************************/
 
-void CZone::TOTDChange(TIMETYPE TOTD)
+void CZone::TOTDChange(vanadiel_time::TOTD TOTD)
 {
     TracyZoneScoped;
 
@@ -844,7 +841,7 @@ void CZone::WideScan(CCharEntity* PChar, uint16 radius)
  *                                                                       *
  ************************************************************************/
 
-void CZone::ZoneServer(time_point tick)
+void CZone::ZoneServer(timer::time_point tick)
 {
     TracyZoneScoped;
 
@@ -855,7 +852,7 @@ void CZone::ZoneServer(time_point tick)
         m_BattlefieldHandler->HandleBattlefields(tick);
     }
 
-    if (ZoneTimer && m_zoneEntities->CharListEmpty() && m_timeZoneEmpty + 5s < server_clock::now() && CheckMobsPathedBack())
+    if (ZoneTimer && m_zoneEntities->CharListEmpty() && m_timeZoneEmpty + 5s < timer::now() && CheckMobsPathedBack())
     {
         ZoneTimer->m_type = CTaskManager::TASK_REMOVE;
         ZoneTimer         = nullptr;
@@ -954,16 +951,16 @@ void CZone::createZoneTimers()
     TracyZoneScoped;
 
     // clang-format off
-    ZoneTimer = CTaskManager::getInstance()->AddTask(m_zoneName, server_clock::now(), this, CTaskManager::TASK_INTERVAL, kLogicUpdateInterval,
-    [](time_point tick, CTaskManager::CTask* PTask)
+    ZoneTimer = CTaskManager::getInstance()->AddTask(m_zoneName, timer::now(), this, CTaskManager::TASK_INTERVAL, kLogicUpdateInterval,
+    [](timer::time_point tick, CTaskManager::CTask* PTask)
     {
         CZone* PZone = std::any_cast<CZone*>(PTask->m_data);
         PZone->ZoneServer(tick);
         return 0;
     });
 
-    ZoneTimerTriggerAreas = CTaskManager::getInstance()->AddTask(m_zoneName + "TriggerAreas", server_clock::now(), this, CTaskManager::TASK_INTERVAL, kTriggerAreaInterval,
-    [](time_point tick, CTaskManager::CTask* PTask)
+    ZoneTimerTriggerAreas = CTaskManager::getInstance()->AddTask(m_zoneName + "TriggerAreas", timer::now(), this, CTaskManager::TASK_INTERVAL, kTriggerAreaInterval,
+    [](timer::time_point tick, CTaskManager::CTask* PTask)
     {
         CZone* PZone = std::any_cast<CZone*>(PTask->m_data);
         PZone->CheckTriggerAreas();

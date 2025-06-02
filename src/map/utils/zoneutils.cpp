@@ -55,7 +55,7 @@ namespace zoneutils
      *                                                                       *
      ************************************************************************/
 
-    void TOTDChange(TIMETYPE TOTD)
+    void TOTDChange(vanadiel_time::TOTD TOTD)
     {
         for (auto PZone : g_PZoneList)
         {
@@ -455,7 +455,7 @@ namespace zoneutils
                             PMob->m_SpawnPoint.z        = rset->get<float>("pos_z");
                             PMob->loc.p                 = PMob->m_SpawnPoint;
 
-                            PMob->m_RespawnTime = rset->get<uint32>("respawntime") * 1000;
+                            PMob->m_RespawnTime = std::chrono::seconds(rset->get<uint32>("respawntime"));
                             PMob->m_SpawnType   = static_cast<SPAWNTYPE>(rset->get<uint8>("spawntype"));
                             PMob->m_DropID      = rset->get<uint32>("dropid");
 
@@ -680,9 +680,9 @@ namespace zoneutils
                 }
                 else
                 {
-                    PMob->PAI->Internal_Respawn(std::chrono::milliseconds(PMob->m_RespawnTime));
+                    PMob->PAI->Internal_Respawn(PMob->m_RespawnTime);
                     // If the mob is a scripted spawn and it has a respawn time defined when the mob initializes then allow it to respawn
-                    if (PMob->m_SpawnType == SPAWNTYPE_SCRIPTED && PMob->m_RespawnTime > 0)
+                    if (PMob->m_SpawnType == SPAWNTYPE_SCRIPTED && PMob->m_RespawnTime > 0s)
                     {
                         PMob->m_AllowRespawn = true;
                     }

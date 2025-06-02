@@ -86,7 +86,7 @@ namespace gambits
         gambits.clear();
     }
 
-    void CGambitsContainer::Tick(time_point tick)
+    void CGambitsContainer::Tick(timer::time_point tick)
     {
         TracyZoneScoped;
 
@@ -736,7 +736,7 @@ namespace gambits
                 case G_CONDITION::SC_AVAILABLE:
                 {
                     auto* PSCEffect = triggerTarget->StatusEffectContainer->GetStatusEffect(EFFECT_SKILLCHAIN);
-                    predicateResults.push_back(PSCEffect && PSCEffect->GetStartTime() + 3s < server_clock::now() && PSCEffect->GetTier() == 0);
+                    predicateResults.push_back(PSCEffect && PSCEffect->GetStartTime() + 3s < timer::now() && PSCEffect->GetTier() == 0);
                     continue;
                 }
                 case G_CONDITION::NOT_SC_AVAILABLE:
@@ -748,7 +748,7 @@ namespace gambits
                 case G_CONDITION::MB_AVAILABLE:
                 {
                     auto* PSCEffect = triggerTarget->StatusEffectContainer->GetStatusEffect(EFFECT_SKILLCHAIN);
-                    predicateResults.push_back(PSCEffect && PSCEffect->GetStartTime() + 3s < server_clock::now() && PSCEffect->GetTier() > 0);
+                    predicateResults.push_back(PSCEffect && PSCEffect->GetStartTime() + 3s < timer::now() && PSCEffect->GetTier() > 0);
                     continue;
                 }
                 case G_CONDITION::READYING_WS:
@@ -852,7 +852,7 @@ namespace gambits
 
                     // TODO: ...and has a valid WS...
 
-                    return PSCEffect && PSCEffect->GetStartTime() + 3s < server_clock::now() && PSCEffect->GetTier() == 0;
+                    return PSCEffect && PSCEffect->GetStartTime() + 3s < timer::now() && PSCEffect->GetTier() == 0;
                     break;
                 }
                 case G_TP_TRIGGER::CLOSER_UNTIL_TP: // Will hold TP to close a SC, but WS immediately once specified value is reached.
@@ -869,7 +869,7 @@ namespace gambits
 
                     // TODO: ...and has a valid WS...
 
-                    return PSCEffect && PSCEffect->GetStartTime() + 3s < server_clock::now() && PSCEffect->GetTier() == 0;
+                    return PSCEffect && PSCEffect->GetStartTime() + 3s < timer::now() && PSCEffect->GetTier() == 0;
                     break;
                 }
                 default:

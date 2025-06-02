@@ -23,6 +23,7 @@
 
 #include "common/utils.h"
 #include "enmity_container.h"
+#include "instance.h"
 #include "latent_effect_container.h"
 #include "mob_modifier.h"
 #include "party.h"
@@ -287,36 +288,51 @@ void CZoneEntities::InsertPET(CBaseEntity* PPet)
 {
     TracyZoneScoped;
 
-    if (PPet != nullptr)
+    if (PPet == nullptr)
+    {
+        ShowError("CZone::InsertPET: entity is null");
+    }
+
+    if (PPet->PInstance)
+    {
+        PPet->PInstance->AssignDynamicTargIDandLongID(PPet);
+    }
+    else
     {
         m_zone->GetZoneEntities()->AssignDynamicTargIDandLongID(PPet);
-
-        m_petList[PPet->targid] = PPet;
-
-        TryAddToNearbySpawnLists(PPet);
-
-        PPet->spawnAnimation = SPAWN_ANIMATION::NORMAL; // Turn off special spawn animation
-
-        return;
     }
-    ShowError("CZone::InsertPET : entity is null");
+
+    m_petList[PPet->targid] = PPet;
+
+    TryAddToNearbySpawnLists(PPet);
+
+    PPet->spawnAnimation = SPAWN_ANIMATION::NORMAL; // Turn off special spawn animation
 }
 
 void CZoneEntities::InsertTRUST(CBaseEntity* PTrust)
 {
     TracyZoneScoped;
 
-    if (PTrust != nullptr)
+    if (PTrust == nullptr)
     {
-        m_zone->GetZoneEntities()->AssignDynamicTargIDandLongID(PTrust);
-        m_trustList[PTrust->targid] = PTrust;
-
-        TryAddToNearbySpawnLists(PTrust);
-
-        PTrust->spawnAnimation = SPAWN_ANIMATION::NORMAL; // Turn off special spawn animation
-
+        ShowError("CZone::InsertTRUST: entity is null");
         return;
     }
+
+    if (PTrust->PInstance)
+    {
+        PTrust->PInstance->AssignDynamicTargIDandLongID(PTrust);
+    }
+    else
+    {
+        m_zone->GetZoneEntities()->AssignDynamicTargIDandLongID(PTrust);
+    }
+
+    m_trustList[PTrust->targid] = PTrust;
+
+    TryAddToNearbySpawnLists(PTrust);
+
+    PTrust->spawnAnimation = SPAWN_ANIMATION::NORMAL; // Turn off special spawn animation
 }
 
 void CZoneEntities::FindPartyForMob(CBaseEntity* PEntity)
@@ -654,7 +670,7 @@ void CZoneEntities::EraseStaleDynamicTargIDs()
     for (auto it = m_dynamicTargIdsToDelete.begin(); it != m_dynamicTargIdsToDelete.end();)
     {
         // Erase dynamic targid if it's stale enough
-        if ((server_clock::now() - it->second) > 60s)
+        if ((timer::now() - it->second) > 60s)
         {
             m_dynamicTargIds.erase(it->first);
             it = m_dynamicTargIdsToDelete.erase(it);
@@ -1322,7 +1338,7 @@ CBaseEntity* CZoneEntities::GetEntity(uint16 targid, uint8 filter)
     return nullptr;
 }
 
-void CZoneEntities::TOTDChange(TIMETYPE TOTD)
+void CZoneEntities::TOTDChange(vanadiel_time::TOTD TOTD)
 {
     TracyZoneScoped;
 
@@ -1330,11 +1346,11 @@ void CZoneEntities::TOTDChange(TIMETYPE TOTD)
 
     switch (TOTD)
     {
-        case TIME_MIDNIGHT:
+        case vanadiel_time::TOTD::MIDNIGHT:
         {
         }
         break;
-        case TIME_NEWDAY:
+        case vanadiel_time::TOTD::NEWDAY:
         {
             FOR_EACH_PAIR_CAST_SECOND(CMobEntity*, PMob, m_mobList)
             {
@@ -1346,7 +1362,7 @@ void CZoneEntities::TOTDChange(TIMETYPE TOTD)
             }
         }
         break;
-        case TIME_DAWN:
+        case vanadiel_time::TOTD::DAWN:
         {
             ScriptType = SCRIPT_TIME_DAWN;
 
@@ -1360,17 +1376,17 @@ void CZoneEntities::TOTDChange(TIMETYPE TOTD)
             }
         }
         break;
-        case TIME_DAY:
+        case vanadiel_time::TOTD::DAY:
         {
             ScriptType = SCRIPT_TIME_DAY;
         }
         break;
-        case TIME_DUSK:
+        case vanadiel_time::TOTD::DUSK:
         {
             ScriptType = SCRIPT_TIME_DUSK;
         }
         break;
-        case TIME_EVENING:
+        case vanadiel_time::TOTD::EVENING:
         {
             ScriptType = SCRIPT_TIME_EVENING;
 
@@ -1385,7 +1401,7 @@ void CZoneEntities::TOTDChange(TIMETYPE TOTD)
             }
         }
         break;
-        case TIME_NIGHT:
+        case vanadiel_time::TOTD::NIGHT:
         {
             FOR_EACH_PAIR_CAST_SECOND(CMobEntity*, PMob, m_mobList)
             {
@@ -1655,7 +1671,7 @@ void CZoneEntities::WideScan(CCharEntity* PChar, uint16 radius)
     PChar->pushPacket<CWideScanPacket>(WIDESCAN_END);
 }
 
-void CZoneEntities::ZoneServer(time_point tick)
+void CZoneEntities::ZoneServer(timer::time_point tick)
 {
     TracyZoneScoped;
     TracyZoneString(m_zone->getName());
@@ -1911,7 +1927,7 @@ void CZoneEntities::ZoneServer(time_point tick)
         if (auto itr = m_mobList.find(PMob->targid); itr != m_mobList.end())
         {
             m_mobList.erase(itr);
-            m_dynamicTargIdsToDelete.emplace_back(PMob->targid, server_clock::now());
+            m_dynamicTargIdsToDelete.emplace_back(PMob->targid, timer::now());
             destroy(PMob);
         }
     }
@@ -1921,7 +1937,7 @@ void CZoneEntities::ZoneServer(time_point tick)
         if (auto itr = m_npcList.find(PNpc->targid); itr != m_npcList.end())
         {
             m_npcList.erase(itr);
-            m_dynamicTargIdsToDelete.emplace_back(PNpc->targid, server_clock::now());
+            m_dynamicTargIdsToDelete.emplace_back(PNpc->targid, timer::now());
             destroy(PNpc);
         }
     }
@@ -1931,7 +1947,7 @@ void CZoneEntities::ZoneServer(time_point tick)
         if (auto itr = m_petList.find(PPet->targid); itr != m_petList.end())
         {
             m_petList.erase(itr);
-            m_dynamicTargIdsToDelete.emplace_back(PPet->targid, server_clock::now());
+            m_dynamicTargIdsToDelete.emplace_back(PPet->targid, timer::now());
             destroy(PPet);
         }
     }
@@ -1941,7 +1957,7 @@ void CZoneEntities::ZoneServer(time_point tick)
         if (auto itr = m_trustList.find(PTrust->targid); itr != m_trustList.end())
         {
             m_trustList.erase(itr);
-            m_dynamicTargIdsToDelete.emplace_back(PTrust->targid, server_clock::now());
+            m_dynamicTargIdsToDelete.emplace_back(PTrust->targid, timer::now());
             destroy(PTrust);
         }
     }

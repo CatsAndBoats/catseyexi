@@ -59,8 +59,8 @@ class AHPaginationModule : public CPPModule
             const auto action = data.ref<uint8>(0x04);
             if (action == 0x05)
             {
-                const uint32 curTick = gettick();
-                if (curTick - PChar->m_AHHistoryTimestamp > 1500)
+                const timer::time_point curTick = timer::now();
+                if (curTick > PChar->m_AHHistoryTimestamp + 1500ms)
                 {
                     // Not const, because we're going to increment it below
                     // This will get wiped on zoning

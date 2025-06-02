@@ -272,7 +272,7 @@ void auth_session::read_func()
                     ref<uint32>(buffer_.data(), 1) = accountID;
 
                     unsigned char hash[16];
-                    uint32        hashData = std::time(nullptr) ^ getpid();
+                    uint32        hashData = earth_time::timestamp() ^ getpid();
                     md5(reinterpret_cast<uint8*>(&hashData), hash, sizeof(hashData));
                     std::memcpy(buffer_.data() + 5, hash, 16);
 
@@ -280,7 +280,7 @@ void auth_session::read_func()
 
                     auto& session          = loginHelpers::get_authenticated_session(ipAddress, asStringFromUntrustedSource(hash, sizeof(hash)));
                     session.accountID      = accountID;
-                    session.authorizedTime = server_clock::now();
+                    session.authorizedTime = timer::now();
                 }
                 else if (status & ACCOUNT_STATUS_CODE::BANNED)
                 {
@@ -338,11 +338,7 @@ void auth_session::read_func()
                 accid = (accid < 1000 ? 1000 : accid);
 
                 // creating new account
-                time_t timecreate{};
-                tm     timecreateinfo{};
-
-                time(&timecreate);
-                _localtime_s(&timecreateinfo, &timecreate);
+                std::tm timecreateinfo = earth_time::to_local_tm();
 
                 char strtimecreate[128];
                 strftime(strtimecreate, sizeof(strtimecreate), "%Y:%m:%d %H:%M:%S", &timecreateinfo);

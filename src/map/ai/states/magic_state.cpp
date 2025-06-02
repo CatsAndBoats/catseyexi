@@ -82,7 +82,7 @@ CMagicState::CMagicState(CBattleEntity* PEntity, uint16 targid, SpellID spellid,
                                                                         errorMsg == 1 ? MSGBASIC_CANNOT_CAST_SPELL : errorMsg));
     }
 
-    m_castTime = std::chrono::milliseconds(battleutils::CalculateSpellCastTime(m_PEntity, this));
+    m_castTime = battleutils::CalculateSpellCastTime(m_PEntity, this);
     m_startPos = m_PEntity->loc.p;
 
     action_t action;
@@ -112,7 +112,7 @@ CMagicState::CMagicState(CBattleEntity* PEntity, uint16 targid, SpellID spellid,
     m_PEntity->loc.zone->PushPacket(m_PEntity, CHAR_INRANGE_SELF, std::make_unique<CActionPacket>(action));
 }
 
-bool CMagicState::Update(time_point tick)
+bool CMagicState::Update(timer::time_point tick)
 {
     action_t    action;
     auto*       PTarget = m_PEntity->IsValidTarget(m_targid, m_PSpell->getValidTarget(), m_errorMsg);
@@ -183,7 +183,7 @@ bool CMagicState::Update(time_point tick)
                 if (!luautils::OnTrustSpellCastCheckBattlefieldTrusts(PChar))
                 {
                     m_PEntity->OnCastInterrupted(*this, action, MSGBASIC_TRUST_NO_CAST_TRUST, true);
-                    action.recast = 2; // seems hardcoded to 2
+                    action.recast = 2s; // seems hardcoded to 2
                     m_PEntity->loc.zone->PushPacket(m_PEntity, CHAR_INRANGE_SELF, std::make_unique<CActionPacket>(action));
 
                     Complete();
@@ -225,7 +225,7 @@ bool CMagicState::Update(time_point tick)
         {
             action_t interruptedAction;
             m_PEntity->setActionInterrupted(interruptedAction, PTarget, MSGBASIC_IS_PARALYZED_2, static_cast<uint16>(m_PSpell->getID()));
-            interruptedAction.recast   = 2; // seems hardcoded to 2
+            interruptedAction.recast   = 2s; // seems hardcoded to 2
             interruptedAction.actionid = static_cast<uint16>(m_PSpell->getID());
             m_PEntity->loc.zone->PushPacket(m_PEntity, CHAR_INRANGE_SELF, std::make_unique<CActionPacket>(interruptedAction));
 
@@ -235,7 +235,7 @@ bool CMagicState::Update(time_point tick)
             // Spell interrupts when you're moving send a message + stop casting fourcc command and not two actions.
             action.id         = m_PEntity->id;
             action.spellgroup = m_PSpell->getSpellGroup();
-            action.recast     = 2;
+            action.recast     = 2s;
             action.actiontype = ACTION_MAGIC_INTERRUPT;
 
             actionList_t& actionList  = action.getNewActionList();
@@ -254,14 +254,14 @@ bool CMagicState::Update(time_point tick)
         {
             action_t interruptedAction;
             m_PEntity->setActionInterrupted(interruptedAction, PTarget, MSGBASIC_IS_INTIMIDATED, static_cast<uint16>(m_PSpell->getID()));
-            interruptedAction.recast   = 2; // seems hardcoded to 2
+            interruptedAction.recast   = 2s; // seems hardcoded to 2
             interruptedAction.actionid = static_cast<uint16>(m_PSpell->getID());
             m_PEntity->loc.zone->PushPacket(m_PEntity, CHAR_INRANGE_SELF, std::make_unique<CActionPacket>(interruptedAction));
 
             // See comment in above block for paralyze
             action.id         = m_PEntity->id;
             action.spellgroup = m_PSpell->getSpellGroup();
-            action.recast     = 2;
+            action.recast     = 2s;
             action.actiontype = ACTION_MAGIC_INTERRUPT;
 
             actionList_t& actionList  = action.getNewActionList();
@@ -292,7 +292,7 @@ bool CMagicState::Update(time_point tick)
 
         Complete();
     }
-    else if (IsCompleted() && tick > GetEntryTime() + m_castTime + std::chrono::milliseconds(m_PSpell->getAnimationTime()))
+    else if (IsCompleted() && tick > GetEntryTime() + m_castTime + m_PSpell->getAnimationTime())
     {
         if (m_PEntity->objtype == TYPE_PC)
         {
@@ -305,7 +305,7 @@ bool CMagicState::Update(time_point tick)
     return false;
 }
 
-void CMagicState::Cleanup(time_point tick)
+void CMagicState::Cleanup(timer::time_point tick)
 {
     if (!IsCompleted())
     {
@@ -466,16 +466,14 @@ void CMagicState::SpendCost()
     }
 }
 
-uint32 CMagicState::GetRecast()
+timer::duration CMagicState::GetRecast()
 {
-    uint32 RecastTime = 0;
-
     if (!m_PEntity->StatusEffectContainer->HasStatusEffect(EFFECT_CHAINSPELL) && !m_PEntity->StatusEffectContainer->HasStatusEffect(EFFECT_SPONTANEITY) &&
         !m_instantCast)
     {
-        RecastTime = battleutils::CalculateSpellRecastTime(m_PEntity, GetSpell());
+        return battleutils::CalculateSpellRecastTime(m_PEntity, GetSpell());
     }
-    return RecastTime;
+    return 0s;
 }
 
 void CMagicState::ApplyEnmity(CBattleEntity* PTarget, int ce, int ve)

@@ -154,7 +154,7 @@ auto CLuaTreasurePool::getItems() const -> sol::table
         sol::table itemRow   = lua.create_table();
         itemRow["id"]        = item.ID;
         itemRow["slotId"]    = item.SlotID;
-        itemRow["timestamp"] = item.TimeStamp.time_since_epoch().count();
+        itemRow["timestamp"] = earth_time::timestamp(timer::to_utc(item.TimeStamp));
 
         sol::table lotters     = lua.create_table();
         int        lotterIndex = 1;

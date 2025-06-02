@@ -84,7 +84,7 @@ void CLinkshell::setName(const std::string& name)
 
 void CLinkshell::setMessage(const std::string& message, const std::string& poster)
 {
-    const auto postTime = static_cast<uint32>(time(nullptr));
+    const auto postTime = earth_time::timestamp();
 
     if (!db::preparedStmt("UPDATE linkshells SET poster = ?, message = ?, messagetime = ? WHERE linkshellid = ?", poster, message, postTime, m_id))
     {
@@ -196,6 +196,7 @@ void CLinkshell::ChangeMemberRank(const std::string& MemberName, uint8 toSack)
                     uint8 SlotID     = PItemLinkshell->getSlotID();
                     destroy(PItemLinkshell);
 
+                    PItemLinkshell = newShellItem;
                     PMember->getStorage(LocationID)->InsertItem(PItemLinkshell, SlotID);
                     db::preparedStmt("UPDATE char_inventory SET itemid = ?, extra = ? WHERE charid = ? AND location = ? AND slot = ? LIMIT 1",
                                      PItemLinkshell->getID(), PItemLinkshell->m_extra, PMember->id, LocationID, SlotID);

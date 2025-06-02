@@ -24,6 +24,8 @@
 
 #include "zone.h"
 
+#include "common/timer.h"
+
 #include "entities/baseentity.h"
 #include "entities/charentity.h"
 #include "entities/mobentity.h"
@@ -73,13 +75,13 @@ public:
     void FindPartyForMob(CBaseEntity* PEntity);         // looking for a party for the monster
     void TransportDepart(uint16 boundary, uint16 zone); // ship/boat is leaving, passengers need to be collected
 
-    void TOTDChange(TIMETYPE TOTD); // process the world's reactions to changing time of day
+    void TOTDChange(vanadiel_time::TOTD TOTD); // process the world's reactions to changing time of day
     void WeatherChange(WEATHER weather);
     void MusicChange(uint16 BlockID, uint16 MusicTrackID);
 
     void PushPacket(CBaseEntity*, GLOBAL_MESSAGE_TYPE, const std::unique_ptr<CBasicPacket>&); // send a global package within the zone
 
-    void ZoneServer(time_point tick);
+    void ZoneServer(timer::time_point tick);
 
     CZone* GetZone();
 
@@ -115,15 +117,15 @@ private:
     std::set<uint16> m_charTargIds;       // sorted set of targids for characters
     std::set<uint16> m_dynamicTargIds;    // sorted set of targids for dynamic entities
 
-    std::vector<std::pair<uint16, time_point>> m_dynamicTargIdsToDelete; // list of targids pending deletion at a later date
+    std::vector<std::pair<uint16, timer::time_point>> m_dynamicTargIdsToDelete; // list of targids pending deletion at a later date
 
-    time_point m_EffectCheckTime{ server_clock::now() };
+    timer::time_point m_EffectCheckTime{ timer::now() };
 
-    time_point m_computeTime{ server_clock::now() };
-    uint16     m_lastCharComputeTargId{ 0 };
+    timer::time_point m_computeTime{ timer::now() };
+    uint16            m_lastCharComputeTargId{ 0 };
 
-    time_point m_charPersistTime{ server_clock::now() };
-    uint16     m_lastCharPersistTargId{ 0 };
+    timer::time_point m_charPersistTime{ timer::now() };
+    uint16            m_lastCharPersistTargId{ 0 };
 
     //
     // Intermediate collections for use inside ZoneServer

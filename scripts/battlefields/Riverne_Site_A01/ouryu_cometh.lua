@@ -3,30 +3,39 @@
 -- Name: Ouryu Cometh
 -- !pos 187.112 -0.5 346.341 30
 -----------------------------------
-local ID = zones[xi.zone.RIVERNE_SITE_A01]
------------------------------------
-ID.text.MEMBERS_OF_YOUR_PARTY         = 7535
-ID.text.TIME_LIMIT_FOR_THIS_BATTLE_IS = 7537
-ID.text.ENTERING_THE_BATTLEFIELD_FOR  = 7600
 
 local content = Battlefield:new({
     zoneId        = xi.zone.RIVERNE_SITE_A01,
     battlefieldId = xi.battlefield.id.OURYU_COMETH,
     maxPlayers    = 18,
-    levelCap      = 75,
-    timeLimit     = utils.minutes(30),
+    levelCap      = 99,
+    timeLimit     = utils.minutes(60),
     index         = 0,
     area          = 1,
     entryNpc      = 'Unstable_Displacement',
-    exitNpc       = 'Spatial_Displacement',
-    requiredItems =
-    {
-        xi.item.CLOUD_EVOKER,
-        wearMessage = ID.text.A_GLOWING_MIST + 280,
-        wornMessage = ID.text.A_GLOWING_MIST + 279,
-    },
-    grantXP          = 1500,
+    exitNpc       = 'Spatial_Displacement_BC',
+    requiredItems = { xi.item.CLOUD_EVOKER }
 })
+
+local function healCharacter(player)
+    if player:isAlive() then
+        player:setHP(player:getMaxHP())
+        player:setMP(player:getMaxMP())
+        player:setTP(0)
+
+        if player:getPet() ~= nil then
+            local pet = player:getPet()
+            pet:setHP(pet:getMaxHP())
+            pet:setMP(pet:getMaxMP())
+            pet:setTP(0)
+        end
+    end
+end
+
+-- players on healed on entry to the battlefield
+function content:battlefieldEntry(player, battlefield)
+    healCharacter(player)
+end
 
 content.groups =
 {
@@ -43,11 +52,12 @@ content.groups =
     {
         mobs           = { 'Ziryu' },
         superlinkGroup = 1,
+        spawned        = false,
     },
 
     {
-        mobs = { 'Water_Elemental', 'Earth_Elemental' }
-    },
+        mobs    = { 'Water_Elemental', 'Earth_Elemental' },
+    }
 }
 
 return content:register()

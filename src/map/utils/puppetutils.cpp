@@ -119,15 +119,22 @@ namespace puppetutils
         }
     }
 
+    void SaveAttachments(CCharEntity* PChar)
+    {
+        db::preparedStmt("UPDATE char_pet SET "
+                         "unlocked_attachments = ? "
+                         "WHERE charid = ? LIMIT 1",
+                         PChar->m_unlockedAttachments, PChar->id);
+    }
+
     void SaveAutomaton(CCharEntity* PChar)
     {
         if (PChar->GetMJob() == JOBTYPE::JOB_PUP || PChar->GetSJob() == JOBTYPE::JOB_PUP)
         {
             db::preparedStmt("UPDATE char_pet SET "
-                             "unlocked_attachments = ?, "
                              "equipped_attachments = ? "
                              "WHERE charid = ? LIMIT 1",
-                             PChar->m_unlockedAttachments, PChar->automatonInfo.m_Equip, PChar->id);
+                             PChar->automatonInfo.m_Equip, PChar->id);
         }
     }
 
@@ -146,7 +153,7 @@ namespace puppetutils
         {
             if (addBit(id & 0xFF, (uint8*)PChar->m_unlockedAttachments.attachments, sizeof(PChar->m_unlockedAttachments.attachments)))
             {
-                SaveAutomaton(PChar);
+                SaveAttachments(PChar);
                 PChar->pushPacket<CCharJobExtraPacket>(PChar, PChar->GetMJob() == JOB_PUP);
                 return true;
             }
@@ -156,7 +163,7 @@ namespace puppetutils
         {
             if (addBit(id & 0x0F, &PChar->m_unlockedAttachments.frames, sizeof(PChar->m_unlockedAttachments.frames)))
             {
-                SaveAutomaton(PChar);
+                SaveAttachments(PChar);
                 PChar->pushPacket<CCharJobExtraPacket>(PChar, PChar->GetMJob() == JOB_PUP);
                 return true;
             }
@@ -166,7 +173,7 @@ namespace puppetutils
         {
             if (addBit(id & 0x0F, &PChar->m_unlockedAttachments.heads, sizeof(PChar->m_unlockedAttachments.heads)))
             {
-                SaveAutomaton(PChar);
+                SaveAttachments(PChar);
                 PChar->pushPacket<CCharJobExtraPacket>(PChar, PChar->GetMJob() == JOB_PUP);
                 return true;
             }

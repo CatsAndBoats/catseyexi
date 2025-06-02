@@ -25,6 +25,8 @@
 #include <type_traits>
 #include <utility>
 
+#include "earth_time.h"
+
 // The purpose of this namespace IS NOT to replace the C++ standard library.
 //
 // It is to provide convenience wrappers around common standard library types
@@ -37,6 +39,40 @@
 
 namespace xi
 {
+    class vanadiel_clock
+    {
+    private:
+        using millisecond_ratio = std::ratio<1, 25000>; // (1Vms/25000ms) * 1000Vms * 60Vs = 1 Vmin
+        using second_ratio      = std::ratio_multiply<millisecond_ratio, std::ratio<1000>>;
+        using minute_ratio      = std::ratio_multiply<second_ratio, std::ratio<60>>; // 2.4 Earth seconds
+        using hour_ratio        = std::ratio_multiply<minute_ratio, std::ratio<60>>; //  60 Vana'diel minutes
+        using day_ratio         = std::ratio_multiply<hour_ratio, std::ratio<24>>;   //  24 Vana'diel hours
+        using week_ratio        = std::ratio_multiply<day_ratio, std::ratio<8>>;     //   8 Vana'diel days
+        using month_ratio       = std::ratio_multiply<day_ratio, std::ratio<30>>;    //  30 Vana'diel days
+        using year_ratio        = std::ratio_multiply<day_ratio, std::ratio<360>>;   // 360 Vana'diel days
+
+    public:
+        using milliseconds = std::chrono::duration<long long, millisecond_ratio>;
+        using seconds      = std::chrono::duration<long long, second_ratio>;
+        using minutes      = std::chrono::duration<long long, minute_ratio>;
+        using hours        = std::chrono::duration<long long, hour_ratio>;
+        using days         = std::chrono::duration<long long, day_ratio>;
+        using weeks        = std::chrono::duration<long long, week_ratio>;
+        using months       = std::chrono::duration<long long, month_ratio>;
+        using years        = std::chrono::duration<long long, year_ratio>;
+
+        using duration              = milliseconds;
+        using rep                   = duration::rep;
+        using period                = duration::period;
+        using time_point            = std::chrono::time_point<vanadiel_clock>;
+        static const bool is_steady = false;
+
+        static time_point now() noexcept
+        {
+            return time_point{ std::chrono::duration_cast<duration>(earth_time::now() - earth_time::vanadiel_epoch) };
+        }
+    };
+
     // A wrapper around std::optional to allow usage of object.apply([](auto& obj) { ... });
     // https://en.cppreference.com/w/cpp/utility/optional
     template <typename T>

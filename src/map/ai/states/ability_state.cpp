@@ -115,7 +115,7 @@ bool CAbilityState::CanChangeState()
     return IsCompleted();
 }
 
-bool CAbilityState::Update(time_point tick)
+bool CAbilityState::Update(timer::time_point tick)
 {
     // Rotate towards target during ability
     if (m_castTime > 0s && tick < GetEntryTime() + m_castTime)

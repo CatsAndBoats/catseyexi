@@ -180,10 +180,7 @@ WEATHER CLuaZone::getWeather()
 
 uint32 CLuaZone::getUptime()
 {
-    time_point currentTime   = std::chrono::system_clock::now(); // Gets the current time
-    time_point zoneStartTime = get_server_start_time();          // Gets the start time of the zone group (cluster)
-
-    long long uptime = std::chrono::duration_cast<std::chrono::seconds>(currentTime - zoneStartTime).count();
+    long long uptime = timer::count_seconds(timer::get_uptime());
     // returns the zone up time in seconds
     return static_cast<uint32>(uptime);
 }

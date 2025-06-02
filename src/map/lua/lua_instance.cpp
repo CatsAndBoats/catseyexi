@@ -22,6 +22,7 @@
 #include "lua_instance.h"
 
 #include "common/logging.h"
+#include "common/timer.h"
 
 #include "instance.h"
 #include "lua_baseentity.h"
@@ -120,7 +121,7 @@ sol::table CLuaInstance::getPets()
 
 uint32 CLuaInstance::getTimeLimit()
 {
-    uint32 limit = std::chrono::duration_cast<std::chrono::minutes>(m_PLuaInstance->GetTimeLimit()).count();
+    uint32 limit = std::chrono::floor<std::chrono::minutes>(m_PLuaInstance->GetTimeLimit()).count();
     return limit;
 }
 
@@ -144,7 +145,7 @@ uint8 CLuaInstance::getLevelCap()
 
 uint32 CLuaInstance::getLastTimeUpdate()
 {
-    auto time_ms = std::chrono::duration_cast<std::chrono::milliseconds>(m_PLuaInstance->GetLastTimeUpdate()).count();
+    auto time_ms = timer::count_milliseconds(m_PLuaInstance->GetLastTimeUpdate());
     return static_cast<uint32>(time_ms);
 }
 
@@ -155,7 +156,7 @@ uint32 CLuaInstance::getProgress()
 
 uint32 CLuaInstance::getWipeTime()
 {
-    auto time_ms = std::chrono::duration_cast<std::chrono::milliseconds>(m_PLuaInstance->GetWipeTime()).count();
+    auto time_ms = timer::count_milliseconds(m_PLuaInstance->GetWipeTime());
     return static_cast<uint32>(time_ms);
 }
 

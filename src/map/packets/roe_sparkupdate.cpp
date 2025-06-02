@@ -32,9 +32,9 @@ CRoeSparkUpdatePacket::CRoeSparkUpdatePacket(CCharEntity* PChar)
     this->setType(0x110);
     this->setSize(0x14);
 
-    uint32 vanaTime        = CVanaTime::getInstance()->getVanaTime();
-    uint32 daysSinceEpoch  = vanaTime / (60 * 60 * 24);
-    uint32 weeksSinceEpoch = daysSinceEpoch / 7;
+    earth_time::duration vanaTime        = std::chrono::seconds(earth_time::vanadiel_timestamp());
+    uint32               daysSinceEpoch  = std::chrono::floor<std::chrono::days>(vanaTime).count();
+    uint32               weeksSinceEpoch = std::chrono::floor<std::chrono::weeks>(vanaTime).count();
 
     const auto rset = db::preparedStmt("SELECT spark_of_eminence, deeds, plaudits FROM char_points WHERE charid = ? LIMIT 1", PChar->id);
     if (rset && rset->rowsCount() && rset->next())

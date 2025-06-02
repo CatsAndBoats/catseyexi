@@ -35,10 +35,10 @@ zones[xi.zone.NASHMAU] =
         SANCTION                      = 10788, -- You have received the Empire's Sanction.
         NENE_DELIVERY_DIALOG          = 10856, -- Yooo want to send gooods? Yooo want to send clink clink?
         NANA_DELIVERY_DIALOG          = 10857, -- Yooo send gooods. Yooo send clink clink.
-        YOYOROON_SHOP_DIALOG          = 11811, -- Boooss, boooss! Yoyoroon bring yooo goood custooomer! Yoyoroon goood wooorker, nooo?
-        PIPIROON_SHOP_DIALOG          = 11812, -- Yes? I'm a busy man. Make it quick.
-        RETRIEVE_DIALOG_ID            = 11912, -- You retrieve <item> from the porter moogle's care.
-        COMMON_SENSE_SURVIVAL         = 11951, -- It appears that you have arrived at a new survival guide provided by the Adventurers' Mutual Aid Network. Common sense dictates that you should now be able to teleport here from similar tomes throughout the world.
+        YOYOROON_SHOP_DIALOG          = 11816, -- Boooss, boooss! Yoyoroon bring yooo goood custooomer! Yoyoroon goood wooorker, nooo?
+        PIPIROON_SHOP_DIALOG          = 11817, -- Yes? I'm a busy man. Make it quick.
+        RETRIEVE_DIALOG_ID            = 11917, -- You retrieve <item> from the porter moogle's care.
+        COMMON_SENSE_SURVIVAL         = 11956, -- It appears that you have arrived at a new survival guide provided by the Adventurers' Mutual Aid Network. Common sense dictates that you should now be able to teleport here from similar tomes throughout the world.
     },
     mob =
     {

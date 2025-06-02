@@ -97,6 +97,7 @@
 #include "weapon_skill.h"
 
 CCharEntity::CCharEntity()
+: m_PlayTime(0s)
 {
     TracyZoneScoped;
     objtype     = TYPE_PC;
@@ -190,8 +191,8 @@ CCharEntity::CCharEntity()
     m_hasArise           = false;
     m_LevelRestriction   = 0;
     m_lastBcnmTimePrompt = 0;
-    m_AHHistoryTimestamp = 0;
-    m_DeathTimestamp     = 0;
+    m_AHHistoryTimestamp = timer::time_point::min();
+    m_DeathTimestamp     = timer::time_point::min();
 
     m_EquipFlag         = 0;
     m_EquipBlock        = 0;
@@ -232,8 +233,7 @@ CCharEntity::CCharEntity()
     resetPetZoningInfo();
     petZoningInfo.petID = 0;
 
-    m_PlayTime    = 0;
-    m_SaveTime    = 0;
+    m_SaveTime    = timer::time_point::min();
     m_reloadParty = false;
 
     m_moghouseID     = 0;
@@ -604,8 +604,8 @@ void CCharEntity::resetPetZoningInfo()
     petZoningInfo.petMP        = 0;
     petZoningInfo.respawnPet   = false;
     petZoningInfo.petType      = PET_TYPE::AVATAR;
-    petZoningInfo.jugSpawnTime = 0;
-    petZoningInfo.jugDuration  = 0;
+    petZoningInfo.jugSpawnTime = timer::time_point::min();
+    petZoningInfo.jugDuration  = 0s;
 }
 
 bool CCharEntity::shouldPetPersistThroughZoning()
@@ -874,17 +874,17 @@ void CCharEntity::setBlockingAid(bool isBlockingAid)
     m_isBlockingAid = isBlockingAid;
 }
 
-void CCharEntity::SetPlayTime(uint32 playTime)
+void CCharEntity::SetPlayTime(timer::duration playTime)
 {
     m_PlayTime = playTime;
-    m_SaveTime = gettick() / 1000;
+    m_SaveTime = timer::now();
 }
 
-uint32 CCharEntity::GetPlayTime(bool needUpdate)
+timer::duration CCharEntity::GetPlayTime(bool needUpdate)
 {
     if (needUpdate)
     {
-        uint32 currentTime = gettick() / 1000;
+        auto currentTime = timer::now();
 
         m_PlayTime += currentTime - m_SaveTime;
         m_SaveTime = currentTime;
@@ -1015,7 +1015,7 @@ bool CCharEntity::PersistData()
     return didPersist;
 }
 
-bool CCharEntity::PersistData(time_point tick)
+bool CCharEntity::PersistData(timer::time_point tick)
 {
     if (tick < nextDataPersistTime || !PersistData())
     {
@@ -1026,11 +1026,11 @@ bool CCharEntity::PersistData(time_point tick)
     return true;
 }
 
-void CCharEntity::Tick(time_point tick)
+void CCharEntity::Tick(timer::time_point tick)
 {
     TracyZoneScoped;
     CBattleEntity::Tick(tick);
-    if (m_DeathTimestamp > 0 && tick >= m_deathSyncTime)
+    if (m_DeathTimestamp > timer::time_point::min() && tick >= m_deathSyncTime)
     {
         // Send an update packet at a regular interval to keep the player's death variables synced
         updatemask |= UPDATE_STATUS;
@@ -1091,7 +1091,7 @@ void CCharEntity::PostTick()
         m_EffectsChanged = false;
     }
 
-    std::chrono::steady_clock::time_point now = std::chrono::steady_clock::now();
+    timer::time_point now = timer::now();
 
     if (updatemask && now > m_nextUpdateTimer)
     {
@@ -1271,7 +1271,7 @@ bool CCharEntity::OnAttack(CAttackState& state, action_t& action)
 {
     TracyZoneScoped;
     auto* controller{ static_cast<CPlayerController*>(PAI->GetController()) };
-    controller->setLastAttackTime(server_clock::now());
+    controller->setLastAttackTime(timer::now());
     auto ret = CBattleEntity::OnAttack(state, action);
 
     return ret;
@@ -1415,7 +1415,7 @@ void CCharEntity::OnCastFinished(CMagicState& state, action_t& action)
                     auto scEffect = PTarget->StatusEffectContainer->GetStatusEffect(EFFECT_SKILLCHAIN, 0);
                     if (isHelix && scEffect)
                     {
-                        scEffect->SetDuration(scEffect->GetDuration() + 2000);
+                        scEffect->SetDuration(scEffect->GetDuration() + 2s);
                     }
                 }
             }
@@ -1721,17 +1721,22 @@ void CCharEntity::OnAbility(CAbilityState& state, action_t& action)
         }
 
         // get any available merit recast reduction
-        uint8 meritRecastReduction = 0;
+        auto meritRecastReduction = 0s;
 
         if (PAbility->getMeritModID() > 0 && !(PAbility->getAddType() & ADDTYPE_MERIT))
         {
-            meritRecastReduction = PMeritPoints->GetMeritValue((MERIT_TYPE)PAbility->getMeritModID(), this);
+            meritRecastReduction = std::chrono::seconds(PMeritPoints->GetMeritValue((MERIT_TYPE)PAbility->getMeritModID(), this));
         }
 
         auto* charge = ability::GetCharge(this, PAbility->getRecastId());
         if (charge && PAbility->getID() != ABILITY_SIC)
         {
-            action.recast = charge->chargeTime * PAbility->getRecastTime() - meritRecastReduction;
+            // TODO: this is bad
+            // "recast" 1-4 = sic/ready
+            // "recast" 1 = quickdraw, stratagems
+            auto crypticRecastSecondsAsType = timer::count_seconds(PAbility->getRecastTime());
+
+            action.recast = charge->chargeTime * crypticRecastSecondsAsType - meritRecastReduction;
         }
         else
         {
@@ -1742,7 +1747,7 @@ void CCharEntity::OnAbility(CAbilityState& state, action_t& action)
         {
             if (this->StatusEffectContainer->HasStatusEffect(EFFECT_TABULA_RASA))
             {
-                action.recast = 0;
+                action.recast = 0s;
             }
         }
         else if (PAbility->getRecastId() == 173 || PAbility->getRecastId() == 174) // BP rage, BP ward
@@ -1762,10 +1767,10 @@ void CCharEntity::OnAbility(CAbilityState& state, action_t& action)
 
             // Localvar will set the BP ability timer when the move consumes MP
             // The delay is snapshot when the player uses the ability: https://www.bg-wiki.com/ffxi/Blood_Pact_Ability_Delay
-            this->SetLocalVar("bpRecastTime", static_cast<uint16>(std::max<int16>(0, action.recast - bloodPactDelayReduction)));
+            this->SetLocalVar("bpRecastTime", static_cast<uint16>(timer::count_seconds(std::max<timer::duration>(0s, action.recast - std::chrono::seconds(bloodPactDelayReduction)))));
 
             // Recast is actually triggered when the bp goes off (no recast packet at all on using a bp and the target moving out of range of the pet)
-            action.recast = 0;
+            action.recast = 0s;
         }
 
         // remove invisible if aggressive
@@ -1799,12 +1804,12 @@ void CCharEntity::OnAbility(CAbilityState& state, action_t& action)
             {
                 // TODO: Transform this into an item Mod::REWARD_RECAST perhaps ?
                 // The Bison/Brave's Warbonnet & Khimaira/Stout Bonnet reduces recast time by 10 seconds.
-                action.recast -= 10; // remove 10 seconds
+                action.recast -= 10s; // remove 10 seconds
             }
         }
         else if (PAbility->getID() == ABILITY_READY || PAbility->getID() == ABILITY_SIC)
         {
-            action.recast = static_cast<uint16>(std::max<int16>(0, action.recast - getMod(Mod::SIC_READY_RECAST)));
+            action.recast = std::max<timer::duration>(0s, action.recast - std::chrono::seconds(getMod(Mod::SIC_READY_RECAST)));
         }
 
         action.id         = this->id;
@@ -1895,7 +1900,7 @@ void CCharEntity::OnAbility(CAbilityState& state, action_t& action)
                     addMP((int32)-mpCost);
                     if (this->GetLocalVar("bpRecastTime") > 0) // This will go away when all smn petskills are handled via jobutils/summoner.lua
                     {
-                        action.recast = this->GetLocalVar("bpRecastTime");
+                        action.recast = std::chrono::seconds(this->GetLocalVar("bpRecastTime"));
                     }
 
                     if (PAbility->getValidTarget() == TARGET_SELF)
@@ -2446,15 +2451,15 @@ void CCharEntity::OnRaise()
         // add weakness effect (75% reduction in HP/MP)
         if (GetLocalVar("MijinGakure") == 0)
         {
-            uint32 weaknessTime = 300;
+            auto weaknessTime = 5min;
 
             // Arise has a reduced weakness time of 3 mins
             if (m_hasArise)
             {
-                weaknessTime = 180;
+                weaknessTime = 3min;
             }
 
-            CStatusEffect* PWeaknessEffect = new CStatusEffect(EFFECT_WEAKNESS, EFFECT_WEAKNESS, m_weaknessLvl, 0, weaknessTime);
+            CStatusEffect* PWeaknessEffect = new CStatusEffect(EFFECT_WEAKNESS, EFFECT_WEAKNESS, m_weaknessLvl, 0s, weaknessTime);
             StatusEffectContainer->AddStatusEffect(PWeaknessEffect);
         }
 
@@ -2519,7 +2524,7 @@ void CCharEntity::OnRaise()
         // If Arise was used then apply a reraise 3 effect on the target
         if (m_hasArise)
         {
-            CStatusEffect* PReraiseEffect = new CStatusEffect(EFFECT_RERAISE, EFFECT_RERAISE, 3, 0, 3600);
+            CStatusEffect* PReraiseEffect = new CStatusEffect(EFFECT_RERAISE, EFFECT_RERAISE, 3, 0s, 1h);
             StatusEffectContainer->AddStatusEffect(PReraiseEffect);
         }
 
@@ -2578,7 +2583,7 @@ void CCharEntity::OnItemFinish(CItemState& state, action_t& action)
         {
             PItem->setCurrentCharges(PItem->getCurrentCharges() - 1);
         }
-        PItem->setLastUseTime(CVanaTime::getInstance()->getVanaTime());
+        PItem->setLastUseTime(timer::now());
 
         db::preparedStmt("UPDATE char_inventory "
                          "SET extra = ? "
@@ -2587,8 +2592,8 @@ void CCharEntity::OnItemFinish(CItemState& state, action_t& action)
 
         if (PItem->getCurrentCharges() != 0)
         {
-            this->PRecastContainer->Add(RECAST_ITEM, PItem->getSlotID() << 8 | PItem->getLocationID(),
-                                        PItem->getReuseTime() / 1000); // add recast timer to Recast List from any bag
+            // add recast timer to Recast List from any bag
+            this->PRecastContainer->Add(RECAST_ITEM, PItem->getSlotID() << 8 | PItem->getLocationID(), PItem->getReuseTime());
         }
     }
     else // unlock all items except equipment
@@ -2657,7 +2662,7 @@ void CCharEntity::Die()
     }
 
     Die(death_duration);
-    SetDeathTimestamp((uint32)time(nullptr));
+    SetDeathTime(timer::now());
 
     setBlockingAid(false);
 
@@ -2675,7 +2680,7 @@ void CCharEntity::Die()
     luautils::OnPlayerDeath(this);
 }
 
-void CCharEntity::Die(duration _duration)
+void CCharEntity::Die(timer::duration _duration)
 {
     TracyZoneScoped;
 
@@ -2694,7 +2699,7 @@ void CCharEntity::Die(duration _duration)
         m_weaknessLvl = 0;
     }
 
-    m_deathSyncTime = server_clock::now() + death_update_frequency;
+    m_deathSyncTime = timer::now() + death_update_frequency;
     PAI->ClearStateStack();
     PAI->Internal_Die(_duration);
 
@@ -2732,29 +2737,25 @@ void CCharEntity::Raise()
     TracyZoneScoped;
 
     PAI->Internal_Raise();
-    SetDeathTimestamp(0);
+    SetDeathTime(timer::time_point::min());
 }
 
-void CCharEntity::SetDeathTimestamp(uint32 timestamp)
+void CCharEntity::SetDeathTime(timer::time_point timestamp)
 {
     m_DeathTimestamp = timestamp;
 }
 
-int32 CCharEntity::GetSecondsElapsedSinceDeath() const
+timer::duration CCharEntity::GetTimeSinceDeath() const
 {
-    return m_DeathTimestamp > 0 ? (uint32)time(nullptr) - m_DeathTimestamp : 0;
+    return m_DeathTimestamp > timer::time_point::min() ? timer::now() - m_DeathTimestamp : 0s;
 }
 
-int32 CCharEntity::GetTimeRemainingUntilDeathHomepoint() const
+timer::duration CCharEntity::GetTimeUntilDeathHomepoint() const
 {
-    // 0x0003A020 is 60 * 3960 and 3960 is 66 minutes in seconds
-    // The client uses this time as the maximum amount of time for death
-    // We convert the elapsed death time to this total time and subtract it which gives us the remaining time to a forced homepoint
-    // Once the returned value here reaches below 360 then the client with force homepoint the character
-    return 0x0003A020 - (60 * GetSecondsElapsedSinceDeath());
+    return 60min - GetTimeSinceDeath();
 }
 
-int32 CCharEntity::GetTimeCreated()
+earth_time::time_point CCharEntity::GetTimeCreated()
 {
     TracyZoneScoped;
 
@@ -2762,10 +2763,10 @@ int32 CCharEntity::GetTimeCreated()
 
     if (rset && rset->rowsCount() && rset->next())
     {
-        return rset->get<int32>(0);
+        return earth_time::time_point(std::chrono::seconds(rset->get<uint32>("UNIX_TIMESTAMP(timecreated)")));
     }
 
-    return 0;
+    return earth_time::time_point::min();
 }
 
 uint8 CCharEntity::getHighestJobLevel()
@@ -3310,12 +3311,11 @@ int32 CCharEntity::getCharVar(std::string const& charVarName)
 {
     if (auto charVar = charVarCache.find(charVarName); charVar != charVarCache.end())
     {
-        std::pair cachedVarData    = charVar->second;
-        uint32    currentTimestamp = CVanaTime::getInstance()->getSysTime();
+        std::pair cachedVarData = charVar->second;
 
         // If the cached variable is not expired, return it.  Else, fall through so that the
         // database can be cleaned up.
-        if (cachedVarData.second == 0 || cachedVarData.second > currentTimestamp)
+        if (cachedVarData.second == 0 || cachedVarData.second > earth_time::timestamp())
         {
             return cachedVarData.first;
         }
@@ -3329,7 +3329,7 @@ int32 CCharEntity::getCharVar(std::string const& charVarName)
 
 auto CCharEntity::getCharVarsWithPrefix(std::string const& prefix) -> std::vector<std::pair<std::string, int32>>
 {
-    const uint32 currentTimestamp = CVanaTime::getInstance()->getSysTime();
+    const auto currentTimestamp = earth_time::timestamp();
 
     std::vector<std::pair<std::string, int32>> charVars;
 

@@ -90,14 +90,14 @@ struct profile_t
 
 struct capacityChain_t
 {
-    uint16 chainNumber;
-    uint32 chainTime;
+    uint16            chainNumber;
+    timer::time_point chainTime;
 };
 
 struct expChain_t
 {
-    uint16 chainNumber;
-    uint32 chainTime;
+    uint16            chainNumber;
+    timer::time_point chainTime;
 };
 
 struct telepoint_t
@@ -131,15 +131,15 @@ struct teleport_t
 
 struct PetInfo_t
 {
-    bool     respawnPet;   // Used for spawning pet on zone
-    uint32   jugSpawnTime; // Keeps track of original spawn time in seconds since epoch
-    uint32   jugDuration;  // Number of seconds a jug pet should last after its original spawn time
-    uint8    petID;        // ID as in wyvern(48) , carbuncle(8) ect..
-    PET_TYPE petType;      // Type of pet being transferred
-    uint8    petLevel;     // Level the pet was spawned with
-    int16    petHP;
-    int16    petMP;
-    float    petTP;
+    bool              respawnPet;   // Used for spawning pet on zone
+    timer::time_point jugSpawnTime; // Keeps track of original spawn time
+    timer::duration   jugDuration;  // Duration a jug pet should last after its original spawn time
+    uint8             petID;        // ID as in wyvern(48) , carbuncle(8) ect..
+    PET_TYPE          petType;      // Type of pet being transferred
+    uint8             petLevel;     // Level the pet was spawned with
+    int16             petHP;
+    int16             petMP;
+    float             petTP;
 };
 
 struct AuctionHistory_t
@@ -259,13 +259,14 @@ public:
 
     SAVE_CONF playerConfig{}; // Various settings such as chat filter, display head flag, new adventurer, autotarget, etc.
 
-    uint32 lastOnline{ 0 };              // UTC Unix Timestamp of the last time char zoned or logged out
-    bool   isNewPlayer() const;          // Checks if new player bit is unset.
-    bool   isSeekingParty() const;       // is seeking party or not
-    bool   isAnon() const;               // is /anon
-    bool   isAway() const;               // is /away (tells will not go through)
-    bool   isMentor() const;             // If player is a mentor or not.
-    bool   hasAutoTargetEnabled() const; // has autotarget enabled
+    earth_time::time_point lastOnline{}; // UTC time of the last time char zoned or logged out
+
+    bool isNewPlayer() const;          // Checks if new player bit is unset.
+    bool isSeekingParty() const;       // is seeking party or not
+    bool isAnon() const;               // is /anon
+    bool isAway() const;               // is /away (tells will not go through)
+    bool isMentor() const;             // If player is a mentor or not.
+    bool hasAutoTargetEnabled() const; // has autotarget enabled
 
     profile_t       profile{};
     capacityChain_t capacityChain{};
@@ -284,7 +285,7 @@ public:
     uint8            m_TitleList[143]{};       // List of obtained titles
     uint8            m_Abilities[64]{};        // List of current abilities
     uint8            m_LearnedAbilities[49]{}; // Learnable abilities (corsair rolls)
-    xi::bitset<64>   m_LearnedWeaponskills;    // Learnable Weaponskills
+    xi::bitset<64>   m_LearnedWeaponskills{};  // Learnable Weaponskills
     uint8            m_TraitList[18]{};        // List of active job traits in the form of a bit mask
     uint8            m_PetCommands[64]{};
     uint8            m_WeaponSkills[32]{};
@@ -451,20 +452,20 @@ public:
 
     void SetName(const std::string& name); // set the name of character, limited to 15 characters
 
-    time_point   lastTradeInvite{};
-    EntityID_t   TradePending{};    // Character ID offering trade
-    EntityID_t   InvitePending{};   // Character ID sending party invite
-    EntityID_t   BazaarID{};        // Pointer to the bazaar we are browsing.
-    BazaarList_t BazaarCustomers{}; // Array holding the IDs of the current customers
+    timer::time_point lastTradeInvite{};
+    EntityID_t        TradePending{};    // Character ID offering trade
+    EntityID_t        InvitePending{};   // Character ID sending party invite
+    EntityID_t        BazaarID{};        // Pointer to the bazaar we are browsing.
+    BazaarList_t      BazaarCustomers{}; // Array holding the IDs of the current customers
 
     std::unique_ptr<monstrosity::MonstrosityData_t> m_PMonstrosity;
 
-    uint8      m_LevelRestriction; // Character level limit
-    uint16     m_Costume;
-    uint16     m_Costume2;
-    uint32     m_AHHistoryTimestamp;
-    uint32     m_DeathTimestamp;
-    time_point m_deathSyncTime{}; // Timer used for sending an update packet at a regular interval while the character is dead
+    uint8             m_LevelRestriction; // Character level limit
+    uint16            m_Costume;
+    uint16            m_Costume2;
+    timer::time_point m_AHHistoryTimestamp;
+    timer::time_point m_DeathTimestamp;
+    timer::time_point m_deathSyncTime{}; // Timer used for sending an update packet at a regular interval while the character is dead
 
     uint8      m_hasTractor;        // checks if player has tractor already
     uint8      m_hasRaise;          // checks if player has raise already
@@ -475,10 +476,10 @@ public:
 
     location_t m_previousLocation{};
 
-    uint32 m_PlayTime;
-    uint32 m_SaveTime;
+    timer::duration   m_PlayTime;
+    timer::time_point m_SaveTime;
 
-    time_point m_LeaderCreatedPartyTime{}; // Time that a party member joined and this player was leader.
+    timer::time_point m_LeaderCreatedPartyTime{}; // Time that a party member joined and this player was leader.
 
     uint8 m_GMlevel;    // Level of the GM flag assigned to this character
     bool  m_isGMHidden; // GM Hidden flag to prevent player updates from being processed.
@@ -502,10 +503,10 @@ public:
     // Send updates about dirty containers in post tick
     std::map<CONTAINER_ID, bool> dirtyInventoryContainers;
 
-    bool       m_EquipSwap; // true if equipment was recently changed
-    bool       m_EffectsChanged;
-    time_point m_LastSynthTime{};
-    time_point m_LastRangedAttackTime{};
+    bool              m_EquipSwap; // true if equipment was recently changed
+    bool              m_EffectsChanged;
+    timer::time_point m_LastSynthTime{};
+    timer::time_point m_LastRangedAttackTime{};
 
     CHAR_SUBSTATE m_Substate;
 
@@ -516,11 +517,11 @@ public:
     std::vector<GearSetMod_t>     m_GearSetMods; // The list of gear set mods currently applied to the character.
     std::vector<AuctionHistory_t> m_ah_history;  // AH history list (in the future consider using UContainer)
 
-    std::unordered_map<uint16, uint32> m_PacketRecievedTimestamps;
-    uint16                             m_LastPacketType{};
+    std::unordered_map<uint16, timer::time_point> m_PacketRecievedTimestamps;
+    uint16                                        m_LastPacketType{};
 
-    void   SetPlayTime(uint32 playTime);        // Set playtime
-    uint32 GetPlayTime(bool needUpdate = true); // Get playtime
+    void            SetPlayTime(timer::duration playTime); // Set playtime
+    timer::duration GetPlayTime(bool needUpdate = true);   // Get playtime
 
     CItemEquipment* getEquip(SLOTTYPE slot);
 
@@ -540,9 +541,9 @@ public:
 
     void RequestPersist(CHAR_PERSIST toPersist);
     bool PersistData();
-    bool PersistData(time_point tick);
+    bool PersistData(timer::time_point tick);
 
-    virtual void Tick(time_point) override;
+    virtual void Tick(timer::time_point) override;
     void         PostTick() override;
 
     virtual void addTrait(CTrait*) override;
@@ -553,17 +554,18 @@ public:
     bool         IsMobOwner(CBattleEntity* PTarget);
 
     virtual void Die() override;
-    void         Die(duration _duration);
+    void         Die(timer::duration _duration);
     void         Raise();
 
-    static constexpr duration death_duration         = 60min;
-    static constexpr duration death_update_frequency = 16s;
+    static constexpr timer::duration death_duration         = 60min;
+    static constexpr timer::duration death_update_frequency = 16s;
 
-    void  SetDeathTimestamp(uint32 timestamp);
-    int32 GetSecondsElapsedSinceDeath() const;
-    int32 GetTimeRemainingUntilDeathHomepoint() const;
+    void            SetDeathTime(timer::time_point timestamp);
+    timer::duration GetTimeSinceDeath() const;
+    timer::duration GetTimeUntilDeathHomepoint() const;
 
-    int32 GetTimeCreated();
+    earth_time::time_point GetTimeCreated();
+
     uint8 getHighestJobLevel();
 
     bool isInTriggerArea(uint32 triggerAreaId);
@@ -650,8 +652,8 @@ private:
     std::unordered_set<std::string>                           charVarChanges;
     std::unordered_set<uint32>                                charTriggerAreaIDs; // Holds any TriggerArea IDs that the player is currently within the bounds of
 
-    uint8      dataToPersist = 0;
-    time_point nextDataPersistTime{};
+    uint8             dataToPersist = 0;
+    timer::time_point nextDataPersistTime{};
 
     // TODO: Don't use raw ptrs for this, but don't duplicate whole packets with unique_ptr either.
     std::deque<std::unique_ptr<CBasicPacket>> PacketList;          // The list of packets to be sent to the character during the next network cycle

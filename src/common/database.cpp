@@ -26,6 +26,7 @@
 #include "macros.h"
 #include "settings.h"
 #include "task_manager.h"
+#include "timer.h"
 #include "utils.h"
 
 #include <chrono>
@@ -215,11 +216,11 @@ Synchronized<db::detail::State>& db::detail::getState()
 auto db::detail::timer(std::string const& query) -> xi::final_action<std::function<void()>>
 {
     // clang-format off
-    const auto start = server_clock::now();
+    const auto start = timer::now();
     return xi::finally<std::function<void()>>([query, start]() -> void
     {
-        const auto end      = server_clock::now();
-        const auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+        const auto end      = timer::now();
+        const auto duration = timer::count_milliseconds(end - start);
         if (timersEnabled && settings::get<bool>("logging.SQL_SLOW_QUERY_LOG_ENABLE"))
         {
             if (duration > settings::get<uint32>("logging.SQL_SLOW_QUERY_ERROR_TIME"))
@@ -302,7 +303,7 @@ auto db::queryStr(std::string const& rawQuery) -> std::unique_ptr<db::detail::Re
         }
 
         ShowCritical("Query Failed after %d retries: %s", queryRetryCount, rawQuery.c_str());
-        std::this_thread::sleep_for(std::chrono::seconds(1));
+        std::this_thread::sleep_for(1s);
         std::terminate();
     });
     // clang-format on

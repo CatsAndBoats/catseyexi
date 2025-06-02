@@ -205,7 +205,7 @@ void MapServer::prepareWatchdog()
             ShowCritical(outputStr);
 
             // Allow some time for logging to flush
-            std::this_thread::sleep_for(std::chrono::milliseconds(200));
+            std::this_thread::sleep_for(200ms);
 
             throw std::runtime_error("Watchdog thread time exceeded. Killing process.");
         }
@@ -219,32 +219,34 @@ void MapServer::run()
 
     while (Application::isRunning())
     {
-        duration tasksDuration;
-        duration networkDuration;
-        duration tickDuration;
+        timer::duration tasksDuration;
+        timer::duration networkDuration;
+        timer::duration tickDuration;
 
-        const auto tickStart = server_clock::now();
+        const auto tickStart = timer::now();
         {
-            tasksDuration   = CTaskManager::getInstance()->doExpiredTasks(tickStart);
-            networkDuration = networking_->doSocketsBlocking(kMainLoopInterval - tasksDuration); // Use tick remainder for networking
-            watchdog_->update();
+            tasksDuration = CTaskManager::getInstance()->doExpiredTasks(tickStart);
+            // Use tick remainder for networking with a maximum to ensure that the network phase
+            // doesn't starve and a minimum to prevent bumping up against the time limit.
+            networkDuration = networking_->doSocketsBlocking(kMainLoopInterval - std::clamp<timer::duration>(tasksDuration, 50ms, 150ms));
         }
-        tickDuration  = server_clock::now() - tickStart;
-        tasksDuration = tickDuration - networkDuration; // Since we don't measure logic directly, we can calculate it based on the total and network durations
+        tickDuration = timer::now() - tickStart;
 
         const auto tickDiffTime = kMainLoopInterval - tickDuration;
 
-        mapStatistics_->set(MapStatistics::Key::TasksTickTime, getMilliseconds(tasksDuration));
-        mapStatistics_->set(MapStatistics::Key::NetworkTickTime, getMilliseconds(networkDuration));
-        mapStatistics_->set(MapStatistics::Key::TotalTickTime, getMilliseconds(tickDuration));
-        mapStatistics_->set(MapStatistics::Key::TickDiffTime, getMilliseconds(tickDiffTime));
+        mapStatistics_->set(MapStatistics::Key::TasksTickTime, timer::count_milliseconds(tasksDuration));
+        mapStatistics_->set(MapStatistics::Key::NetworkTickTime, timer::count_milliseconds(networkDuration));
+        mapStatistics_->set(MapStatistics::Key::TotalTickTime, timer::count_milliseconds(tickDuration));
+        mapStatistics_->set(MapStatistics::Key::TickDiffTime, timer::count_milliseconds(tickDiffTime));
         mapStatistics_->flush();
 
         DebugPerformanceFmt("Tasks: {}ms, Network: {}ms, Total: {}ms, Diff/Sleep: {}ms",
-                            getMilliseconds(tasksDuration),
-                            getMilliseconds(networkDuration),
-                            getMilliseconds(tickDuration),
-                            getMilliseconds(tickDiffTime));
+                            timer::count_milliseconds(tasksDuration),
+                            timer::count_milliseconds(networkDuration),
+                            timer::count_milliseconds(tickDuration),
+                            timer::count_milliseconds(tickDiffTime));
+
+        watchdog_->update();
 
         if (tickDiffTime > 0ms)
         {
@@ -252,7 +254,7 @@ void MapServer::run()
         }
         else if (tickDiffTime < -kMainLoopBacklogThreshold)
         {
-            RATE_LIMIT(15s, ShowWarningFmt("Main loop is running {}ms behind, performance is degraded!", -getMilliseconds(tickDiffTime)));
+            RATE_LIMIT(15s, ShowWarningFmt("Main loop is running {}ms behind, performance is degraded!", -timer::count_milliseconds(tickDiffTime)));
         }
     }
 }
@@ -360,21 +362,19 @@ void MapServer::do_init()
 
     monstrosity::LoadStaticData();
 
-    CVanaTime::getInstance()->setCustomEpoch(settings::get<int32>("map.VANADIEL_TIME_EPOCH"));
-
     zoneutils::InitializeWeather(); // Need VanaTime initialized
 
     CTransportHandler::getInstance()->InitializeTransport(mapIPP);
 
-    CTaskManager::getInstance()->AddTask("time_server", server_clock::now(), nullptr, CTaskManager::TASK_INTERVAL, kTimeServerTickInterval, time_server);
-    CTaskManager::getInstance()->AddTask("map_cleanup", server_clock::now(), nullptr, CTaskManager::TASK_INTERVAL, 5s, std::bind(&MapServer::map_cleanup, this, std::placeholders::_1, std::placeholders::_2));
-    CTaskManager::getInstance()->AddTask("garbage_collect", server_clock::now(), nullptr, CTaskManager::TASK_INTERVAL, 15min, std::bind(&MapServer::map_garbage_collect, this, std::placeholders::_1, std::placeholders::_2));
-    CTaskManager::getInstance()->AddTask("persist_server_vars", server_clock::now(), nullptr, CTaskManager::TASK_INTERVAL, 1min, serverutils::PersistVolatileServerVars);
+    CTaskManager::getInstance()->AddTask("time_server", timer::now(), nullptr, CTaskManager::TASK_INTERVAL, kTimeServerTickInterval, time_server);
+    CTaskManager::getInstance()->AddTask("map_cleanup", timer::now(), nullptr, CTaskManager::TASK_INTERVAL, 5s, std::bind(&MapServer::map_cleanup, this, std::placeholders::_1, std::placeholders::_2));
+    CTaskManager::getInstance()->AddTask("garbage_collect", timer::now(), nullptr, CTaskManager::TASK_INTERVAL, 15min, std::bind(&MapServer::map_garbage_collect, this, std::placeholders::_1, std::placeholders::_2));
+    CTaskManager::getInstance()->AddTask("persist_server_vars", timer::now(), nullptr, CTaskManager::TASK_INTERVAL, 1min, serverutils::PersistVolatileServerVars);
 
-    zoneutils::TOTDChange(CVanaTime::getInstance()->GetCurrentTOTD()); // This tells the zones to spawn stuff based on time of day conditions (such as undead at night)
+    zoneutils::TOTDChange(vanadiel_time::get_totd()); // This tells the zones to spawn stuff based on time of day conditions (such as undead at night)
 
     ShowInfo("do_init: Removing expired database variables");
-    uint32 currentTimestamp = CVanaTime::getInstance()->getSysTime();
+    uint32 currentTimestamp = earth_time::timestamp();
     db::preparedStmt("DELETE FROM char_vars WHERE expiry > 0 AND expiry <= ?", currentTimestamp);
     db::preparedStmt("DELETE FROM server_variables WHERE expiry > 0 AND expiry <= ?", currentTimestamp);
 
@@ -413,16 +413,13 @@ void MapServer::do_final()
     zoneutils::FreeZoneList();
 
     CTaskManager::delInstance();
-    CVanaTime::delInstance();
     Async::delInstance();
-
-    timer_final();
 
     luautils::cleanup();
     logging::ShutDown();
 }
 
-int32 MapServer::map_cleanup(time_point tick, CTaskManager::CTask* PTask)
+int32 MapServer::map_cleanup(timer::time_point tick, CTaskManager::CTask* PTask)
 {
     TracyZoneScoped;
 
@@ -438,7 +435,7 @@ int32 MapServer::map_cleanup(time_point tick, CTaskManager::CTask* PTask)
     return 0;
 }
 
-int32 MapServer::map_garbage_collect(time_point tick, CTaskManager::CTask* PTask)
+int32 MapServer::map_garbage_collect(timer::time_point tick, CTaskManager::CTask* PTask)
 {
     TracyZoneScoped;
 

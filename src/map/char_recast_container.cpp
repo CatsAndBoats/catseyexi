@@ -47,14 +47,14 @@ CCharRecastContainer::CCharRecastContainer(CCharEntity* PChar)
  *                                                                       *
  ************************************************************************/
 
-void CCharRecastContainer::Add(RECASTTYPE type, uint16 id, uint32 duration, uint32 chargeTime, uint8 maxCharges)
+void CCharRecastContainer::Add(RECASTTYPE type, uint16 id, timer::duration duration, timer::duration chargeTime, uint8 maxCharges)
 {
     Recast_t* recast = Load(type, id, duration, chargeTime, maxCharges);
 
     if (type == RECAST_ABILITY)
     {
         db::preparedStmt("REPLACE INTO char_recast VALUES (?, ?, ?, ?)",
-                         m_PChar->id, recast->ID, static_cast<uint32>(recast->TimeStamp), recast->RecastTime);
+                         m_PChar->id, recast->ID, earth_time::timestamp(timer::to_utc(recast->TimeStamp)), static_cast<uint32>(timer::count_seconds(recast->RecastTime)));
     }
 }
 
@@ -96,7 +96,7 @@ void CCharRecastContainer::DeleteByIndex(RECASTTYPE type, uint8 index)
     RecastList_t* PRecastList = GetRecastList(type);
     if (type == RECAST_ABILITY)
     {
-        PRecastList->at(index).RecastTime = 0;
+        PRecastList->at(index).RecastTime = 0s;
         db::preparedStmt("DELETE FROM char_recast WHERE charid = ? AND id = ?", m_PChar->id, PRecastList->at(index).ID);
     }
     else
@@ -166,7 +166,7 @@ void CCharRecastContainer::Check()
         {
             Recast_t* recast = &PRecastList->at(i);
 
-            if (time(nullptr) >= (recast->TimeStamp + recast->RecastTime))
+            if (timer::now() >= recast->TimeStamp + recast->RecastTime)
             {
                 if (type == RECAST_ITEM)
                 {
@@ -184,7 +184,7 @@ void CCharRecastContainer::Check()
                 }
                 else
                 {
-                    recast->RecastTime = 0;
+                    recast->RecastTime = 0s;
                 }
             }
         }

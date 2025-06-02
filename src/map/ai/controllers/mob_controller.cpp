@@ -45,7 +45,7 @@ CMobController::CMobController(CMobEntity* PEntity)
 {
 }
 
-void CMobController::Tick(time_point tick)
+void CMobController::Tick(timer::time_point tick)
 {
     TracyZoneScoped;
     TracyZoneString(PMob->getName());
@@ -563,7 +563,7 @@ void CMobController::CastSpell(SpellID spellid)
     }
 }
 
-void CMobController::DoCombatTick(time_point tick)
+void CMobController::DoCombatTick(timer::time_point tick)
 {
     TracyZoneScopedC(0xFF0000);
     if (PMob->m_OwnerID.targid != 0 && static_cast<CCharEntity*>(PMob->GetEntity(PMob->m_OwnerID.targid))->PClaimedMob != static_cast<CBattleEntity*>(PMob))
@@ -886,7 +886,7 @@ void CMobController::HandleEnmity()
     }
 }
 
-void CMobController::DoRoamTick(time_point tick)
+void CMobController::DoRoamTick(timer::time_point tick)
 {
     TracyZoneScopedC(0x00FF00);
     // If there's someone on our enmity list, go from roaming -> engaging
@@ -908,7 +908,7 @@ void CMobController::DoRoamTick(time_point tick)
         return;
     }
     // TODO
-    else if (PMob->GetDespawnTime() > time_point::min() && PMob->GetDespawnTime() < m_Tick)
+    else if (PMob->GetDespawnTime() > timer::time_point::min() && PMob->GetDespawnTime() < m_Tick)
     {
         Despawn();
         return;
@@ -1071,7 +1071,7 @@ void CMobController::DoRoamTick(time_point tick)
     }
 }
 
-void CMobController::Wait(duration _duration)
+void CMobController::Wait(timer::duration _duration)
 {
     if (m_Tick > m_WaitTime)
     {

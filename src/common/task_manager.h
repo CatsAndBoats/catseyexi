@@ -23,6 +23,7 @@
 
 #include "cbasetypes.h"
 #include "singleton.h"
+#include "timer.h"
 
 #include <any>
 #include <functional>
@@ -42,7 +43,7 @@ public:
         TASK_INVALID
     };
 
-    using TaskFunc_t = std::function<int32(time_point, CTask*)>;
+    using TaskFunc_t = std::function<int32(timer::time_point, CTask*)>;
 
     template <class _Ty>
     struct greater_equal
@@ -59,7 +60,7 @@ public:
     {
     public:
         template <typename F>
-        CTask(std::string const& name, time_point tick, std::any data, TASKTYPE type, duration interval, F&& func)
+        CTask(std::string const& name, timer::time_point tick, std::any data, TASKTYPE type, timer::duration interval, F&& func)
         : m_name(name)
         , m_type(type)
         , m_tick(tick)
@@ -69,12 +70,12 @@ public:
         {
         }
 
-        std::string m_name;
-        TASKTYPE    m_type;
-        time_point  m_tick;
-        duration    m_interval;
-        std::any    m_data;
-        TaskFunc_t  m_func;
+        std::string       m_name;
+        TASKTYPE          m_type;
+        timer::time_point m_tick;
+        timer::duration   m_interval;
+        std::any          m_data;
+        TaskFunc_t        m_func;
     };
 
     ~CTaskManager();
@@ -87,12 +88,12 @@ public:
     CTask* AddTask(CTask*);
 
     template <typename F>
-    CTask* AddTask(std::string const& InitName, time_point InitTick, std::any InitData, TASKTYPE InitType, duration InitInterval, F&& InitFunc)
+    CTask* AddTask(std::string const& InitName, timer::time_point InitTick, std::any InitData, TASKTYPE InitType, timer::duration InitInterval, F&& InitFunc)
     {
         return AddTask(new CTask(InitName, InitTick, InitData, InitType, InitInterval, std::forward<F>(InitFunc)));
     }
 
-    auto doExpiredTasks(time_point tick) -> duration;
+    auto doExpiredTasks(timer::time_point tick) -> timer::duration;
     void RemoveTask(std::string const& TaskName);
 
 protected:

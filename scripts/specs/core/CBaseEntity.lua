@@ -1042,12 +1042,12 @@ end
 
 ---@nodiscard
 ---@param name string
----@param mobFamily integer
+---@param interestData integer
 ---@param zeni integer
 ---@param skillIndex integer
 ---@param fp integer
 ---@return CItem?
-function CBaseEntity:addSoulPlate(name, mobFamily, zeni, skillIndex, fp)
+function CBaseEntity:addSoulPlate(name, interestData, zeni, skillIndex, fp)
 end
 
 ---@nodiscard
@@ -3090,6 +3090,11 @@ function CBaseEntity:uncharm()
 end
 
 ---@nodiscard
+---@return boolean
+function CBaseEntity:isTandemActive()
+end
+
+---@nodiscard
 ---@param element integer
 ---@param burden integer
 ---@return integer
@@ -3160,13 +3165,6 @@ end
 ---@param damageType integer?
 ---@return integer
 function CBaseEntity:physicalDmgTaken(damage, damageType)
-end
-
----@nodiscard
----@param damage number
----@param element integer?
----@return integer
-function CBaseEntity:magicDmgTaken(damage, element)
 end
 
 ---@nodiscard
@@ -3990,6 +3988,11 @@ end
 ---@nodiscard
 ---@return boolean
 function CBaseEntity:itemStolen()
+end
+
+---@nodiscard
+---@return boolean
+function CBaseEntity:itemDespoiled()
 end
 
 ---@nodiscard

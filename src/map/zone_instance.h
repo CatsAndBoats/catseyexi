@@ -55,12 +55,13 @@ public:
     virtual void FindPartyForMob(CBaseEntity* PEntity) override;         // looking for a party for the monster
     virtual void TransportDepart(uint16 boundary, uint16 zone) override; // ship/boat is leaving, passengers need to be collected
 
-    virtual void TOTDChange(TIMETYPE TOTD) override;                                                           // process the world's reactions to changing time of day
+    virtual void TOTDChange(vanadiel_time::TOTD TOTD) override; // process the world's reactions to changing time of day
+
     virtual void PushPacket(CBaseEntity*, GLOBAL_MESSAGE_TYPE, const std::unique_ptr<CBasicPacket>&) override; // send a global package within the zone
 
     virtual void UpdateEntityPacket(CBaseEntity* PEntity, ENTITYUPDATE type, uint8 updatemask, bool alwaysInclude = false) override;
 
-    virtual void ZoneServer(time_point tick) override;
+    virtual void ZoneServer(timer::time_point tick) override;
     virtual void CheckTriggerAreas() override;
 
     void ForEachChar(std::function<void(CCharEntity*)> const& func) override;

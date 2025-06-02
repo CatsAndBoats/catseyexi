@@ -55,7 +55,7 @@ auto MapSessionContainer::createSession(IPP ipp) -> MapSession*
 
     auto map_session_data = std::make_unique<MapSession>();
 
-    map_session_data->last_update = time(nullptr);
+    map_session_data->last_update = timer::now();
     map_session_data->client_ipp  = ipp;
 
     sessions_[ipp] = std::move(map_session_data);
@@ -149,8 +149,9 @@ void MapSessionContainer::cleanupSessions(IPP mapIPP)
         auto& map_session_data = it->second;
 
         CCharEntity* PChar = map_session_data->PChar;
+        auto         now   = timer::now();
 
-        if ((time(nullptr) - map_session_data->last_update) > 5)
+        if (now > map_session_data->last_update + 5s)
         {
             if (PChar != nullptr && !PChar->isLinkDead)
             {
@@ -166,7 +167,8 @@ void MapSessionContainer::cleanupSessions(IPP mapIPP)
                 }
             }
 
-            if ((time(nullptr) - map_session_data->last_update) > settings::get<uint16>("map.MAX_TIME_LASTUPDATE"))
+            auto timeoutSetting = settings::get<uint16>("map.MAX_TIME_LASTUPDATE");
+            if (now > map_session_data->last_update + std::chrono::seconds(timeoutSetting))
             {
                 bool otherMap = false;
 

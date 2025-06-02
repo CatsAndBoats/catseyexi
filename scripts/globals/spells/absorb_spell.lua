@@ -74,13 +74,13 @@ end
 
 local absorbPointsData =
 {
-    -- [spell ID] = { skill-mult < 300, skill mult > 300, min potency correction, increase max HP }
-    [xi.magic.spell.DRAIN    ] = { xi.mod.HP, 0.1, 0.90, 0.50, false },
-    [xi.magic.spell.DRAIN_II ] = { xi.mod.HP, 0.2, 1.35, 0.66, true  },
-    [xi.magic.spell.DRAIN_III] = { xi.mod.HP, 0.3, 1.80, 0.75, true  },
-    [xi.magic.spell.ASPIR    ] = { xi.mod.MP, 0.3, 0.40, 0.50, false },
-    [xi.magic.spell.ASPIR_II ] = { xi.mod.MP, 0.5, 0.60, 0.50, false },
-    [xi.magic.spell.ASPIR_III] = { xi.mod.MP, 0.7, 0.80, 0.50, false },
+    -- [spell ID] = { parameter, { skill <= 300 }, { skill > 300 }, divisor, increase max HP? }
+    [xi.magic.spell.DRAIN    ] = { xi.mod.HP, {   1,  20 }, { 0.625, 132.5 }, 0.50, false },
+    [xi.magic.spell.DRAIN_II ] = { xi.mod.HP, {   1, 165 }, {     1,   165 }, 0.66, true  },
+    [xi.magic.spell.DRAIN_III] = { xi.mod.HP, {   1, 255 }, {   1.5,   105 }, 0.75, true  },
+    [xi.magic.spell.ASPIR    ] = { xi.mod.MP, { 0.3,  20 }, {   0.4,     0 }, 0.50, false },
+    [xi.magic.spell.ASPIR_II ] = { xi.mod.MP, { 0.5,  30 }, {   0.6,     0 }, 0.50, false },
+    [xi.magic.spell.ASPIR_III] = { xi.mod.MP, { 0.7,  40 }, {   0.8,     0 }, 0.50, false },
 }
 
 -- https://www.bg-wiki.com/ffxi/Category:Drain/Aspir_Spell
@@ -98,7 +98,7 @@ xi.spells.absorb.doDrainingSpell = function(caster, target, spell)
     end
 
     -- Early return: Target absorbs or nullifies dark.
-    if xi.spells.damage.calculateNukeAbsorbOrNullify(target, xi.element.DARK) then
+    if xi.spells.damage.calculateNukeAbsorbOrNullify(target, xi.element.DARK) ~= 1 then
         spell:setMsg(xi.msg.basic.MAGIC_RESIST)
         return finalDamage
     end
@@ -117,8 +117,9 @@ xi.spells.absorb.doDrainingSpell = function(caster, target, spell)
 
     -- Base damage.
     local casterSkill        = caster:getSkillLevel(xi.skill.DARK_MAGIC)
-    local maxDamagePotential = casterSkill > 300 and casterSkill * absorbPointsData[spellId][3] or casterSkill * absorbPointsData[spellId][2]
-    local minDamagePotential = maxDamagePotential * absorbPointsData[spellId][4]
+    local skillEquation      = casterSkill > 300 and 3 or 2
+    local maxDamagePotential = math.floor(casterSkill * absorbPointsData[spellId][skillEquation][1] + absorbPointsData[spellId][skillEquation][2])
+    local minDamagePotential = math.floor(maxDamagePotential * absorbPointsData[spellId][4])
     local baseDamage         = math.random(minDamagePotential, maxDamagePotential)
 
     -- Multipliers.
@@ -194,7 +195,7 @@ xi.spells.absorb.doAbsorbTPSpell = function(caster, target, spell)
     local finalDamage = 0
 
     -- Early return: Target absorbs or nullifies dark.
-    if xi.spells.damage.calculateNukeAbsorbOrNullify(target, xi.element.DARK) then
+    if xi.spells.damage.calculateNukeAbsorbOrNullify(target, xi.element.DARK) ~= 1 then
         spell:setMsg(xi.msg.basic.MAGIC_RESIST)
         return finalDamage
     end
@@ -216,6 +217,7 @@ xi.spells.absorb.doAbsorbTPSpell = function(caster, target, spell)
     local elementalStaffBonus  = xi.spells.damage.calculateElementalStaffBonus(caster, xi.element.DARK)
     local dayAndWeather        = xi.spells.damage.calculateDayAndWeather(caster, xi.element.DARK, false)
     local absorbMultiplier     = 1 + caster:getMod(xi.mod.AUGMENTS_ABSORB) / 100
+    local absorbTpMultiplier   = 1 + caster:getMod(xi.mod.AUGMENTS_ABSORB_TP) / 100 -- TODO: Additive with aug abs or multiplicative?
     local liberatorMultiplier  = 1 + caster:getMod(xi.mod.AUGMENTS_ABSORB_LIBERATOR) / 100
 
     -- Operations.
@@ -225,6 +227,7 @@ xi.spells.absorb.doAbsorbTPSpell = function(caster, target, spell)
     finalDamage = math.floor(finalDamage * elementalStaffBonus)
     finalDamage = math.floor(finalDamage * dayAndWeather)
     finalDamage = math.floor(finalDamage * absorbMultiplier)
+    finalDamage = math.floor(finalDamage * absorbTpMultiplier)
     finalDamage = math.floor(finalDamage * liberatorMultiplier)
 
     -- Clamp

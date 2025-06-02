@@ -85,14 +85,14 @@ namespace
     };
     // clang-format on
 
-    constexpr int RECAST_SEAL           = 1;
-    constexpr int RECAST_GEODE          = 2;
-    constexpr int SPECIAL_DROP_COOLDOWN = 300; // 5 minutes between special drops
+    constexpr int             RECAST_SEAL           = 1;
+    constexpr int             RECAST_GEODE          = 2;
+    constexpr timer::duration SPECIAL_DROP_COOLDOWN = 5min; // 5 minutes between special drops
 } // namespace
 
 CMobEntity::CMobEntity()
 : m_AllowRespawn(false)
-, m_RespawnTime(300)
+, m_RespawnTime(5min)
 , m_DropItemTime(0)
 , m_DropID(0)
 , m_minLevel(1)
@@ -134,6 +134,7 @@ CMobEntity::CMobEntity()
 , m_HiPartySize(0)
 , m_THLvl(0)
 , m_ItemStolen(false)
+, m_ItemDespoiled(false)
 , m_Family(0)
 , m_SuperFamily(0)
 , m_MobSkillList(0)
@@ -202,20 +203,20 @@ void CMobEntity::setEntityFlags(uint32 EntityFlags)
  *                                                                       *
  ************************************************************************/
 
-time_point CMobEntity::GetDespawnTime()
+timer::time_point CMobEntity::GetDespawnTime()
 {
     return m_DespawnTimer;
 }
 
-void CMobEntity::SetDespawnTime(duration _duration)
+void CMobEntity::SetDespawnTime(timer::duration _duration)
 {
     if (_duration > 0s)
     {
-        m_DespawnTimer = server_clock::now() + _duration;
+        m_DespawnTimer = timer::now() + _duration;
     }
     else
     {
-        m_DespawnTimer = time_point::min();
+        m_DespawnTimer = timer::time_point::min();
     }
 }
 
@@ -528,7 +529,7 @@ void CMobEntity::PostTick()
 {
     TracyZoneScoped;
     CBattleEntity::PostTick();
-    std::chrono::steady_clock::time_point now = std::chrono::steady_clock::now();
+    timer::time_point now = timer::now();
     if (loc.zone && updatemask && now > m_nextUpdateTimer)
     {
         m_nextUpdateTimer = now + 250ms;
@@ -593,13 +594,14 @@ void CMobEntity::Spawn()
 {
     TracyZoneScoped;
     CBattleEntity::Spawn();
-    m_giveExp      = true;
-    m_HiPCLvl      = 0;
-    m_HiPartySize  = 0;
-    m_THLvl        = 0;
-    m_ItemStolen   = false;
-    m_DropItemTime = 1000;
-    animationsub   = (uint8)getMobMod(MOBMOD_SPAWN_ANIMATIONSUB);
+    m_giveExp       = true;
+    m_HiPCLvl       = 0;
+    m_HiPartySize   = 0;
+    m_THLvl         = 0;
+    m_ItemStolen    = false;
+    m_ItemDespoiled = false;
+    m_DropItemTime  = 1000ms;
+    animationsub    = (uint8)getMobMod(MOBMOD_SPAWN_ANIMATIONSUB);
     SetCallForHelpFlag(false);
 
     PEnmityContainer->Clear();
@@ -639,7 +641,7 @@ void CMobEntity::Spawn()
         }
     }
 
-    m_DespawnTimer = time_point::min();
+    m_DespawnTimer = timer::time_point::min();
     luautils::OnMobSpawn(this);
 }
 
@@ -1141,7 +1143,7 @@ void CMobEntity::OnDespawn(CDespawnState& /*unused*/)
 {
     TracyZoneScoped;
     FadeOut();
-    PAI->Internal_Respawn(std::chrono::milliseconds(m_RespawnTime));
+    PAI->Internal_Respawn(m_RespawnTime);
     luautils::OnMobDespawn(this);
     // #event despawn
     PAI->EventHandler.triggerListener("DESPAWN", this);
@@ -1166,7 +1168,7 @@ void CMobEntity::Die()
     CBattleEntity::Die();
 
     // clang-format off
-    PAI->QueueAction(queueAction_t(std::chrono::milliseconds(m_DropItemTime), false, [this](CBaseEntity* PEntity)
+    PAI->QueueAction(queueAction_t(m_DropItemTime, false, [this](CBaseEntity* PEntity)
     {
         if (static_cast<CMobEntity*>(PEntity)->isDead())
         {

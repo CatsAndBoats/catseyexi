@@ -43,7 +43,7 @@ int16 CLuaAbility::getMsg()
 
 uint16 CLuaAbility::getRecast()
 {
-    return m_PLuaAbility->getRecastTime();
+    return static_cast<uint16>(timer::count_seconds(m_PLuaAbility->getRecastTime()));
 }
 
 uint16 CLuaAbility::getRecastID()
@@ -83,7 +83,7 @@ void CLuaAbility::setAnimation(uint16 animationID)
 
 void CLuaAbility::setRecast(uint16 recastTime)
 {
-    m_PLuaAbility->setRecastTime(recastTime);
+    m_PLuaAbility->setRecastTime(std::chrono::seconds(recastTime));
 }
 
 int32 CLuaAbility::getCE()

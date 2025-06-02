@@ -201,7 +201,7 @@ xi.spells.enfeebling.useEnfeeblingSong = function(caster, target, spell)
     local power     = xi.spells.enfeebling.calculateSongPower(caster, spellEffect, pTable[spellId][column.SONG_POWER_BASE], gearBoost) or 0
     local tick      = spellEffect == xi.effect.REQUIEM and 3 or 0
     local duration  = xi.spells.enfeebling.calculateSongDuration(caster, spellEffect, pTable[spellId][column.SONG_DURATION], gearBoost) or 0
-    local subEffect = spellEffect == xi.effect.THRENODY and xi.combat.element.getElementalMEVAModifier(spellElement) or 0
+    local subEffect = spellEffect == xi.effect.THRENODY and xi.combat.element.getElementalMEVAModifier(xi.combat.element.getElementStrength(spellElement)) or 0
 
     -- FClamp and floor.
     power    = math.floor(utils.clamp(power, 0, pTable[spellId][column.SONG_POWER_CAP]))

@@ -1060,7 +1060,7 @@ void SmallPacket0x01A(MapSession* const PSession, CCharEntity* const PChar, CBas
             }
             else if (charutils::hasKeyItem(PChar, 3072 + MountID))
             {
-                if (PChar->PRecastContainer->HasRecast(RECAST_ABILITY, 256, 60))
+                if (PChar->PRecastContainer->HasRecast(RECAST_ABILITY, 256, 60s))
                 {
                     PChar->pushPacket<CMessageBasicPacket>(PChar, PChar, 0, 0, 94);
 
@@ -1079,13 +1079,13 @@ void SmallPacket0x01A(MapSession* const PSession, CCharEntity* const PChar, CBas
                                                                   EFFECT_MOUNTED,
                                                                   EFFECT_MOUNTED,
                                                                   MountID ? ++MountID : 0,
-                                                                  0,
-                                                                  1800,
+                                                                  0s,
+                                                                  30min,
                                                                   0,
                                                                   0x40), // previously known as nameflag "FLAG_CHOCOBO"
                                                               EffectNotice::Silent);
 
-                PChar->PRecastContainer->Add(RECAST_ABILITY, 256, 60);
+                PChar->PRecastContainer->Add(RECAST_ABILITY, 256, 60s);
                 PChar->pushPacket<CCharRecastPacket>(PChar);
 
                 luautils::OnPlayerMount(PChar);
@@ -1501,8 +1501,9 @@ void SmallPacket0x032(MapSession* const PSession, CCharEntity* const PChar, CBas
             return;
         }
 
-        auto lastTargetTradeTimeSeconds = std::chrono::duration_cast<std::chrono::seconds>(server_clock::now() - PTarget->lastTradeInvite).count();
-        if ((PTarget->TradePending.targid != 0 && lastTargetTradeTimeSeconds < 60) || PTarget->UContainer->GetType() == UCONTAINER_TRADE)
+        timer::time_point currentTime     = timer::now();
+        auto              lastTargetTrade = currentTime - PTarget->lastTradeInvite;
+        if ((PTarget->TradePending.targid != 0 && lastTargetTrade < 60s) || PTarget->UContainer->GetType() == UCONTAINER_TRADE)
         {
             // Can't trade with someone who's already got a pending trade before timeout
             PChar->pushPacket<CTradeActionPacket>(PTarget, 0x07);
@@ -1527,11 +1528,11 @@ void SmallPacket0x032(MapSession* const PSession, CCharEntity* const PChar, CBas
             }
         }
 
-        PChar->lastTradeInvite     = server_clock::now();
+        PChar->lastTradeInvite     = currentTime;
         PChar->TradePending.id     = charid;
         PChar->TradePending.targid = targid;
 
-        PTarget->lastTradeInvite     = server_clock::now();
+        PTarget->lastTradeInvite     = currentTime;
         PTarget->TradePending.id     = PChar->id;
         PTarget->TradePending.targid = PChar->targid;
         PTarget->pushPacket<CTradeRequestPacket>(PChar);
@@ -1739,7 +1740,7 @@ void SmallPacket0x034(MapSession* const PSession, CCharEntity* const PChar, CBas
                          sender_name   = PChar->getName(),
                          receiver      = PTarget->id,
                          receiver_name = PTarget->getName(),
-                         date          = static_cast<uint32>(time(nullptr))]()
+                         date          = earth_time::timestamp()]()
                         {
                             const auto query = "INSERT INTO audit_trade(itemid, quantity, sender, sender_name, receiver, receiver_name, date) VALUES (?, ?, ?, ?, ?, ?, ?)";
                             if (!db::preparedStmt(query, itemID, quantity, sender, sender_name, receiver, receiver_name, date))
@@ -1843,7 +1844,7 @@ void SmallPacket0x036(MapSession* const PSession, CCharEntity* const PChar, CBas
                      sender_name   = PChar->getName(),
                      receiver      = PNpc->id,
                      receiver_name = PNpc->getName(),
-                     date          = static_cast<uint32>(time(nullptr))]()
+                     date          = earth_time::timestamp()]()
                     {
                         const auto query = "INSERT INTO audit_trade(itemid, quantity, sender, sender_name, receiver, receiver_name, date) VALUES (?, ?, ?, ?, ?, ?, ?)";
                         if (!db::preparedStmt(query, itemID, quantity, sender, sender_name, receiver, receiver_name, date))
@@ -1927,7 +1928,7 @@ void SmallPacket0x03A(MapSession* const PSession, CCharEntity* const PChar, CBas
 
     uint8 size = PItemContainer->GetSize();
 
-    if (gettick() - PItemContainer->LastSortingTime < 1000)
+    if (timer::now() < PItemContainer->LastSortingTime + 1s)
     {
         if (settings::get<uint8>("map.LIGHTLUGGAGE_BLOCK") == (int32)(++PItemContainer->SortingPacket))
         {
@@ -1939,7 +1940,7 @@ void SmallPacket0x03A(MapSession* const PSession, CCharEntity* const PChar, CBas
     else
     {
         PItemContainer->SortingPacket   = 0;
-        PItemContainer->LastSortingTime = gettick();
+        PItemContainer->LastSortingTime = timer::now();
     }
     for (uint8 slotID = 1; slotID <= size; ++slotID)
     {
@@ -2351,7 +2352,7 @@ void SmallPacket0x04B(MapSession* const PSession, CCharEntity* const PChar, CBas
                 selfEntry.race       = PChar->mainlook.race;
                 selfEntry.allegiance = static_cast<uint8>(PChar->allegiance);
                 selfEntry.fishRank   = PChar->RealSkills.rank[SKILLTYPE::SKILL_FISHING];
-                selfEntry.submitTime = CVanaTime::getInstance()->getVanaTime();
+                selfEntry.submitTime = earth_time::vanadiel_timestamp();
             }
         }
 
@@ -4117,7 +4118,7 @@ void SmallPacket0x085(MapSession* const PSession, CCharEntity* const PChar, CBas
              seller_name = PChar->getName(),
              baseprice   = PItem->getBasePrice(),
              totalprice  = cost,
-             time        = static_cast<uint32>(time(nullptr))]()
+             time        = earth_time::timestamp()]()
             {
                 const auto query = "INSERT INTO audit_vendor(itemid, quantity, seller, seller_name, baseprice, totalprice, date) VALUES (?, ?, ?, ?, ?, ?, ?)";
                 if (!db::preparedStmt(query, itemid, quantity, seller, seller_name, baseprice, totalprice, time))
@@ -4161,7 +4162,7 @@ void SmallPacket0x096(MapSession* const PSession, CCharEntity* const PChar, CBas
 
     // Force full synth duration wait no matter the synth animation length
     // Thus players can synth on whatever fps they want
-    if (PChar->m_LastSynthTime + 15s > server_clock::now())
+    if (PChar->m_LastSynthTime + 15s > timer::now())
     {
         PChar->pushPacket<CMessageBasicPacket>(PChar, PChar, 0, 0, 94);
         return;
@@ -4788,7 +4789,7 @@ void SmallPacket0x0B5(MapSession* const PSession, CCharEntity* const PChar, CBas
                         else if (!isInYellCooldown)
                         {
                             // CharVar will self-expire and set to zero after the cooldown period
-                            PChar->setCharVar("[YELL]Cooldown", 1, CVanaTime::getInstance()->getSysTime() + yellCooldownTime);
+                            PChar->setCharVar("[YELL]Cooldown", 1, static_cast<uint32>(earth_time::timestamp() + yellCooldownTime));
 
                             message::send(ipc::ChatMessageYell{
                                 .senderId   = PChar->id,
@@ -5856,9 +5857,9 @@ void SmallPacket0x0E7(MapSession* const PSession, CCharEntity* const PChar, CBas
 
         if (PChar->PPet == nullptr || (PChar->PPet->m_EcoSystem != ECOSYSTEM::AVATAR && PChar->PPet->m_EcoSystem != ECOSYSTEM::ELEMENTAL))
         {
-            PChar->StatusEffectContainer->AddStatusEffect(new CStatusEffect(EFFECT_HEALING, 0, 0, settings::get<uint8>("map.HEALING_TICK_DELAY"), 0));
+            PChar->StatusEffectContainer->AddStatusEffect(new CStatusEffect(EFFECT_HEALING, 0, 0, std::chrono::seconds(settings::get<uint8>("map.HEALING_TICK_DELAY")), 0s));
         }
-        PChar->StatusEffectContainer->AddStatusEffect(new CStatusEffect(EFFECT_LEAVEGAME, 0, ExitType, 5, 0));
+        PChar->StatusEffectContainer->AddStatusEffect(new CStatusEffect(EFFECT_LEAVEGAME, 0, ExitType, 5s, 0s));
     }
     else if (PChar->animation == ANIMATION_HEALING)
     {
@@ -5870,7 +5871,7 @@ void SmallPacket0x0E7(MapSession* const PSession, CCharEntity* const PChar, CBas
         {
             uint8 ExitType = (data.ref<uint8>(0x06) == 1 ? 7 : 35);
 
-            PChar->StatusEffectContainer->AddStatusEffect(new CStatusEffect(EFFECT_LEAVEGAME, 0, ExitType, 5, 0));
+            PChar->StatusEffectContainer->AddStatusEffect(new CStatusEffect(EFFECT_LEAVEGAME, 0, ExitType, 5s, 0s));
         }
     }
 }
@@ -5912,7 +5913,7 @@ void SmallPacket0x0E8(MapSession* const PSession, CCharEntity* const PChar, CBas
                 {
                     PChar->PPet->PAI->Disengage();
                 }
-                PChar->StatusEffectContainer->AddStatusEffect(new CStatusEffect(EFFECT_HEALING, 0, 0, settings::get<uint8>("map.HEALING_TICK_DELAY"), 0));
+                PChar->StatusEffectContainer->AddStatusEffect(new CStatusEffect(EFFECT_HEALING, 0, 0, std::chrono::seconds(settings::get<uint8>("map.HEALING_TICK_DELAY")), 0s));
                 return;
             }
             PChar->pushPacket<CMessageBasicPacket>(PChar, PChar, 0, 0, 345);
@@ -6427,7 +6428,7 @@ void SmallPacket0x0FC(MapSession* const PSession, CCharEntity* const PChar, CBas
         PChar->pushPacket<CMessageStandardPacket>(itemID, 132); // "Your moogle plants the <seed> in the flowerpot."
         PPotItem->cleanPot();
         PPotItem->setPlant(CItemFlowerpot::getPlantFromSeed(itemID));
-        PPotItem->setPlantTimestamp(CVanaTime::getInstance()->getVanaTime());
+        PPotItem->setPlantTimestamp(earth_time::vanadiel_timestamp());
         PPotItem->setStrength(xirand::GetRandomNumber(33));
         gardenutils::GrowToNextStage(PPotItem);
         updatedPot = true;
@@ -6895,7 +6896,7 @@ void SmallPacket0x102(MapSession* const PSession, CCharEntity* const PChar, CBas
                 auto* PSpell  = spell::GetSpell(spellId);
                 if (CBlueSpell* PBlueSpell = dynamic_cast<CBlueSpell*>(PSpell))
                 {
-                    PChar->PRecastContainer->Add(RECAST_MAGIC, static_cast<uint16>(PBlueSpell->getID()), 60);
+                    PChar->PRecastContainer->Add(RECAST_MAGIC, static_cast<uint16>(PBlueSpell->getID()), 60s);
                 }
             }
         }
@@ -7145,7 +7146,7 @@ void SmallPacket0x106(MapSession* const PSession, CCharEntity* const PChar, CBas
                  purchaserID   = PChar->id,
                  purchaserName = PChar->getName(),
                  price         = PriceWithTax,
-                 date          = static_cast<uint32>(time(nullptr))]
+                 date          = earth_time::timestamp()]
                 {
                     const auto query = "INSERT INTO audit_bazaar(itemid, quantity, seller, seller_name, purchaser, purchaser_name, price, date) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
                     if (!db::preparedStmt(query, itemID, quantity, sellerID, sellerName, purchaserID, purchaserName, price, date))

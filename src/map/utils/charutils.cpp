@@ -430,11 +430,11 @@ namespace charutils
             db::extractFromBlob(rset, "campaign", PChar->m_campaignLog);
             db::extractFromBlob(rset, "eminence", PChar->m_eminenceLog);
 
-            PChar->SetPlayTime(rset->get<uint32>("playtime"));
+            PChar->SetPlayTime(std::chrono::seconds(rset->get<uint32>("playtime")));
             PChar->profile.campaign_allegiance = rset->get<uint8>("campaign_allegiance");
             PChar->setStyleLocked(rset->get<uint32>("isstylelocked") == 1);
             PChar->SetMoghancement(rset->get<uint16>("moghancement"));
-            PChar->lastOnline      = rset->get<uint32>("lastonline");
+            PChar->lastOnline      = earth_time::time_point(std::chrono::seconds(rset->get<uint32>("lastonline")));
             PChar->search.language = rset->get<uint8>("languages");
 
             PChar->m_GMlevel          = rset->get<uint8>("gmlevel");
@@ -705,8 +705,9 @@ namespace charutils
                 PChar->petZoningInfo.petType      = static_cast<PET_TYPE>(rset->get<uint8>("pet_type"));
                 PChar->petZoningInfo.petLevel     = rset->get<uint8>("pet_level");
                 PChar->petZoningInfo.respawnPet   = true;
-                PChar->petZoningInfo.jugSpawnTime = static_cast<uint32>(PChar->getCharVar("jugpet-spawn-time"));
-                PChar->petZoningInfo.jugDuration  = static_cast<uint32>(PChar->getCharVar("jugpet-duration-seconds"));
+                auto jugTimestamp                 = static_cast<uint32>(PChar->getCharVar("jugpet-spawn-time"));
+                PChar->petZoningInfo.jugSpawnTime = timer::from_utc(earth_time::time_point(std::chrono::seconds(jugTimestamp)));
+                PChar->petZoningInfo.jugDuration  = std::chrono::seconds(PChar->getCharVar("jugpet-duration-seconds"));
 
                 // clear the charvars used for jug state
                 PChar->clearCharVarsWithPrefix("jugpet-");
@@ -735,12 +736,12 @@ namespace charutils
         {
             while (rset->next())
             {
-                uint32    cast_time  = rset->get<uint32>("time");
-                uint32    recast     = rset->get<uint32>("recast");
-                time_t    now        = time(nullptr);
-                uint32    chargeTime = 0;
-                uint8     maxCharges = 0;
-                Charge_t* charge     = ability::GetCharge(PChar, rset->get<uint32>("id"));
+                auto            now        = timer::now();
+                auto            cast_time  = timer::from_utc(earth_time::time_point(std::chrono::seconds(rset->get<uint32>("time"))));
+                auto            recast     = std::chrono::seconds(rset->get<uint32>("recast"));
+                timer::duration chargeTime = 0s;
+                uint8           maxCharges = 0;
+                Charge_t*       charge     = ability::GetCharge(PChar, rset->get<uint32>("id"));
                 if (charge != nullptr)
                 {
                     chargeTime = charge->chargeTime;
@@ -748,7 +749,7 @@ namespace charutils
                 }
                 if (now < cast_time + recast)
                 {
-                    PChar->PRecastContainer->Load(RECAST_ABILITY, rset->get<uint32>("id"), (cast_time + recast - (uint32)now), chargeTime, maxCharges);
+                    PChar->PRecastContainer->Load(RECAST_ABILITY, rset->get<uint32>("id"), (cast_time + recast - now), chargeTime, maxCharges);
                 }
             }
         }
@@ -970,6 +971,13 @@ namespace charutils
                         char EncodedString[SignatureStringLength] = {};
                         EncodeStringSignature(rset->get<std::string>("signature").c_str(), EncodedString);
                         PItem->setSignature(EncodedString);
+                    }
+
+                    if (auto PItemUsable = dynamic_cast<CItemUsable*>(PItem))
+                    {
+                        uint32 useTime = 0;
+                        std::memcpy(&useTime, PItemUsable->m_extra + 0x04, sizeof(useTime));
+                        PItemUsable->setLastUseTime(timer::now() - std::chrono::seconds(earth_time::vanadiel_timestamp() - useTime));
                     }
 
                     if (PItem->isType(ITEM_FURNISHING) && (PItem->getLocationID() == LOC_MOGSAFE || PItem->getLocationID() == LOC_MOGSAFE2))
@@ -1670,6 +1678,18 @@ namespace charutils
 
     void UnequipItem(CCharEntity* PChar, uint8 equipSlotID, bool update)
     {
+        if (PChar == nullptr)
+        {
+            ShowWarning("PChar was null.");
+            return;
+        }
+
+        if (equipSlotID > 15)
+        {
+            ShowWarning("Invalid slot ID. Must be between 0 and 15.");
+            return;
+        }
+
         CItem* PItem = PChar->getEquip((SLOTTYPE)equipSlotID);
 
         if ((PItem != nullptr) && PItem->isType(ITEM_EQUIPMENT))
@@ -2753,9 +2773,9 @@ namespace charutils
                     }
                     if (PItem->isType(ITEM_USABLE) && ((CItemUsable*)PItem)->getCurrentCharges() != 0)
                     {
-                        PItem->setAssignTime(CVanaTime::getInstance()->getVanaTime());
-                        PChar->PRecastContainer->Add(RECAST_ITEM, slotID << 8 | containerID,
-                                                     PItem->getReuseTime() / 1000); // add recast timer to Recast List from any bag
+                        PItem->setAssignTime(timer::now());
+                        // add recast timer to Recast List from any bag
+                        PChar->PRecastContainer->Add(RECAST_ITEM, slotID << 8 | containerID, PItem->getReuseTime());
 
                         // Do not forget to update the timer when equipping the subject
 
@@ -3097,17 +3117,17 @@ namespace charutils
                 if (PAbility->getID() < ABILITY_HEALING_RUBY && PAbility->getID() != ABILITY_PET_COMMANDS && CheckAbilityAddtype(PChar, PAbility))
                 {
                     addAbility(PChar, PAbility->getID());
-                    Charge_t* charge     = ability::GetCharge(PChar, PAbility->getRecastId());
-                    auto      chargeTime = 0;
-                    auto      maxCharges = 0;
+                    Charge_t*       charge     = ability::GetCharge(PChar, PAbility->getRecastId());
+                    timer::duration chargeTime = 0s;
+                    auto            maxCharges = 0;
                     if (charge)
                     {
-                        chargeTime = charge->chargeTime - PChar->PMeritPoints->GetMeritValue((MERIT_TYPE)charge->merit, PChar);
+                        chargeTime = charge->chargeTime - std::chrono::seconds(PChar->PMeritPoints->GetMeritValue((MERIT_TYPE)charge->merit, PChar));
                         maxCharges = charge->maxCharges;
                     }
                     if (!PChar->PRecastContainer->Has(RECAST_ABILITY, PAbility->getRecastId()))
                     {
-                        PChar->PRecastContainer->Add(RECAST_ABILITY, PAbility->getRecastId(), 0, chargeTime, maxCharges);
+                        PChar->PRecastContainer->Add(RECAST_ABILITY, PAbility->getRecastId(), 0s, chargeTime, maxCharges);
                     }
                 }
             }
@@ -3137,17 +3157,17 @@ namespace charutils
                     if (PAbility->getID() != ABILITY_PET_COMMANDS && CheckAbilityAddtype(PChar, PAbility) && !(PAbility->getAddType() & ADDTYPE_MAIN_ONLY))
                     {
                         addAbility(PChar, PAbility->getID());
-                        Charge_t* charge     = ability::GetCharge(PChar, PAbility->getRecastId());
-                        auto      chargeTime = 0;
-                        auto      maxCharges = 0;
+                        Charge_t*       charge     = ability::GetCharge(PChar, PAbility->getRecastId());
+                        timer::duration chargeTime = 0s;
+                        auto            maxCharges = 0;
                         if (charge)
                         {
-                            chargeTime = charge->chargeTime - PChar->PMeritPoints->GetMeritValue((MERIT_TYPE)charge->merit, PChar);
+                            chargeTime = charge->chargeTime - std::chrono::seconds(PChar->PMeritPoints->GetMeritValue((MERIT_TYPE)charge->merit, PChar));
                             maxCharges = charge->maxCharges;
                         }
                         if (!PChar->PRecastContainer->Has(RECAST_ABILITY, PAbility->getRecastId()))
                         {
-                            PChar->PRecastContainer->Add(RECAST_ABILITY, PAbility->getRecastId(), 0, chargeTime, maxCharges);
+                            PChar->PRecastContainer->Add(RECAST_ABILITY, PAbility->getRecastId(), 0s, chargeTime, maxCharges);
                         }
                     }
                 }
@@ -4390,7 +4410,7 @@ namespace charutils
 
                     if (mobCheck > EMobDifficulty::DecentChallenge)
                     {
-                        if (PMember->expChain.chainTime > gettick() || PMember->expChain.chainTime == 0)
+                        if (PMember->expChain.chainTime > timer::now() || PMember->expChain.chainTime == timer::time_point::min())
                         {
                             chainactive = true;
                             switch (PMember->expChain.chainNumber)
@@ -4422,31 +4442,31 @@ namespace charutils
                         {
                             if (PMember->GetMLevel() <= 10)
                             {
-                                PMember->expChain.chainTime = gettick() + 50000;
+                                PMember->expChain.chainTime = timer::now() + 50s;
                             }
                             else if (PMember->GetMLevel() <= 20)
                             {
-                                PMember->expChain.chainTime = gettick() + 100000;
+                                PMember->expChain.chainTime = timer::now() + 100s;
                             }
                             else if (PMember->GetMLevel() <= 30)
                             {
-                                PMember->expChain.chainTime = gettick() + 150000;
+                                PMember->expChain.chainTime = timer::now() + 150s;
                             }
                             else if (PMember->GetMLevel() <= 40)
                             {
-                                PMember->expChain.chainTime = gettick() + 200000;
+                                PMember->expChain.chainTime = timer::now() + 200s;
                             }
                             else if (PMember->GetMLevel() <= 50)
                             {
-                                PMember->expChain.chainTime = gettick() + 250000;
+                                PMember->expChain.chainTime = timer::now() + 250s;
                             }
                             else if (PMember->GetMLevel() <= 60)
                             {
-                                PMember->expChain.chainTime = gettick() + 300000;
+                                PMember->expChain.chainTime = timer::now() + 300s;
                             }
                             else
                             {
-                                PMember->expChain.chainTime = gettick() + 360000;
+                                PMember->expChain.chainTime = timer::now() + 360s;
                             }
                             PMember->expChain.chainNumber = 1;
                         }
@@ -4456,25 +4476,25 @@ namespace charutils
                             switch (PMember->expChain.chainNumber)
                             {
                                 case 0:
-                                    PMember->expChain.chainTime = gettick() + 50000;
+                                    PMember->expChain.chainTime = timer::now() + 50s;
                                     break;
                                 case 1:
-                                    PMember->expChain.chainTime = gettick() + 40000;
+                                    PMember->expChain.chainTime = timer::now() + 40s;
                                     break;
                                 case 2:
-                                    PMember->expChain.chainTime = gettick() + 30000;
+                                    PMember->expChain.chainTime = timer::now() + 30s;
                                     break;
                                 case 3:
-                                    PMember->expChain.chainTime = gettick() + 20000;
+                                    PMember->expChain.chainTime = timer::now() + 20s;
                                     break;
                                 case 4:
-                                    PMember->expChain.chainTime = gettick() + 10000;
+                                    PMember->expChain.chainTime = timer::now() + 10s;
                                     break;
                                 case 5:
-                                    PMember->expChain.chainTime = gettick() + 6000;
+                                    PMember->expChain.chainTime = timer::now() + 6s;
                                     break;
                                 default:
-                                    PMember->expChain.chainTime = gettick() + 2000;
+                                    PMember->expChain.chainTime = timer::now() + 2s;
                                     break;
                             }
                         }
@@ -4483,25 +4503,25 @@ namespace charutils
                             switch (PMember->expChain.chainNumber)
                             {
                                 case 0:
-                                    PMember->expChain.chainTime = gettick() + 100000;
+                                    PMember->expChain.chainTime = timer::now() + 100s;
                                     break;
                                 case 1:
-                                    PMember->expChain.chainTime = gettick() + 80000;
+                                    PMember->expChain.chainTime = timer::now() + 80s;
                                     break;
                                 case 2:
-                                    PMember->expChain.chainTime = gettick() + 60000;
+                                    PMember->expChain.chainTime = timer::now() + 60s;
                                     break;
                                 case 3:
-                                    PMember->expChain.chainTime = gettick() + 40000;
+                                    PMember->expChain.chainTime = timer::now() + 40s;
                                     break;
                                 case 4:
-                                    PMember->expChain.chainTime = gettick() + 20000;
+                                    PMember->expChain.chainTime = timer::now() + 20s;
                                     break;
                                 case 5:
-                                    PMember->expChain.chainTime = gettick() + 8000;
+                                    PMember->expChain.chainTime = timer::now() + 8s;
                                     break;
                                 default:
-                                    PMember->expChain.chainTime = gettick() + 4000;
+                                    PMember->expChain.chainTime = timer::now() + 4s;
                                     break;
                             }
                         }
@@ -4510,25 +4530,25 @@ namespace charutils
                             switch (PMember->expChain.chainNumber)
                             {
                                 case 0:
-                                    PMember->expChain.chainTime = gettick() + 150000;
+                                    PMember->expChain.chainTime = timer::now() + 150s;
                                     break;
                                 case 1:
-                                    PMember->expChain.chainTime = gettick() + 120000;
+                                    PMember->expChain.chainTime = timer::now() + 120s;
                                     break;
                                 case 2:
-                                    PMember->expChain.chainTime = gettick() + 90000;
+                                    PMember->expChain.chainTime = timer::now() + 90s;
                                     break;
                                 case 3:
-                                    PMember->expChain.chainTime = gettick() + 60000;
+                                    PMember->expChain.chainTime = timer::now() + 60s;
                                     break;
                                 case 4:
-                                    PMember->expChain.chainTime = gettick() + 30000;
+                                    PMember->expChain.chainTime = timer::now() + 30s;
                                     break;
                                 case 5:
-                                    PMember->expChain.chainTime = gettick() + 10000;
+                                    PMember->expChain.chainTime = timer::now() + 10s;
                                     break;
                                 default:
-                                    PMember->expChain.chainTime = gettick() + 5000;
+                                    PMember->expChain.chainTime = timer::now() + 5s;
                                     break;
                             }
                         }
@@ -4537,25 +4557,25 @@ namespace charutils
                             switch (PMember->expChain.chainNumber)
                             {
                                 case 0:
-                                    PMember->expChain.chainTime = gettick() + 200000;
+                                    PMember->expChain.chainTime = timer::now() + 200s;
                                     break;
                                 case 1:
-                                    PMember->expChain.chainTime = gettick() + 160000;
+                                    PMember->expChain.chainTime = timer::now() + 160s;
                                     break;
                                 case 2:
-                                    PMember->expChain.chainTime = gettick() + 120000;
+                                    PMember->expChain.chainTime = timer::now() + 120s;
                                     break;
                                 case 3:
-                                    PMember->expChain.chainTime = gettick() + 80000;
+                                    PMember->expChain.chainTime = timer::now() + 80s;
                                     break;
                                 case 4:
-                                    PMember->expChain.chainTime = gettick() + 40000;
+                                    PMember->expChain.chainTime = timer::now() + 40s;
                                     break;
                                 case 5:
-                                    PMember->expChain.chainTime = gettick() + 40000;
+                                    PMember->expChain.chainTime = timer::now() + 40s;
                                     break;
                                 default:
-                                    PMember->expChain.chainTime = gettick() + 30000;
+                                    PMember->expChain.chainTime = timer::now() + 30s;
                                     break;
                             }
                         }
@@ -4564,25 +4584,25 @@ namespace charutils
                             switch (PMember->expChain.chainNumber)
                             {
                                 case 0:
-                                    PMember->expChain.chainTime = gettick() + 250000;
+                                    PMember->expChain.chainTime = timer::now() + 250s;
                                     break;
                                 case 1:
-                                    PMember->expChain.chainTime = gettick() + 200000;
+                                    PMember->expChain.chainTime = timer::now() + 200s;
                                     break;
                                 case 2:
-                                    PMember->expChain.chainTime = gettick() + 150000;
+                                    PMember->expChain.chainTime = timer::now() + 150s;
                                     break;
                                 case 3:
-                                    PMember->expChain.chainTime = gettick() + 100000;
+                                    PMember->expChain.chainTime = timer::now() + 100s;
                                     break;
                                 case 4:
-                                    PMember->expChain.chainTime = gettick() + 50000;
+                                    PMember->expChain.chainTime = timer::now() + 50s;
                                     break;
                                 case 5:
-                                    PMember->expChain.chainTime = gettick() + 50000;
+                                    PMember->expChain.chainTime = timer::now() + 50s;
                                     break;
                                 default:
-                                    PMember->expChain.chainTime = gettick() + 50000;
+                                    PMember->expChain.chainTime = timer::now() + 50s;
                                     break;
                             }
                         }
@@ -4591,25 +4611,25 @@ namespace charutils
                             switch (PMember->expChain.chainNumber)
                             {
                                 case 0:
-                                    PMember->expChain.chainTime = gettick() + 300000;
+                                    PMember->expChain.chainTime = timer::now() + 300s;
                                     break;
                                 case 1:
-                                    PMember->expChain.chainTime = gettick() + 240000;
+                                    PMember->expChain.chainTime = timer::now() + 240s;
                                     break;
                                 case 2:
-                                    PMember->expChain.chainTime = gettick() + 180000;
+                                    PMember->expChain.chainTime = timer::now() + 180s;
                                     break;
                                 case 3:
-                                    PMember->expChain.chainTime = gettick() + 120000;
+                                    PMember->expChain.chainTime = timer::now() + 120s;
                                     break;
                                 case 4:
-                                    PMember->expChain.chainTime = gettick() + 90000;
+                                    PMember->expChain.chainTime = timer::now() + 90s;
                                     break;
                                 case 5:
-                                    PMember->expChain.chainTime = gettick() + 60000;
+                                    PMember->expChain.chainTime = timer::now() + 60s;
                                     break;
                                 default:
-                                    PMember->expChain.chainTime = gettick() + 60000;
+                                    PMember->expChain.chainTime = timer::now() + 60s;
                                     break;
                             }
                         }
@@ -4618,25 +4638,25 @@ namespace charutils
                             switch (PMember->expChain.chainNumber)
                             {
                                 case 0:
-                                    PMember->expChain.chainTime = gettick() + 360000;
+                                    PMember->expChain.chainTime = timer::now() + 360s;
                                     break;
                                 case 1:
-                                    PMember->expChain.chainTime = gettick() + 300000;
+                                    PMember->expChain.chainTime = timer::now() + 300s;
                                     break;
                                 case 2:
-                                    PMember->expChain.chainTime = gettick() + 240000;
+                                    PMember->expChain.chainTime = timer::now() + 240s;
                                     break;
                                 case 3:
-                                    PMember->expChain.chainTime = gettick() + 165000;
+                                    PMember->expChain.chainTime = timer::now() + 165s;
                                     break;
                                 case 4:
-                                    PMember->expChain.chainTime = gettick() + 105000;
+                                    PMember->expChain.chainTime = timer::now() + 105s;
                                     break;
                                 case 5:
-                                    PMember->expChain.chainTime = gettick() + 60000;
+                                    PMember->expChain.chainTime = timer::now() + 60s;
                                     break;
                                 default:
-                                    PMember->expChain.chainTime = gettick() + 60000;
+                                    PMember->expChain.chainTime = timer::now() + 60s;
                                     break;
                             }
                         }
@@ -4701,7 +4721,7 @@ namespace charutils
                 // https://ffxiclopedia.fandom.com/wiki/Job_Points#Capacity_Points
                 capacityPoints = 0.0089 * std::pow(levelDiff, 3) + 0.0533 * std::pow(levelDiff, 2) + 3.7439 * levelDiff + 89.7;
 
-                if (PMember->capacityChain.chainTime > gettick() || PMember->capacityChain.chainTime == 0)
+                if (PMember->capacityChain.chainTime > timer::now() || PMember->capacityChain.chainTime == timer::time_point::min())
                 {
                     chainActive = true;
 
@@ -4713,13 +4733,13 @@ namespace charutils
                 else
                 {
                     // TODO: Capacity Chain Timer is reduced after Chain 30
-                    PMember->capacityChain.chainTime   = gettick() + 30000;
+                    PMember->capacityChain.chainTime   = timer::now() + 30s;
                     PMember->capacityChain.chainNumber = 1;
                 }
 
                 if (chainActive)
                 {
-                    PMember->capacityChain.chainTime = gettick() + 30000;
+                    PMember->capacityChain.chainTime = timer::now() + 30s;
                 }
 
                 capacityPoints = AddCapacityBonus(PMember, capacityPoints);
@@ -5207,6 +5227,11 @@ namespace charutils
     {
         TracyZoneScoped;
 
+        if (PChar->status == STATUS_TYPE::DISAPPEAR)
+        {
+            return;
+        }
+
         const char* Query = "UPDATE chars "
                             "SET "
                             "pos_rot = %u,"
@@ -5331,7 +5356,7 @@ namespace charutils
                          "LIMIT 1",
                          PChar->m_eminenceLog, PChar->id);
 
-        PChar->m_eminenceCache.lastWriteout = static_cast<uint32>(time(nullptr));
+        PChar->m_eminenceCache.lastWriteout = timer::now();
     }
 
     void SaveCharInventoryCapacity(CCharEntity* PChar)
@@ -5506,8 +5531,9 @@ namespace charutils
 
         // These two are jug only variables. We should probably move pet char stats into its own table, but in the meantime
         // we use charvars for jug specific things
-        PChar->setCharVar("jugpet-spawn-time", static_cast<int32>(PChar->petZoningInfo.jugSpawnTime));
-        PChar->setCharVar("jugpet-duration-seconds", static_cast<int32>(PChar->petZoningInfo.jugDuration));
+        auto jugTimestamp = earth_time::timestamp(timer::to_utc(PChar->petZoningInfo.jugSpawnTime));
+        PChar->setCharVar("jugpet-spawn-time", jugTimestamp);
+        PChar->setCharVar("jugpet-duration-seconds", static_cast<int32>(timer::count_seconds(PChar->petZoningInfo.jugDuration)));
     }
 
     /************************************************************************
@@ -6018,7 +6044,7 @@ namespace charutils
     {
         TracyZoneScoped;
         auto tstamp = static_cast<uint32>(PChar->getCharVar("mog-locker-expiry-timestamp"));
-        if (CVanaTime::getInstance()->getVanaTime() < tstamp)
+        if (earth_time::vanadiel_timestamp() < tstamp)
         {
             return true;
         }
@@ -6087,20 +6113,22 @@ namespace charutils
     {
         TracyZoneScoped;
 
-        const char* fmtQuery = "UPDATE char_stats SET death = %u WHERE charid = %u LIMIT 1";
-        _sql->Query(fmtQuery, PChar->GetSecondsElapsedSinceDeath(), PChar->id);
+        const char* fmtQuery          = "UPDATE char_stats SET death = %u WHERE charid = %u LIMIT 1";
+        uint32      secondsSinceDeath = static_cast<uint32>(timer::count_seconds(PChar->GetTimeSinceDeath()));
+        _sql->Query(fmtQuery, secondsSinceDeath, PChar->id);
     }
 
     void SavePlayTime(CCharEntity* PChar)
     {
         TracyZoneScoped;
 
-        uint32 playtime = PChar->GetPlayTime();
+        timer::duration playDuration = PChar->GetPlayTime();
+        uint32          playtime     = static_cast<uint32>(timer::count_seconds(playDuration));
 
         _sql->Query("UPDATE chars SET playtime = '%u' WHERE charid = '%u' LIMIT 1", playtime, PChar->id);
 
         // Removes new player icon if played for more than 240 hours
-        if (PChar->isNewPlayer() && playtime >= 864000)
+        if (PChar->isNewPlayer() && playDuration >= 240h)
         {
             PChar->playerConfig.NewAdventurerOffFlg = true;
             PChar->updatemask |= UPDATE_HP;
@@ -6346,10 +6374,10 @@ namespace charutils
             CBattleEntity* PSyncTarget = PChar->PParty->GetSyncTarget();
             if (PSyncTarget && PChar->getZone() == PSyncTarget->getZone() && !(PChar->StatusEffectContainer->HasStatusEffect(EFFECT_LEVEL_SYNC)) &&
                 PSyncTarget->StatusEffectContainer->HasStatusEffect(EFFECT_LEVEL_SYNC) &&
-                PSyncTarget->StatusEffectContainer->GetStatusEffect(EFFECT_LEVEL_SYNC)->GetDuration() == 0)
+                PSyncTarget->StatusEffectContainer->GetStatusEffect(EFFECT_LEVEL_SYNC)->GetDuration() == 0s)
             {
                 PChar->pushPacket<CMessageBasicPacket>(PChar, PChar, 0, PSyncTarget->GetMLevel(), 540);
-                PChar->StatusEffectContainer->AddStatusEffect(new CStatusEffect(EFFECT_LEVEL_SYNC, EFFECT_LEVEL_SYNC, PSyncTarget->GetMLevel(), 0, 0), EffectNotice::Silent);
+                PChar->StatusEffectContainer->AddStatusEffect(new CStatusEffect(EFFECT_LEVEL_SYNC, EFFECT_LEVEL_SYNC, PSyncTarget->GetMLevel(), 0s, 0s), EffectNotice::Silent);
                 PChar->StatusEffectContainer->DelStatusEffectsByFlag(EFFECTFLAG_DISPELABLE);
             }
 
@@ -6614,6 +6642,8 @@ namespace charutils
         });
 
         PChar->pushPacket<CServerIPPacket>(PChar, 1, IPP());
+
+        removeCharFromZone(PChar);
     }
 
     void ForceLogout(CCharEntity* PChar)
@@ -6644,7 +6674,7 @@ namespace charutils
             PChar->StatusEffectContainer->DelStatusEffectSilent(EFFECT_WEAKNESS);
             PChar->StatusEffectContainer->DelStatusEffectSilent(EFFECT_LEVEL_SYNC);
 
-            PChar->SetDeathTimestamp(0);
+            PChar->SetDeathTime(timer::time_point::min());
 
             PChar->health.hp = PChar->GetMaxHP();
             PChar->health.mp = PChar->GetMaxMP();
@@ -6776,9 +6806,7 @@ namespace charutils
             value  = rset->get<int32>(0);
             expiry = rset->get<uint32>(1);
 
-            uint32 currentTimestamp = CVanaTime::getInstance()->getSysTime();
-
-            if (expiry > 0 && expiry <= currentTimestamp)
+            if (expiry > 0 && expiry <= earth_time::timestamp())
             {
                 value = 0;
                 db::preparedStmt("DELETE FROM char_vars WHERE charid = ? AND varname = ?", charId, varName);
@@ -6878,9 +6906,9 @@ namespace charutils
         PChar->pushPacket<CObjectiveUtilityPacket>(seconds);
     }
 
-    void SendTimerPacket(CCharEntity* PChar, duration dur)
+    void SendTimerPacket(CCharEntity* PChar, timer::duration dur)
     {
-        auto timeLimitSeconds = static_cast<uint32>(std::chrono::duration_cast<std::chrono::seconds>(dur).count());
+        auto timeLimitSeconds = static_cast<uint32>(timer::count_seconds(dur));
         SendTimerPacket(PChar, timeLimitSeconds);
     }
 
@@ -6889,19 +6917,19 @@ namespace charutils
         PChar->pushPacket<CObjectiveUtilityPacket>();
     }
 
-    time_t getTraverserEpoch(CCharEntity* PChar)
+    earth_time::time_point getTraverserEpoch(CCharEntity* PChar)
     {
         TracyZoneScoped;
 
-        auto fmtQuery = "SELECT unix_timestamp(traverser_start) FROM char_unlocks WHERE charid = %u";
+        auto fmtQuery = "SELECT UNIX_TIMESTAMP(traverser_start) FROM char_unlocks WHERE charid = %u";
 
         auto ret = _sql->Query(fmtQuery, PChar->id);
         if (ret != SQL_ERROR && _sql->NumRows() != 0 && _sql->NextRow() == SQL_SUCCESS)
         {
-            return _sql->GetUIntData(0);
+            return earth_time::time_point(std::chrono::seconds(_sql->GetUIntData(0)));
         }
 
-        return 0;
+        return earth_time::time_point::min();
     }
 
     // TODO: Perhaps allow for optional argument to support GM Commands
@@ -6951,18 +6979,18 @@ namespace charutils
     {
         TracyZoneScoped;
 
-        auto   fmtQuery         = "SELECT unix_timestamp(traverser_start), traverser_claimed FROM char_unlocks WHERE charid = %u";
-        time_t traverserEpoch   = 0;
-        uint32 traverserClaimed = 0;
+        auto                   fmtQuery         = "SELECT UNIX_TIMESTAMP(traverser_start), traverser_claimed FROM char_unlocks WHERE charid = %u";
+        earth_time::time_point traverserEpoch   = earth_time::time_point::min();
+        uint32                 traverserClaimed = 0;
 
         auto ret = _sql->Query(fmtQuery, PChar->id);
         if (ret != SQL_ERROR && _sql->NumRows() != 0 && _sql->NextRow() == SQL_SUCCESS)
         {
-            traverserEpoch   = _sql->GetUIntData(0);
+            traverserEpoch   = earth_time::time_point(std::chrono::seconds(_sql->GetUIntData(0)));
             traverserClaimed = _sql->GetUIntData(1);
         }
 
-        if (traverserEpoch == 0)
+        if (traverserEpoch == earth_time::time_point::min())
         {
             // Players cannot accrue Traverser Stones until the epoch has been set.  This is not possible
             // in quests, but is always displayed in player currencies.
@@ -6970,16 +6998,18 @@ namespace charutils
         }
 
         // Handle reduction for Celerity Key Items
-        uint8 stoneWaitHours = 20;
+        earth_time::duration stoneWaitHours = 20h;
         for (int keyItem = 1385; keyItem <= 1387; ++keyItem)
         {
             if (hasKeyItem(PChar, keyItem))
             {
-                stoneWaitHours -= 4;
+                stoneWaitHours -= 4h;
             }
         }
+        earth_time::duration elapsedSinceEpoch = earth_time::now() - traverserEpoch;
+        uint32               stonesGenerated   = std::chrono::floor<std::chrono::hours>(elapsedSinceEpoch) / stoneWaitHours;
 
-        return floor((std::time(nullptr) - traverserEpoch) / (stoneWaitHours * 3600)) - traverserClaimed;
+        return stonesGenerated - traverserClaimed;
     }
 
     void ReadHistory(CCharEntity* PChar)
@@ -7360,11 +7390,11 @@ namespace charutils
         if (rset && rset->rowsCount() && rset->next())
         {
             // Update the character's death timestamp based off of how long they were previously dead
-            const auto secondsSinceDeath = rset->get<uint32>("death");
+            const auto secondsSinceDeath = std::chrono::seconds(rset->get<uint32>("death"));
             if (PChar->health.hp == 0)
             {
-                PChar->SetDeathTimestamp((uint32)time(nullptr) - secondsSinceDeath);
-                PChar->Die(CCharEntity::death_duration - std::chrono::seconds(secondsSinceDeath));
+                PChar->SetDeathTime(timer::time_point(timer::now() - secondsSinceDeath));
+                PChar->Die(CCharEntity::death_duration - secondsSinceDeath);
             }
         }
     }

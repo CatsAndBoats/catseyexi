@@ -40,7 +40,7 @@ public:
     MapSocket(uint16 port, ReceiveFn onReceiveFn); // TODO: Move passing in onReceiveFn to recvFor
     ~MapSocket();
 
-    void recvFor(duration duration);
+    void recvFor(timer::duration duration);
     void send(const IPP& ipp, std::span<uint8> buffer);
 
 private:

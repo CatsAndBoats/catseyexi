@@ -227,8 +227,11 @@ CCharStatusPacket::CCharStatusPacket(CCharEntity* PChar)
         packet->b = (LSColor.B << 4) + 15;
     }
 
-    packet->dead_counter1     = PChar->GetTimeRemainingUntilDeathHomepoint();
-    packet->dead_counter2     = CVanaTime::getInstance()->getVanaTime() + packet->dead_counter1 / 60;
+    // The client uses 66min as the maximum amount of time for death
+    // Once this value reaches below 6min then the client will force homepoint the character
+    auto deadRemaining        = timer::count_seconds(6min + PChar->GetTimeUntilDeathHomepoint());
+    packet->dead_counter1     = static_cast<uint32>(60 * deadRemaining);
+    packet->dead_counter2     = earth_time::vanadiel_timestamp() + deadRemaining;
     packet->costume_id        = PChar->m_Costume;
     packet->model_hitbox_size = 4; // TODO: verify this
     packet->mount_id          = 0;

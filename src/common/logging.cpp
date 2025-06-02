@@ -135,7 +135,7 @@ void logging::InitializeLog(std::string const& serverName, std::string const& lo
     // If you create more than one worker thread, messages may be delivered out of order
     spdlog::init_thread_pool(8192, 1);
     spdlog::flush_on(spdlog::level::warn);
-    spdlog::flush_every(std::chrono::seconds(5));
+    spdlog::flush_every(5s);
 
     // Sink to console
     std::vector<spdlog::sink_ptr> sinks;

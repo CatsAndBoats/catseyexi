@@ -29,6 +29,7 @@
 namespace puppetutils
 {
     void   LoadAutomaton(CCharEntity* PChar);
+    void   SaveAttachments(CCharEntity* PChar);
     void   SaveAutomaton(CCharEntity* PChar);
     bool   UnlockAttachment(CCharEntity* PChar, CItem* PItem);
     bool   HasAttachment(CCharEntity* PChar, CItem* PItem);
