@@ -26,38 +26,39 @@ local content = Battlefield:new({
     keyItemLostMessage = ID.text.PARTY_MEMBERS_HAVE_FALLEN + 16,
 })
 
-function content:entryRequirement(player, npc, isRegistrant, trade)
-    if isRegistrant then
-        return player:hasKeyItem(xi.ki.IMPERIAL_LINEAGE_CHAPTER_I)
-            and player:hasKeyItem(xi.ki.IMPERIAL_LINEAGE_CHAPTER_II)
-            and player:hasKeyItem(xi.ki.IMPERIAL_LINEAGE_CHAPTER_III)
-            and player:hasKeyItem(xi.ki.IMPERIAL_LINEAGE_CHAPTER_IV)
-            and player:hasKeyItem(xi.ki.IMPERIAL_LINEAGE_CHAPTER_V)
-            and player:hasKeyItem(xi.ki.IMPERIAL_LINEAGE_CHAPTER_VI)
-            and player:hasKeyItem(xi.ki.IMPERIAL_LINEAGE_CHAPTER_VII)
-            and player:hasKeyItem(xi.ki.IMPERIAL_LINEAGE_CHAPTER_VIII)
-    else
-        return true -- Allow helpers in without requiring KIs
-    end
-end
+local requiredKIs =
+{
+    xi.ki.IMPERIAL_LINEAGE_CHAPTER_I,
+    xi.ki.IMPERIAL_LINEAGE_CHAPTER_II,
+    xi.ki.IMPERIAL_LINEAGE_CHAPTER_III,
+    xi.ki.IMPERIAL_LINEAGE_CHAPTER_IV,
+    xi.ki.IMPERIAL_LINEAGE_CHAPTER_V,
+    xi.ki.IMPERIAL_LINEAGE_CHAPTER_VI,
+    xi.ki.IMPERIAL_LINEAGE_CHAPTER_VII,
+    xi.ki.IMPERIAL_LINEAGE_CHAPTER_VIII,
+}
 
 function content:onBattlefieldRegister(player, battlefield)
     -- Mark the registrant
     battlefield:setLocalVar("registrantId", player:getID())
 end
 
+function content:entryRequirement(player, npc, isRegistrant, trade)
+    if isRegistrant then
+        for _, ki in ipairs(requiredKIs) do
+            if not player:hasKeyItem(ki) then
+                return false
+            end
+        end
+    end
+    return true
+end
+
 function content:onBattlefieldEnter(player, battlefield)
     if player:getID() == battlefield:getLocalVar("registrantId") then
-        -- Only the registrant loses the KIs
-        player:delKeyItem(xi.ki.IMPERIAL_LINEAGE_CHAPTER_I)
-        player:delKeyItem(xi.ki.IMPERIAL_LINEAGE_CHAPTER_II)
-        player:delKeyItem(xi.ki.IMPERIAL_LINEAGE_CHAPTER_III)
-        player:delKeyItem(xi.ki.IMPERIAL_LINEAGE_CHAPTER_IV)
-        player:delKeyItem(xi.ki.IMPERIAL_LINEAGE_CHAPTER_V)
-        player:delKeyItem(xi.ki.IMPERIAL_LINEAGE_CHAPTER_VI)
-        player:delKeyItem(xi.ki.IMPERIAL_LINEAGE_CHAPTER_VII)
-        player:delKeyItem(xi.ki.IMPERIAL_LINEAGE_CHAPTER_VIII)
-
+        for _, ki in ipairs(requiredKIs) do
+            player:delKeyItem(ki)
+        end
         player:messageSpecial(ID.text.PARTY_MEMBERS_HAVE_FALLEN + 16)
     end
 end
