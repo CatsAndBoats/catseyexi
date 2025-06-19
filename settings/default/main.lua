@@ -178,10 +178,10 @@ xi.settings.main =
 
     -- SE implemented coffer/chest illusion time in order to prevent coffer farming. No-one in the same area can open a chest or coffer for loot (gil, gems & items)
     -- till a random time between MIN_ILLSION_TIME and MAX_ILLUSION_TIME. During this time players can loot keyitem and item related to quests (AF, maps... etc.)
-    COFFER_MAX_ILLUSION_TIME = 3600,  -- 1 hour
-    COFFER_MIN_ILLUSION_TIME = 1800,  -- 30 minutes
-    CHEST_MAX_ILLUSION_TIME  = 3600,  -- 1 hour
-    CHEST_MIN_ILLUSION_TIME  = 1800,  -- 30 minutes
+    COFFER_MAX_ILLUSION_TIME = 1200, -- (20 mins), Default: 3600 (1 hour)
+    COFFER_MIN_ILLUSION_TIME =  900, -- (15 mins), Default: 1800 (30 mins)
+    CHEST_MAX_ILLUSION_TIME  = 1200, -- (20 mins), Default: 3600 (1 hour)
+    CHEST_MIN_ILLUSION_TIME  =  900, -- (15 mins), Default: 1800 (30 mins)
 
     -- Sets spawn type for: Behemoth, Fafnir, Adamantoise, King Behemoth, Nidhog, Aspidochelone.
     -- Use 0 for timed spawns, 1 for force pop only, 2 for both
