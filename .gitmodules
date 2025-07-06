@@ -15,3 +15,6 @@
 [submodule "control"]
 	path = control
 	url = https://github.com/CatsAndBoats/catseyexi-control
+[submodule "src/map/cexi"]
+	path = src/map/cexi
+	url = https://github.com/catsandboats/cexi-src
