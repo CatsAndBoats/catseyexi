@@ -87,58 +87,7 @@ content.groups =
 content.loot =
 {
     {
-        { item = 2763, weight = 40 }, -- Swamp Ore
-        { item = 737,  weight = 40 }, -- Gold Ore
-        { item = 1858, weight = 40 }, -- Moblumin Ingot
-        { item = 2761, weight = 40 }, -- Feyweald Log
-        { item = 703,  weight = 40 }, -- Petrified Log
-        { item = 2831, weight = 40 }, -- Yellow Brass Chain
-        { item = 1861, weight = 40 }, -- Moblin Sheepskin
-        { item = 2518, weight = 40 }, -- Smilodon Hide
-        { item = 844,  weight = 40 }, -- Phoenix Feather
-        { item = 5651, weight = 40 }, -- Burdock
-        { item = 6393, weight = 40 }, -- Porxie Pork
-        { item = 738,  weight = 40 }, -- Platinum Ore
-        { item = 2755, weight = 40 }, -- Ruszor Hide
-        { item = 915,  weight = 40 }, -- Toad Oil
-        { item = 1465, weight = 40 }, -- Granite
-        { item = 1622, weight = 40 }, -- Bugard Tusk
-        { item = 828,  weight = 40 }, -- Velvet Cloth
-        { item = 1641, weight = 40 }, -- Fire Anima
-        { item = 1644, weight = 40 }, -- Earth Anima
-        { item = 1646, weight = 40 }, -- Water Anima
-        { item = 1643, weight = 40 }, -- Wind Anima
-        { item = 1642, weight = 40 }, -- Ice Anima
-        { item = 1645, weight = 40 }, -- Lightning Anima
-        { item = 1647, weight = 40 }, -- Light Anima
-        { item = 1648, weight = 40 }, -- Dark Anima
-    },
-    {
-        { item = 2763, weight = 40 }, -- Swamp Ore
-        { item = 737,  weight = 40 }, -- Gold Ore
-        { item = 1858, weight = 40 }, -- Moblumin Ingot
-        { item = 2761, weight = 40 }, -- Feyweald Log
-        { item = 703,  weight = 40 }, -- Petrified Log
-        { item = 2831, weight = 40 }, -- Yellow Brass Chain
-        { item = 1861, weight = 40 }, -- Moblin Sheepskin
-        { item = 2518, weight = 40 }, -- Smilodon Hide
-        { item = 844,  weight = 40 }, -- Phoenix Feather
-        { item = 5651, weight = 40 }, -- Burdock
-        { item = 6393, weight = 40 }, -- Porxie Pork
-        { item = 738,  weight = 40 }, -- Platinum Ore
-        { item = 2755, weight = 40 }, -- Ruszor Hide
-        { item = 915,  weight = 40 }, -- Toad Oil
-        { item = 1465, weight = 40 }, -- Granite
-        { item = 1622, weight = 40 }, -- Bugard Tusk
-        { item = 828,  weight = 40 }, -- Velvet Cloth
-        { item = 1641, weight = 40 }, -- Fire Anima
-        { item = 1644, weight = 40 }, -- Earth Anima
-        { item = 1646, weight = 40 }, -- Water Anima
-        { item = 1643, weight = 40 }, -- Wind Anima
-        { item = 1642, weight = 40 }, -- Ice Anima
-        { item = 1645, weight = 40 }, -- Lightning Anima
-        { item = 1647, weight = 40 }, -- Light Anima
-        { item = 1648, weight = 40 }, -- Dark Anima
+        { item = xi.item.GIL, weight = 1000, amount = 1000000 },
     },
     {
         { item = xi.item.APEX_TOKEN,     weight = 333 },
@@ -166,6 +115,24 @@ content.loot =
         { item = xi.item.ASCENSION_STONE, weight = 1000 },
     },
     {
+        { item = xi.item.ASCENSION_STONE,   weight = 500 },
+        { item = xi.item.PINNACLE_CELATA,   weight = 30 },
+        { item = xi.item.PINNACLE_CUIRASS,  weight = 30 },
+        { item = xi.item.PINNACLE_DASTANAS, weight = 30 },
+        { item = xi.item.PINNACLE_CUISSES,  weight = 30 },
+        { item = xi.item.PINNACLE_SABATONS, weight = 30 },
+        { item = xi.item.APOGEE_PETASOS,    weight = 30 },
+        { item = xi.item.APOGEE_COAT,       weight = 30 },
+        { item = xi.item.APOGEE_CUFFS,      weight = 30 },
+        { item = xi.item.APOGEE_TONBAN,     weight = 30 },
+        { item = xi.item.APOGEE_SABOTS,     weight = 30 },
+        { item = xi.item.APEX_HATSUBURI,    weight = 40 },
+        { item = xi.item.APEX_TOGI,         weight = 40 },
+        { item = xi.item.APEX_KOTE,         weight = 40 },
+        { item = xi.item.APEX_HAIDATE,      weight = 40 },
+        { item = xi.item.APEX_SUNE_ATE,     weight = 40 },
+    },
+    {
         { item = xi.item.APEX_HATSUBURI,   weight = 200 },
         { item = xi.item.APEX_TOGI,        weight = 200 },
         { item = xi.item.APEX_KOTE,        weight = 200 },
@@ -191,15 +158,13 @@ content.loot =
     },
     -- original drops
     {
-        { item = xi.item.NONE,                 weight = 250 },
-        { item = xi.item.BRILLIANT_EARRING,    weight = 375 },
-        { item = xi.item.REE_HABALOS_HEADGEAR, weight = 375 },
+        { item = xi.item.BRILLIANT_EARRING,    weight = 500 },
+        { item = xi.item.REE_HABALOS_HEADGEAR, weight = 500 },
     },
     {
-        { item = xi.item.NONE,     weight = 250 },
-        { item = 15833,            weight = 250 }, -- diverters ring
-        { item = 11392,            weight = 250 }, -- koschei crackows
-        { item = xi.item.PRESTER,  weight = 250 }, -- prester
+        { item = 15833,            weight = 333 }, -- diverters ring
+        { item = 11392,            weight = 333 }, -- koschei crackows
+        { item = xi.item.PRESTER,  weight = 334 }, -- prester
     },
 }
 
