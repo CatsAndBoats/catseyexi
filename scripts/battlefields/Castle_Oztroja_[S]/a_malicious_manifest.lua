@@ -25,42 +25,42 @@ local content = Battlefield:new({
     exitNpc            = { '_2r8' },
     experimental       = false,
     armouryCrates      = { ID.mob.TZEE_XICU_THE_MANIFEST + 5 },
-    keyItemLostMessage = ID.text.THE_PARTY_WILL_BE_REMOVED + 9
+    keyItemLostMessage = ID.text.THE_PARTY_WILL_BE_REMOVED + 9,
 })
 
--- Only the registrant needs the KIs
-function content:entryRequirement(player, npc, isRegistrant, trade)
-    if isRegistrant then
-        return player:hasKeyItem(xi.ki.HABALOS_ECLOGUE_VERSE_I)
-            and player:hasKeyItem(xi.ki.HABALOS_ECLOGUE_VERSE_II)
-            and player:hasKeyItem(xi.ki.HABALOS_ECLOGUE_VERSE_III)
-            and player:hasKeyItem(xi.ki.HABALOS_ECLOGUE_VERSE_IV)
-            and player:hasKeyItem(xi.ki.HABALOS_ECLOGUE_VERSE_V)
-            and player:hasKeyItem(xi.ki.HABALOS_ECLOGUE_VERSE_VI)
-            and player:hasKeyItem(xi.ki.HABALOS_ECLOGUE_VERSE_VII)
-            and player:hasKeyItem(xi.ki.HABALOS_ECLOGUE_VERSE_VIII)
-    else
-        return true  -- Allow helpers in without requiring KIs
-    end
-end
+local requiredKIs =
+{
+    xi.ki.HABALOS_ECLOGUE_VERSE_I,
+    xi.ki.HABALOS_ECLOGUE_VERSE_II,
+    xi.ki.HABALOS_ECLOGUE_VERSE_III,
+    xi.ki.HABALOS_ECLOGUE_VERSE_IV,
+    xi.ki.HABALOS_ECLOGUE_VERSE_V,
+    xi.ki.HABALOS_ECLOGUE_VERSE_VI,
+    xi.ki.HABALOS_ECLOGUE_VERSE_VII,
+    xi.ki.HABALOS_ECLOGUE_VERSE_VIII,
+}
 
 function content:onBattlefieldRegister(player, battlefield)
     -- Mark the registrant
     battlefield:setLocalVar("registrantId", player:getID())
 end
 
+function content:entryRequirement(player, npc, isRegistrant, trade)
+    if isRegistrant then
+        for _, ki in ipairs(requiredKIs) do
+            if not player:hasKeyItem(ki) then
+                return false
+            end
+        end
+    end
+    return true
+end
+
 function content:onBattlefieldEnter(player, battlefield)
     if player:getID() == battlefield:getLocalVar("registrantId") then
-        -- Only the registrant loses the KIs
-        player:delKeyItem(xi.ki.HABALOS_ECLOGUE_VERSE_I)
-        player:delKeyItem(xi.ki.HABALOS_ECLOGUE_VERSE_II)
-        player:delKeyItem(xi.ki.HABALOS_ECLOGUE_VERSE_III)
-        player:delKeyItem(xi.ki.HABALOS_ECLOGUE_VERSE_IV)
-        player:delKeyItem(xi.ki.HABALOS_ECLOGUE_VERSE_V)
-        player:delKeyItem(xi.ki.HABALOS_ECLOGUE_VERSE_VI)
-        player:delKeyItem(xi.ki.HABALOS_ECLOGUE_VERSE_VII)
-        player:delKeyItem(xi.ki.HABALOS_ECLOGUE_VERSE_VIII)
-
+        for _, ki in ipairs(requiredKIs) do
+            player:delKeyItem(ki)
+        end
         player:messageSpecial(ID.text.THE_PARTY_WILL_BE_REMOVED + 9)
     end
 end
