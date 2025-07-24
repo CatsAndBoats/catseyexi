@@ -140,6 +140,10 @@ INSERT INTO `item_mods_pet` VALUES (11388,28,5,3); -- Automaton - MATT: 5
 -- Pantin Babouches +1
 INSERT INTO `item_mods_pet` VALUES (11389,28,5,3); -- Automaton - MATT: 5
 
+-- Koschei Crackows
+INSERT INTO `item_mods_pet` VALUES (11392,23,5,1); -- Avatar - ATT: 5
+INSERT INTO `item_mods_pet` VALUES (11392,1,10,1); -- Avatar - DEF: 10
+
 -- Puppetry Taj +1
 INSERT INTO `item_mods_pet` VALUES (11470,71,3,3); -- Automaton - MPHEAL: 3
 INSERT INTO `item_mods_pet` VALUES (11470,72,3,3); -- Automaton - HPHEAL: 3

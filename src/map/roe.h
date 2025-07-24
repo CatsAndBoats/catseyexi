@@ -143,7 +143,7 @@ namespace roeutils
     bool event(ROE_EVENT eventID, CCharEntity* PChar, const RoeDatagram& payload);
 
     void   SetEminenceRecordCompletion(CCharEntity* PChar, uint16 recordID, bool newStatus);
-    bool   GetEminenceRecordCompletion(CCharEntity* PChar, uint16 recordID);
+    bool   GetEminenceRecordCompletion(const CCharEntity* PChar, uint16 recordID);
     uint16 GetNumEminenceCompleted(CCharEntity* PChar);
     bool   AddEminenceRecord(CCharEntity* PChar, uint16 recordID);
     bool   DelEminenceRecord(CCharEntity* PChar, uint16 recordID);

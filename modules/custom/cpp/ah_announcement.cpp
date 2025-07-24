@@ -9,20 +9,15 @@
 #include "map/utils/moduleutils.h"
 
 #include "common/database.h"
-#include "common/timer.h"
 
 #include "map/packet_system.h"
 #include "map/packets/auction_house.h"
 #include "map/packets/basic.h"
 #include "map/packets/chat_message.h"
-#include "map/packets/inventory_finish.h"
-#include "map/utils/charutils.h"
 #include "map/utils/itemutils.h"
 
 #include "map/ipc_client.h"
-#include "map/item_container.h"
 #include "map/map_session.h"
-#include "map/zone.h"
 #include "utils/auctionutils.h"
 
 #include <functional>
@@ -55,7 +50,13 @@ class AHAnnouncementModule : public CPPModule
                 CItem* PItem = itemutils::GetItemPointer(itemid);
                 if (PItem)
                 {
-                    if (auctionutils::PurchasingItems(PChar, action, price, itemid, quantity))
+                    const GP_AUC_PARAM_BID payload{
+                        .BidPrice   = price,
+                        .ItemNo     = itemid,
+                        .ItemStacks = quantity,
+                    };
+
+                    if (auctionutils::PurchasingItems(PChar, payload))
                     {
                         // clang-format off
                         const auto sellerId = [&]() -> uint32

@@ -5612,7 +5612,15 @@ INSERT INTO `mob_spell_lists` VALUES ('Ouryu_Ouryu_Cometh',548,191,1,255); -- st
 INSERT INTO `mob_spell_lists` VALUES ('Ouryu_Ouryu_Cometh',548,365,1,255); -- breakga (1~255)
 INSERT INTO `mob_spell_lists` VALUES ('Ouryu_Ouryu_Cometh',548,255,1,255); -- break (1~255)
 
--- Next Available: 549
+-- T3 Elemental Ga Spells - Mammet-800 (549)
+INSERT INTO `mob_spell_lists` VALUES ('T3_Ga_Spells',549,176,1,255);  -- Firaga III (1~255)
+INSERT INTO `mob_spell_lists` VALUES ('T3_Ga_Spells',549,181,1,255);  -- Blizzaga III (1~255)
+INSERT INTO `mob_spell_lists` VALUES ('T3_Ga_Spells',549,186,1,255);  -- Aeroga III (1~255)
+INSERT INTO `mob_spell_lists` VALUES ('T3_Ga_Spells',549,191,1,255);  -- Stonega III (1~255)
+INSERT INTO `mob_spell_lists` VALUES ('T3_Ga_Spells',549,196,1,255);  -- Thundaga III (1~255)
+INSERT INTO `mob_spell_lists` VALUES ('T3_Ga_Spells',549,201,1,255);  -- Waterga III (1~255)
+
+-- Next Available: 550
 
 /*!40000 ALTER TABLE `mob_spell_lists` ENABLE KEYS */;
 UNLOCK TABLES;

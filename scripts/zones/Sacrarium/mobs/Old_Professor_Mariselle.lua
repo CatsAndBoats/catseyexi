@@ -55,7 +55,7 @@ entity.onMobFight = function(mob, target)
     if
         mob:getBattleTime() - teleTime > 30 and
         mob:getBattleTime() > 59 and
-        mob:actionQueueEmpty()
+        not xi.combat.behavior.isEntityBusy(mob)
     then
         local profLocation = mob:getLocalVar('spawnLocation')
         local randomPosition = math.random(1, 9)

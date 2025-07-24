@@ -62,6 +62,9 @@ enum class MsgStd : uint16
     LinkshellUnavailable         = 112, // The linkshell name you entered is already in use or otherwise unavailable.
     EventSkipped                 = 117, // Event skipped.
     TellNotReceivedOffline       = 125, // Your tell was not received.  The recipient is currently away.
+    MooglePlantsSeeds            = 132, // Your moogle plants the <seed> in the flowerpot.
+    MoogleDriesPlant             = 133, // Your moogle dries the plant in the <item>.
+    MoogleUsesItemOnPLant        = 136, // Your moogle uses the <item> on the plant.
     MoghouseCantPickUp           = 137, // Kupo... I can't pick anything right now, kupo.
     ChocoboRefusedToEnte         = 138, // The chocobo refused to enter the next area.
     CurrentPollResultsSystem     = 140, // Player Name's proposal - Current poll results:
@@ -126,6 +129,7 @@ enum class MsgStd : uint16
     PollProposalLinkshell2       = 289, // Player Name's proposal to the linkshell group (cast vote with command: "/vote ?"):
     CurrentPollResultsLinkshell2 = 290, // Player Name's proposal - Current poll results:
     FinalPollResultsLinkshell2   = 291, // Player Name's proposal - Final poll results:
+    SuccessfulRemodel            = 293, // Your second floor has been successfully remodeled.
     TrustCannotLFP               = 296, // You cannot use Trust magic while seeking a party.
     WaitParty                    = 297, // While inviting a party member, you must wait a while before using Trust magic.
     TrustMaximumNumber           = 298, // You have called forth your maximum number of alter egos.
@@ -133,6 +137,7 @@ enum class MsgStd : uint16
     TrustEnmity                  = 300, // You cannot use Trust magic while having gained enmity.
     TrustSoloOrLeader            = 301, // You cannot use Trust magic unless you are solo or the party leader.
     AnErrorHasOccured            = 308, // An error has occurred.
+    UnableToThrowAway            = 325, // You are unable to throw away the <item>.
     LevelSyncActivated           = 540, // Level Sync activated. Your level has been restricted to <Level>. Equipment effected by the level restriction will be adjusted accordingly. Experience...
     LevelSyncDesigneeBelowMin    = 541, // Level Sync could not be activated. The designated player is below level 10.
     LevelSyncDesigneeInOtherArea = 542, // Level Sync could not be activated. The designated player is in a different area.
@@ -160,7 +165,7 @@ public:
     CMessageStandardPacket(uint16 MessageID);
 
     CMessageStandardPacket(MsgStd MessageID);
-    CMessageStandardPacket(uint32 param0, uint16 MessageID);
+    CMessageStandardPacket(uint32 param0, MsgStd MessageID);
     CMessageStandardPacket(uint32 param0, uint32 param1, uint16 MessageID);
     CMessageStandardPacket(CCharEntity* PChar, uint32 param0, MsgStd MessageID);
     CMessageStandardPacket(CCharEntity* PChar, uint32 param0, uint32 param1, MsgStd MessageID);

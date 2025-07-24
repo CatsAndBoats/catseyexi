@@ -30,7 +30,11 @@ spellObject.onSpellCast = function(caster, target, spell)
         caster:getFamily() == 51 or
         caster:getFamily() == 479
     then
-        dmg = 14 + caster:getMainLvl() * 30
+        -- Not entirely accurate until mobspell skills are reworked. #7222
+        -- TODO: + dINT *2 until dINT +13. When dINT is negative, dINT / 2 until unknown floor.
+        -- TODO: Account for all mitigation sources.
+        -- TODO: Account for rage.
+        dmg = caster:getMainLvl() * 15.5
     else
         dmg = ((100 + caster:getMod(xi.mod.MATT)) / (100 + target:getMod(xi.mod.MDEF))) * (caster:getStat(xi.mod.INT) + (caster:getMaxSkillLevel(caster:getMainLvl(), xi.job.BLM, xi.skill.ELEMENTAL_MAGIC)) / 6) * 9.4
     end

@@ -451,6 +451,12 @@ void CItemEquipment::SetAugmentMod(uint16 type, uint8 value)
         // check if we should be adding to or taking away from the mod power (handle scripted augments properly)
         modValue = (modValue > 0 ? modValue + value : modValue - value) * (multiplier > 1 ? multiplier : 1);
 
+        // Skip unimplemented augments modifiers
+        if (modId == Mod::NONE)
+        {
+            continue;
+        }
+
         if (!isPet)
         {
             addModifier(CModifier(modId, modValue));

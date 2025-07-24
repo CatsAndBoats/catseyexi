@@ -20,7 +20,6 @@ mission.reward =
 -- Bits
 -- 0 -> Lower Jeuno Aldo interaction. Optional.
 -- 1 -> Lower Delkfutt tower Zone-in cutscene. Optional. Yes. Really.
--- 2 -> Stellar Fulcrum pre-battle cutscene. Can't miss it.
 
 mission.sections =
 {
@@ -81,9 +80,10 @@ mission.sections =
         [xi.zone.STELLAR_FULCRUM] =
         {
             onZoneIn = function(player, prevZone)
-                if not mission:isVarBitsSet(player, 'Option', 2) then
+                local missionStatus = player:getMissionStatus(mission.areaId)
+                if missionStatus == 0 then
                     return 0 -- Pre-Battle.
-                elseif player:getMissionStatus(mission.areaId) == 1 then
+                elseif missionStatus == 2 then
                     return 17 -- Post-Battle. Mission complete event.
                 elseif player:getPreviousZone() == xi.zone.UPPER_DELKFUTTS_TOWER then
                     return 7 -- Ensure regular entering CS plays.
@@ -102,7 +102,7 @@ mission.sections =
             onEventFinish =
             {
                 [0] = function(player, csid, option, npc)
-                    mission:setVarBit(player, 'Option', 2)
+                    player:setMissionStatus(mission.areaId, 1)
                 end,
 
                 [17] = function(player, csid, option, npc)
@@ -111,7 +111,7 @@ mission.sections =
 
                 [32001] = function(player, csid, option, npc)
                     if player:getLocalVar('battlefieldWin') == xi.battlefield.id.RETURN_TO_DELKFUTTS_TOWER then
-                        player:setMissionStatus(mission.areaId, 1)
+                        player:setMissionStatus(mission.areaId, 2)
                         player:setPos(-519.99, 1.076, -19.943, 64, xi.zone.STELLAR_FULCRUM)
                     end
                 end,

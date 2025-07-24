@@ -182,39 +182,42 @@ uint8 CItemContainer::InsertItem(CItem* PItem, uint8 SlotID)
     return ERROR_SLOTID;
 }
 
-CItem* CItemContainer::GetItem(uint8 SlotID)
+CItem* CItemContainer::GetItem(uint8 slotID) const
 {
-    if (SlotID <= m_size)
+    if (slotID <= m_size)
     {
-        return m_ItemList[SlotID];
+        return m_ItemList[slotID];
     }
+
     return nullptr;
 }
 
-uint8 CItemContainer::SearchItem(uint16 ItemID)
+auto CItemContainer::SearchItem(const uint16 itemId) const -> uint8
 {
-    for (uint8 SlotID = 0; SlotID <= m_size; ++SlotID)
+    for (uint8 slotId = 0; slotId <= m_size; ++slotId)
     {
-        if ((m_ItemList[SlotID] != nullptr) && (m_ItemList[SlotID]->getID() == ItemID))
+        if ((m_ItemList[slotId] != nullptr) && (m_ItemList[slotId]->getID() == itemId))
         {
-            return SlotID;
+            return slotId;
         }
     }
+
     return ERROR_SLOTID;
 }
 
-auto CItemContainer::SearchItems(uint16 ItemID) -> std::vector<uint8>
+auto CItemContainer::SearchItems(const uint16 itemId) const -> std::vector<uint8>
 {
-    std::vector<uint8> SlotIDs;
+    std::vector<uint8> slotIds;
 
-    for (uint8 SlotID = 0; SlotID <= m_size; ++SlotID)
+    for (uint8 slotId = 0; slotId <= m_size; ++slotId)
     {
-        if ((m_ItemList[SlotID] != nullptr) && (m_ItemList[SlotID]->getID() == ItemID))
+        if ((m_ItemList[slotId] != nullptr) && (m_ItemList[slotId]->getID() == itemId))
         {
-            SlotIDs.push_back(SlotID);
+            slotIds.push_back(slotId);
         }
     }
-    return SlotIDs;
+
+    return slotIds;
 }
 
 uint8 CItemContainer::SearchItemWithSpace(uint16 ItemID, uint32 quantity)

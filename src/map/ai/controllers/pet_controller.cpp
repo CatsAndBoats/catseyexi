@@ -27,6 +27,15 @@
 #include "status_effect_container.h"
 #include "utils/petutils.h"
 
+namespace
+{
+    const std::set immobilePets = {
+        PETID_LUOPAN,
+        PETID_ALEXANDER,
+        PETID_ODIN,
+    };
+}
+
 CPetController::CPetController(CMobEntity* _PPet)
 : CMobController(_PPet)
 , PPet(_PPet)
@@ -103,7 +112,7 @@ void CPetController::DoRoamTick(timer::time_point tick)
                 return;
             }
         }
-        else if (PetEntity->m_PetID == PETID_LUOPAN) // Luopans do nothing
+        else if (immobilePets.contains(static_cast<PETID>(PetEntity->m_PetID))) // certain pets do not roam
         {
             return;
         }

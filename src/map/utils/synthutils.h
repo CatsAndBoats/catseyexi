@@ -19,8 +19,7 @@
 ===========================================================================
 */
 
-#ifndef _SYNTHUTILS_H
-#define _SYNTHUTILS_H
+#pragma once
 
 #include "common/cbasetypes.h"
 
@@ -55,11 +54,9 @@ namespace synthutils
         SYNTHESIS_HQ3     = 4
     };
 
-    void  LoadSynthRecipes();
-    int32 startSynth(CCharEntity* PChar);
-    int32 sendSynthDone(CCharEntity* PChar);
-    void  doSynthFail(CCharEntity* PChar);
-    void  doSynthCriticalFail(CCharEntity* PChar);
+    void LoadSynthRecipes();
+    auto startSynth(CCharEntity* PChar) -> int32;
+    auto sendSynthDone(CCharEntity* PChar) -> int32;
+    void doSynthFail(CCharEntity* PChar);
+    void doSynthCriticalFail(CCharEntity* PChar);
 }; // namespace synthutils
-
-#endif

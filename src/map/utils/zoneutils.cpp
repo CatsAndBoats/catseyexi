@@ -149,21 +149,20 @@ namespace zoneutils
         return nullptr;
     }
 
-    CCharEntity* GetCharFromWorld(uint32 charid, uint16 targid)
+    auto GetCharFromWorld(const uint32 charid, const uint16 targid) -> CCharEntity*
     {
-        // will not return pointers to players in Mog House
-        for (auto PZone : g_PZoneList)
+        for (auto [zoneId, PZone] : g_PZoneList)
         {
-            if (PZone.first == 0)
+            if (zoneId == 0)
             {
                 continue;
             }
-            CBaseEntity* PEntity = PZone.second->GetEntity(targid, TYPE_PC);
-            if (PEntity != nullptr && PEntity->id == charid)
+            if (CBaseEntity* PEntity = PZone->GetEntity(targid, TYPE_PC); PEntity != nullptr && PEntity->id == charid)
             {
-                return (CCharEntity*)PEntity;
+                return static_cast<CCharEntity*>(PEntity);
             }
         }
+
         return nullptr;
     }
 

@@ -260,11 +260,11 @@ namespace roeutils
         charutils::SaveEminenceData(PChar);
     }
 
-    bool GetEminenceRecordCompletion(CCharEntity* PChar, uint16 recordID)
+    bool GetEminenceRecordCompletion(const CCharEntity* PChar, uint16 recordID)
     {
         TracyZoneScoped;
-        uint16 page = recordID / 8;
-        uint8  bit  = recordID % 8;
+        const uint16 page = recordID / 8;
+        const uint8  bit  = recordID % 8;
         return PChar->m_eminenceLog.complete[page] & (1 << bit);
     }
 
@@ -304,17 +304,7 @@ namespace roeutils
             return false;
         }
 
-        // Prevent packet-injection for re-taking completed records which aren't marked repeatable.
-        if (roeutils::GetEminenceRecordCompletion(PChar, recordID) && !roeutils::RoeSystem.RepeatableRecords.test(recordID))
-        {
-            return false;
-        }
-
-        // Prevent packet-injection from taking timed records as normal ones.
-        if (roeutils::RoeSystem.TimedRecords.test(recordID))
-        {
-            return false;
-        }
+        // There used to be packet injection prevention code here, but it is now part of the packet handler
 
         for (int i = 0; i < 30; i++)
         {

@@ -8,7 +8,7 @@ local zoneObject = {}
 
 zoneObject.onGameHour = function(zone)
     -- Script for Laughing Bison sign flip animations
-    local timer = 1152 - ((os.time() - 1009810802)%1152)
+    local timer = 1152 - ((GetSystemTime() - 1009810802)%1152)
 
     -- Next ferry is Al Zhabi for higher values.
     if timer >= 576 then
@@ -33,9 +33,10 @@ zoneObject.onZoneIn = function(player, prevZone)
         player:getZPos() == 0
     then
         if
-            prevZone == xi.zone.SHIP_BOUND_FOR_MHAURA or
+            player:hasKeyItem(xi.ki.FERRY_TICKET) and
+            (prevZone == xi.zone.SHIP_BOUND_FOR_MHAURA or
             prevZone == xi.zone.OPEN_SEA_ROUTE_TO_MHAURA or
-            prevZone == xi.zone.SHIP_BOUND_FOR_MHAURA_PIRATES
+            prevZone == xi.zone.SHIP_BOUND_FOR_MHAURA_PIRATES)
         then
             cs = 202
             player:setPos(14.960, -3.430, 18.423, 192)
@@ -54,16 +55,21 @@ end
 zoneObject.onTransportEvent = function(player, transport)
     if transport == 47 or transport == 46 then
         if
-            not player:hasKeyItem(xi.ki.BOARDING_PERMIT) or
-            xi.settings.main.ENABLE_TOAU == 0
+            xi.settings.main.ENABLE_TOAU == 1 and
+            player:hasKeyItem(xi.ki.BOARDING_PERMIT) and
+            player:hasKeyItem(xi.ki.FERRY_TICKET)
         then
+            player:startEvent(200)
+        else
             player:setPos(8.200, -1.363, 3.445, 192)
             player:messageSpecial(ID.text.DO_NOT_POSSESS, xi.ki.BOARDING_PERMIT)
-        else
-            player:startEvent(200)
         end
     else
-        player:startEvent(200)
+        if player:hasKeyItem(xi.ki.FERRY_TICKET) then
+            player:startEvent(200)
+        else
+            player:setPos(8.200, -1.363, 3.445, 192)
+        end
     end
 end
 

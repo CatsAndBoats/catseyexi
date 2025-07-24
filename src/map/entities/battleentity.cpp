@@ -319,7 +319,7 @@ uint8 CBattleEntity::UpdateSpeed(bool run)
     if (isMounted())
     {
         outputSpeed = settings::get<uint8>("map.MOUNT_SPEED") / 2;
-        outputSpeed *= (100 + getMod(Mod::MOUNT_MOVE)) / 100;
+        outputSpeed *= 1.0f + static_cast<float>(getMod(Mod::MOUNT_MOVE)) / 100.0f;
     }
     else if (baseSpeed == 0 || getMod(Mod::MOVE_SPEED_OVERRIDE) < 0)
     {
@@ -442,42 +442,51 @@ bool CBattleEntity::Rest(float rate)
     return didRest;
 }
 
-int16 CBattleEntity::GetWeaponDelay(bool tp)
+uint16 CBattleEntity::GetWeaponDelay(bool tp)
 {
     TracyZoneScoped;
-    uint16 WeaponDelay = 9999;
+    uint16 finalDelay = 9999;
+
     if (auto* weapon = dynamic_cast<CItemWeapon*>(m_Weapons[SLOT_MAIN]))
     {
-        uint16 MinimumDelay = weapon->getDelay(); // Track base delay.  We will need this later.  Mod::DELAY is ignored for now.
-        WeaponDelay         = weapon->getDelay() - getMod(Mod::DELAY);
+        uint16 weaponDelay = weapon->getDelay() + getMod(Mod::DELAY);
+
+        // Flat bonuses/Penalties (Bonuses would be negative in value)
+        int16 martialArts = 0;
+
+        // Multipliers
+        float dualWieldMultiplier = 1.0f;
+        float hasteMultiplier     = 1.0f;
+        float delayModMultiplier  = 1.0f + getMod(Mod::DELAYP) / 100.0f;
+
+        // H2H
         if (weapon->isHandToHand())
         {
-            WeaponDelay -= getMod(Mod::MARTIAL_ARTS) * 1000 / 60;
+            weaponDelay = weaponDelay + 8000;                    // (480) base * (1000 / 60) milisecond conversion
+            martialArts = getMod(Mod::MARTIAL_ARTS) * 1000 / 60; // TODO: Job points?
         }
+
+        // Sub-weapon
         else if (auto* subweapon = dynamic_cast<CItemWeapon*>(m_Weapons[SLOT_SUB]);
                  subweapon && subweapon->getDmgType() > DAMAGE_TYPE::NONE && subweapon->getDmgType() < DAMAGE_TYPE::HTH)
         {
-            MinimumDelay += subweapon->getDelay();
-            WeaponDelay += subweapon->getDelay();
-            // apply dual wield delay reduction
-            WeaponDelay = (uint16)(WeaponDelay * ((100.0f - getMod(Mod::DUAL_WIELD)) / 100.0f));
+            weaponDelay         = weaponDelay + subweapon->getDelay();
+            dualWieldMultiplier = 1.0f - getMod(Mod::DUAL_WIELD) / 100.0f;
         }
 
-        // apply haste and delay reductions that don't affect tp
+        // Handle Hundred Fists directly.
+        if (!tp && StatusEffectContainer->HasStatusEffect(EFFECT_HUNDRED_FISTS))
+        {
+            finalDelay = std::clamp<uint16>(weaponDelay - martialArts, 1600, 8000);
+            finalDelay = finalDelay * 0.25;
+
+            return finalDelay;
+        }
+
+        // Haste and delay reductions that don't affect tp.
         if (!tp)
         {
-            // Cap haste at appropriate levels.
-            int16 hasteMagic   = std::clamp<int16>(getMod(Mod::HASTE_MAGIC), -10000, 4375);  // 43.75% cap -- handle 100% slow for weakness
-            int16 hasteAbility = std::clamp<int16>(getMod(Mod::HASTE_ABILITY), -2500, 2500); // 25% cap
-            int16 hasteGear    = std::clamp<int16>(getMod(Mod::HASTE_GEAR), -2500, 2500);    // 25%
-
-            if (weapon->isTwoHanded())
-            {
-                hasteAbility = std::clamp<int16>(getMod(Mod::HASTE_ABILITY) + getMod(Mod::TWOHAND_HASTE_ABILITY), -2500, 2500); // 25% cap
-            }
-
-            // Check if we are using a special attack list that should not be affected by attack speed debuffs
-            // Example: Wyrm's flying auto attack speed should not be modified by debuffs.
+            // Haste
             bool specialAttackList = false;
             if (auto* mobEntity = dynamic_cast<CMobEntity*>(this))
             {
@@ -487,28 +496,40 @@ int16 CBattleEntity::GetWeaponDelay(bool tp)
                 }
             }
 
-            // Divide by float to get a more accurate reduction, then use int16 cast to truncate
             if (!specialAttackList)
             {
-                WeaponDelay -= (int16)(WeaponDelay * (hasteMagic + hasteAbility + hasteGear) / 10000.f);
+                float hasteMagic   = getMod(Mod::HASTE_MAGIC) / 10000.0f;
+                float hasteAbility = getMod(Mod::HASTE_ABILITY) / 10000.0f;
+                float hasteGear    = getMod(Mod::HASTE_GEAR) / 10000.0f;
+
+                if (weapon->isTwoHanded())
+                {
+                    hasteAbility = hasteAbility - getMod(Mod::TWOHAND_HASTE_ABILITY) / 10000.0f;
+                }
+
+                hasteMagic   = std::clamp<float>(hasteMagic, -1.0f, 0.4375f);
+                hasteAbility = std::clamp<float>(hasteAbility, -0.25f, 0.25f);
+                hasteGear    = std::clamp<float>(hasteGear, -0.25f, 0.25f);
+
+                hasteMultiplier = std::clamp<float>(1.0f - hasteMagic - hasteAbility - hasteGear, 0.2f, 2.0f);
             }
         }
-        WeaponDelay = (uint16)(WeaponDelay * ((100.0f + getMod(Mod::DELAYP)) / 100.0f));
 
-        // Global delay reduction cap of "about 80%" being enforced.
-        // This should be enforced on -delay equipment, martial arts, dual wield, and haste, hence MinimumDelay * 0.2.
-        // TODO: Could be converted to value/1024 if the exact cap is ever determined.
-        MinimumDelay -= (uint16)(MinimumDelay * 0.8);
+        // Store upper and lower values.
+        uint16 minDelay = weaponDelay * 0.2;
+        uint16 maxDelay = weaponDelay * 2;
 
-        // if hundred fists then use the min delay (as hundred fists also reduces base delay by 80%
-        if (StatusEffectContainer->HasStatusEffect(EFFECT_HUNDRED_FISTS) && !tp)
-        {
-            WeaponDelay = MinimumDelay;
-        }
+        // Apply delay modifications.
+        finalDelay = weaponDelay - martialArts;
+        finalDelay = finalDelay * dualWieldMultiplier;
+        finalDelay = finalDelay * hasteMultiplier;
+        finalDelay = finalDelay * delayModMultiplier;
 
-        WeaponDelay = (WeaponDelay < MinimumDelay) ? MinimumDelay : WeaponDelay;
+        // Clamp
+        finalDelay = std::clamp<uint16>(finalDelay, minDelay, maxDelay);
     }
-    return WeaponDelay;
+
+    return finalDelay;
 }
 
 float CBattleEntity::GetMeleeRange() const
@@ -1167,7 +1188,7 @@ uint16 CBattleEntity::EVA()
     return std::max(1, evasion + (this->objtype == TYPE_MOB || this->objtype == TYPE_PET ? 0 : m_modStat[Mod::EVA])); // The mod for a pet or mob is already calclated in the above so return 0
 }
 
-JOBTYPE CBattleEntity::GetMJob()
+JOBTYPE CBattleEntity::GetMJob() const
 {
     return m_mjob;
 }
@@ -1177,12 +1198,13 @@ uint8 CBattleEntity::GetMLevel() const
     return m_mlvl;
 }
 
-JOBTYPE CBattleEntity::GetSJob()
+JOBTYPE CBattleEntity::GetSJob() const
 {
     if (StatusEffectContainer->HasStatusEffect({ EFFECT_OBLIVISCENCE, EFFECT_SJ_RESTRICTION }))
     {
         return JOB_NON;
     }
+
     return m_sjob;
 }
 
@@ -1192,6 +1214,7 @@ uint8 CBattleEntity::GetSLevel() const
     {
         return 0;
     }
+
     return m_slvl;
 }
 
@@ -2131,20 +2154,45 @@ void CBattleEntity::OnMobSkillFinished(CMobSkillState& state, action_t& action)
         return;
     }
 
-    uint16 targets = static_cast<uint16>(PAI->TargetFind->m_targets.size());
+    uint16 targets  = static_cast<uint16>(PAI->TargetFind->m_targets.size());
+    auto   skipSelf = false;
+
+    if ((PSkill->getValidTargets() & TARGET_ANY_ALLEGIANCE) && (PSkill->getValidTargets() & TARGET_SELF))
+    {
+        // This ability targets self for aoe skills (such as Frozen Mist)
+        // Should be impossible for self to not be in target list, but just in case
+        if (targets > 0)
+        {
+            targets -= 1;
+        }
+        skipSelf = true;
+    }
 
     // No targets, perhaps something like Super Jump or otherwise untargetable
     if (targets == 0)
     {
-        action.actiontype         = ACTION_MOBABILITY_INTERRUPT;
-        action.actionid           = 28787; // Some hardcoded magic for interrupts
         actionList_t& actionList  = action.getNewActionList();
         actionList.ActionTargetID = id;
 
         actionTarget_t& actionTarget = actionList.getNewActionTarget();
-        actionTarget.animation       = 0x1FC; // Hardcoded magic sent from the server
         actionTarget.messageID       = 0;
-        actionTarget.reaction        = REACTION::ABILITY | REACTION::HIT;
+
+        if (skipSelf)
+        {
+            // This ability targets self for aoe skills (such as Frozen Mist)
+            // And it found no valid targets in range, the skill and animation should still trigger
+            // action.actiontype unchanged
+            actionTarget.animation  = PSkill->getAnimationID();
+            actionTarget.reaction   = REACTION::MISS | REACTION::HIT | REACTION::GUARDED;
+            actionTarget.speceffect = SPECEFFECT::SELFAOE_MISS;
+        }
+        else
+        {
+            action.actiontype      = ACTION_MOBABILITY_INTERRUPT;
+            action.actionid        = 28787; // Some hardcoded magic for interrupts
+            actionTarget.animation = 0x1FC; // Hardcoded magic sent from the server
+            actionTarget.reaction  = REACTION::ABILITY | REACTION::HIT;
+        }
 
         return;
     }
@@ -2161,6 +2209,14 @@ void CBattleEntity::OnMobSkillFinished(CMobSkillState& state, action_t& action)
     bool first{ true };
     for (auto&& PTargetFound : PAI->TargetFind->m_targets)
     {
+        if (PTarget == PTargetFound && skipSelf)
+        {
+            // This ability targets self for aoe skills (such as Frozen Mist)
+            // Ignore self completely
+
+            continue;
+        }
+
         actionList_t& list = action.getNewActionList();
 
         list.ActionTargetID = PTargetFound->id;

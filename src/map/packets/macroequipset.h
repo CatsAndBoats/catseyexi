@@ -25,12 +25,13 @@
 #include "basic.h"
 #include "common/cbasetypes.h"
 
+struct GP_CLI_COMMAND_EQUIPSET_CHECK;
 class CCharEntity;
 
 class CAddtoEquipSet : public CBasicPacket
 {
 public:
-    CAddtoEquipSet(CCharEntity* PChar, uint8* data);
+    CAddtoEquipSet(const CCharEntity* PChar, const GP_CLI_COMMAND_EQUIPSET_CHECK& data);
 };
 
 #endif

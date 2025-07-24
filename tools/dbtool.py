@@ -1077,6 +1077,9 @@ def launch_using_zone_settings():
 
     ports = result.stdout.split("\n")[1:-1]
 
+    # Strip out any '0' entries from ports
+    ports = [port for port in ports if port.strip() != '0']
+
     print(f"ZoneIP: {zoneip}, Ports: {ports}\n")
 
     xi_connect_executable = from_server_path(f"xi_connect{exe}")

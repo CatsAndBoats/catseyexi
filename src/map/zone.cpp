@@ -130,7 +130,7 @@ CZone::~CZone()
     m_zoneLineList.clear();
 }
 
-ZONEID CZone::GetID()
+auto CZone::GetID() const -> ZONEID
 {
     return m_zoneID;
 }
@@ -587,7 +587,7 @@ void CZone::UpdateWeather()
     uint8                     WeatherChance     = 0;
 
     // Random time between 3 minutes and 30 minutes for the next weather change
-    WeatherNextUpdate = xi::vanadiel_clock::seconds(xirand::GetRandomNumber(180, 1801));
+    WeatherNextUpdate = std::chrono::seconds(xirand::GetRandomNumber(180, 1801));
 
     // Calculate what day we are on since the start of vanadiel time
     WeatherDay = vanadiel_time::count_days(CurrentVanaDate.time_since_epoch());

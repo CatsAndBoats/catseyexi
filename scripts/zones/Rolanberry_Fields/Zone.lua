@@ -8,8 +8,6 @@ require('scripts/quests/i_can_hear_a_rainbow')
 local zoneObject = {}
 
 zoneObject.onInitialize = function(zone)
-    UpdateNMSpawnPoint(ID.mob.SIMURGH)
-    GetMobByID(ID.mob.SIMURGH):setRespawnTime(math.random(900, 7200))
     xi.voidwalker.zoneOnInit(zone)
 
     -- A Chocobo Riding Game finish line

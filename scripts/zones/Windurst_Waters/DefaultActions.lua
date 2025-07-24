@@ -58,7 +58,6 @@ return {
     ['Nine_of_Hearts']   = { event = 277 },
     ['Ohbiru-Dohbiru']   = { event = 344 },
     ['Okaka']            = { event = 574 },
-    ['Olaky-Yayulaky']   = { event = 910 },
     ['Orn']              = { event = 652 },
     ['Pakesse-Myukesse'] = { event = 434 },
     ['Paku-Nakku']       = { event = 431 },

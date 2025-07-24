@@ -10,7 +10,8 @@ quest.sections =
 {
     {
         check = function(player, questVars, vars)
-            return xi.trust.hasPermit(player) and
+            return xi.settings.main.ENABLE_TRUST_QUESTS == 1 and
+                xi.trust.hasPermit(player) and
                 not player:hasSpell(xi.magic.spell.MAAT)
         end,
 

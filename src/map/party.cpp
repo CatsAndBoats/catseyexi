@@ -38,6 +38,7 @@
 #include <cstring>
 #include <vector>
 
+#include "packets/c2s/0x077_group_change2.h"
 #include "packets/char_abilities.h"
 #include "packets/char_status.h"
 #include "packets/char_sync.h"
@@ -181,15 +182,15 @@ void CParty::DisbandParty(bool playerInitiated)
 }
 
 // Assign roles to group members (players only)
-void CParty::AssignPartyRole(const std::string& MemberName, uint8 role)
+void CParty::AssignPartyRole(const std::string& MemberName, const GP_CLI_COMMAND_GROUP_CHANGE2_CHANGEKIND role)
 {
     if (m_PartyType != PARTY_PCS)
     {
-        ShowWarning("Attempting to assign role (%d) to %s in Mob Party.", role, MemberName);
+        ShowWarningFmt("Attempting to assign role ({}) to {} in Mob Party.", static_cast<uint8_t>(role), MemberName);
         return;
     }
 
-    // Make sure that the the character is actually a part of this party
+    // Make sure that the character is actually a part of this party
     const auto rset = db::preparedStmt("SELECT chars.charid FROM chars JOIN accounts_parties ON accounts_parties.charid = chars.charid WHERE charname = ? AND partyid = ?", MemberName, m_PartyID);
     if (!rset || rset->rowsCount() == 0)
     {
@@ -198,21 +199,23 @@ void CParty::AssignPartyRole(const std::string& MemberName, uint8 role)
 
     switch (role)
     {
-        case 0:
+        case GP_CLI_COMMAND_GROUP_CHANGE2_CHANGEKIND::SetPartyLeader:
             SetLeader(MemberName);
             break;
-        case 4:
+        case GP_CLI_COMMAND_GROUP_CHANGE2_CHANGEKIND::SetQuartermaster:
             SetQuarterMaster(MemberName);
             break;
-        case 5:
+        case GP_CLI_COMMAND_GROUP_CHANGE2_CHANGEKIND::SetLottery:
             SetQuarterMaster("");
             break;
-        case 6:
+        case GP_CLI_COMMAND_GROUP_CHANGE2_CHANGEKIND::SetLevelSync:
             SetSyncTarget(MemberName, MsgStd::LevelSyncSet);
             break;
-        case 7:
+        case GP_CLI_COMMAND_GROUP_CHANGE2_CHANGEKIND::DisableLevelSync:
             SetSyncTarget("", MsgStd::LevelSyncRemoveLeftParty);
             break;
+        default:
+            return;
     }
 
     if (m_PAlliance)

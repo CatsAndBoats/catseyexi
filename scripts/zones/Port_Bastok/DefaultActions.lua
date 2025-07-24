@@ -16,7 +16,6 @@ return {
     ['Ensetsu']          = { event = 27 },
     ['Evi']              = { event = 21 },
     ['Ferrol']           = { event = 254 },
-    ['Gallagher']        = { event = 349 },
     ['Grin']             = { event = 295 },
     ['Gudav']            = { event = 31 },
     ['Gwinar']           = { event = 365 },

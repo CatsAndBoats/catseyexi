@@ -23,6 +23,7 @@ zones[xi.zone.MONARCH_LINN] =
         TIME_LIMIT_FOR_THIS_BATTLE_IS = 7423, -- The time limit for this battle is <number> minutes.
         PARTY_MEMBERS_HAVE_FALLEN     = 7459, -- All party members have fallen in battle. Now leaving the battlefield.
         THE_PARTY_WILL_BE_REMOVED     = 7466, -- If all party members' HP are still zero after # minute[/s], the party will be removed from the battlefield.
+        TORN_FROM_YOUR_HANDS          = 7474, -- The <keyitem> is torn from your hands and sucked into the spatial displacement!
         CONQUEST_BASE                 = 7483, -- Tallying conquest results...
         ENTERING_THE_BATTLEFIELD_FOR  = 7646, -- Entering the battlefield for [Ancient Vows/The Savage/Fire in the Sky/Bad Seed/Bugard in the Clouds/Beloved of the Atlantes/Uninvited Guests/Nest of Nightmares/The Savage]!
     },
@@ -30,6 +31,8 @@ zones[xi.zone.MONARCH_LINN] =
     {
         MAMMET_19_EPSILON = GetFirstID('Mammet-19_Epsilon'),
         OURYU             = GetFirstID('Ouryu'),
+        RAZON             = GetFirstID('Razon'),
+        MAMMET_800        = GetFirstID('Mammet-800')
     },
     npc =
     {

@@ -159,10 +159,11 @@ DECLARE_FORMAT_AS_UNDERLYING(SKILLTYPE);
 
 enum SUBSKILLTYPE : uint8
 {
-    SUBSKILL_XBO      = 0,
-    SUBSKILL_GUN      = 1,
-    SUBSKILL_CNN      = 2,
-    SUBSKILL_SHURIKEN = 3,
+    SUBSKILL_XBOW_SHORTBOW = 0,
+    SUBSKILL_GUN           = 1,
+    SUBSKILL_CANNON        = 2,
+    SUBSKILL_SHURIKEN      = 3,
+    SUBSKILL_LONGBOW       = 4,
 
     SUBSKILL_ANIMATOR    = 10,
     SUBSKILL_ANIMATOR_II = 11,
@@ -316,6 +317,7 @@ enum class SPECEFFECT : uint8
 {
     NONE         = 0x00,
     BLOOD        = 0x02,
+    SELFAOE_MISS = 0x04,
     HIT          = 0x10,
     RAISE        = 0x11,
     RECOIL       = 0x20,
@@ -426,6 +428,7 @@ enum TARGETTYPE : uint16
     TARGET_PET                     = 0x0100,
     TARGET_PLAYER_PARTY_ENTRUST    = 0x0200,
     TARGET_IGNORE_BATTLEID         = 0x0400, // Can hit targets that do not have the same battle ID
+    TARGET_ANY_ALLEGIANCE          = 0x0800, // Can hit targets from any allegiance simultaneously. To be used with other flags above and only makes sense for non-single-target skills
 };
 DECLARE_FORMAT_AS_UNDERLYING(TARGETTYPE);
 
@@ -577,8 +580,8 @@ public:
     bool isMounted();
     bool isSitting();
 
-    JOBTYPE GetMJob();
-    JOBTYPE GetSJob();
+    JOBTYPE GetMJob() const;
+    JOBTYPE GetSJob() const;
     uint8   GetMLevel() const;
     uint8   GetSLevel() const;
 
@@ -597,7 +600,7 @@ public:
     void  UpdateHealth(); // recalculation of the maximum amount of hp and mp, as well as adjusting their current values
     uint8 UpdateSpeed(bool run = false) override;
 
-    int16  GetWeaponDelay(bool tp);              // returns delay of combined weapons
+    uint16 GetWeaponDelay(bool tp);              // returns delay of combined weapons
     float  GetMeleeRange() const;                // returns the distance considered to be within melee range of the entity
     int16  GetRangedWeaponDelay(bool forTPCalc); // returns delay of ranged weapon + ammo where applicable
     int16  GetAmmoDelay();                       // returns delay of ammo (for cooldown between shots)

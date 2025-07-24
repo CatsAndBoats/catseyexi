@@ -167,13 +167,30 @@ xi.spells.absorb.doDrainingSpell = function(caster, target, spell)
         target:updateEnmityFromDamage(caster, finalDamage)
     end
 
-    -- Drain II and Drain III increase max HP.
+    -- Drain II and Drain III increase max HP via effect.
     if absorbPointsData[spellId][5] then
         local overflow = finalDamage + caster:getHP() - caster:getMaxHP()
         if overflow > 0 then
-            local power    = 100 * overflow / caster:getMaxHP()
-            local duration = 180 + 180 * caster:getMod(xi.mod.DARK_MAGIC_DURATION) / 100
-            caster:addStatusEffect(xi.effect.MAX_HP_BOOST, power, 0, duration)
+            -- Check if effect should be applied. Only 1 "Max HP Effect" can be in place at a time.
+            -- Retail testing suggest that %power effect takes precedent over flat power.
+            local hasMaxHPEffect      = caster:hasStatusEffect(xi.effect.MAX_HP_BOOST)
+            local maxHPEffectPower    = 0
+            local maxHPEffectSubpower = 0
+
+            if hasMaxHPEffect then
+                maxHPEffectPower    = caster:getStatusEffect(xi.effect.MAX_HP_BOOST):getPower()
+                maxHPEffectSubpower = caster:getStatusEffect(xi.effect.MAX_HP_BOOST):getSubPower()
+            end
+
+            if
+                not hasMaxHPEffect or           -- No effect present, so apply.
+                (maxHPEffectPower == 0 and      -- Effect present, but it isn't %. If subpower is higher, we can override the effect.
+                maxHPEffectSubpower < overflow) -- Subpower present is lower than new one, so we can override the effect.
+            then
+                local duration = 180 + 180 * caster:getMod(xi.mod.DARK_MAGIC_DURATION) / 100
+                caster:delStatusEffect(xi.effect.MAX_HP_BOOST)
+                caster:addStatusEffect(xi.effect.MAX_HP_BOOST, 0, 0, duration, 0, overflow)
+            end
         end
     end
 

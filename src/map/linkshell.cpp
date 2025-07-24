@@ -37,7 +37,10 @@
 #include "item_container.h"
 #include "items/item_linkshell.h"
 #include "linkshell.h"
+
+#include "items.h"
 #include "map_server.h"
+#include "packets/c2s/0x0e2_set_lsmsg.h"
 #include "packets/linkshell_message.h"
 #include "utils/charutils.h"
 #include "utils/itemutils.h"
@@ -45,7 +48,7 @@
 #include "utils/zoneutils.h"
 
 CLinkshell::CLinkshell(uint32 id)
-: m_postRights(0)
+: m_postRights(GP_CLI_COMMAND_SET_LSMSG_WRITELEVEL::Linkshell)
 , m_id(id)
 , m_color(0)
 {
@@ -66,10 +69,15 @@ void CLinkshell::setColor(uint16 color)
     m_color = color;
 }
 
-void CLinkshell::setPostRights(uint8 postrights)
+auto CLinkshell::getPostRights() const -> GP_CLI_COMMAND_SET_LSMSG_WRITELEVEL
 {
-    m_postRights = postrights;
-    db::preparedStmt("UPDATE linkshells SET postrights = ? WHERE linkshellid = ?", postrights, m_id);
+    return m_postRights;
+}
+
+void CLinkshell::setPostRights(const GP_CLI_COMMAND_SET_LSMSG_WRITELEVEL writeLevel)
+{
+    m_postRights = writeLevel;
+    db::preparedStmt("UPDATE linkshells SET postrights = ? WHERE linkshellid = ?", m_postRights, m_id);
 }
 
 const std::string& CLinkshell::getName()
@@ -157,13 +165,25 @@ bool CLinkshell::DelMember(CCharEntity* PChar)
 }
 
 // Promotes or demotes the target member (pearlsack/linkpearl)
-void CLinkshell::ChangeMemberRank(const std::string& MemberName, uint8 toSack)
+void CLinkshell::ChangeMemberRank(const std::string& MemberName, const uint8 requesterRank, const uint8 newRank)
 {
-    // topearl = 3
-    // tosack = 2
-    int newId = 512 + toSack;
+    // 2 = Pearl to sack
+    // 3 = Sack to pearl
+    if (newRank < 2 || newRank > 3)
+    {
+        ShowErrorFmt("CLinkshell::ChangeMemberRank: Invalid rank change request for member '{}' in linkshell {}.", MemberName, m_id);
+        return;
+    }
 
-    if (newId == 514 || newId == 515)
+    if (requesterRank != LSTYPE_LINKSHELL)
+    {
+        ShowErrorFmt("CLinkshell::ChangeMemberRank: Invalid rank change request for member '{}' in linkshell {}.", MemberName, m_id);
+        return;
+    }
+
+    const int newId = (ITEMID::LINKSHELL + newRank) - 1;
+
+    if (newId == ITEMID::PEARLSACK || newId == ITEMID::LINKPEARL)
     {
         for (auto& member : members)
         {
@@ -190,7 +210,7 @@ void CLinkshell::ChangeMemberRank(const std::string& MemberName, uint8 toSack)
                     }
                     newShellItem->setQuantity(1);
                     std::memcpy(newShellItem->m_extra, PItemLinkshell->m_extra, 24);
-                    newShellItem->SetLSType(newId == 514 ? LSTYPE_PEARLSACK : LSTYPE_LINKPEARL);
+                    newShellItem->SetLSType(newId == ITEMID::PEARLSACK ? LSTYPE_PEARLSACK : LSTYPE_LINKPEARL);
                     newShellItem->setSubType(ITEM_LOCKED);
                     uint8 LocationID = PItemLinkshell->getLocationID();
                     uint8 SlotID     = PItemLinkshell->getSlotID();
@@ -229,7 +249,7 @@ void CLinkshell::ChangeMemberRank(const std::string& MemberName, uint8 toSack)
 
 // Remove a character from Linkshell by name.
 // Breaks all pearls/sacks if, kicked by shell holder, otherwise equipped pearl only.
-void CLinkshell::RemoveMemberByName(const std::string& MemberName, uint8 kickerRank, bool breakLinkshell)
+void CLinkshell::RemoveMemberByName(const std::string& MemberName, uint8 requesterRank, bool breakLinkshell)
 {
     uint32 lsid = m_id;
     for (auto& member : members)
@@ -273,7 +293,7 @@ void CLinkshell::RemoveMemberByName(const std::string& MemberName, uint8 kickerR
                     CItemLinkshell* newPItemLinkshell = (CItemLinkshell*)Inventory->GetItem(SlotID);
                     if (newPItemLinkshell != nullptr && newPItemLinkshell->isType(ITEM_LINKSHELL) && newPItemLinkshell->GetLSID() == lsid)
                     {
-                        if (kickerRank == LSTYPE_LINKSHELL || newPItemLinkshell == PItemLinkshell)
+                        if (requesterRank == LSTYPE_LINKSHELL || newPItemLinkshell == PItemLinkshell)
                         {
                             if (newPItemLinkshell->GetLSType() != LSTYPE_LINKSHELL)
                             {
@@ -358,6 +378,7 @@ void CLinkshell::PushLinkshellMessage(CCharEntity* PChar, LinkshellSlot slot)
         {
             PChar->pushPacket<CLinkshellMessagePacket>(poster, message, m_name, messageTime, slot);
         }
+        // TODO: No message sends a 0xCC packet that prints "No linkshell message set."
     }
 }
 
@@ -365,7 +386,7 @@ namespace linkshell
 {
     std::map<uint32, std::unique_ptr<CLinkshell>> LinkshellList;
 
-    CLinkshell* LoadLinkshell(uint32 id)
+    auto LoadLinkshell(uint32 id) -> CLinkshell*
     {
         const auto rset = db::preparedStmt("SELECT linkshellid, color, name, postrights FROM linkshells WHERE linkshellid = ? LIMIT 1", id);
         if (rset && rset->rowsCount() && rset->next())
@@ -373,25 +394,17 @@ namespace linkshell
             const auto linkshellid = rset->get<uint32>("linkshellid");
             const auto color       = rset->get<uint16>("color");
             const auto name        = rset->get<std::string>("name");
-            const auto postrights  = rset->get<uint8>("postrights");
+            const auto postrights  = static_cast<GP_CLI_COMMAND_SET_LSMSG_WRITELEVEL>(rset->get<uint8>("postrights"));
 
             auto PLinkshell = std::make_unique<CLinkshell>(linkshellid);
 
             PLinkshell->setColor(color);
-            char EncodedName[LinkshellStringLength];
-
-            std::memset(&EncodedName, 0, sizeof(EncodedName));
+            char EncodedName[LinkshellStringLength] = {};
 
             EncodeStringLinkshell(name.c_str(), EncodedName);
             PLinkshell->setName(EncodedName);
-            if (postrights < LSTYPE_LINKSHELL || postrights > LSTYPE_LINKPEARL)
-            {
-                PLinkshell->setPostRights(LSTYPE_PEARLSACK);
-            }
-            else
-            {
-                PLinkshell->m_postRights = postrights;
-            }
+            PLinkshell->setPostRights(postrights);
+
             LinkshellList[id] = std::move(PLinkshell);
             return LinkshellList[id].get();
         }

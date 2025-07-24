@@ -21,6 +21,15 @@ end
 
 spellObject.onSpellCast = function(caster, target, spell)
     caster:spawnPet(xi.petId.ALEXANDER)
+    local pet = caster:getPet()
+
+    -- Use Perfect Defense 5 seconds after spawning.
+    if pet then
+        pet:timer(5000, function()
+            pet:usePetAbility(xi.jobAbility.PERFECT_DEFENSE, pet)
+        end)
+    end
+
     return 0
 end
 

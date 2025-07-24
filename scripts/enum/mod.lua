@@ -109,6 +109,17 @@ xi.mod =
     LIGHT_AFFINITY_PERP             = 559,
     DARK_AFFINITY_PERP              = 560,
 
+    -- Day/Weather elemental bonuses.
+    FORCE_FIRE_DWBONUS              = 531,  -- Set to above 0 to force fire day/weather elemental bonuses. Penalties are NOT forced.
+    FORCE_ICE_DWBONUS               = 532,  -- Set to above 0 to force ice day/weather elemental bonuses. Penalties are NOT forced.
+    FORCE_WIND_DWBONUS              = 533,  -- Set to above 0 to force wind day/weather elemental bonuses. Penalties are NOT forced.
+    FORCE_EARTH_DWBONUS             = 534,  -- Set to above 0 to force earth day/weather elemental bonuses. Penalties are NOT forced.
+    FORCE_LIGHTNING_DWBONUS         = 535,  -- Set to above 0 to force lightning day/weather elemental bonuses. Penalties are NOT forced.
+    FORCE_WATER_DWBONUS             = 536,  -- Set to above 0 to force water day/weather elemental bonuses. Penalties are NOT forced.
+    FORCE_LIGHT_DWBONUS             = 537,  -- Set to above 0 to force light day/weather elemental bonuses. Penalties are NOT forced.
+    FORCE_DARK_DWBONUS              = 538,  -- Set to above 0 to force dark day/weather elemental bonuses. Penalties are NOT forced.
+    FORCE_DW_BONUS_PENALTY          = 1156, -- Set to above 0 to force all day/weather elemental bonus AND penalties. This is used by "Hachirin-no-Obi".
+
     WSACC                           = 48,
     ATTP                            = 62,
     DEFP                            = 63,
@@ -797,14 +808,6 @@ xi.mod =
 
     ENHANCES_REFRESH                = 529, -- "Enhances Refresh" adds +1 per modifier to spell's tick result.
     NO_SPELL_MP_DEPLETION           = 530, -- % to not deplete MP on spellcast.
-    FORCE_FIRE_DWBONUS              = 531, -- Set to 1 to force fire day/weather spell bonus/penalty. Do not have it total more than 1.
-    FORCE_ICE_DWBONUS               = 532, -- Set to 1 to force ice day/weather spell bonus/penalty. Do not have it total more than 1.
-    FORCE_WIND_DWBONUS              = 533, -- Set to 1 to force wind day/weather spell bonus/penalty. Do not have it total more than 1.
-    FORCE_EARTH_DWBONUS             = 534, -- Set to 1 to force earth day/weather spell bonus/penalty. Do not have it total more than 1.
-    FORCE_LIGHTNING_DWBONUS         = 535, -- Set to 1 to force lightning day/weather spell bonus/penalty. Do not have it total more than 1.
-    FORCE_WATER_DWBONUS             = 536, -- Set to 1 to force water day/weather spell bonus/penalty. Do not have it total more than 1.
-    FORCE_LIGHT_DWBONUS             = 537, -- Set to 1 to force light day/weather spell bonus/penalty. Do not have it total more than 1.
-    FORCE_DARK_DWBONUS              = 538, -- Set to 1 to force dark day/weather spell bonus/penalty. Do not have it total more than 1.
     STONESKIN_BONUS_HP              = 539, -- Bonus "HP" granted to Stoneskin spell.
     ENHANCES_ELEMENTAL_SIPHON       = 540, -- Bonus Base MP added to Elemental Siphon skill.
     BP_DELAY_II                     = 541, -- Blood Pact Delay Reduction II

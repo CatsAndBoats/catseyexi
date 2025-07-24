@@ -25,12 +25,13 @@ quest.sections =
 {
     {
         check = function(player, questVars, vars)
-            return xi.trust.hasPermit(player) and
-            not player:hasSpell(xi.magic.spell.ULMIA) and
-            -- On Dawn, but past "the boss"
-            (player:getCurrentMission(xi.mission.log_id.COP) > xi.mission.id.cop.DAWN and
-            xi.mission.getVar(player, xi.mission.log_id.COP, xi.mission.id.cop.DAWN, 'Status') >= 2)
-            -- TODO: Additional conditions
+            return xi.settings.main.ENABLE_TRUST_QUESTS == 1 and
+                xi.trust.hasPermit(player) and
+                not player:hasSpell(xi.magic.spell.ULMIA) and
+                -- On Dawn, but past "the boss"
+                (player:getCurrentMission(xi.mission.log_id.COP) > xi.mission.id.cop.DAWN and
+                xi.mission.getVar(player, xi.mission.log_id.COP, xi.mission.id.cop.DAWN, 'Status') >= 2)
+                -- TODO: Additional conditions
         end,
 
         [xi.zone.MISAREAUX_COAST] =

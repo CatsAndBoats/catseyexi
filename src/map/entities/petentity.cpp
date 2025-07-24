@@ -407,9 +407,14 @@ void CPetEntity::OnPetSkillFinished(CPetSkillState& state, action_t& action)
     */
 
     // Mob buff abilities also hit monster's pets
-    if (PSkill->getValidTargets() == TARGET_SELF)
+    if (PSkill->getValidTargets() & TARGET_SELF)
     {
         findFlags |= FINDFLAGS_PET;
+        // skill can target self and is aoe, add itself to targetfind first
+        if (PSkill->isAoE())
+        {
+            PTarget = this;
+        }
     }
 
     if ((PSkill->getValidTargets() & TARGET_IGNORE_BATTLEID) == TARGET_IGNORE_BATTLEID)

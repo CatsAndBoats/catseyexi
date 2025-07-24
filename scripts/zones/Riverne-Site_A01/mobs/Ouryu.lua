@@ -132,7 +132,7 @@ entity.onMobFight = function(mob, target)
 
     -- valid conditions for a change
     if
-        mob:actionQueueEmpty() and
+        not xi.combat.behavior.isEntityBusy(mob) and
         mob:canUseAbilities()
     then
         local nextPhaseTime = mob:getLocalVar('nextPhaseTime')

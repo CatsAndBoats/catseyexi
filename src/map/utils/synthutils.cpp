@@ -1,4 +1,4 @@
-/*
+﻿/*
 ===========================================================================
 
   Copyright (c) 2010-2015 Darkstar Dev Teams
@@ -46,6 +46,7 @@
 #include "trade_container.h"
 
 #include "charutils.h"
+#include "enums/key_items.h"
 #include "itemutils.h"
 #include "zone.h"
 #include "zoneutils.h"
@@ -54,35 +55,35 @@ namespace synthutils
 {
     struct SynthRecipe
     {
-        uint32 ID;
-        uint8  Desynth;
-        uint16 KeyItem;
-        uint8  Wood;
-        uint8  Smith;
-        uint8  Gold;
-        uint8  Cloth;
-        uint8  Leather;
-        uint8  Bone;
-        uint8  Alchemy;
-        uint8  Cook;
-        uint16 Crystal;
-        uint16 HQCrystal;
-        uint16 Ingredient1;
-        uint16 Ingredient2;
-        uint16 Ingredient3;
-        uint16 Ingredient4;
-        uint16 Ingredient5;
-        uint16 Ingredient6;
-        uint16 Ingredient7;
-        uint16 Ingredient8;
-        uint16 Result;
-        uint16 ResultHQ1;
-        uint16 ResultHQ2;
-        uint16 ResultHQ3;
-        uint8  ResultQty;
-        uint8  ResultHQ1Qty;
-        uint8  ResultHQ2Qty;
-        uint8  ResultHQ3Qty;
+        uint32  ID;
+        uint8   Desynth;
+        KeyItem RequiredKeyItem;
+        uint8   Wood;
+        uint8   Smith;
+        uint8   Gold;
+        uint8   Cloth;
+        uint8   Leather;
+        uint8   Bone;
+        uint8   Alchemy;
+        uint8   Cook;
+        uint16  Crystal;
+        uint16  HQCrystal;
+        uint16  Ingredient1;
+        uint16  Ingredient2;
+        uint16  Ingredient3;
+        uint16  Ingredient4;
+        uint16  Ingredient5;
+        uint16  Ingredient6;
+        uint16  Ingredient7;
+        uint16  Ingredient8;
+        uint16  Result;
+        uint16  ResultHQ1;
+        uint16  ResultHQ2;
+        uint16  ResultHQ3;
+        uint8   ResultQty;
+        uint8   ResultHQ1Qty;
+        uint8   ResultHQ2Qty;
+        uint8   ResultHQ3Qty;
 
         std::string ResultName;
         std::string ContentTag;
@@ -118,43 +119,51 @@ namespace synthutils
 
             switch (crystalID)
             {
-                case ITEMID::FIRE_CRYSTAL:
-                case ITEMID::INFERNO_CRYSTAL:
+                case FIRE_CRYSTAL:
+                case INFERNO_CRYSTAL:
+                case PYRE_CRYSTAL:
                     out = "Fire";
                     break;
 
-                case ITEMID::ICE_CRYSTAL:
-                case ITEMID::GLACIER_CRYSTAL:
+                case ICE_CRYSTAL:
+                case GLACIER_CRYSTAL:
+                case FROST_CRYSTAL:
                     out = "Ice";
                     break;
 
-                case ITEMID::WIND_CRYSTAL:
-                case ITEMID::CYCLONE_CRYSTAL:
+                case WIND_CRYSTAL:
+                case CYCLONE_CRYSTAL:
+                case VORTEX_CRYSTAL:
                     out = "Wind";
                     break;
 
-                case ITEMID::EARTH_CRYSTAL:
-                case ITEMID::TERRA_CRYSTAL:
+                case EARTH_CRYSTAL:
+                case TERRA_CRYSTAL:
+                case GEO_CRYSTAL:
                     out = "Earth";
                     break;
 
-                case ITEMID::LIGHTNING_CRYSTAL:
-                case ITEMID::PLASMA_CRYSTAL:
+                case LIGHTNING_CRYSTAL:
+                case PLASMA_CRYSTAL:
+                case BOLT_CRYSTAL:
                     out = "Lightning";
                     break;
 
-                case ITEMID::WATER_CRYSTAL:
-                case ITEMID::TORRENT_CRYSTAL:
+                case WATER_CRYSTAL:
+                case TORRENT_CRYSTAL:
+                case FLUID_CRYSTAL:
                     out = "Water";
                     break;
 
-                case ITEMID::LIGHT_CRYSTAL:
-                case ITEMID::AURORA_CRYSTAL:
+                case LIGHT_CRYSTAL:
+                case AURORA_CRYSTAL:
+                case GLIMMER_CRYSTAL:
                     out = "Light";
                     break;
 
-                case ITEMID::DARK_CRYSTAL:
-                case ITEMID::TWILIGHT_CRYSTAL:
+                case DARK_CRYSTAL:
+                case TWILIGHT_CRYSTAL:
+                case SHADOW_CRYSTAL:
                     out = "Dark";
                     break;
             }
@@ -194,39 +203,39 @@ namespace synthutils
 
         // TODO: If we limit by ID ranges, we could use multiple threads to load the recipes
 
-        const auto rset = db::preparedStmt("SELECT \
-            ID, \
-            Desynth, \
-            KeyItem, \
-            Wood, \
-            Smith, \
-            Gold, \
-            Cloth, \
-            Leather, \
-            Bone, \
-            Alchemy, \
-            Cook, \
-            Crystal, \
-            HQCrystal, \
-            Ingredient1, \
-            Ingredient2, \
-            Ingredient3, \
-            Ingredient4, \
-            Ingredient5, \
-            Ingredient6, \
-            Ingredient7, \
-            Ingredient8, \
-            Result, \
-            ResultHQ1, \
-            ResultHQ2, \
-            ResultHQ3, \
-            ResultQty, \
-            ResultHQ1Qty, \
-            ResultHQ2Qty, \
-            ResultHQ3Qty, \
-            ResultName, \
-            content_tag \
-            FROM synth_recipes");
+        const auto rset = db::preparedStmt("SELECT "
+                                           "ID, "
+                                           "Desynth, "
+                                           "KeyItem, "
+                                           "Wood, "
+                                           "Smith, "
+                                           "Gold, "
+                                           "Cloth, "
+                                           "Leather, "
+                                           "Bone, "
+                                           "Alchemy, "
+                                           "Cook, "
+                                           "Crystal, "
+                                           "HQCrystal, "
+                                           "Ingredient1, "
+                                           "Ingredient2, "
+                                           "Ingredient3, "
+                                           "Ingredient4, "
+                                           "Ingredient5, "
+                                           "Ingredient6, "
+                                           "Ingredient7, "
+                                           "Ingredient8, "
+                                           "Result, "
+                                           "ResultHQ1, "
+                                           "ResultHQ2, "
+                                           "ResultHQ3, "
+                                           "ResultQty, "
+                                           "ResultHQ1Qty, "
+                                           "ResultHQ2Qty, "
+                                           "ResultHQ3Qty, "
+                                           "ResultName, "
+                                           "content_tag "
+                                           "FROM synth_recipes");
 
         if (!rset || !rset->rowsCount())
         {
@@ -237,37 +246,37 @@ namespace synthutils
         while (rset->next())
         {
             const auto recipe = SynthRecipe{
-                .ID           = rset->get<uint32>("ID"),
-                .Desynth      = rset->get<uint8>("Desynth"),
-                .KeyItem      = rset->get<uint16>("KeyItem"),
-                .Wood         = rset->get<uint8>("Wood"),
-                .Smith        = rset->get<uint8>("Smith"),
-                .Gold         = rset->get<uint8>("Gold"),
-                .Cloth        = rset->get<uint8>("Cloth"),
-                .Leather      = rset->get<uint8>("Leather"),
-                .Bone         = rset->get<uint8>("Bone"),
-                .Alchemy      = rset->get<uint8>("Alchemy"),
-                .Cook         = rset->get<uint8>("Cook"),
-                .Crystal      = rset->get<uint16>("Crystal"),
-                .HQCrystal    = rset->get<uint16>("HQCrystal"),
-                .Ingredient1  = rset->get<uint16>("Ingredient1"),
-                .Ingredient2  = rset->get<uint16>("Ingredient2"),
-                .Ingredient3  = rset->get<uint16>("Ingredient3"),
-                .Ingredient4  = rset->get<uint16>("Ingredient4"),
-                .Ingredient5  = rset->get<uint16>("Ingredient5"),
-                .Ingredient6  = rset->get<uint16>("Ingredient6"),
-                .Ingredient7  = rset->get<uint16>("Ingredient7"),
-                .Ingredient8  = rset->get<uint16>("Ingredient8"),
-                .Result       = rset->get<uint16>("Result"),
-                .ResultHQ1    = rset->get<uint16>("ResultHQ1"),
-                .ResultHQ2    = rset->get<uint16>("ResultHQ2"),
-                .ResultHQ3    = rset->get<uint16>("ResultHQ3"),
-                .ResultQty    = rset->get<uint8>("ResultQty"),
-                .ResultHQ1Qty = rset->get<uint8>("ResultHQ1Qty"),
-                .ResultHQ2Qty = rset->get<uint8>("ResultHQ2Qty"),
-                .ResultHQ3Qty = rset->get<uint8>("ResultHQ3Qty"),
-                .ResultName   = rset->get<std::string>("ResultName"),
-                .ContentTag   = rset->getOrDefault<std::string>("content_tag", ""),
+                .ID              = rset->get<uint32>("ID"),
+                .Desynth         = rset->get<uint8>("Desynth"),
+                .RequiredKeyItem = static_cast<KeyItem>(rset->get<uint16>("KeyItem")),
+                .Wood            = rset->get<uint8>("Wood"),
+                .Smith           = rset->get<uint8>("Smith"),
+                .Gold            = rset->get<uint8>("Gold"),
+                .Cloth           = rset->get<uint8>("Cloth"),
+                .Leather         = rset->get<uint8>("Leather"),
+                .Bone            = rset->get<uint8>("Bone"),
+                .Alchemy         = rset->get<uint8>("Alchemy"),
+                .Cook            = rset->get<uint8>("Cook"),
+                .Crystal         = rset->get<uint16>("Crystal"),
+                .HQCrystal       = rset->get<uint16>("HQCrystal"),
+                .Ingredient1     = rset->get<uint16>("Ingredient1"),
+                .Ingredient2     = rset->get<uint16>("Ingredient2"),
+                .Ingredient3     = rset->get<uint16>("Ingredient3"),
+                .Ingredient4     = rset->get<uint16>("Ingredient4"),
+                .Ingredient5     = rset->get<uint16>("Ingredient5"),
+                .Ingredient6     = rset->get<uint16>("Ingredient6"),
+                .Ingredient7     = rset->get<uint16>("Ingredient7"),
+                .Ingredient8     = rset->get<uint16>("Ingredient8"),
+                .Result          = rset->get<uint16>("Result"),
+                .ResultHQ1       = rset->get<uint16>("ResultHQ1"),
+                .ResultHQ2       = rset->get<uint16>("ResultHQ2"),
+                .ResultHQ3       = rset->get<uint16>("ResultHQ3"),
+                .ResultQty       = rset->get<uint8>("ResultQty"),
+                .ResultHQ1Qty    = rset->get<uint8>("ResultHQ1Qty"),
+                .ResultHQ2Qty    = rset->get<uint8>("ResultHQ2Qty"),
+                .ResultHQ3Qty    = rset->get<uint8>("ResultHQ3Qty"),
+                .ResultName      = rset->get<std::string>("ResultName"),
+                .ContentTag      = rset->getOrDefault<std::string>("content_tag", ""),
             };
 
             synthRecipes[recipe.key()] = recipe;
@@ -284,7 +293,7 @@ namespace synthutils
      * In the fields itemID and slotID of 10-14 cells, we write the results of the synthesis                                         *
      ********************************************************************************************************************************/
 
-    bool isRightRecipe(CCharEntity* PChar)
+    auto isRightRecipe(CCharEntity* PChar) -> bool
     {
         TracyZoneScoped;
 
@@ -310,7 +319,7 @@ namespace synthutils
                 return false;
             }
 
-            if (recipe.KeyItem == 0 || charutils::hasKeyItem(PChar, recipe.KeyItem))
+            if (recipe.RequiredKeyItem == KeyItem::NONE || charutils::hasKeyItem(PChar, recipe.RequiredKeyItem))
             {
                 // in the ninth cell write the id of the recipe
                 PChar->CraftContainer->setItem(9, recipe.ID, 0xFF, 0);
@@ -350,7 +359,7 @@ namespace synthutils
      *                                                                           *
      ****************************************************************************/
 
-    int16 getSynthDifficulty(CCharEntity* PChar, uint8 skillID)
+    auto getSynthDifficulty(CCharEntity* PChar, uint8 skillID) -> int16
     {
         Mod ModID = Mod::NONE;
 
@@ -395,7 +404,7 @@ namespace synthutils
      *                                                            *
      *************************************************************/
 
-    bool canSynthesizeHQ(CCharEntity* PChar, uint8 skillID)
+    auto canSynthesizeHQ(CCharEntity* PChar, uint8 skillID) -> bool
     {
         Mod ModID = Mod::NONE;
 
@@ -439,7 +448,7 @@ namespace synthutils
      *                                                                                     *
      **************************************************************************************/
 
-    uint8 calcSynthResult(CCharEntity* PChar)
+    auto calcSynthResult(CCharEntity* PChar) -> uint8
     {
         //------------------------------
         // Section 1: Variable definitions.
@@ -1061,7 +1070,7 @@ namespace synthutils
      *                                                                    *
      *********************************************************************/
 
-    int32 startSynth(CCharEntity* PChar)
+    auto startSynth(CCharEntity* PChar) -> int32
     {
         PChar->m_LastSynthTime = timer::now();
 
@@ -1073,56 +1082,63 @@ namespace synthutils
         }
 
         // Set animation and element based on crystal element.
-        uint16 effect        = 0;
-        uint8  element       = 0;
-        uint16 crystalItemId = PChar->CraftContainer->getItemID(0);
+        uint16 effect  = 0;
+        uint8  element = 0;
 
-        switch (crystalItemId)
+        switch (PChar->CraftContainer->getItemID(0))
         {
-            case 4096: // Fire Crystal
-            case 4238: // Inferno Crystal
+            case FIRE_CRYSTAL:
+            case INFERNO_CRYSTAL:
+            case PYRE_CRYSTAL:
                 effect  = EFFECT_FIRESYNTH;
                 element = ELEMENT_FIRE;
                 break;
 
-            case 4097: // Ice Crystal
-            case 4239: // Glacier Crystal
+            case ICE_CRYSTAL:
+            case GLACIER_CRYSTAL:
+            case FROST_CRYSTAL:
                 effect  = EFFECT_ICESYNTH;
                 element = ELEMENT_ICE;
                 break;
 
-            case 4098: // Wind Crystal
-            case 4240: // Cyclone Crystal
+            case WIND_CRYSTAL:
+            case CYCLONE_CRYSTAL:
+            case VORTEX_CRYSTAL:
                 effect  = EFFECT_WINDSYNTH;
                 element = ELEMENT_WIND;
                 break;
 
-            case 4099: // Earth Crystal
-            case 4241: // Terra Crystal
+            case EARTH_CRYSTAL:
+            case TERRA_CRYSTAL:
+            case GEO_CRYSTAL:
                 effect  = EFFECT_EARTHSYNTH;
                 element = ELEMENT_EARTH;
                 break;
 
-            case 4100: // Lightning Crystal
-            case 4242: // Plasma Crystal
+            case LIGHTNING_CRYSTAL:
+            case PLASMA_CRYSTAL:
+            case BOLT_CRYSTAL:
                 effect  = EFFECT_LIGHTNINGSYNTH;
                 element = ELEMENT_LIGHTNING;
                 break;
 
-            case 4101: // Water Crystal
-            case 4243: // Torrent Crystal
+            case WATER_CRYSTAL:
+            case TORRENT_CRYSTAL:
+            case FLUID_CRYSTAL:
                 effect  = EFFECT_WATERSYNTH;
                 element = ELEMENT_WATER;
                 break;
 
-            case 4102: // Light Crystal
-            case 4244: // Aurora Crystal
+            case LIGHT_CRYSTAL:
+            case AURORA_CRYSTAL:
+            case GLIMMER_CRYSTAL:
                 effect  = EFFECT_LIGHTSYNTH;
                 element = ELEMENT_LIGHT;
                 break;
 
-            case 4103: // Dark Crystal
-            case 4245: // Twilight Crystal
+            case DARK_CRYSTAL:
+            case TWILIGHT_CRYSTAL:
+            case SHADOW_CRYSTAL:
                 effect  = EFFECT_DARKSYNTH;
                 element = ELEMENT_DARK;
                 break;
@@ -1133,11 +1149,10 @@ namespace synthutils
         // Reserve the items after we know we have the right recipe
         for (uint8 container_slotID = 0; container_slotID <= 8; ++container_slotID)
         {
-            auto slotid = PChar->CraftContainer->getInvSlotID(container_slotID);
+            const auto slotid = PChar->CraftContainer->getInvSlotID(container_slotID);
             if (slotid != 0xFF)
             {
-                CItem* PItem = PChar->getStorage(LOC_INVENTORY)->GetItem(slotid);
-                if (PItem != nullptr)
+                if (CItem* PItem = PChar->getStorage(LOC_INVENTORY)->GetItem(slotid); PItem != nullptr)
                 {
                     PItem->setReserve(PItem->getReserve() + 1);
                 }
@@ -1145,8 +1160,7 @@ namespace synthutils
         }
 
         // remove crystal
-        auto* PItem = PChar->getStorage(LOC_INVENTORY)->GetItem(PChar->CraftContainer->getInvSlotID(0));
-        if (PItem != nullptr)
+        if (auto* PItem = PChar->getStorage(LOC_INVENTORY)->GetItem(PChar->CraftContainer->getInvSlotID(0)); PItem != nullptr)
         {
             PItem->setReserve(PItem->getReserve() - 1);
         }
@@ -1165,9 +1179,7 @@ namespace synthutils
             {
                 invSlotID = tempSlotID;
 
-                CItem* PCraftItem = PChar->getStorage(LOC_INVENTORY)->GetItem(invSlotID);
-
-                if (PCraftItem != nullptr)
+                if (CItem* PCraftItem = PChar->getStorage(LOC_INVENTORY)->GetItem(invSlotID); PCraftItem != nullptr)
                 {
                     PCraftItem->setSubType(ITEM_LOCKED);
                     PChar->pushPacket<CInventoryAssignPacket>(PCraftItem, INV_NOSELECT);
@@ -1180,8 +1192,7 @@ namespace synthutils
         uint32 highestSkill = 0;
         for (uint8 skillID = SKILL_WOODWORKING; skillID <= SKILL_COOKING; ++skillID)
         {
-            uint8 skillRequired = PChar->CraftContainer->getQuantity(skillID - 40);
-            if (skillRequired > highestSkill)
+            if (const uint8 skillRequired = PChar->CraftContainer->getQuantity(skillID - 40); skillRequired > highestSkill)
             {
                 skillType    = skillID;
                 highestSkill = skillRequired;
@@ -1193,14 +1204,7 @@ namespace synthutils
         PChar->pushPacket<CCharStatusPacket>(PChar);
         PChar->startSynth(static_cast<SKILLTYPE>(skillType));
 
-        if (PChar->loc.zone->GetID() != 255 && PChar->loc.zone->GetID() != 0)
-        {
-            PChar->loc.zone->PushPacket(PChar, CHAR_INRANGE_SELF, std::make_unique<CSynthAnimationPacket>(PChar, effect, result));
-        }
-        else
-        {
-            PChar->pushPacket<CSynthAnimationPacket>(PChar, effect, result);
-        }
+        PChar->loc.zone->PushPacket(PChar, CHAR_INRANGE_SELF, std::make_unique<CSynthAnimationPacket>(PChar, effect, result));
 
         return 0;
     }
@@ -1211,7 +1215,7 @@ namespace synthutils
      *                                                                       *
      ************************************************************************/
 
-    int32 doSynthResult(CCharEntity* PChar)
+    auto doSynthResult(CCharEntity* PChar) -> int32
     {
         uint8 m_synthResult = PChar->CraftContainer->getQuantity(0);
 
@@ -1279,15 +1283,8 @@ namespace synthutils
             // Use appropiate message (Regular or desynthesis)
             const auto message = PChar->CraftContainer->getCraftType() == CRAFT_DESYNTHESIS ? SYNTH_SUCCESS_DESYNTH : SYNTH_SUCCESS;
 
-            if (PChar->loc.zone->GetID() != 255 && PChar->loc.zone->GetID() != 0)
-            {
-                PChar->loc.zone->PushPacket(PChar, CHAR_INRANGE, std::make_unique<CSynthResultMessagePacket>(PChar, message, itemID, quantity));
-                PChar->pushPacket<CSynthMessagePacket>(PChar, message, itemID, quantity);
-            }
-            else
-            {
-                PChar->pushPacket<CSynthMessagePacket>(PChar, message, itemID, quantity);
-            }
+            PChar->loc.zone->PushPacket(PChar, CHAR_INRANGE, std::make_unique<CSynthResultMessagePacket>(PChar, message, itemID, quantity));
+            PChar->pushPacket<CSynthMessagePacket>(PChar, message, itemID, quantity);
 
             // Calculate what craft this recipe "belongs" to based on highest skill required
             uint32 skillType    = 0;
@@ -1320,7 +1317,7 @@ namespace synthutils
      *                                                                       *
      ************************************************************************/
 
-    int32 sendSynthDone(CCharEntity* PChar)
+    auto sendSynthDone(CCharEntity* PChar) -> int32
     {
         doSynthResult(PChar);
 

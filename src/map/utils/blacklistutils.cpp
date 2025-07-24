@@ -22,25 +22,21 @@
 #include "blacklistutils.h"
 
 #include "common/database.h"
-#include "common/logging.h"
-#include "common/sql.h"
 #include "common/utils.h"
 
 #include "entities/charentity.h"
-
-#include "map_server.h"
 
 #include "packets/send_blacklist.h"
 
 namespace blacklistutils
 {
-    bool IsBlacklisted(uint32 ownerId, uint32 targetId)
+    auto IsBlacklisted(uint32 ownerId, uint32 targetId) -> bool
     {
         const auto rset = db::preparedStmt("SELECT * FROM char_blacklist WHERE charid_owner = ? AND charid_target = ? LIMIT 1", ownerId, targetId);
         return rset && rset->rowsCount();
     }
 
-    bool AddBlacklisted(uint32 ownerId, uint32 targetId)
+    auto AddBlacklisted(uint32 ownerId, uint32 targetId) -> bool
     {
         if (IsBlacklisted(ownerId, targetId))
         {
@@ -51,7 +47,7 @@ namespace blacklistutils
         return rset && rset->rowsAffected();
     }
 
-    bool DeleteBlacklisted(uint32 ownerId, uint32 targetId)
+    auto DeleteBlacklisted(uint32 ownerId, uint32 targetId) -> bool
     {
         if (!IsBlacklisted(ownerId, targetId))
         {
@@ -75,14 +71,14 @@ namespace blacklistutils
         }
 
         // Loop and build blacklist
-        int currentCount = 0;
-        int totalCount   = 0;
-        int rowCount     = rset->rowsCount();
+        int       currentCount = 0;
+        int       totalCount   = 0;
+        const int rowCount     = rset->rowsCount();
 
         while (rset->next())
         {
-            uint32      accid_target = rset->get<uint32>(0);
-            std::string targetName   = rset->get<std::string>(1);
+            auto accid_target = rset->get<uint32>(0);
+            auto targetName   = rset->get<std::string>(1);
 
             blacklist.emplace_back(accid_target, targetName);
             currentCount++;

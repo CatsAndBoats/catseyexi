@@ -126,9 +126,9 @@ local dockTable =
     -- ['npc_name'] = { eventId, route },
     ['Baya_Hiramayuh' ] = { 232, xi.transport.routes.OPEN_SEA                }, -- Aht Urhgan Whitegate to Mhaura
     ['Dieh_Yamilsiah' ] = { 231, xi.transport.routes.SELBINA_MHAURA_OPEN_SEA }, -- Mhaura to Aht Urhgan Whitegate or Selbina
-    ['Laughing_Bison' ] = { 333, xi.transport.routes.SELBINA_MHAURA_OPEN_SEA }, -- Mhaura to Aht Urhgan Whitegate or Selbina
     ['Humilitie'      ] = { 231, xi.transport.routes.SELBINA_MHAURA          }, -- Selbina to Mhaura
     ['Kuhn_Tsahnpri'  ] = { 236, xi.transport.routes.SILVER_SEA              }, -- Aht Urhgan Whitegate to Nashmau
+    ['Laughing_Bison' ] = { 333, xi.transport.routes.SELBINA_MHAURA_OPEN_SEA }, -- Mhaura to Aht Urhgan Whitegate or Selbina
     ['Yohj_Dukonlhy'  ] = { 231, xi.transport.routes.SILVER_SEA              }, -- Nashmau to Aht Urhgan Whitegate
 }
 

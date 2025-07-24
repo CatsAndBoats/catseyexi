@@ -19973,7 +19973,7 @@ INSERT INTO `mob_droplist` VALUES (2509,0,0,1000,896,@ALWAYS);   -- Scorpion She
 INSERT INTO `mob_droplist` VALUES (2509,0,0,1000,901,@VRARE);    -- Venomous Claw (Very Rare, 1%)
 
 -- ZoneID: 187 - Tzee Xicu Idol
-INSERT INTO `mob_droplist` VALUES (2510,0,0,1000,3404,@ALWAYS);   -- Fiendish Tome Chapter 1 (Always, 100%)
+INSERT INTO `mob_droplist` VALUES (2510,0,0,1000,3414,@ALWAYS);   -- Fiendish Tome Chapter 11 (Always, 100%)
 INSERT INTO `mob_droplist` VALUES (2510,0,0,1000,1474,@UNCOMMON); -- Infinity Core (Uncommon, 10%)
 INSERT INTO `mob_droplist` VALUES (2510,0,0,1000,748,@VRARE);     -- Gold Beastcoin (Very Rare, 1%)
 INSERT INTO `mob_droplist` VALUES (2510,0,0,1000,749,@RARE);      -- Mythril Beastcoin (Rare, 1%)

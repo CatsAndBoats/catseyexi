@@ -25,19 +25,21 @@
 
 #include "delivery_box.h"
 
-CDeliveryBoxPacket::CDeliveryBoxPacket(uint8 action, uint8 boxid, uint8 count, uint8 param)
+#include "c2s/0x04d_pbx.h"
+
+CDeliveryBoxPacket::CDeliveryBoxPacket(GP_CLI_COMMAND_PBX_COMMAND action, GP_CLI_COMMAND_PBX_BOXNO boxid, const uint8 count, const uint8 param)
 {
     this->setType(0x4B);
     this->setSize(0x14);
 
     std::memset(buffer_.data() + 4, 0xFF, 12);
 
-    ref<uint8>(0x04) = action;
-    ref<uint8>(0x05) = boxid;
+    ref<uint8>(0x04) = static_cast<uint8_t>(action);
+    ref<uint8>(0x05) = static_cast<int8_t>(boxid);
 
-    if (action == 0x05)
+    if (action == GP_CLI_COMMAND_PBX_COMMAND::Check)
     {
-        if (boxid == 0x01)
+        if (boxid == GP_CLI_COMMAND_PBX_BOXNO::Incoming)
         {
             ref<uint8>(0x0E) = count;
         }
@@ -46,31 +48,35 @@ CDeliveryBoxPacket::CDeliveryBoxPacket(uint8 action, uint8 boxid, uint8 count, u
             ref<uint8>(0x0F) = count;
         }
     }
-    else if (action == 0x0C)
+    else if (action == GP_CLI_COMMAND_PBX_COMMAND::Query)
     {
         ref<uint8>(0x0D) = count;
     }
+
     ref<uint8>(0x0C) = param;
 }
 
-CDeliveryBoxPacket::CDeliveryBoxPacket(uint8 action, uint8 boxid, CItem* PItem, uint8 slotid, uint8 count, uint8 message)
+CDeliveryBoxPacket::CDeliveryBoxPacket(GP_CLI_COMMAND_PBX_COMMAND action, GP_CLI_COMMAND_PBX_BOXNO boxid, CItem* PItem, uint8 slotid, uint8 count, uint8 message)
 {
     this->setType(0x4B);
     this->setSize(0x58);
 
     std::memset(buffer_.data() + 4, 0xFF, 12);
 
-    ref<uint8>(0x04) = action;
-    ref<uint8>(0x05) = boxid;
+    ref<uint8>(0x04) = static_cast<uint8_t>(action);
+    ref<uint8>(0x05) = static_cast<int8_t>(boxid);
     ref<uint8>(0x06) = slotid;
     ref<uint8>(0x0C) = message; // success: 0x01, else error message
     ref<uint8>(0x0D) = count;
 
     if (PItem)
     {
-        if ((action != 0x0A && action != 0x0B && action != 0x09) || message > 1)
+        if ((action != GP_CLI_COMMAND_PBX_COMMAND::Get &&
+             action != GP_CLI_COMMAND_PBX_COMMAND::Clear &&
+             action != GP_CLI_COMMAND_PBX_COMMAND::Reject) ||
+            message > 1)
         {
-            if (boxid == 1)
+            if (boxid == GP_CLI_COMMAND_PBX_BOXNO::Incoming)
             {
                 ref<uint8>(0x10) = 0x07;
                 std::memcpy(buffer_.data() + 0x14, PItem->getSender().c_str(),
@@ -83,16 +89,16 @@ CDeliveryBoxPacket::CDeliveryBoxPacket(uint8 action, uint8 boxid, CItem* PItem, 
                             PItem->getReceiver().size()); // Receiver's name.  Client disables "Return" if it starts with "AH"
             }
         }
-        if (action == 0x02)
+        if (action == GP_CLI_COMMAND_PBX_COMMAND::Set)
         {
             ref<uint8>(0x10) = 0x01;
             ref<uint8>(0x07) = PItem->getSlotID();
         }
-        else if (action == 0x03)
+        else if (action == GP_CLI_COMMAND_PBX_COMMAND::Send)
         {
             ref<uint8>(0x07) = PItem->getSlotID();
         }
-        else if (action == 0x04)
+        else if (action == GP_CLI_COMMAND_PBX_COMMAND::Cancel)
         {
             if (message == 0x01)
             {

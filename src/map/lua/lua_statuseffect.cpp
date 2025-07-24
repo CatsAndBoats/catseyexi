@@ -113,7 +113,7 @@ uint32 CLuaStatusEffect::getTimeRemaining()
     if (m_PLuaStatusEffect->GetDuration() > 0s)
     {
         auto duration = m_PLuaStatusEffect->GetStartTime() - timer::now() + m_PLuaStatusEffect->GetDuration();
-        remaining     = static_cast<uint32>(timer::count_milliseconds(duration));
+        remaining     = static_cast<uint32>(std::max<int64>(timer::count_milliseconds(duration), 0));
     }
 
     return remaining;

@@ -27,15 +27,9 @@
 #include "ai/ai_container.h"
 #include "ai/controllers/player_controller.h"
 
-/************************************************************************
- *                                                                       *
- *                                                                       *
- *                                                                       *
- ************************************************************************/
-
 namespace jailutils
 {
-    bool InPrison(CCharEntity* PChar)
+    auto InPrison(const CCharEntity* PChar) -> bool
     {
         TracyZoneScoped;
         return PChar->m_GMlevel == 0 && PChar->getZone() == ZONE_MORDION_GAOL;

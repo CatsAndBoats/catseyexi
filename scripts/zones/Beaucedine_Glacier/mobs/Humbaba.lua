@@ -5,7 +5,18 @@
 ---@type TMobEntity
 local entity = {}
 
+local spawnPoints =
+{
+    { x =  219.250, y =   0.500, z =  107.140 },
+    { x =  246.720, y =   0.130, z = -200.300 },
+    { x = -116.850, y =   0.310, z = -370.300 },
+    { x =   90.330, y = -39.700, z =   38.400 },
+}
+
 entity.onMobInitialize = function(mob)
+    xi.mob.updateNMSpawnPoint(mob, spawnPoints)
+    mob:setRespawnTime(math.random(3600, 4200)) -- When server restarts, reset timer
+
     mob:setMobMod(xi.mobMod.AUTO_SPIKES, 1)
     mob:addStatusEffect(xi.effect.ICE_SPIKES, 50, 0, 0)
     mob:getStatusEffect(xi.effect.ICE_SPIKES):setEffectFlags(xi.effectFlag.DEATH)
@@ -38,7 +49,7 @@ entity.onMobDeath = function(mob, player, optParams)
 end
 
 entity.onMobDespawn = function(mob)
-    UpdateNMSpawnPoint(mob:getID())
+    xi.mob.updateNMSpawnPoint(mob, spawnPoints)
     mob:setRespawnTime(math.random(3600, 4200)) -- 60 to 70 minutes
 end
 

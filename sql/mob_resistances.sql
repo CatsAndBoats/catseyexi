@@ -493,7 +493,7 @@ INSERT INTO `mob_resistances` VALUES (499,'Wanderer-Stray',0,0,0,0,0,0,0,0,0,0,0
 INSERT INTO `mob_resistances` VALUES (500,'Golem-Mokkurkalfi',0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,2,2,2,2,2,2);
 INSERT INTO `mob_resistances` VALUES (501,'Doll-Nio_A-Nio_Hum',0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,2,2,-3,2,2,2);
 INSERT INTO `mob_resistances` VALUES (502,'Evil_Weapon-Shikigami',0,0,0,0,0,0,0,0,0,0,0,0,0,-3,0,-2,-2,-2,-2,-3,0);
-INSERT INTO `mob_resistances` VALUES (503,'Mammet',0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-2,-1,0,0);
+INSERT INTO `mob_resistances` VALUES (503,'Mammet',0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,0,0);
 INSERT INTO `mob_resistances` VALUES (504,'Luopan',0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0);
 INSERT INTO `mob_resistances` VALUES (505,'Fungi',0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0);
 INSERT INTO `mob_resistances` VALUES (506,'Meeble',0,0,0,0,0,0,0,0,0,0,0,0,0,-1,-1,-1,3,0,-1,-1,0);

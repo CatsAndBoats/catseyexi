@@ -605,8 +605,6 @@ INSERT INTO `mob_skill_lists` VALUES ('Humanoid-Hume',149,1393);
 INSERT INTO `mob_skill_lists` VALUES ('Humanoid-Hume',149,1394);
 INSERT INTO `mob_skill_lists` VALUES ('Humanoid-Hume',149,1395);
 INSERT INTO `mob_skill_lists` VALUES ('Humanoid-Hume',149,1397);
--- INSERT INTO `mob_skill_lists` VALUES ('Humanoid-Hume',149,1398);
-INSERT INTO `mob_skill_lists` VALUES ('Humanoid-Hume',149,1399);
 INSERT INTO `mob_skill_lists` VALUES ('Gears3',150,2043);
 INSERT INTO `mob_skill_lists` VALUES ('Gears3',150,2044);
 INSERT INTO `mob_skill_lists` VALUES ('Gears3',150,2045);
@@ -3814,7 +3812,7 @@ INSERT INTO `mob_skill_lists` VALUES ('Bugbear_Muscleman',1169,361);
 INSERT INTO `mob_skill_lists` VALUES ('Cop_Wardens',1170,561); -- Electromagnetic Field
 INSERT INTO `mob_skill_lists` VALUES ('Cop_Wardens',1170,562); -- Reactive Armor
 
-INSERT INTO `mob_skill_lists` VALUES ('Tenzen_Ranged',1171,1396); -- Tenzen Ranged Attack
+-- SPARE ID: 1171
 
 INSERT INTO `mob_skill_lists` VALUES ('Goblin_NM',1172,590);
 INSERT INTO `mob_skill_lists` VALUES ('Goblin_NM',1172,591);
@@ -4174,7 +4172,10 @@ INSERT INTO `mob_skill_lists` VALUES ('Vampyr_Jarl',2054,2110); -- Wings of Gehe
 INSERT INTO `mob_skill_lists` VALUES ('Vampyr_Jarl',2054,2111); -- Eternal Damnation
 INSERT INTO `mob_skill_lists` VALUES ('Vampyr_Jarl',2054,2112); -- Nocturnal Servitude
 
--- Next ID : 2055
+INSERT INTO `mob_skill_lists` VALUES ('Tenzen_Ranged_High',2055,1398); -- Tenzen Ranged Attack
+INSERT INTO `mob_skill_lists` VALUES ('Tenzen_Ranged_Low',2056,1400); -- Tenzen Ranged Attack
+
+-- Next ID : 2057
 
 -- ------------------------------------------------------------
 -- Start of Ambuscade section

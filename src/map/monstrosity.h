@@ -26,9 +26,11 @@
 #include "packets/basic.h"
 
 #include "entities/battleentity.h"
+#include "packets/c2s/0x01a_action.h"
 
 #include <array>
 
+struct mon_data_t;
 class CCharEntity;
 
 // ===
@@ -77,12 +79,12 @@ namespace monstrosity
     uint32 GetPackedMonstrosityName(CCharEntity* PChar);
     void   SendFullMonstrosityUpdate(CCharEntity* PChar);
 
-    void HandleMonsterSkillActionPacket(CCharEntity* PChar, CBasicPacket& data);
-    void HandleEquipChangePacket(CCharEntity* PChar, CBasicPacket& data);
+    void HandleMonsterSkillActionPacket(const CCharEntity* PChar, const GP_CLI_COMMAND_ACTION& data);
+    void HandleEquipChangePacket(CCharEntity* PChar, const mon_data_t& data);
 
     void SetLevel(CCharEntity* PChar, uint8 id, uint8 level);
 
-    void HandleDeathMenu(CCharEntity* PChar, uint8 type);
+    void HandleDeathMenu(CCharEntity* PChar, GP_CLI_COMMAND_ACTION_HOMEPOINTMENU type);
 
     bool IsInstinctUnlocked(CCharEntity* PChar, uint16 instinct);
     bool IsVariantUnlocked(CCharEntity* PChar, uint8 variant);

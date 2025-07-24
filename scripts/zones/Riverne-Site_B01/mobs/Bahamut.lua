@@ -56,19 +56,6 @@ entity.onMobFight = function(mob, target)
     local gigaFlare = mob:getLocalVar('GigaFlare')
     local tauntShown = mob:getLocalVar('tauntShown')
     local mobHPP = mob:getHPP()
-    local isBusy = false
-    local act = mob:getCurrentAction()
-
-    if
-        act == xi.act.MOBABILITY_START or
-        act == xi.act.MOBABILITY_USING or
-        act == xi.act.MOBABILITY_FINISH or
-        act == xi.act.MAGIC_START or
-        act == xi.act.MAGIC_CASTING or
-        act == xi.act.MAGIC_FINISH
-    then
-        isBusy = true -- is set to true if Bahamut is in any stage of using a mobskill or casting a spell
-    end
 
     -- if Megaflare hasn't been set to be used this many times, increase the queue of Megaflares. This will allow it to use multiple Megaflares in a row if the HP is decreased quickly enough.
     for trigger, hpp in ipairs(megaflareHPP) do
@@ -79,7 +66,7 @@ entity.onMobFight = function(mob, target)
         end
     end
 
-    if mob:actionQueueEmpty() and not isBusy then -- the last check prevents multiple Mega/Gigaflares from being called at the same time.
+    if not xi.combat.behavior.isEntityBusy(mob) then -- the last check prevents multiple Mega/Gigaflares from being called at the same time.
         if megaFlareQueue > 0 then
             mob:setMobAbilityEnabled(false) -- disable all other actions until Megaflare is used successfully
             mob:setMagicCastingEnabled(false)

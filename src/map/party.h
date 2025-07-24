@@ -28,6 +28,7 @@
 
 #include <vector>
 
+enum class GP_CLI_COMMAND_GROUP_CHANGE2_CHANGEKIND : uint8_t;
 class CBasicPacket;
 class CBattleEntity;
 class CCharEntity;
@@ -86,7 +87,7 @@ public:
     void   PopMember(CBattleEntity* PEntity);    // remove a member from memberlist (zoned to different server)
     void   PushMember(CBattleEntity* PEntity);   // add a member without invoking chat/db
     void   SetPartyID(uint32 id);                // set new party ID
-    void   AssignPartyRole(const std::string& MemberName, uint8 role);
+    void   AssignPartyRole(const std::string& MemberName, GP_CLI_COMMAND_GROUP_CHANGE2_CHANGEKIND role);
     void   DisableSync();
     void   SetSyncTarget(const std::string& MemberName, MsgStd message);
     void   RefreshSync();
