@@ -33,6 +33,7 @@
 #include "item_container.h"
 #include "status_effect_container.h"
 #include "utils/itemutils.h"
+#include "utils/mountutils.h"
 
 // https://github.com/atom0s/XiPackets/tree/main/world/server/0x0037
 
@@ -267,8 +268,9 @@ CCharStatusPacket::CCharStatusPacket(CCharEntity* PChar)
 
     if (auto* effect = PChar->StatusEffectContainer->GetStatusEffect(EFFECT_MOUNTED))
     {
-        packet->mount_id     = effect->GetPower();
-        flags0.Chocobo_Index = effect->GetSubPower();
+        const auto [ChocoboIndex, CustomProperties] = mountutils::packetDefinition(PChar);
+        packet->mount_id                            = effect->GetPower();
+        flags0.Chocobo_Index                        = ChocoboIndex;
     }
 
     // flags 1 starts at 0x2C

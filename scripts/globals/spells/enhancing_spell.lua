@@ -497,8 +497,8 @@ xi.spells.enhancing.useEnhancingSpell = function(caster, target, spell)
     -- Refresh
     elseif spellEffect == xi.effect.REFRESH then
         if
-            target:hasStatusEffect(xi.effect.SUBLIMATION_ACTIVATED) or
-            target:hasStatusEffect(xi.effect.SUBLIMATION_COMPLETE)
+            tier < 3 and
+            (target:hasStatusEffect(xi.effect.SUBLIMATION_ACTIVATED) or target:hasStatusEffect(xi.effect.SUBLIMATION_COMPLETE))
         then
             spell:setMsg(xi.msg.basic.MAGIC_NO_EFFECT)
             return 0

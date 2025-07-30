@@ -28,14 +28,18 @@ zoneObject.onZoneIn = function(player, prevZone)
         player:getYPos() == 0 and
         player:getZPos() == 0
     then
-        if prevZone == xi.zone.OPEN_SEA_ROUTE_TO_AL_ZAHBI then
-            player:setPos(-11, 5, -142, 192)
+        if
+            player:hasKeyItem(xi.ki.FERRY_TICKET) and
+            prevZone == xi.zone.OPEN_SEA_ROUTE_TO_AL_ZAHBI
+        then
+            player:setPos(-11, 2, -142, 192)
             cs = 201
         elseif
-            prevZone == xi.zone.SILVER_SEA_ROUTE_TO_AL_ZAHBI or
-            prevZone == xi.zone.SILVER_SEA_ROUTE_TO_NASHMAU
+            player:hasKeyItem(xi.ki.SILVER_SEA_FERRY_TICKET) and
+            (prevZone == xi.zone.SILVER_SEA_ROUTE_TO_AL_ZAHBI or
+            prevZone == xi.zone.SILVER_SEA_ROUTE_TO_NASHMAU)
         then
-            player:setPos(11, 5, 142, 64)
+            player:setPos(11, 2, 142, 64)
             cs = 204
         else
             -- MOG HOUSE EXIT
@@ -83,14 +87,26 @@ zoneObject.onTriggerAreaLeave = function(player, triggerArea)
 end
 
 zoneObject.onTransportEvent = function(player, transport)
+    -- Boat to Mhaura.
     if transport == 46 or transport == 47 then
-        player:startEvent(200)
+        if player:hasKeyItem(xi.ki.FERRY_TICKET) then
+            player:startEvent(200)
+        else
+            player:setPos(-11, 2, -142, 192)
+        end
+
+    -- Boat to Nashmau.
     elseif transport == 58 or transport == 59 then
-        player:startEvent(203)
+        if player:hasKeyItem(xi.ki.SILVER_SEA_FERRY_TICKET) then
+            player:startEvent(203)
+        else
+            player:setPos(11, 2, 142, 64)
+        end
     end
 end
 
 zoneObject.onEventUpdate = function(player, csid, option, npc)
+    -- This exist when boats leave among others. TODO: Add them. Things work better when they are added.
 end
 
 zoneObject.onEventFinish = function(player, csid, option, npc)

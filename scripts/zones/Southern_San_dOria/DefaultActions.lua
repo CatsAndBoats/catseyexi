@@ -38,7 +38,6 @@ return {
     ['Ophelia']              = { event = 751 },
     ['Paouala']              = { event =  82 },
     ['Phillone']             = { event =  29 },
-    ['Poudoruchant']         = { event = 779 },
     ['qm2']                  = { messageSpecial = ID.text.NOTHING_OUT_OF_ORDINARY },
     ['qm4']                  = { messageSpecial = ID.text.NOTHING_OUT_OF_ORDINARY },
     ['Rosel']                = { text = ID.text.ROSEL_GREETINGS },

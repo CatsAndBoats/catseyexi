@@ -12,7 +12,9 @@ quest.sections =
 {
     {
         check = function(player, questVars, vars)
-            return not player:hasSpell(xi.magic.spell.SHIKAREE_Z) and
+            return xi.settings.main.ENABLE_TRUST_QUESTS == 1 and
+                xi.trust.hasPermit(player) and
+                not player:hasSpell(xi.magic.spell.SHIKAREE_Z) and
                 player:hasCompletedMission(xi.mission.log_id.COP, xi.mission.id.cop.THREE_PATHS) and
                 -- TODO BG WIKI States acquisition can be blocked while Shikaree Z is "out of town".
                 --      Verify which Missions this comment refers to, though likely the following:

@@ -822,11 +822,12 @@ local regionalStockTable =
 }
 
 xi.shop.handleRegionalShop = function(player, npc)
-    local npcData = regionalVendorTable[npc:getName()]
+    local npcData   = regionalVendorTable[npc:getName()]
+    local npcRegion = npcData[regionParam.REGION]
 
     -- CoP Mission check for Tavnazia vendors.
     if
-        npcData[regionParam.REGION] == xi.region.TAVNAZIANARCH and
+        npcRegion == xi.region.TAVNAZIANARCH and
         player:getCurrentMission(xi.mission.log_id.COP) < xi.mission.id.cop.THE_SAVAGE
     then
         player:showText(npc, npcData[regionParam.TEXT_UNAVAILABLE])
@@ -834,14 +835,14 @@ xi.shop.handleRegionalShop = function(player, npc)
     end
 
     -- Region owner check.
-    if GetRegionOwner(npcData[regionParam.REGION]) ~= npcData[regionParam.NATION] then
+    if GetRegionOwner(npcRegion) ~= npcData[regionParam.NATION] then
         player:showText(npc, npcData[regionParam.TEXT_CLOSED])
         return
     end
 
     -- Build shop.
     player:showText(npc, npcData[regionParam.TEXT_OPEN])
-    xi.shop.general(player, regionalStockTable[regionParam.REGION], npcData[regionParam.FAME_AREA])
+    xi.shop.general(player, regionalStockTable[npcRegion], npcData[regionParam.FAME_AREA])
 end
 
 -----------------------------------
@@ -871,7 +872,7 @@ xi.shop.handleValerianoShop = function(player, npc)
         { xi.item.SCROLL_OF_MAGES_BALLAD_III, 140039 },
     }
 
-    local zoneId     = player:getZoneID()
+    local zoneId = player:getZoneID()
 
     -- Fail-safe in case npc didnt despawn.
     if GetNationRank(zoneTable[zoneId][1]) ~= 1 then

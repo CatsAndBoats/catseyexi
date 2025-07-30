@@ -35,15 +35,15 @@ zones[xi.zone.BONEYARD_GULLY] =
         IN_YOUR_EYE_HONEYCAKES        = 7741, -- In your eye, honeycakes!
         READY_TO_RUMBLE               = 7749, -- Ready to rrrumble!
         TIME_TO_HUNT                  = 7750, -- Mithran Trackers! Time to hunt!
-        MY_TURN                       = 7751, -- My turn! My Turn!
+        MY_TURN                       = 7751, -- My turn! My turn!
         YOURE_MINE                    = 7752, -- You're mine!
         TUCHULCHA_SANDPIT             = 7761, -- Tuchulcha retreats beneath the soil!
-        BURSTS_INTO_FLAMES            = 7766, -- The {key item} suddenly bursts into flames, the blackened remains borne away by the wind...
+        BURSTS_INTO_FLAMES            = 7766, -- The <keyitem> suddenly bursts into flames, the blackened remains borne away by the wind...
         GET_YOUR_BLOOD_RACING         = 7816, -- I'll get your blood rrracing!
-        SCENT_OF_FRESH_BLOOD          = 7818, -- Ah, the scent of frrrresh blood!
+        SCENT_OF_FRESH_BLOOD          = 7818, -- Ah, the scent of frrresh blood!
         EVEN_AT_MY_BEST               = 7820, -- Even at my best...
         TIME_TO_END_THE_HUNT          = 7821, -- Time to end the hunt! Go for the jugular!
-        DINNER_TIME_ADVENTURER_STEAK  = 7822, -- Dinner time! Tonight we're having "Adventurer Steak"!
+        DINNER_TIME_ADVENTURER_STEAK  = 7822, -- Dinner time! Tonight we're having Adventurer Steak!
     },
 
     mob =

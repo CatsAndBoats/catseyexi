@@ -46,7 +46,7 @@ CAuctionHousePacket::CAuctionHousePacket(uint8 action)
     }
 }
 
-CAuctionHousePacket::CAuctionHousePacket(uint8 action, CItem* PItem, uint8 quantity, uint32 price)
+CAuctionHousePacket::CAuctionHousePacket(GP_CLI_COMMAND_AUC_COMMAND action, CItem* PItem, uint8 quantity, uint32 price)
 {
     this->setType(0x4C);
     this->setSize(0x3C);
@@ -54,16 +54,16 @@ CAuctionHousePacket::CAuctionHousePacket(uint8 action, CItem* PItem, uint8 quant
     uint32 auctionFee = 0;
     if (quantity == 0) // This is a stack..Yes, zero for stacks.. Why is this being called quantity?
     {
-        auctionFee = (uint32)(settings::get<uint32>("map.AH_BASE_FEE_STACKS") + (price * settings::get<float>("map.AH_TAX_RATE_STACKS") / 100));
+        auctionFee = static_cast<uint32>(settings::get<uint32>("map.AH_BASE_FEE_STACKS") + (price * settings::get<float>("map.AH_TAX_RATE_STACKS") / 100));
     }
     else // This is a single item.
     {
-        auctionFee = (uint32)(settings::get<uint32>("map.AH_BASE_FEE_SINGLE") + (price * settings::get<float>("map.AH_TAX_RATE_SINGLE") / 100));
+        auctionFee = static_cast<uint32>(settings::get<uint32>("map.AH_BASE_FEE_SINGLE") + (price * settings::get<float>("map.AH_TAX_RATE_SINGLE") / 100));
     }
 
     auctionFee = std::clamp<uint32>(auctionFee, 0, settings::get<uint32>("map.AH_MAX_FEE"));
 
-    ref<uint8>(0x04)  = action;
+    ref<uint8>(0x04)  = static_cast<uint8_t>(action);
     ref<uint8>(0x05)  = 0xFF;
     ref<uint8>(0x06)  = IsAuctionOpen;
     ref<uint8>(0x07)  = 0x02;
@@ -77,12 +77,12 @@ CAuctionHousePacket::CAuctionHousePacket(uint8 action, CItem* PItem, uint8 quant
 }
 
 // e.g. client history, client probes a slot number which you give the correct itemId+price
-CAuctionHousePacket::CAuctionHousePacket(uint8 action, uint8 slot, CCharEntity* PChar)
+CAuctionHousePacket::CAuctionHousePacket(GP_CLI_COMMAND_AUC_COMMAND action, uint8 slot, CCharEntity* PChar)
 {
     this->setType(0x4C);
     this->setSize(0x3C);
 
-    ref<uint8>(0x04) = action;
+    ref<uint8>(0x04) = static_cast<uint8_t>(action);
     ref<uint8>(0x05) = slot; // Serial number of the subject
     ref<uint8>(0x06) = IsAuctionOpen;
 
@@ -100,25 +100,25 @@ CAuctionHousePacket::CAuctionHousePacket(uint8 action, uint8 slot, CCharEntity* 
     }
 }
 
-CAuctionHousePacket::CAuctionHousePacket(uint8 action, uint8 message, uint16 itemid, uint32 price, uint8 quantity, uint8 stacksize)
+CAuctionHousePacket::CAuctionHousePacket(GP_CLI_COMMAND_AUC_COMMAND action, uint8 message, uint16 itemid, uint32 price, uint8 quantity, uint8 stacksize)
 {
     this->setType(0x4C);
     this->setSize(0x3C);
 
-    ref<uint8>(0x04)  = action;
+    ref<uint8>(0x04)  = static_cast<uint8_t>(action);
     ref<uint8>(0x06)  = message;
     ref<uint32>(0x08) = price;
     ref<uint16>(0x0C) = itemid;
-    // Following previous nomenclature, "quantity == 0" indicates a stack. This might be 0 = stack 1 = single flag.
+    // 0 = stack, 1 = single
     ref<uint16>(0x10) = quantity == 0 ? stacksize : 1;
 }
 
-CAuctionHousePacket::CAuctionHousePacket(uint8 action, uint8 message, CCharEntity* PChar, uint8 slot, bool keepItem)
+CAuctionHousePacket::CAuctionHousePacket(GP_CLI_COMMAND_AUC_COMMAND action, uint8 message, CCharEntity* PChar, uint8 slot, bool keepItem)
 {
     this->setType(0x4C);
     this->setSize(0x3C);
 
-    ref<uint8>(0x04) = action;
+    ref<uint8>(0x04) = static_cast<uint8_t>(action);
     ref<uint8>(0x05) = slot;
     ref<uint8>(0x06) = message;
 

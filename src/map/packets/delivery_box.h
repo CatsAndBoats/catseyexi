@@ -31,11 +31,13 @@
 #define AH_WINDURST "AH-Windurst"
 #define AH_BASTOK   "AH-Bastok"
 
+enum class GP_CLI_COMMAND_PBX_BOXNO : int8_t;
+enum class GP_CLI_COMMAND_PBX_COMMAND : uint8_t;
 class CDeliveryBoxPacket : public CBasicPacket
 {
 public:
-    CDeliveryBoxPacket(uint8 action, uint8 boxid, uint8 count, uint8 param);
-    CDeliveryBoxPacket(uint8 action, uint8 boxid, CItem* PItem, uint8 slotid, uint8 count, uint8 message);
+    CDeliveryBoxPacket(GP_CLI_COMMAND_PBX_COMMAND action, GP_CLI_COMMAND_PBX_BOXNO boxid, uint8 count, uint8 param);
+    CDeliveryBoxPacket(GP_CLI_COMMAND_PBX_COMMAND action, GP_CLI_COMMAND_PBX_BOXNO boxid, CItem* PItem, uint8 slotid, uint8 count, uint8 message);
 };
 
 #endif

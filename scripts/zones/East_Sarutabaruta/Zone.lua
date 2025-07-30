@@ -1,7 +1,6 @@
 -----------------------------------
 -- Zone: East_Sarutabaruta (116)
 -----------------------------------
-local ID = zones[xi.zone.EAST_SARUTABARUTA]
 require('scripts/quests/i_can_hear_a_rainbow')
 -----------------------------------
 ---@type TZone
@@ -10,9 +9,6 @@ local zoneObject = {}
 zoneObject.onInitialize = function(zone)
     -- A Chocobo Riding Game finish line
     zone:registerCylindricalTriggerArea(1, -119.92, -520.08, 10)
-
-    UpdateNMSpawnPoint(ID.mob.DUKE_DECAPOD)
-    GetMobByID(ID.mob.DUKE_DECAPOD):setRespawnTime(math.random(3600, 4200))
 end
 
 zoneObject.onZoneIn = function(player, prevZone)

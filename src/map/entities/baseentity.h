@@ -144,11 +144,12 @@ enum MOUNTTYPE : uint8
     MOUNT_RED_RAPTOR     = 31,
     MOUNT_IRON_GIANT     = 32,
     MOUNT_BYAKKO         = 33,
-    MOUNT_NOBLE_CHOCOBO  = 34, // NOTE: This is currently blank, probably needs additional packets sent
+    MOUNT_NOBLE_CHOCOBO  = 34, // NOTE: This uses Chocobo animation, and CustomProperties[1] set to 1
     MOUNT_IXION          = 35,
     MOUNT_PHUABO         = 36,
+    MOUNT_CRACKLAW       = 37,
     //
-    MOUNT_MAX = 37,
+    MOUNT_MAX = 38,
 };
 
 enum class ALLEGIANCE_TYPE : uint8

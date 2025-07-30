@@ -48,7 +48,8 @@ quest.sections =
 {
     {
         check = function(player, questVars, vars)
-            return  xi.trust.hasPermit(player) and
+            return xi.settings.main.ENABLE_TRUST_QUESTS == 1 and
+                xi.trust.hasPermit(player) and
                 not player:hasSpell(xi.magic.spell.PRISHE) and
                 (player:getCurrentMission(xi.mission.log_id.COP) > xi.mission.id.cop.DAWN and
                 xi.mission.getVar(player, xi.mission.log_id.COP, xi.mission.id.cop.DAWN, 'Status') >= 5)

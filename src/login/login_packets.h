@@ -131,7 +131,9 @@ struct lpkt_chr_info_sub2
     uint16_t          ffxi_id_world;      // PS2: ffxi_id_world
     uint16_t          worldid;            // PS2: worldid
     uint16_t          status;             // PS2: status
-    uint8_t           renamef;            // PS2: renamef
+    uint8_t           renamef : 1;        // PS2: renamef
+    uint8_t           race_change : 1;    // PS2: (New; did not exist.)
+    uint8_t           unused : 6;         // PS2: (New; did not exist.)
     uint8_t           ffxi_id_world_tbl;  // PS2: (New; did not exist.)
     char              character_name[16]; // PS2: character_name
     char              world_name[16];     // PS2: world_name

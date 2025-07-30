@@ -127,7 +127,7 @@ INSERT INTO `mob_family_system` VALUES (74,'Corse',47,'Corse',19,'Undead',1.00,4
 INSERT INTO `mob_family_system` VALUES (75,'Crab',48,'Crab',2,'Aquan',0.00,40,108,120,4,4,3,5,4,4,4,1,3,1,3,6.0,2,1);
 INSERT INTO `mob_family_system` VALUES (76,'Crab',48,'Crab',2,'Aquan',0.00,40,108,120,4,4,3,5,4,4,4,1,3,1,3,6.0,2,1);
 INSERT INTO `mob_family_system` VALUES (77,'Crab',48,'Crab',2,'Aquan',0.00,40,108,120,4,4,3,5,4,4,4,1,3,1,3,6.0,2,1);
-INSERT INTO `mob_family_system` VALUES (78,'Craver',49,'Craver',12,'Empty',0.00,40,120,90,1,3,1,3,6,6,5,1,3,1,3,0.0,257,0);
+INSERT INTO `mob_family_system` VALUES (78,'Craver',49,'Craver',12,'Empty',0.00,40,120,90,1,3,1,3,6,6,5,1,3,1,3,0.0,2,0);
 INSERT INTO `mob_family_system` VALUES (79,'Crawler',63,'Crawler',20,'Vermin',1.00,40,105,120,4,4,3,5,4,4,4,1,5,1,3,4.0,2,1);
 INSERT INTO `mob_family_system` VALUES (80,'Dhalmel',51,'Dhalmel',6,'Beast',1.00,40,110,120,3,4,4,5,4,4,5,1,3,1,3,4.0,257,1);
 INSERT INTO `mob_family_system` VALUES (81,'Diremite',52,'Diremite',20,'Vermin',1.00,40,86,90,4,4,4,4,4,4,4,1,3,1,3,3.0,2,1);

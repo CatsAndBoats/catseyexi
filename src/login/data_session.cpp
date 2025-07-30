@@ -133,6 +133,7 @@ void data_session::read_func()
                         characterInfo.ffxi_id_world     = charIdMain;
                         characterInfo.worldid           = worldId;
                         characterInfo.status            = 1; // 0 = Invalid/Hidden, 1 = Available, 2 = Disabled (unpaid)
+                        characterInfo.race_change       = 0; // 0 = no race change service, 1 = race change service (gold star icon) (NOT YET SUPPORTED!)
                         characterInfo.renamef           = 0; // 0 = no rename required, 1 = rename required (NOT YET SUPPORTED!)
                         characterInfo.ffxi_id_world_tbl = charIdExtra;
 

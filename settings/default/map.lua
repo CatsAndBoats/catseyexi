@@ -273,6 +273,8 @@ xi.settings.map =
     AUDIT_LINKSHELL = 1,
     AUDIT_UNITY     = 1,
     AUDIT_PARTY     = 1,
+    AUDIT_BALLISTA  = false,
+    AUDIT_ASSIST    = false,
 
     -- Player Item Transaction Logging (Default: Off)
     -- Logs player item transactions to the database for persistence.

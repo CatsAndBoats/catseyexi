@@ -781,11 +781,11 @@ void CStatusEffectContainer::ApplyStateAlteringEffects(CStatusEffect* StatusEffe
     }
 }
 
-void CStatusEffectContainer::DelStatusEffectsByIcon(uint16 IconID)
+void CStatusEffectContainer::DelStatusEffectsByIcon(const uint16 BuffNo)
 {
     for (CStatusEffect* PStatusEffect : m_StatusEffectSet)
     {
-        if (PStatusEffect->GetIcon() == IconID)
+        if (PStatusEffect->GetIcon() == BuffNo)
         {
             // This covers all effects that client can remove. Function not used for anything the server removes.
             if (!(PStatusEffect->HasEffectFlag(EFFECTFLAG_NO_CANCEL)))
@@ -823,7 +823,7 @@ void CStatusEffectContainer::DelStatusEffectsByFlag(uint32 flag, EffectNotice no
             if (
                 flag & EFFECTFLAG_DAMAGE &&
                 PStatusEffect->GetStatusID() == EFFECT_SLEEP &&
-                PStatusEffect->GetTier() > 1)
+                PStatusEffect->GetTier() >= 5) // Tier 5 = Diabolos NM Nightmare
             {
                 continue;
             }
@@ -1623,7 +1623,7 @@ void CStatusEffectContainer::LoadStatusEffects()
                         "flags, "
                         "timestamp "
                         "FROM char_effects "
-                        "WHERE charid = (?)";
+                        "WHERE charid = ?";
 
     auto rset = db::preparedStmt(Query, m_POwner->id);
 
@@ -2017,7 +2017,7 @@ void CStatusEffectContainer::TickEffects(timer::time_point tick)
         for (const auto& PStatusEffect : m_StatusEffectSet)
         {
             if (PStatusEffect->GetTickTime() != 0s &&
-                PStatusEffect->GetElapsedTickCount() <= (tick - PStatusEffect->GetStartTime()) / PStatusEffect->GetTickTime())
+                PStatusEffect->GetElapsedTickCount() < (tick - PStatusEffect->GetStartTime()) / PStatusEffect->GetTickTime())
             {
                 if (PStatusEffect->HasEffectFlag(EFFECTFLAG_AURA))
                 {
@@ -2076,7 +2076,7 @@ void CStatusEffectContainer::TickRegen(timer::time_point tick)
                 if (
                     !(
                         m_POwner->StatusEffectContainer->GetStatusEffect(EFFECT_SLEEP) &&
-                        m_POwner->StatusEffectContainer->GetStatusEffect(EFFECT_SLEEP)->GetTier() > 0))
+                        m_POwner->StatusEffectContainer->GetStatusEffect(EFFECT_SLEEP)->GetTier() >= 4)) // Tier 4 = Player Avatar Nightmare
                 {
                     WakeUp();
                 }

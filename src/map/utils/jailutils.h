@@ -19,10 +19,7 @@
 ===========================================================================
 */
 
-#ifndef _JAILUTILS_H
-#define _JAILUTILS_H
-
-#include "common/cbasetypes.h"
+#pragma once
 
 /*
 TODO: Add functions that can:
@@ -40,20 +37,12 @@ TODO: Common actions/procedures/needs include:
         - Off-line players could be moved upon login.
 */
 
-/************************************************************************
- *                                                                       *
- *                                                                       *
- *                                                                       *
- ************************************************************************/
-
 class CCharEntity;
 
 namespace jailutils
 {
-    bool InPrison(CCharEntity* PChar);
+    auto InPrison(const CCharEntity* PChar) -> bool;
 
     void Add(CCharEntity* PChar);
     void Del(CCharEntity* PChar);
 }; // namespace jailutils
-
-#endif

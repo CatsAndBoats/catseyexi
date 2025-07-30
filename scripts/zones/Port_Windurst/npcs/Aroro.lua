@@ -20,7 +20,7 @@ entity.onTrigger = function(player, npc)
         { xi.item.SCROLL_OF_SLEEP,    2600, 2 },
         { xi.item.SCROLL_OF_BURN,     5366, 3 },
         { xi.item.SCROLL_OF_FROST,    4261, 3 },
-        { xi.item.SCROLL_OF_CHOCKE,   2600, 3 },
+        { xi.item.SCROLL_OF_CHOKE,    2600, 3 },
         { xi.item.SCROLL_OF_RASP,     2111, 3 },
         { xi.item.SCROLL_OF_SHOCK,    1575, 3 },
         { xi.item.SCROLL_OF_DROWN,    7356, 3 },

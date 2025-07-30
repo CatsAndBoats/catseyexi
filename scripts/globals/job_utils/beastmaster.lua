@@ -508,7 +508,7 @@ xi.job_utils.beastmaster.onAbilityCheckFight = function(player, target, ability)
     return 0, 0
 end
 
--- On Ability Use Stay
+-- On Ability Use Fight
 xi.job_utils.beastmaster.onUseAbilityFight = function(player, target, ability)
     local pet = player:getPet()
 
@@ -519,6 +519,32 @@ xi.job_utils.beastmaster.onUseAbilityFight = function(player, target, ability)
 
         player:petAttack(target)
     end
+end
+
+-- On Ability Check Killer Instinct
+xi.job_utils.beastmaster.onAbilityCheckKillerInstinct = function(player, target, ability)
+    local pet = player:getPet()
+
+    if
+        pet == nil or -- No pet currently spawned
+        (not player:hasJugPet() and pet:getObjType() ~= xi.objType.MOB) -- The pet spawned is not a jug pet or charmed mob
+    then
+        return xi.msg.basic.REQUIRES_A_PET, 0
+    end
+
+    return 0, 0
+end
+
+-- On Ability Use Killer Instinct
+xi.job_utils.beastmaster.onUseAbilityKillerInstinct = function(player, target, ability)
+    -- Notes: Pet ecosystem is assigned to the subPower, then mapped to the correct killer mod in the effect script.
+    local pet          = player:getPet()
+    local petEcosystem = pet:getEcosystem()
+    local power        = 10
+    local duration     = 180 + (player:getMerit(xi.merit.KILLER_INSTINCT) - 10)
+    -- TODO: Is there gear/mods that enhance power/duration?
+
+    target:addStatusEffect(xi.effect.KILLER_INSTINCT, power, 0, duration, 0, petEcosystem)
 end
 
 local function getCharmDuration(charmer, target)

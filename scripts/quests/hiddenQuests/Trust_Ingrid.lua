@@ -10,7 +10,9 @@ quest.sections =
 {
     {
         check = function(player, questVars, vars)
-            return not player:hasSpell(xi.magic.spell.INGRID) and
+            return xi.settings.main.ENABLE_TRUST_QUESTS == 1 and
+                xi.trust.hasPermit(player) and
+                not player:hasSpell(xi.magic.spell.INGRID) and
                 player:hasCompletedMission(xi.mission.log_id.SOA, xi.mission.id.soa.THE_MERCILESS_ONE)
         end,
 

@@ -19,10 +19,7 @@
 ===========================================================================
 */
 
-#ifndef _CZONEINPACKET_H_
-#define _CZONEINPACKET_H_
-
-#include "common/cbasetypes.h"
+#pragma once
 
 #include "basic.h"
 
@@ -34,5 +31,3 @@ class CZoneInPacket : public CBasicPacket
 public:
     CZoneInPacket(CCharEntity* PChar, const EventInfo*);
 };
-
-#endif

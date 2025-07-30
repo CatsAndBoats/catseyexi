@@ -219,6 +219,24 @@ namespace loginHelpers
         createchar.m_look.size = ref<uint8>(buf, 57);
         createchar.m_look.face = ref<uint8>(buf, 60);
 
+        if (createchar.m_look.race < 1 || createchar.m_look.race > 8) // 1(HumeM) to 8(Galka)
+        {
+            ShowError(fmt::format("{} attempted to create character with invalid race {}", charName, createchar.m_look.race));
+            return -1;
+        }
+
+        if (createchar.m_look.size > 2) // Large
+        {
+            ShowError(fmt::format("{} attempted to create character with invalid size {}", charName, createchar.m_look.size));
+            return -1;
+        }
+
+        if (createchar.m_look.face > 15) // Face 8B
+        {
+            ShowError(fmt::format("{} attempted to create character with invalid face {}", charName, createchar.m_look.face));
+            return -1;
+        }
+
         // Validate that the job is a starting job.
         uint8 mjob        = ref<uint8>(buf, 50);
         createchar.m_mjob = std::clamp<uint8>(mjob, 1, 6);
@@ -231,6 +249,12 @@ namespace loginHelpers
         }
 
         createchar.m_nation = ref<uint8>(buf, 54);
+
+        if (createchar.m_nation > 2) // 0x00 = San d'Oria, 0x01 = Bastok, 0x02 = Windurst
+        {
+            ShowError(fmt::format("{} attempted to create character with invalid nation {}", charName, createchar.m_nation));
+            return -1;
+        }
 
         std::vector<uint32> bastokStartingZones   = { 0xEA, 0xEB, 0xEC };
         std::vector<uint32> sandoriaStartingZones = { 0xE6, 0xE7, 0xE8 };

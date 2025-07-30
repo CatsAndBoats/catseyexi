@@ -25,7 +25,7 @@ class CCharEntity;
 class CCharEmotionJumpPacket : public CBasicPacket
 {
 public:
-    CCharEmotionJumpPacket(CCharEntity* PChar, uint16 targetIndex, uint16 extra);
+    CCharEmotionJumpPacket(CCharEntity* PChar, uint16 targetIndex);
 };
 
 #endif

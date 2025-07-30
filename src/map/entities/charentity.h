@@ -209,10 +209,48 @@ enum CHAR_SUBSTATE
 
 enum CHAR_PERSIST : uint8
 {
-    EQUIP     = 0x01,
-    POSITION  = 0x02,
-    EFFECTS   = 0x04,
-    LINKSHELL = 0x08,
+    EQUIP    = 0x01,
+    POSITION = 0x02,
+    EFFECTS  = 0x04,
+};
+
+enum class CharRace : uint8
+{
+    HumeMale       = 1,
+    HumeFemale     = 2,
+    ElvaanMale     = 3,
+    ElvaanFemale   = 4,
+    TarutaruMale   = 5,
+    TarutaruFemale = 6,
+    Mithra         = 7,
+    Galka          = 8,
+};
+
+enum class CharSize : uint8
+{
+    Small  = 0,
+    Medium = 1,
+    Large  = 2,
+};
+
+enum class CharFace : uint8
+{
+    Face1A = 0,
+    Face1B = 1,
+    Face2A = 2,
+    Face2B = 3,
+    Face3A = 4,
+    Face3B = 5,
+    Face4A = 6,
+    Face4B = 7,
+    Face5A = 8,
+    Face5B = 9,
+    Face6A = 10,
+    Face6B = 11,
+    Face7A = 12,
+    Face7B = 13,
+    Face8A = 14,
+    Face8B = 15,
 };
 
 class CBasicPacket;
@@ -298,13 +336,14 @@ public:
     uint32           m_lastBcnmTimePrompt{};          // The last message prompt in seconds
     PetInfo_t        petZoningInfo{};                 // Used to repawn dragoons pets ect on zone
 
-    void setPetZoningInfo();              // Set pet zoning info (when zoning and logging out)
-    void resetPetZoningInfo();            // Reset pet zoning info (when changing job ect)
-    bool shouldPetPersistThroughZoning(); // If true, zoning should not cause a currently active pet to despawn
+    void setPetZoningInfo();                            // Set pet zoning info (when zoning and logging out)
+    void resetPetZoningInfo();                          // Reset pet zoning info (when changing job ect)
+    auto shouldPetPersistThroughZoning() const -> bool; // If true, zoning should not cause a currently active pet to despawn
 
     std::array<uint8, 20> m_SetBlueSpells{}; // The 0x200 offsetted blue magic spell IDs which the user has set. (1 byte per spell)
 
     uint32 m_FieldChocobo{};
+    uint8  m_mountId{}; // Do not reset to 0. Only update when the mount changes.
     uint32 m_claimedDeeds[5]{};
     uint32 m_uniqueEvents[5]{};
 
@@ -418,19 +457,19 @@ public:
 
     virtual void HandleErrorMessage(std::unique_ptr<CBasicPacket>&) override;
 
-    CLinkshell*    PLinkshell1;
-    CLinkshell*    PLinkshell2;
-    CUnityChat*    PUnityChat;
-    CTreasurePool* PTreasurePool;
-    CMeritPoints*  PMeritPoints;
-    CJobPoints*    PJobPoints;
-    bool           MeritMode;
+    CLinkshell*                   PLinkshell1;
+    CLinkshell*                   PLinkshell2;
+    CUnityChat*                   PUnityChat;
+    CTreasurePool*                PTreasurePool;
+    std::unique_ptr<CMeritPoints> PMeritPoints;
+    std::unique_ptr<CJobPoints>   PJobPoints;
+    bool                          MeritMode;
 
     CLatentEffectContainer* PLatentEffectContainer;
     bool                    retriggerLatents; // used to retrigger all latent effects if some event requires them to be retriggered
 
     CItemContainer* PGuildShop;
-    CItemContainer* getStorage(uint8 LocationID);
+    CItemContainer* getStorage(uint8 locationId) const;
 
     CTradeContainer* TradeContainer; // Container used specifically for trading.
     CTradeContainer* Container;      // Universal container for exchange, synthesis, store, etc.
@@ -523,7 +562,7 @@ public:
     void            SetPlayTime(timer::duration playTime); // Set playtime
     timer::duration GetPlayTime(bool needUpdate = true);   // Get playtime
 
-    CItemEquipment* getEquip(SLOTTYPE slot);
+    auto getEquip(SLOTTYPE slot) const -> CItemEquipment*;
 
     bool requestedInfoSync = false;
 
@@ -573,7 +612,7 @@ public:
     void onTriggerAreaLeave(uint32 triggerAreaId);
     void clearTriggerAreas();
 
-    bool isInEvent();
+    auto isInEvent() const -> bool;
     bool isNpcLocked();
     void queueEvent(EventInfo* eventToQueue);
     void endCurrentEvent();
@@ -603,12 +642,12 @@ public:
 
     virtual void OnItemFinish(CItemState&, action_t&);
 
-    int32 getCharVar(std::string const& varName);
-    auto  getCharVarsWithPrefix(std::string const& prefix) -> std::vector<std::pair<std::string, int32>>;
-    void  setCharVar(std::string const& varName, int32 value, uint32 expiry = 0);
-    void  setVolatileCharVar(std::string const& varName, int32 value, uint32 expiry = 0);
-    void  updateCharVarCache(std::string const& varName, int32 value, uint32 expiry = 0);
-    void  removeFromCharVarCache(std::string const& varName);
+    auto getCharVar(std::string const& varName) const -> int32;
+    auto getCharVarsWithPrefix(std::string const& prefix) -> std::vector<std::pair<std::string, int32>>;
+    void setCharVar(std::string const& varName, int32 value, uint32 expiry = 0);
+    void setVolatileCharVar(std::string const& varName, int32 value, uint32 expiry = 0);
+    void updateCharVarCache(std::string const& varName, int32 value, uint32 expiry = 0);
+    void removeFromCharVarCache(std::string const& varName);
 
     void clearCharVarsWithPrefix(std::string const& prefix);
 
@@ -648,9 +687,9 @@ private:
     bool m_isBlockingAid;
     bool m_reloadParty;
 
-    std::unordered_map<std::string, std::pair<int32, uint32>> charVarCache;
-    std::unordered_set<std::string>                           charVarChanges;
-    std::unordered_set<uint32>                                charTriggerAreaIDs; // Holds any TriggerArea IDs that the player is currently within the bounds of
+    mutable std::unordered_map<std::string, std::pair<int32, uint32>> charVarCache;
+    std::unordered_set<std::string>                                   charVarChanges;
+    std::unordered_set<uint32>                                        charTriggerAreaIDs; // Holds any TriggerArea IDs that the player is currently within the bounds of
 
     uint8             dataToPersist = 0;
     timer::time_point nextDataPersistTime{};

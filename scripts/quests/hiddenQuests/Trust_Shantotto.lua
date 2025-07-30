@@ -79,7 +79,8 @@ quest.sections =
 {
     {
         check = function(player, questVars, vars)
-            return not player:hasSpell(xi.magic.spell.SHANTOTTO) and
+            return xi.settings.main.ENABLE_TRUST_QUESTS == 1 and
+                not player:hasSpell(xi.magic.spell.SHANTOTTO) and
                 player:hasKeyItem(xi.ki.WINDURST_TRUST_PERMIT)
         end,
 

@@ -21,6 +21,7 @@
 
 #include "macroequipset.h"
 
+#include "c2s/0x052_equipset_check.h"
 #include "item_container.h"
 #include "items/item_equipment.h"
 #include "utils/charutils.h"
@@ -36,7 +37,7 @@
 // etc
 // Later, these sets may be used for /lockstyleset.
 // /lockstyleset commands also have their own checking for slots that should never be used together
-CAddtoEquipSet::CAddtoEquipSet(CCharEntity* PChar, uint8* orig)
+CAddtoEquipSet::CAddtoEquipSet(const CCharEntity* PChar, const GP_CLI_COMMAND_EQUIPSET_CHECK& data)
 {
     this->setType(0x116);
     this->setSize(0x46);
@@ -46,26 +47,24 @@ CAddtoEquipSet::CAddtoEquipSet(CCharEntity* PChar, uint8* orig)
     uint8           equipSetBagIndex[16] = {};
     bool            equipSetDisabled[16] = {};
 
-    uint8                 equippedIndex       = ::ref<uint8>(orig, 0x4);                       // Where packet claims the new item is going
-    [[maybe_unused]] bool newItemEnabled      = (::ref<uint8>(orig, 0x08) & 0x01) == 1;        // single bit indicating item is in the equipset
-    bool                  newItemSlotDisabled = ((::ref<uint8>(orig, 0x08) & 0x02) >> 1) == 1; // single bit, indicates this slot is intentionally disabled
-    uint8                 newItemBag          = ::ref<uint8>(orig, 0x08) >> 2;                 // 6 bits for bag
-    uint8                 newItemBagIndex     = ::ref<uint8>(orig, 0x09);                      // one byte for bag index
-    uint16                newItemID           = ::ref<uint16>(orig, 0x0A);                     // 2 bytes for item ID
+    const uint8  equippedIndex       = data.EquipKind;                // Where packet claims the new item is going
+    const bool   newItemSlotDisabled = data.ItemChange.RemoveItemFlg; // single bit, indicates this slot is intentionally disabled
+    const uint8  newItemBag          = data.ItemChange.Category;      // 6 bits for bag
+    const uint8  newItemBagIndex     = data.ItemChange.ItemIndex;     // one byte for bag index
+    const uint16 newItemID           = data.ItemChange.ItemNo;        // 2 bytes for item ID
 
     // Previous set
     for (int i = 0; i < 0x10; i++)
     {
-        [[maybe_unused]] bool enabled      = (::ref<uint8>(orig, 0x0C + (0x04 * i)) & 0x01) == 1;        // single bit indicating item is in equipset
-        bool                  slotDisabled = ((::ref<uint8>(orig, 0x0C + (0x04 * i)) & 0x02) >> 1) == 1; // single bit, indicates slot intentionally disabled
-        uint8                 bag          = ::ref<uint8>(orig, 0x0C + (0x04 * i)) >> 2;                 // 6 bits for bag
-        uint8                 bagIndex     = ::ref<uint8>(orig, 0x0D + (0x04 * i));                      // one byte for bag index
-        uint16                itemID       = ::ref<uint16>(orig, 0x0E + (0x04 * i));                     // 2 bytes for item ID
+        const bool   slotDisabled = data.Equipment[i].RemoveItemFlg; // single bit, indicates slot intentionally disabled
+        const uint8  bag          = data.Equipment[i].Category;      // 6 bits for bag
+        const uint8  bagIndex     = data.Equipment[i].ItemIndex;     // one byte for bag index
+        const uint16 itemID       = data.Equipment[i].ItemNo;        // 2 bytes for item ID
 
         // Retail doesn't do strict checking on items already in the set
         // This is probably due to the fact you can move items later
         // The actual equip command should handle erroneous input and/or missing items
-        CItemEquipment* PItem = dynamic_cast<CItemEquipment*>(itemutils::GetItemPointer(itemID));
+        auto* PItem = dynamic_cast<CItemEquipment*>(itemutils::GetItemPointer(itemID));
 
         equipSet[i]         = PItem;
         equipSetBag[i]      = bag;
@@ -73,7 +72,7 @@ CAddtoEquipSet::CAddtoEquipSet(CCharEntity* PChar, uint8* orig)
         equipSetDisabled[i] = slotDisabled;
     }
 
-    CItemEquipment* newItem = dynamic_cast<CItemEquipment*>(PChar->getStorage(newItemBag)->GetItem(newItemBagIndex));
+    auto* newItem = dynamic_cast<CItemEquipment*>(PChar->getStorage(newItemBag)->GetItem(newItemBagIndex));
     // check for bad packet
     if (newItem && ((newItem->getEquipSlotId() & (1 << equippedIndex)) == 0 || newItemID != newItem->getID()))
     {
@@ -83,7 +82,7 @@ CAddtoEquipSet::CAddtoEquipSet(CCharEntity* PChar, uint8* orig)
     if (newItem && !newItemSlotDisabled)
     {
         // Check if we need to remove stuff
-        auto removeSlotID = newItem->getRemoveSlotId();
+        const auto removeSlotID = newItem->getRemoveSlotId();
 
         for (uint8 i = 0; i < sizeof(removeSlotID) * 8; ++i)
         {
@@ -103,13 +102,12 @@ CAddtoEquipSet::CAddtoEquipSet(CCharEntity* PChar, uint8* orig)
             }
         }
 
-        CItemWeapon* PWeapon       = dynamic_cast<CItemWeapon*>(equipSet[SLOT_MAIN]);
-        CItemWeapon* PSub          = dynamic_cast<CItemWeapon*>(equipSet[SLOT_SUB]);
-        CItemWeapon* PRanged       = dynamic_cast<CItemWeapon*>(equipSet[SLOT_RANGED]);
-        CItemWeapon* PAmmo         = dynamic_cast<CItemWeapon*>(equipSet[SLOT_AMMO]);
-        CItemWeapon* newItemWeapon = dynamic_cast<CItemWeapon*>(newItem);
+        const CItemWeapon* PWeapon = dynamic_cast<CItemWeapon*>(equipSet[SLOT_MAIN]);
+        const CItemWeapon* PSub    = dynamic_cast<CItemWeapon*>(equipSet[SLOT_SUB]);
+        const CItemWeapon* PRanged = dynamic_cast<CItemWeapon*>(equipSet[SLOT_RANGED]);
+        const CItemWeapon* PAmmo   = dynamic_cast<CItemWeapon*>(equipSet[SLOT_AMMO]);
 
-        if (newItemWeapon)
+        if (const CItemWeapon* newItemWeapon = dynamic_cast<CItemWeapon*>(newItem))
         {
             // Remove sub for H2H
             if (newItemWeapon->isHandToHand())

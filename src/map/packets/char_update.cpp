@@ -26,6 +26,7 @@
 #include "entities/charentity.h"
 #include "status_effect_container.h"
 #include "utils/itemutils.h"
+#include "utils/mountutils.h"
 
 namespace
 {
@@ -274,6 +275,8 @@ void CCharUpdatePacket::updateWith(CCharEntity* PChar, ENTITYUPDATE type, uint8 
 
     if (packet->SendFlg.General)
     {
+        const auto [ChocoboIndex, CustomProperties] = mountutils::packetDefinition(PChar);
+
         packet->Hpp             = PChar->GetHPP();
         packet->server_status   = PChar->animation;
         packet->ModelHitboxSize = 4; // TODO: verify this value and if it changes (Monstrosity?)
@@ -284,12 +287,14 @@ void CCharUpdatePacket::updateWith(CCharEntity* PChar, ENTITYUPDATE type, uint8 
         packet->Flags1.unknown_0_3 = PChar->loc.zone ? PChar->loc.zone->CanUseMisc(MISC_TREASURE) : 0; // Set global treasure pool
         packet->Flags1.unknown_0_4 = 0;
 
-        if (auto* effect = PChar->StatusEffectContainer->GetStatusEffect(EFFECT_MOUNTED))
-        {
-            packet->Flags1.ChocoboIndex = effect->GetSubPower();
-        }
+        // All mounts need a valid ChocoboIndex
+        packet->Flags1.ChocoboIndex = ChocoboIndex;
+        // Only known to be used by Personal Chocobos at this time.
+        packet->CustomProperties[0] = CustomProperties[0];
+        // Only known to be used by Noble Chocobo at this time.
+        packet->CustomProperties[1] = CustomProperties[1];
 
-        CItemLinkshell* linkshell = (CItemLinkshell*)PChar->getEquip(SLOT_LINK1);
+        auto* linkshell = reinterpret_cast<CItemLinkshell*>(PChar->getEquip(SLOT_LINK1));
 
         packet->Flags1.CliPosInitFlag  = 0; // Unused
         packet->Flags1.GraphSize       = PChar->look.size;
@@ -311,7 +316,7 @@ void CCharUpdatePacket::updateWith(CCharEntity* PChar, ENTITYUPDATE type, uint8 
 
         if (linkshell && linkshell->isType(ITEM_LINKSHELL))
         {
-            lscolor_t LSColor = linkshell->GetLSColor();
+            const lscolor_t LSColor = linkshell->GetLSColor();
 
             // This seems wrong, but displays correctly?
             packet->Flags2.r = (LSColor.R << 4) + 15;
@@ -358,12 +363,7 @@ void CCharUpdatePacket::updateWith(CCharEntity* PChar, ENTITYUPDATE type, uint8 
         }
 
         packet->Flags6.GateId = 0; // Set as "Confrontation" sub power? This will make other players invisible that dont also have this status.
-        if (PChar->StatusEffectContainer->GetStatusEffect(EFFECT_MOUNTED))
-        {
-            packet->Flags6.MountIndex = PChar->StatusEffectContainer->GetStatusEffect(EFFECT_MOUNTED)->GetPower();
-        }
-
-        packet->size = roundUpToNearestFour(general_size) / 4;
+        packet->size          = roundUpToNearestFour(general_size) / 4;
     }
 
     if (packet->SendFlg.Model)
@@ -415,6 +415,13 @@ void CCharUpdatePacket::updateWith(CCharEntity* PChar, ENTITYUPDATE type, uint8 
         // For some reason, if you align the Name's null terminator on the edge of the packet, it cuts off the last character of the name.
         // Add 4 for this alignment issue, even if overkill sometimes.
         packet->size = roundUpToNearestFour(name_size + static_cast<uint32>(charNameSize) + 4) / 4;
+    }
+
+    if (packet->SendFlg.Despawn || packet->SendFlg.General)
+    {
+        // MountIndex is almost always set, even when character is no longer riding.
+        // The client needs it for characters that dismounted out of range, else they become invisible.
+        packet->Flags6.MountIndex = PChar->m_mountId;
     }
 
     // Fields that are always checked if this isnt a despawn packet

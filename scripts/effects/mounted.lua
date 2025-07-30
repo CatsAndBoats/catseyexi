@@ -5,11 +5,13 @@
 local effectObject = {}
 
 effectObject.onEffectGain = function(target, effect)
+    local mountId = effect:getPower()
     -- Retail sends a music change packet (packet ID 0x5F) in both cases.
 
-    -- TODO: This isn't quite right. The IDs we use for mounts vs what we use for power etc.
-    -- seem to be off-by-one.
-    if effect:getPower() < 2 then
+    if
+        mountId == xi.mount.CHOCOBO or
+        mountId == xi.mount.NOBLE_CHOCOBO
+    then
         target:changeMusic(4, 212)
         target:setAnimation(xi.anim.CHOCOBO)
     else

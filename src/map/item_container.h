@@ -67,8 +67,8 @@ public:
     uint8  AddBuff(int8 buff); // increase/decrease storage size
     uint8  AddSize(int8 size); // increase/decrease container size
     uint8  SetSize(uint8 size);
-    uint8  SearchItem(uint16 ItemID);
-    auto   SearchItems(uint16 ItemID) -> std::vector<uint8>;
+    auto   SearchItem(uint16 itemId) const -> uint8;
+    auto   SearchItems(uint16 itemId) const -> std::vector<uint8>;
     uint8  SearchItemWithSpace(uint16 ItemID, uint32 quantity); // search for item that has space to accomodate x items added
 
     uint8 InsertItem(CItem* PItem);               // add a pre-created item to a free cell
@@ -77,8 +77,8 @@ public:
     uint32            SortingPacket; // number of sort requests per clock
     timer::time_point LastSortingTime;
 
-    CItem* GetItem(uint8 slotID); // get a pointer to the object located in the specified cell.
-    void   Clear();               // remove all items from container
+    CItem* GetItem(uint8 slotID) const; // get a pointer to the object located in the specified cell.
+    void   Clear();                     // remove all items from container
 
     template <typename F, typename... Args>
     void ForEachItem(F func, Args&&... args)

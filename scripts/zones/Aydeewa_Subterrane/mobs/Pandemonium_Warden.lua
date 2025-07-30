@@ -59,7 +59,7 @@ entity.onMobSpawn = function(mob)
     mob:hideHP(true)
 
     -- Two hours to forced depop
-    mob:setLocalVar('PWDespawnTime', os.time() + 7200)
+    mob:setLocalVar('PWDespawnTime', GetSystemTime() + 7200)
     mob:setLocalVar('phase', 1)
     mob:setLocalVar('astralFlow', 1)
 end
@@ -193,8 +193,8 @@ entity.onMobFight = function(mob, target)
 
     -- Check for time limit, too
     if
-        os.time() > depopTime and
-        mob:actionQueueEmpty()
+        GetSystemTime() > depopTime and
+        not xi.combat.behavior.isEntityBusy(mob)
     then
         for i = 0, 1 do
             for j = 1, 8 do

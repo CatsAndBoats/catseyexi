@@ -179,10 +179,12 @@ uint16 GetMogHouseModelID(CCharEntity* PChar)
     // clang-format on
 }
 
-uint8 GetMogHouseLeavingFlag(CCharEntity* PChar)
+auto GetMogHouseLeavingFlag(const CCharEntity* PChar) -> uint8
 {
     switch (zoneutils::GetCurrentRegion(PChar->getZone()))
     {
+        case REGION_TYPE::ADOULIN_ISLANDS:
+            return 9; // Adoulin MH exit is always enabled
         case REGION_TYPE::WEST_AHT_URHGAN:
             if (PChar->profile.mhflag & 0x10)
             {
@@ -216,6 +218,7 @@ uint8 GetMogHouseLeavingFlag(CCharEntity* PChar)
         default:
             break;
     }
+
     return 0;
 }
 

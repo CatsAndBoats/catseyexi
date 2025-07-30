@@ -25,12 +25,14 @@ zones[xi.zone.SPIRE_OF_DEM] =
         A_CRACK_HAS_FORMED            = 7384, -- A crack has formed on the <item>, and the beast inside has been unleashed!
         PARTY_MEMBERS_HAVE_FALLEN     = 7418, -- All party members have fallen in battle. Now leaving the battlefield.
         THE_PARTY_WILL_BE_REMOVED     = 7425, -- If all party members' HP are still zero after # minute[/s], the party will be removed from the battlefield.
+        FADES_INTO_NOTHINGNESS        = 7433, -- The % fades into nothingness...
         ENTERING_THE_BATTLEFIELD_FOR  = 7624, -- Entering the battlefield for [Ancient Flames Beckon/You Are What You Eat/Empty Dreams]!
         CANT_REMEMBER                 = 7654, -- You cannot remember when exactly, but you have obtained <item>!
     },
     mob =
     {
         PROGENERATOR = GetFirstID('Progenerator'),
+        INGESTER     = GetFirstID('Ingester'),
     },
     npc =
     {

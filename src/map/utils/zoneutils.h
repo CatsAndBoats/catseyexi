@@ -19,8 +19,7 @@
 ===========================================================================
 */
 
-#ifndef _ZONEUTILS_H
-#define _ZONEUTILS_H
+#pragma once
 
 #include "common/cbasetypes.h"
 #include "common/ipp.h"
@@ -48,9 +47,9 @@ namespace zoneutils
     CNpcEntity*  GetTrigger(uint16 TargID, uint16 ZoneID);
     CBaseEntity* GetEntity(uint32 ID, uint8 filter = -1);
     CCharEntity* GetCharByName(std::string const& name);
-    CCharEntity* GetCharFromWorld(uint32 charid, uint16 targid);  // returns pointer to character by id and target id
-    CCharEntity* GetChar(uint32 id);                              // returns pointer to character by id
-    CCharEntity* GetCharToUpdate(uint32 primary, uint32 ternary); // returns pointer to preferred char to update for party changes
+    auto         GetCharFromWorld(uint32 charid, uint16 targid) -> CCharEntity*; // returns pointer to character by id and target id
+    CCharEntity* GetChar(uint32 id);                                             // returns pointer to character by id
+    CCharEntity* GetCharToUpdate(uint32 primary, uint32 ternary);                // returns pointer to preferred char to update for party changes
     auto         GetZonesAssignedToThisProcess(IPP mapIPP) -> std::vector<uint16>;
     bool         IsZoneAssignedToThisProcess(IPP mapIPP, ZONEID zoneId);
     void         ForEachZone(const std::function<void(CZone*)>& func);
@@ -61,5 +60,3 @@ namespace zoneutils
     void AfterZoneIn(CBaseEntity* PEntity); // triggers after a player has finished zoning in
 
 }; // namespace zoneutils
-
-#endif
