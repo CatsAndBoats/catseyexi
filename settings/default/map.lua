@@ -292,7 +292,7 @@ xi.settings.map =
     -- Despawn jug pets that have a minimum level below level sync or zone level restriction.
     -- Such as despawning Courier Carrie in a level 20 cap when their minimum level to summon is 23.
     -- While the default value of false is retail accurate, there are some balance concerns such as using 1000 needles at low levels from the cactuar pet.
-    DESPAWN_JUGPETS_BELOW_MINIMUM_LEVEL = false,
+    DESPAWN_JUGPETS_BELOW_MINIMUM_LEVEL = true,
 
     -- Send stack traces to the client after caught Lua errors if
     -- their GM level is the same or higher than this number.
