@@ -33,8 +33,8 @@ xi.settings.network =
     -- DB queries will attempt each query once, and reconnect and retry up to `SQL_QUERY_RETRY_COUNT` times.
     SQL_QUERY_RETRY_COUNT = 1,
 
-    ENABLE_HTTP = false,
-    HTTP_HOST   = "localhost",
+    ENABLE_HTTP = true,
+    HTTP_HOST   = "0.0.0.0",
     HTTP_PORT   = 8088,
 
     -- Central message server settings (ensure these are the same on both all map servers and the central (lobby) server
