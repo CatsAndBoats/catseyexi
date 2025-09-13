@@ -46,6 +46,7 @@ CREATE TABLE `chars` (
   `chatfilters_2` bigint(20) unsigned NOT NULL DEFAULT '0',
   `moghancement` smallint(4) unsigned NOT NULL DEFAULT '0',
   `timecreated` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `last_logout` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `lastupdate` timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`charid`),
   FULLTEXT KEY `charname` (`charname`)

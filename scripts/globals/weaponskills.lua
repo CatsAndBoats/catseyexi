@@ -19,42 +19,6 @@ require('scripts/globals/combat/physical_utilities')
 xi = xi or {}
 xi.weaponskills = xi.weaponskills or {}
 
--- http://wiki.ffo.jp/html/1705.html
--- https://www.ffxiah.com/forum/topic/21497/stalwart-soul/ some anecdotal data that aligns with JP
--- https://www.bg-wiki.com/ffxi/Agwu%27s_Scythe Souleater Effect that goes beyond established cap, Stalwart Soul bonus being additive to trait
-local function souleaterBonus(attacker, wsParams)
-    if attacker:hasStatusEffect(xi.effect.SOULEATER) then
-        local souleaterEffect   = attacker:getMaxGearMod(xi.mod.SOULEATER_EFFECT) / 100
-        local souleaterEffectII = attacker:getMod(xi.mod.SOULEATER_EFFECT_II) / 100
-        local stalwartSoulBonus = 1 - attacker:getMod(xi.mod.STALWART_SOUL) / 100
-        local bonusDamage       = math.floor(attacker:getHP() * (0.1 + souleaterEffect + souleaterEffectII))
-
-        if bonusDamage >= 1 then
-            attacker:delHP(utils.stoneskin(attacker, bonusDamage * stalwartSoulBonus))
-
-            if attacker:getMainJob() ~= xi.job.DRK then
-                return math.floor(bonusDamage / 2)
-            end
-
-            return bonusDamage
-        end
-    end
-
-    return 0
-end
-
-local consumeManaBonus = function(attacker)
-    local bonus = 0
-
-    if attacker:hasStatusEffect(xi.effect.CONSUME_MANA) then
-        bonus = math.floor(attacker:getMP() / 10)
-        attacker:setMP(0)
-        attacker:delStatusEffect(xi.effect.CONSUME_MANA)
-    end
-
-    return bonus
-end
-
 local function shadowAbsorb(target)
     local targetShadows = target:getMod(xi.mod.UTSUSEMI)
     local shadowType    = xi.mod.UTSUSEMI
@@ -250,7 +214,7 @@ local function getSingleHitDamage(attacker, target, dmg, ftp, wsParams, calcPara
         calcParams.pdif = xi.combat.physical.calculateRangedPDIF(attacker, target, calcParams.skillType, atkMultiplier, criticalHit, applyLevelCorrection, ignoresDefense, ignoreDefMultiplier, true, 0)
     end
 
-    hitDamage = (dmg + consumeManaBonus(attacker)) * ftp * calcParams.pdif
+    hitDamage = (dmg + xi.combat.damage.consumeManaAddition(attacker)) * ftp * calcParams.pdif
 
     -- handle blocking and reduce the hit damage if needed
     if xi.combat.physical.isBlocked(target, attacker) then
@@ -289,7 +253,7 @@ local function modifyMeleeHitDamage(attacker, target, attackTbl, wsParams, rawDa
     adjustedDamage = adjustedDamage * xi.combat.damage.scarletDeliriumMultiplier(attacker)
 
     -- Souleater
-    adjustedDamage = adjustedDamage + souleaterBonus(attacker, wsParams)
+    adjustedDamage = adjustedDamage + xi.combat.damage.souleaterAddition(attacker)
 
     if adjustedDamage > 0 then
         adjustedDamage = adjustedDamage - target:getMod(xi.mod.PHALANX)
@@ -319,6 +283,7 @@ local function calculateHybridMagicDamage(tp, physicaldmg, attacker, target, wsP
     magicdmg = math.floor(magicdmg + calcParams.bonusfTP * physicaldmg)
     magicdmg = math.floor(magicdmg * applyResistanceAbility(attacker, target, wsParams.ele, wsParams.skill, calcParams.bonusAcc))
     magicdmg = math.floor(magicdmg * xi.spells.damage.calculateTMDA(target, wsParams.ele))
+    magicdmg = math.floor(target:handleSevereDamage(magicdmg, false))
 
     if magicdmg > 0 then
         magicdmg = math.floor(magicdmg * xi.spells.damage.calculateNukeAbsorbOrNullify(target, wsParams.ele))
@@ -332,6 +297,15 @@ local function calculateHybridMagicDamage(tp, physicaldmg, attacker, target, wsP
     end
 
     return math.floor(magicdmg)
+end
+
+-- returns ammo used, if any
+local function useAmmo(attacker)
+    if xi.combat.ranged.shouldUseAmmo(attacker) then
+        return 1
+    end
+
+    return 0
 end
 
 -- Calculates the raw damage for a weaponskill, used by both xi.weaponskills.doPhysicalWeaponskill and xi.weaponskills.doRangedWeaponskill.
@@ -387,10 +361,23 @@ xi.weaponskills.calculateRawWSDmg = function(attacker, target, wsID, tp, action,
     local subTPGain               = xi.combat.tp.getSingleWeaponTPReturn(attacker, xi.slot.SUB)  --
     local isJump                  = wsParams.isJump or false
     local attackerTPMult          = wsParams.attackerTPMult or 1
+    local ammoCount               = -1
+    local ammoUsed                = 0
+    local isRanged                = calcParams.attackInfo.slot == xi.slot.RANGED
     calcParams.hitsLanded         = 0
     calcParams.shadowsAbsorbed    = 0
     calcParams.mainhandHitsLanded = 0
     calcParams.offhandHitsLanded  = 0
+
+    -- Get ammo information
+    if isRanged and attacker:isPC() then
+        local ammoItem = attacker:getEquippedItem(xi.slot.AMMO)
+        if ammoItem then
+            ammoCount = ammoItem:getQuantity()
+        else
+            ammoCount = 0
+        end
+    end
 
     -- Calculate the damage from the first hit
     if
@@ -483,6 +470,14 @@ xi.weaponskills.calculateRawWSDmg = function(attacker, target, wsID, tp, action,
     local mainhandHits     = wsParams.numHits - 1
     local mainhandHitsDone = 0
 
+    if isRanged and ammoCount ~= -1 then
+        ammoUsed = ammoUsed + useAmmo(attacker)
+
+        if ammoUsed >= ammoCount then
+            hitsDone = 8 -- Attack while loops will stop if hitsDone is 8 or higher
+        end
+    end
+
     -- Use up any remaining hits in the WS's numhits
     while hitsDone < 8 and mainhandHitsDone < mainhandHits and finaldmg < targetHp do
         calcParams.hitsLanded = 0
@@ -520,6 +515,14 @@ xi.weaponskills.calculateRawWSDmg = function(attacker, target, wsID, tp, action,
             numMainHandMultis = numMainHandMultis + extraMultis
             numMultiProcs     = extraMultis > 0 and numMultiProcs + 1 or numMultiProcs
         end
+
+        if isRanged and ammoCount ~= -1 then
+            ammoUsed = ammoUsed + useAmmo(attacker)
+
+            if ammoUsed >= ammoCount then
+                hitsDone = 8 -- Attack while loops will stop if hitsDone is 8 or higher
+            end
+        end
     end
 
     -- Proc any mainhand multi attacks.
@@ -553,6 +556,14 @@ xi.weaponskills.calculateRawWSDmg = function(attacker, target, wsID, tp, action,
         finaldmg                  = finaldmg + hitdmg
         hitsDone                  = hitsDone + 1
         mainhandMultiHitsDone     = mainhandMultiHitsDone + 1
+
+        if isRanged and ammoCount ~= -1 then
+            ammoUsed = ammoUsed + useAmmo(attacker)
+
+            if ammoUsed >= ammoCount then
+                hitsDone = 8 -- Attack while loops will stop if hitsDone is 8 or higher
+            end
+        end
     end
 
     local originalSlot = calcParams.attackInfo.slot
@@ -651,6 +662,7 @@ xi.weaponskills.calculateRawWSDmg = function(attacker, target, wsID, tp, action,
 
     -- Return our raw damage to then be modified by enemy reductions based off of melee/ranged
     calcParams.finalDmg = finaldmg
+    calcParams.ammoUsed = ammoUsed
 
     return calcParams
 end
@@ -809,6 +821,12 @@ xi.weaponskills.doRangedWeaponskill = function(attacker, target, wsID, wsParams,
 
     finaldmg = xi.weaponskills.takeWeaponskillDamage(target, attacker, wsParams, primaryMsg, attack, calcParams, action)
 
+    -- Ammo needs to be removed after xi.weaponskills.takeWeaponskillDamage for delay/tp return uses
+    if calcParams.ammoUsed and calcParams.ammoUsed > 0 then
+        print(calcParams.ammoUsed)
+        attacker:removeAmmo(calcParams.ammoUsed)
+    end
+
     return finaldmg, calcParams.criticalHit, calcParams.tpHitsLanded, calcParams.extraHitsLanded, calcParams.shadowsAbsorbed
 end
 
@@ -850,7 +868,7 @@ xi.weaponskills.doMagicWeaponskill = function(attacker, target, wsID, wsParams, 
         dmg = dmg * ftp
 
         -- Apply Consume Mana and Scarlet Delirium
-        -- dmg = dmg + consumeManaBonus(attacker
+        -- dmg = dmg + xi.combat.damage.consumeManaAddition(attacker)
         dmg = dmg * xi.combat.damage.scarletDeliriumMultiplier(attacker)
 
         -- Factor in "all hits" bonus damage mods
@@ -871,6 +889,7 @@ xi.weaponskills.doMagicWeaponskill = function(attacker, target, wsID, wsParams, 
         dmg = math.floor(addBonusesAbility(attacker, wsParams.ele, target, dmg, wsParams))
         dmg = math.floor(dmg * applyResistanceAbility(attacker, target, wsParams.ele, wsParams.skill, gearAcc))
         dmg = math.floor(dmg * xi.spells.damage.calculateTMDA(target, wsParams.ele))
+        dmg = math.floor(target:handleSevereDamage(dmg, false))
 
         if dmg < 0 then
             calcParams.finalDmg = dmg
@@ -976,15 +995,16 @@ xi.weaponskills.takeWeaponskillDamage = function(defender, attacker, wsParams, p
         defender:updateEnmityFromDamage(enmityEntity, finaldmg * enmityMult)
     end
 
+    local sengikoriEffect = attacker:getStatusEffect(xi.effect.SENGIKORI)
     -- TODO: does this effect not apply if you do 0 damage (or absorb)?
     -- Skillchains will still "proc" if you do 0 damage, so assume it does for now
     if
         (wsResults.tpHitsLanded +
         wsResults.extraHitsLanded > 0) and
-        attacker:hasStatusEffect(xi.effect.SENGIKORI)
+        sengikoriEffect ~= nil
     then
         local sengikoriBonus = attacker:getMod(xi.mod.SENGIKORI_BONUS) -- Additive % bonus: https://www.ffxiah.com/forum/topic/23457/july-11-sam-update/4/#1421344
-        local power = 25 + sengikoriBonus                              -- base 25% bonus for SC or MB
+        local power = sengikoriEffect:getPower() + sengikoriBonus
 
         -- If no SC effect, apply SC damage debuff
         -- If there is one, apply MB damage debuff

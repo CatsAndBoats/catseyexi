@@ -63,6 +63,38 @@ xi.moghouse.moghouse2FUnlockCSs =
     [xi.zone.WINDURST_WOODS]     = 885,
 }
 
+local offsetAxis =
+{
+    X = 1,
+    Z = 3,
+}
+
+--  [zoneId]                       = {      x,      y,      z, rot, offsetAxis  , max }
+xi.moghouse.exits =
+{
+    [xi.zone.AL_ZAHBI]             = {     37,      0,    -62, 192, offsetAxis.X, 5.0 },
+    [xi.zone.AHT_URHGAN_WHITEGATE] = {   -100,      0,    -83,   0, offsetAxis.Z, 5.0 },
+    [xi.zone.SOUTHERN_SAN_DORIA_S] = {    147,     -2,    116,  95, offsetAxis.X, 5.0 },
+    [xi.zone.BASTOK_MARKETS_S]     = {   -177,     -8,    -33, 128, offsetAxis.Z, 5.0 },
+    [xi.zone.WINDURST_WATERS_S]    = {    157,      0,     -8, 191, offsetAxis.X, 5.0 },
+    [xi.zone.SOUTHERN_SAN_DORIA]   = {    161,     -2,  162.1,  95, offsetAxis.Z, 3.0 },
+    [xi.zone.NORTHERN_SAN_DORIA]   = {    130,   -0.2,     -3, 160, offsetAxis.X, 3.0 },
+    [xi.zone.PORT_SAN_DORIA]       = {     78,    -16, -135.9, 165, offsetAxis.X, 2.0 },
+    [xi.zone.BASTOK_MINES]         = {    116,   0.99,    -75, 127, offsetAxis.Z, 5.0 },
+    [xi.zone.BASTOK_MARKETS]       = {   -177,     -8,    -33, 127, offsetAxis.Z, 5.0 },
+    [xi.zone.PORT_BASTOK]          = {     57,    8.5,   -239, 192, offsetAxis.X, 5.0 },
+    [xi.zone.WINDURST_WATERS]      = {    157,     -5,    -62, 192, offsetAxis.X, 5.0 },
+    [xi.zone.WINDURST_WALLS]       = { -257.5,  -5.05,   -123,   0, offsetAxis.Z, 5.0 },
+    [xi.zone.PORT_WINDURST]        = {    195, -15.56,    258,  65, offsetAxis.X, 5.0 },
+    [xi.zone.WINDURST_WOODS]       = {   -138,    -10,     37,   0, offsetAxis.Z, 5.0 },
+    [xi.zone.RULUDE_GARDENS]       = {     45,     10,    -73, 192, offsetAxis.X, 5.0 },
+    [xi.zone.UPPER_JEUNO]          = {     45,     -5,    -78, 172, offsetAxis.X, 2.5 },
+    [xi.zone.LOWER_JEUNO]          = {   41.2,     -5,     84,  85, offsetAxis.X, 2.5 },
+    [xi.zone.PORT_JEUNO]           = { -192.5,     -5,   -1.3,   0, offsetAxis.Z, 2.5 },
+    [xi.zone.WESTERN_ADOULIN]      = {     -0,     -0,   -144, 223, offsetAxis.Z, 5.0 },
+    [xi.zone.EASTERN_ADOULIN]      = {  -59.3,      0, -128.5, 191, offsetAxis.X, 5.0 },
+}
+
 xi.moghouse.isInMogHouseInHomeNation = function(player)
     if not player:isInMogHouse() then
         return false
@@ -166,6 +198,34 @@ xi.moghouse.trySetMusic = function(player)
             playerArg:changeMusic(6, utils.randomEntry(possibleSongs))
         end)
     end
+end
+
+xi.moghouse.onMoghouseZoneEvent = function(player, prevZone)
+    -- Handle players zoning in their Mog House
+    if player:isInMogHouse() then
+        return xi.moghouse.onMoghouseZoneIn(player, prevZone)
+    end
+
+    -- Handle players zoning out of their Mog House
+    if
+        player:getXPos() == 0 and
+        player:getYPos() == 0 and
+        player:getZPos() == 0
+    then
+        local x, y, z, r, randomizedAxis, randomMax = unpack(xi.moghouse.exits[player:getZoneID()])
+        local randomOffset                          = math.random(randomMax * 1000)
+
+        -- 0.000 - N.N00 variance
+        if randomizedAxis == offsetAxis.X then
+            x = x + (randomOffset / 1000)
+        elseif randomizedAxis == offsetAxis.Z then
+            z = z + (randomOffset / 1000)
+        end
+
+        player:setPos(x, y, z, r)
+    end
+
+    return -1
 end
 
 xi.moghouse.onMoghouseZoneIn = function(player, prevZone)

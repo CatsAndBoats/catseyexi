@@ -29,6 +29,7 @@
 class CMobSpellContainer;
 class CMobSpellList;
 class CEnmityContainer;
+class spawnGroup;
 
 enum SPAWNTYPE
 {
@@ -134,6 +135,7 @@ public:
     void              TapDeaggroTime(); // call CMobController->TapDeaggroTime if PAI->GetController() is a CMobController, otherwise do nothing.
 
     bool CanLink(position_t* pos, int16 superLink = 0);
+    bool ShouldForceLink();
 
     bool CanDropGil();    // mob has gil to drop
     bool CanStealGil();   // can steal gil from mob
@@ -181,6 +183,7 @@ public:
 
     virtual void OnDespawn(CDespawnState&) override;
 
+    bool         CanSpawnFromGroup();
     virtual void Spawn() override;
     virtual void FadeOut() override;
     virtual bool isWideScannable() override;
@@ -238,11 +241,12 @@ public:
     position_t m_SpawnPoint; // spawn point of mob
 
     uint8  m_Element;
-    uint8  m_HiPCLvl;       // Highest Level of Player Character that hit the Monster
-    uint8  m_HiPartySize;   // Largest party size that hit the Monster
-    int16  m_THLvl;         // Highest Level of Treasure Hunter that apply to drops
-    bool   m_ItemStolen;    // if true, mob has already been robbed. reset on respawn. also used for thf maat fight
-    bool   m_ItemDespoiled; // if true, mob has already been despoiled. reset on respawn.
+    uint8  m_HiPCLvl;        // Highest Level of Player Character that hit the Monster
+    uint8  m_HiPartySize;    // Largest party size that hit the Monster
+    int16  m_THLvl;          // Highest Level of Treasure Hunter that apply to drops
+    int16  m_GilfinderLevel; // Highest Level of Gilfinderthat apply to drops
+    bool   m_ItemStolen;     // if true, mob has already been robbed. reset on respawn. also used for thf maat fight
+    bool   m_ItemDespoiled;  // if true, mob has already been despoiled. reset on respawn.
     uint16 m_Family;
     uint16 m_SuperFamily;
     uint16 m_MobSkillList; // Mob skill list defined from mob_pools
@@ -253,6 +257,8 @@ public:
 
     uint32 m_flags;       // includes the CFH flag and whether the HP bar should be shown or not (e.g. Yilgeban doesnt)
     uint8  m_name_prefix; // The ding bats VS Ding bats
+
+    spawnGroup* m_spawnGroup; // spawn group this mob Belongs to
 
     uint8 m_unk0; // possibly campaign related (entity 0x24)
     uint8 m_unk1; // (entity_update 0x25)

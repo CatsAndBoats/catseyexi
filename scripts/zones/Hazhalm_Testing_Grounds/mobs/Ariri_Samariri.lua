@@ -31,11 +31,6 @@ entity.onMobInitialize = function(mob)
     mob:addImmunity(xi.immunity.SILENCE)
 end
 
-entity.onMobSpawn = function(mob)
-    -- Reset Ariri to the right spell list after Providence
-    mob:setLocalVar('spellListId', 540)
-end
-
 entity.onMobEngage = reset
 
 entity.onMobFight = function(mob)

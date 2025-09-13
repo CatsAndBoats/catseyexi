@@ -27,10 +27,10 @@
 #include <queue>
 
 #include "alliance.h"
+#include "aman.h"
 #include "conquest_system.h"
 #include "linkshell.h"
 #include "map_networking.h"
-#include "map_server.h"
 #include "party.h"
 #include "status_effect_container.h"
 #include "unitychat.h"
@@ -47,6 +47,7 @@
 #include "packets/server_ip.h"
 
 #include "items/item_linkshell.h"
+#include "packets/c2s/0x0b7_assist_channel.h"
 
 #include "utils/charutils.h"
 #include "utils/jailutils.h"
@@ -133,21 +134,58 @@ void IPCClient::handleMessage_EmptyStruct(const IPP& ipp, const ipc::EmptyStruct
     ShowWarningFmt("Received EmptyStruct message from {} - this is probably a bug", ipp.toString());
 }
 
-void IPCClient::handleMessage_CharLogin(const IPP& ipp, const ipc::CharLogin& message)
+void IPCClient::handleMessage_AccountLogin(const IPP& ipp, const ipc::AccountLogin& message)
 {
     TracyZoneScoped;
 
-    CCharEntity* PChar = zoneutils::GetChar(message.charId);
-    if (!PChar)
+    if (auto session = networking_.sessions().getSessionByAccountId(message.accountId))
     {
-        db::preparedStmt("DELETE FROM accounts_sessions WHERE charid = ?", message.charId);
-    }
-    else
-    {
-        // TODO: disconnect the client, but leave the character in the disconnecting state
-        // PChar->status = STATUS_SHUTDOWN;
-        // won't save their position but not a huge deal
-        // PChar->pushPacket<CServerIPPacket>(PChar, 1, 0);
+        // Extreme overkill but...
+        // Scramble key so server rejects input
+        for (uint32_t& i : session->blowfish.key)
+        {
+            i = xirand::GetRandomNumber<uint32_t>(std::numeric_limits<uint32_t>::max());
+        }
+
+        for (uint32_t& i : session->prev_blowfish.key)
+        {
+            i = xirand::GetRandomNumber<uint32_t>(std::numeric_limits<uint32_t>::max());
+        }
+
+        for (uint32_t& i : session->blowfish.P)
+        {
+            i = xirand::GetRandomNumber<uint32_t>(std::numeric_limits<uint32_t>::max());
+        }
+
+        for (uint32_t& i : session->prev_blowfish.P)
+        {
+            i = xirand::GetRandomNumber<uint32_t>(std::numeric_limits<uint32_t>::max());
+        }
+
+        for (uint8_t& i : session->blowfish.hash)
+        {
+            // uniform_int_distribution doesnt like uint8_t, so do some workaround
+            i = static_cast<uint8_t>(xirand::GetRandomNumber<uint16_t>(std::numeric_limits<uint16_t>::max()) % 255);
+        }
+
+        for (uint8_t& i : session->prev_blowfish.hash)
+        {
+            // uniform_int_distribution doesnt like uint8_t, so do some workaround
+            i = static_cast<uint8_t>(xirand::GetRandomNumber<uint16_t>(std::numeric_limits<uint16_t>::max()) % 255);
+        }
+
+        for (int i = 0; i < 4; i++)
+        {
+            for (uint32_t& x : session->blowfish.S[i])
+            {
+                x = xirand::GetRandomNumber<uint32_t>(std::numeric_limits<uint32_t>::max());
+            }
+
+            for (uint32_t& x : session->prev_blowfish.S[i])
+            {
+                x = xirand::GetRandomNumber<uint32_t>(std::numeric_limits<uint32_t>::max());
+            }
+        }
     }
 }
 
@@ -155,11 +193,16 @@ void IPCClient::handleMessage_CharZone(const IPP& ipp, const ipc::CharZone& mess
 {
     TracyZoneScoped;
 
-    // TODO: This is mainly for telling the world server that a character has zoned,
-    //     : but maybe it would be useful here too?
+    auto session = networking_.sessions().getSessionByCharId(message.charId);
 
-    std::ignore = message.charId;
-    std::ignore = message.destinationZoneId;
+    if (session) // Update in case of edge case
+    {
+        session->last_update = timer::now();
+    }
+    else
+    {
+        networking_.sessions().createPendingSession(message.charId); // Create a pending session that the character might use ahead of time
+    }
 }
 
 void IPCClient::handleMessage_CharVarUpdate(const IPP& ipp, const ipc::CharVarUpdate& message)
@@ -314,6 +357,31 @@ void IPCClient::handleMessage_ChatMessageYell(const IPP& ipp, const ipc::ChatMes
                 if (PChar->id != message.senderId)
                 {
                     PChar->pushPacket(std::make_unique<CChatMessagePacket>(message.senderName, message.zoneId, message.messageType, message.message, message.gmLevel));
+                }
+            });
+        }
+    });
+    // clang-format on
+}
+
+void IPCClient::handleMessage_ChatMessageAssist(const IPP& ipp, const ipc::ChatMessageAssist& message) const
+{
+    TracyZoneScoped;
+
+    // clang-format off
+    zoneutils::ForEachZone([&](CZone* PZone)
+    {
+        if (PZone->CanUseMisc(MISC_ASSIST))
+        {
+            PZone->ForEachChar([&](CCharEntity* PChar)
+            {
+                // Don't push to sender
+                if (PChar->id != message.senderId)
+                {
+                    if (PChar->aman().isAssistChannelEligible())
+                    {
+                        PChar->pushPacket(std::make_unique<CChatMessagePacket>(message));
+                    }
                 }
             });
         }
@@ -603,7 +671,16 @@ void IPCClient::handleMessage_MessageStandard(const IPP& ipp, const ipc::Message
 
     if (CCharEntity* PChar = zoneutils::GetChar(message.recipientId))
     {
-        PChar->pushPacket(std::make_unique<CMessageStandardPacket>(PChar, message.param0, message.param1, message.message));
+        // TODO: Exchange the packet struct over IPC to avoid having to match one-offs.
+        // This matches messages with just a string parameter.
+        if (message.string2.size() > 0 && message.param0 == 0 && message.param1 == 0)
+        {
+            PChar->pushPacket(std::make_unique<CMessageStandardPacket>(message.string2, message.message));
+        }
+        else
+        {
+            PChar->pushPacket(std::make_unique<CMessageStandardPacket>(PChar, message.param0, message.param1, message.message));
+        }
     }
 }
 
@@ -689,6 +766,19 @@ void IPCClient::handleMessage_KillSession(const IPP& ipp, const ipc::KillSession
         else
         {
             ShowDebugFmt("KillSession for charid {} not needed", message.victimId);
+        }
+    }
+
+    if (auto sessionToDelete = networking_.sessions().getPendingSessionByCharId(message.victimId))
+    {
+        if (sessionToDelete->blowfish.status == BLOWFISH_PENDING_ZONE)
+        {
+            ShowDebugFmt("Closing pending session of charid {} on request of other process", message.victimId);
+            networking_.sessions().destroySession(sessionToDelete);
+        }
+        else
+        {
+            // ShowDebugFmt("KillSession for charid {} not needed", message.victimId); // noisy
         }
     }
 }
@@ -836,6 +926,33 @@ void IPCClient::handleMessage_SendPlayerToLocation(const IPP& ipp, const ipc::Se
         PChar->clearPacketList();
 
         charutils::SendToZone(PChar, PChar->loc.destination);
+    }
+}
+
+void IPCClient::handleMessage_AssistChannelEvent(const IPP& ipp, const ipc::AssistChannelEvent& message) const
+{
+    TracyZoneScoped;
+
+    CCharEntity* PChar = zoneutils::GetChar(message.receiverId);
+    if (!PChar)
+    {
+        return;
+    }
+
+    switch (static_cast<GP_CLI_COMMAND_ASSIST_CHANNEL_KIND>(message.action))
+    {
+        case GP_CLI_COMMAND_ASSIST_CHANNEL_KIND::AddToMuteList:
+            PChar->aman().mute(message.senderId);
+            break;
+        case GP_CLI_COMMAND_ASSIST_CHANNEL_KIND::RemoveFromMuteList:
+            PChar->aman().unmute(message.senderId);
+            break;
+        case GP_CLI_COMMAND_ASSIST_CHANNEL_KIND::GiveThumbsUp:
+            PChar->aman().addThumbsUp(message.senderId);
+            break;
+        case GP_CLI_COMMAND_ASSIST_CHANNEL_KIND::IssueWarning:
+            PChar->aman().addThumbsDown(message.senderId);
+            break;
     }
 }
 

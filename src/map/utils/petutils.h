@@ -20,8 +20,7 @@
 ===========================================================================
 */
 
-#ifndef _IPETUTILS_H
-#define _IPETUTILS_H
+#pragma once
 
 #include "common/cbasetypes.h"
 #include "common/mmo.h"
@@ -130,6 +129,15 @@ struct Pet_t
     int8 light_res_rank;
     int8 dark_res_rank;
 
+    int8 paralyze_res_rank;
+    int8 bind_res_rank;
+    int8 silence_res_rank;
+    int8 slow_res_rank;
+    int8 poison_res_rank;
+    int8 light_sleep_res_rank;
+    int8 dark_sleep_res_rank;
+    int8 blind_res_rank;
+
     Pet_t()
     : PetID(0)
     , EcoSystem(ECOSYSTEM::ECO_ERROR)
@@ -182,6 +190,14 @@ struct Pet_t
     , water_res_rank(0)
     , light_res_rank(0)
     , dark_res_rank(0)
+    , paralyze_res_rank(0)
+    , bind_res_rank(0)
+    , silence_res_rank(0)
+    , slow_res_rank(0)
+    , poison_res_rank(0)
+    , light_sleep_res_rank(0)
+    , dark_sleep_res_rank(0)
+    , blind_res_rank(0)
     {
     }
 };
@@ -218,5 +234,3 @@ namespace petutils
 
     Pet_t* GetPetInfo(uint32 PetID);
 }; // namespace petutils
-
-#endif

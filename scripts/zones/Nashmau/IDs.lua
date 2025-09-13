@@ -7,6 +7,7 @@ zones[xi.zone.NASHMAU] =
 {
     text =
     {
+        ASSIST_CHANNEL                = 6380,  -- You will be able to use the Assist Channel until #/#/# at #:# (JST).
         ITEM_CANNOT_BE_OBTAINED       = 6385,  -- You cannot obtain the <item>. Come back after sorting your inventory.
         ITEM_CANNOT_BE_OBTAINEDX      = 6389,  -- You cannot obtain the <item>. Try trading again after sorting your inventory.
         ITEM_OBTAINED                 = 6391,  -- Obtained: <item>.

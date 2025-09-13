@@ -37,20 +37,23 @@ class MapSocket
 public:
     using ReceiveFn = std::function<void(const std::error_code&, std::span<uint8>, IPP)>;
 
-    MapSocket(uint16 port, ReceiveFn onReceiveFn); // TODO: Move passing in onReceiveFn to recvFor
+    MapSocket(asio::io_context& io_context, uint16 port, const ReceiveFn& onReceiveFn); // TODO: Move passing in onReceiveFn to recvFor
     ~MapSocket();
 
     void recvFor(timer::duration duration);
     void send(const IPP& ipp, std::span<uint8> buffer);
 
+    void requestExit();
+
 private:
     void startReceive();
 
     uint16                  port_;
-    asio::io_context        io_context_; // TODO: Use Application::io_context_ when available
+    asio::io_context&       io_context_;
     asio::ip::udp::socket   socket_;
     NetworkBuffer           buffer_; // TODO: Pass in the global buffer, or only use this one
     asio::ip::udp::endpoint remote_endpoint_;
+    bool                    isRunning;
 
     ReceiveFn onReceiveFn_;
 };

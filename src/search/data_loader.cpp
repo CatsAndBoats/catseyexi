@@ -241,7 +241,7 @@ std::list<SearchEntity*> CDataLoader::GetPlayersList(search_req sr, int* count)
 
     std::string fmtQuery =
         "SELECT charid, partyid, charname, pos_zone, pos_prevzone, nation, rank_sandoria, rank_bastok, "
-        "rank_windurst, race, mjob, sjob, mlvl, slvl, languages, settings, seacom_type, disconnecting, gmHiddenEnabled "
+        "rank_windurst, race, mjob, sjob, mlvl, slvl, languages, settings, seacom_type, disconnecting, gmHiddenEnabled, muted "
         "FROM accounts_sessions "
         "LEFT JOIN accounts_parties USING (charid) "
         "LEFT JOIN chars USING (charid) "
@@ -303,6 +303,7 @@ std::list<SearchEntity*> CDataLoader::GetPlayersList(search_req sr, int* count)
             PPlayer->seacom_type   = rset->get<uint8>("seacom_type");
             PPlayer->disconnecting = rset->get<bool>("disconnecting");
             PPlayer->gmHidden      = rset->get<bool>("gmHiddenEnabled");
+            PPlayer->muted         = rset->get<bool>("muted");
 
             const auto partyid = rset->getOrDefault<uint32>("partyid", 0);
 
@@ -344,6 +345,11 @@ std::list<SearchEntity*> CDataLoader::GetPlayersList(search_req sr, int* count)
             if (playerSettings.InviteFlg)
             {
                 PPlayer->flags1 |= 0x8000;
+            }
+
+            if (PPlayer->muted)
+            {
+                PPlayer->flags1 |= 0x20000000;
             }
 
             PPlayer->flags2 = PPlayer->flags1;

@@ -21,11 +21,19 @@
 
 #pragma once
 
+#include <array>
+#include <functional>
+#include <memory>
+#include <mutex>
 #include <optional>
+#include <string>
+#include <tuple>
 #include <type_traits>
 #include <utility>
+#include <vector>
 
 #include "earth_time.h"
+#include "tracy.h"
 
 // The purpose of this namespace IS NOT to replace the C++ standard library.
 //
@@ -392,4 +400,118 @@ namespace xi
         }
     };
 
+    // For easy lazy initialization of objects.
+    // Most suitable for Parent->lazy<ChildType> relationships.
+    // NOTE: We capture the constructor arguments in a lambda for use during initialization later on.
+    //     : Therefore you need to ensure the child outlives the parent!
+    template <typename T>
+    class lazy
+    {
+    public:
+        lazy()
+        : constructFn_([]
+                       { return T{}; })
+        {
+        }
+
+        DISALLOW_COPY_AND_MOVE(lazy);
+
+        //
+        // Factory function to create a lazy instance with captured arguments
+        //
+
+        template <typename... Args>
+        static auto with_args(Args&&... args) -> lazy<T>
+        {
+            auto args_tuple = std::make_tuple(std::forward<Args>(args)...);
+            return lazy(std::move(args_tuple));
+        }
+
+        auto get() -> T&
+        {
+            auto lock = std::unique_lock<LockableBase(std::mutex)>(mutex_);
+            LockMark(mutex_);
+
+            if (!instance_)
+            {
+                instance_.emplace(constructFn_());
+            }
+
+            return *instance_;
+        }
+
+        bool is_constructed() const noexcept
+        {
+            return instance_.has_value();
+        }
+
+        void reset() noexcept
+        {
+            instance_.reset();
+        }
+
+        //
+        // Implicit conversion operators
+        //
+
+        operator T&()
+        {
+            return get();
+        }
+
+        auto operator->() -> T*
+        {
+            return &get();
+        }
+
+        auto operator*() -> T&
+        {
+            return get();
+        }
+
+    private:
+        //
+        // Private constructor used by factory
+        //
+
+        template <typename Tuple>
+        explicit lazy(Tuple&& args_tuple)
+        {
+            constructFn_ = [args_tuple = std::forward<Tuple>(args_tuple)]() mutable -> T
+            {
+                return std::apply(
+                    [](auto&&... unpacked)
+                    {
+                        return T(std::forward<decltype(unpacked)>(unpacked)...);
+                    },
+                    std::move(args_tuple));
+            };
+        }
+
+        //
+        // Members
+        //
+
+        mutable TracyLockable(std::mutex, mutex_);
+
+        std::optional<T>   instance_;
+        std::function<T()> constructFn_;
+    };
+
+    template <typename Container, typename Predicate>
+    void eraseIf(Container& container, Predicate&& pred)
+    {
+        auto it = container.begin();
+        while (it != container.end())
+        {
+            if (pred(*it))
+            {
+                it = container.erase(it); // erase returns the next valid iterator
+            }
+            else
+            {
+                ++it;
+            }
+        }
+    }
 } // namespace xi

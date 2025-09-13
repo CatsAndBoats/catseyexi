@@ -39,7 +39,6 @@
 #include "packets/inventory_finish.h"
 #include "packets/key_items.h"
 #include "packets/lock_on.h"
-#include "packets/menu_raisetractor.h"
 #include "packets/message_special.h"
 #include "packets/message_standard.h"
 #include "packets/message_system.h"
@@ -51,20 +50,20 @@
 #include "ai/helpers/targetfind.h"
 #include "ai/states/ability_state.h"
 #include "ai/states/attack_state.h"
-#include "ai/states/death_state.h"
-#include "ai/states/inactive_state.h"
 #include "ai/states/item_state.h"
 #include "ai/states/magic_state.h"
-#include "ai/states/raise_state.h"
 #include "ai/states/range_state.h"
 #include "ai/states/weaponskill_state.h"
 
 #include "ability.h"
+#include "aman.h"
 #include "attack.h"
 #include "automatonentity.h"
 #include "battlefield.h"
 #include "char_recast_container.h"
 #include "charentity.h"
+
+#include "blue_spell.h"
 #include "conquest_system.h"
 #include "enums/key_items.h"
 #include "ipc_client.h"
@@ -99,6 +98,7 @@
 
 CCharEntity::CCharEntity()
 : m_PlayTime(0s)
+, m_AMAN(xi::lazy<CAMANContainer>::with_args(this))
 {
     TracyZoneScoped;
     objtype     = TYPE_PC;
@@ -260,7 +260,6 @@ CCharEntity::CCharEntity()
     m_ActionOffsetPos  = {};
     m_previousLocation = {};
 
-    m_mentorUnlocked   = false;
     m_jobMasterDisplay = false;
     m_EffectsChanged   = false;
 
@@ -544,11 +543,6 @@ bool CCharEntity::isAway() const
     return playerConfig.AwayFlg;
 }
 
-bool CCharEntity::isMentor() const
-{
-    return playerConfig.MentorFlg;
-}
-
 bool CCharEntity::hasAutoTargetEnabled() const
 {
     return !playerConfig.AutoTargetOffFlg;
@@ -769,6 +763,11 @@ auto CCharEntity::getStorage(const uint8 locationId) const -> CItemContainer*
 
     ShowWarning("Unhandled or Invalid Location ID (%d) passed to function.", locationId);
     return nullptr;
+}
+
+auto CCharEntity::aman() -> CAMANContainer&
+{
+    return m_AMAN;
 }
 
 int8 CCharEntity::getShieldSize()
@@ -1565,22 +1564,6 @@ void CCharEntity::OnWeaponSkillFinished(CWeaponSkillState& state, action_t& acti
 
             if (primary)
             {
-                if (isRangedWS)
-                {
-                    uint16 recycleChance = getMod(Mod::RECYCLE) + PMeritPoints->GetMeritValue(MERIT_RECYCLE, this) + this->PJobPoints->GetJobPointValue(JP_AMMO_CONSUMPTION);
-
-                    if (StatusEffectContainer->HasStatusEffect(EFFECT_UNLIMITED_SHOT))
-                    {
-                        StatusEffectContainer->DelStatusEffect(EFFECT_UNLIMITED_SHOT);
-                        recycleChance = 100;
-                    }
-
-                    if (xirand::GetRandomNumber(100) > recycleChance)
-                    {
-                        battleutils::RemoveAmmo(this);
-                    }
-                }
-
                 // See battleentity.h for REACTION class
                 // On retail, weaponskills will contain 0x08, 0x10 (HIT, ABILITY) on hit and may include the following:
                 // 0x01, 0x02, 0x04 (MISS, GUARDED, BLOCK)
@@ -1612,23 +1595,27 @@ void CCharEntity::OnWeaponSkillFinished(CWeaponSkillState& state, action_t& acti
 
                             actionTarget.additionalEffect = effect;
 
-                            // Despite appearances, ws_points_skillchain is not a multiplier it is just an amount "per element"
-                            auto wsPointsSkillchain = settings::get<uint8>("map.WS_POINTS_SKILLCHAIN");
+                            // Despite appearances, ws_points_skillchain is not a multiplier it is just an amount "per skillchain level"
+                            const auto wsPointsSkillchain = settings::get<uint8>("map.WS_POINTS_SKILLCHAIN");
                             if (effect >= 7 && effect < 15)
                             {
-                                wspoints += (1 * wsPointsSkillchain); // 1 element
+                                wspoints += (1 * wsPointsSkillchain); // Level 1
                             }
                             else if (effect >= 3)
                             {
-                                wspoints += (2 * wsPointsSkillchain); // 2 elements
+                                wspoints += (2 * wsPointsSkillchain); // Level 2
                             }
                             else
                             {
-                                wspoints += (4 * wsPointsSkillchain); // 4 elements
+                                wspoints += (3 * wsPointsSkillchain); // Level 3
                             }
                         }
                     }
                     // check for ws points
+                    // TODO: As a general rule, mobs not granting EXP do not give WSP
+                    // The following exceptions apply:
+                    // - PC targeted weaponskills always give WSP
+                    // - A handful of content: Besieged, DI
                     if (charutils::CheckMob(this->GetMLevel(), PTarget->GetMLevel()) > EMobDifficulty::TooWeak)
                     {
                         charutils::AddWeaponSkillPoints(this, damslot, wspoints);
@@ -1703,50 +1690,43 @@ void CCharEntity::OnAbility(CAbilityState& state, action_t& action)
             return;
         }
 
-        // TODO: Remove me when all pet abilities are ported to PetSkill
-        if (PAbility->getID() >= ABILITY_HEALING_RUBY && PAbility->getID() <= ABILITY_PERFECT_DEFENSE && !battleutils::GetPetSkill(PAbility->getID()))
-        {
-            // Blood pact MP costs are stored under animation ID
-            float mpCost = PAbility->getAnimationID();
-            if (StatusEffectContainer->HasStatusEffect(EFFECT_APOGEE))
-            {
-                mpCost *= 1.5f;
-            }
-
-            if (this->health.mp < mpCost)
-            {
-                setActionInterrupted(action, PTarget, MSGBASIC_UNABLE_TO_USE_JA, 0);
-                return;
-            }
-        }
-
         if (battleutils::IsParalyzed(this))
         {
             setActionInterrupted(action, PTarget, MSGBASIC_IS_PARALYZED, 0);
             return;
         }
 
-        // get any available merit recast reduction
-        auto meritRecastReduction = 0s;
+        // get any available recast reduction
+        auto recastReduction = 0s;
 
         if (PAbility->getMeritModID() > 0 && !(PAbility->getAddType() & ADDTYPE_MERIT))
         {
-            meritRecastReduction = std::chrono::seconds(PMeritPoints->GetMeritValue((MERIT_TYPE)PAbility->getMeritModID(), this));
+            recastReduction = std::chrono::seconds(PMeritPoints->GetMeritValue((MERIT_TYPE)PAbility->getMeritModID(), this));
         }
 
         auto* charge = ability::GetCharge(this, PAbility->getRecastId());
         if (charge && PAbility->getID() != ABILITY_SIC)
         {
+            //  Can't assign merits via ability ID for Sic/Ready due to shenanigans
+            if (PAbility->getRecastId() == 102) // Sic/Ready recast ID
+            {
+                recastReduction = std::chrono::seconds(PMeritPoints->GetMeritValue(MERIT_SIC_RECAST, this));
+            }
+            else if (PAbility->getRecastId() == 231) // Stratagems recast ID
+            {
+                recastReduction += std::chrono::seconds(this->getMod(Mod::STRATAGEM_RECAST));
+            }
+
             // TODO: this is bad
             // "recast" 1-4 = sic/ready
             // "recast" 1 = quickdraw, stratagems
             auto crypticRecastSecondsAsType = timer::count_seconds(PAbility->getRecastTime());
 
-            action.recast = charge->chargeTime * crypticRecastSecondsAsType - meritRecastReduction;
+            action.recast = charge->chargeTime * crypticRecastSecondsAsType - recastReduction;
         }
         else
         {
-            action.recast = PAbility->getRecastTime() - meritRecastReduction;
+            action.recast = PAbility->getRecastTime() - recastReduction;
         }
 
         if (PAbility->getID() == ABILITY_LIGHT_ARTS || PAbility->getID() == ABILITY_DARK_ARTS || PAbility->getRecastId() == 231) // stratagems
@@ -1854,7 +1834,9 @@ void CCharEntity::OnAbility(CAbilityState& state, action_t& action)
             CPetEntity* PPetEntity = dynamic_cast<CPetEntity*>(PPet);
             CPetSkill*  PPetSkill  = battleutils::GetPetSkill(PAbility->getID());
 
-            if (PPetEntity && PPetEntity->getPetType() != PET_TYPE::JUG_PET && PPetSkill) // is a real pet (not charmed or a jugpet which is mob-like) and has pet ability - don't display msg and notify pet
+            // is a real pet (charmed pets won't return a valid PPetEntity)
+            // and has pet ability in the pet_skills sql table
+            if (PPetEntity && PPetSkill) // don't display msg and notify pet
             {
                 actionList_t& actionList     = action.getNewActionList();
                 actionList.ActionTargetID    = PTarget->id;
@@ -1866,11 +1848,25 @@ void CCharEntity::OnAbility(CAbilityState& state, action_t& action)
                 actionTarget.messageID       = 0;
 
                 auto PPetTarget = PTarget->targid;
+
+                // set primary target for jug ready abilities (JA targets the player, but the pet acts like a mob and makes its own decision on the skill target)
+                if (PPetEntity->getPetType() == PET_TYPE::JUG_PET)
+                {
+                    if (PPetSkill->getValidTargets() & TARGET_ENEMY)
+                    {
+                        PPetTarget = PPetEntity->GetBattleTargetID();
+                    }
+                    else
+                    {
+                        PPetTarget = PPetEntity->targid;
+                    }
+                }
 
                 PPetEntity->PAI->PetSkill(PPetTarget, PPetSkill->getID());
             }
-            else if (PPet) // may be a bp, fallback - don't display msg and notify pet
+            else if (PPet) // pet without an entry in pet_skills.sql, failback to inferring mobskill based on matching name of the job ability in LoadAbilitiesList()
             {
+                // TODO insert a generic "unable to use ability" when all player-pet skills are in pet_skills.sql
                 actionList_t& actionList     = action.getNewActionList();
                 actionList.ActionTargetID    = PTarget->id;
                 actionTarget_t& actionTarget = actionList.getNewActionTarget();
@@ -1880,67 +1876,21 @@ void CCharEntity::OnAbility(CAbilityState& state, action_t& action)
                 actionTarget.param           = 0;
                 actionTarget.messageID       = 0;
 
-                auto PPetTarget = PTarget->targid;
-                if (PAbility->getID() >= ABILITY_HEALING_RUBY && PAbility->getID() <= ABILITY_PERFECT_DEFENSE)
+                auto  PPetTarget = PTarget->targid;
+                auto* PMobSkill  = battleutils::GetMobSkill(PAbility->getMobSkillID());
+                if (PMobSkill)
                 {
-                    // Blood Pact mp cost stored in animation ID
-                    float mpCost = PAbility->getAnimationID();
-
-                    if (StatusEffectContainer->HasStatusEffect(EFFECT_APOGEE))
+                    if (PMobSkill->getValidTargets() & TARGET_ENEMY)
                     {
-                        mpCost *= 1.5f;
-                        StatusEffectContainer->DelStatusEffectsByFlag(EFFECTFLAG_BLOODPACT);
-                        this->SetLocalVar("bpRecastTime", 0);
+                        PPetTarget = PPet->GetBattleTargetID();
                     }
-
-                    // Blood Boon (does not affect Astral Flow BPs)
-                    if ((PAbility->getAddType() & ADDTYPE_ASTRAL_FLOW) == 0)
-                    {
-                        int16 bloodBoonRate = getMod(Mod::BLOOD_BOON);
-                        if (xirand::GetRandomNumber(100) < bloodBoonRate)
-                        {
-                            mpCost *= xirand::GetRandomNumber(8.f, 16.f) / 16.f;
-                        }
-                    }
-
-                    addMP((int32)-mpCost);
-                    if (this->GetLocalVar("bpRecastTime") > 0) // This will go away when all smn petskills are handled via jobutils/summoner.lua
-                    {
-                        action.recast = std::chrono::seconds(this->GetLocalVar("bpRecastTime"));
-                    }
-
-                    if (PAbility->getValidTarget() == TARGET_SELF)
+                    else
                     {
                         PPetTarget = PPet->targid;
                     }
                 }
-                else if (PAbility->getID() >= ABILITY_CONCENTRIC_PULSE && PAbility->getID() <= ABILITY_RADIAL_ARCANA)
-                {
-                    // use the animation id to get the pet version of this ability
-                    PAbility->setID(PAbility->getAnimationID());
-                    action.actionid = PAbility->getAnimationID();
 
-                    if (PAbility->getValidTarget() == TARGET_SELF)
-                    {
-                        PPetTarget = PPet->targid;
-                    }
-                }
-                else
-                {
-                    auto* PMobSkill = battleutils::GetMobSkill(PAbility->getMobSkillID());
-                    if (PMobSkill)
-                    {
-                        if (PMobSkill->getValidTargets() & TARGET_ENEMY)
-                        {
-                            PPetTarget = PPet->GetBattleTargetID();
-                        }
-                        else
-                        {
-                            PPetTarget = PPet->targid;
-                        }
-                    }
-                }
-                PPet->PAI->MobSkill(PPetTarget, PAbility->getMobSkillID());
+                PPet->PAI->MobSkill(PPetTarget, PAbility->getMobSkillID(), std::nullopt);
             }
         }
         // TODO: make this generic enough to not require an if
@@ -3116,13 +3066,13 @@ void CCharEntity::changeMoghancement(uint16 moghancementID, bool isAdding)
             }
             break;
         case MOGHANCEMENT_MONEY:
-            addModifier(Mod::GILFINDER, 10 * multiplier);
+            addModifier(Mod::MOGHANCEMENT_GIL_BONUS_P, 10 * multiplier);
             break;
         case MOGHANCEMENT_CAMPAIGN:
             addModifier(Mod::CAMPAIGN_BONUS, 5 * multiplier);
             break;
         case MOGHANCEMENT_MONEY_II:
-            addModifier(Mod::GILFINDER, 15 * multiplier);
+            addModifier(Mod::MOGHANCEMENT_GIL_BONUS_P, 15 * multiplier);
             break;
         case MOGHANCEMENT_SKILL_GAINS:
             // NOTE: Exact value is unknown but considering this only granted by a newish item it makes sense SE made it fairly strong

@@ -19,10 +19,8 @@
 ===========================================================================
 */
 
-#ifndef _BATTLEUTILS_H
-#define _BATTLEUTILS_H
+#pragma once
 
-#include "blue_spell.h"
 #include "common/cbasetypes.h"
 #include "merit.h"
 #include "packets/weather.h"
@@ -32,6 +30,7 @@
 
 #include "entities/battleentity.h"
 
+class CMobEntity;
 class CAbility;
 class CAttack;
 class CItemWeapon;
@@ -217,11 +216,11 @@ namespace battleutils
     int32 HandleSteamJacket(CBattleEntity* PDefender, int32 damage, DAMAGE_TYPE damageType);
     int32 CheckAndApplyDamageCap(int32 damage, CBattleEntity* PDefender);
 
-    void  HandleIssekiganEnmityBonus(CBattleEntity* PDefender, CBattleEntity* PAttacker);
-    int32 HandleSevereDamage(CBattleEntity* PDefender, int32 damage, bool isPhysical);
-    int32 HandleSevereDamageEffect(CBattleEntity* PDefender, EFFECT effect, int32 damage, bool removeEffect);
-    void  HandleTacticalParry(CBattleEntity* PEntity);
-    void  HandleTacticalGuard(CBattleEntity* PEntity);
+    void HandleIssekiganEnmityBonus(CBattleEntity* PDefender, CBattleEntity* PAttacker);
+    auto HandleSevereDamage(CBattleEntity* PDefender, int32 damage, bool isPhysical) -> int32;
+    auto HandleSevereDamageEffect(CBattleEntity* PDefender, EFFECT effect, int32 damage, bool removeEffect) -> int32;
+    void HandleTacticalParry(CBattleEntity* PEntity);
+    void HandleTacticalGuard(CBattleEntity* PEntity);
 
     // Handles everything related to breaking Bind
     void BindBreakCheck(CBattleEntity* PAttacker, CBattleEntity* PDefender);
@@ -247,7 +246,7 @@ namespace battleutils
     WEATHER GetWeather(CBattleEntity* PEntity, bool ignoreScholar);
     WEATHER GetWeather(CBattleEntity* PEntity, bool ignoreScholar, uint16 zoneWeather);
     bool    WeatherMatchesElement(WEATHER weather, uint8 element);
-    void    DrawIn(CBattleEntity* PEntity, position_t pos, float offset, float degrees);
+    void    DrawIn(CBattleEntity* PTarget, position_t pos, float offset, float degrees);
     void    DoWildCardToEntity(CCharEntity* PCaster, CCharEntity* PTarget, uint8 roll);
     bool    DoRandomDealToEntity(CCharEntity* PChar, CBattleEntity* PTarget);
 
@@ -275,5 +274,3 @@ namespace battleutils
     void           ConvertDmgToMP(CBattleEntity* PDefender, int32 damage, bool IsCovered);
     float          CheckLiementAbsorb(CBattleEntity* PBattleEntity, DAMAGE_TYPE DamageType);
 }; // namespace battleutils
-
-#endif

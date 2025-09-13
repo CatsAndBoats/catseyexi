@@ -21,6 +21,7 @@
 
 #include "0x0b5_chat_std.h"
 
+#include "aman.h"
 #include "command_handler.h"
 #include "common/async.h"
 #include "common/database.h"
@@ -308,10 +309,53 @@ void GP_CLI_COMMAND_CHAT_STD::process(MapSession* PSession, CCharEntity* PChar) 
         }
         break;
         case GP_CLI_COMMAND_CHAT_STD_KIND::AssistJ:
+        {
+            if (!settings::get<bool>("main.ASSIST_CHANNEL_ENABLED") ||
+                !PChar->loc.zone->CanUseMisc(MISC_ASSIST) ||
+                PChar->aman().isMuted() ||
+                !PChar->aman().isAssistChannelEligible())
+            {
+                // Silently drop the message.
+                return;
+            }
+
+            PChar->aman().recordLastMessage();
+            message::send(ipc::ChatMessageAssist{
+                .senderId    = PChar->id,
+                .senderName  = PChar->getName(),
+                .message     = rawMessage,
+                .mentorRank  = PChar->aman().isMentor() ? PChar->aman().getMentorRank() : static_cast<uint8>(0),
+                .masteryRank = PChar->aman().getMasteryRank(),
+                .gmLevel     = PChar->m_GMlevel,
+                .messageType = MESSAGE_JP_ASSIST,
+            });
+
+            auditChat(PChar, "ASSISTJ", rawMessage);
+        }
+        break;
         case GP_CLI_COMMAND_CHAT_STD_KIND::AssistE:
         {
-            // Not implemented
-            auditChat(PChar, "ASSIST", rawMessage);
+            if (!settings::get<bool>("main.ASSIST_CHANNEL_ENABLED") ||
+                !PChar->loc.zone->CanUseMisc(MISC_ASSIST) ||
+                PChar->aman().isMuted() ||
+                !PChar->aman().isAssistChannelEligible())
+            {
+                // Silently drop the message.
+                return;
+            }
+
+            PChar->aman().recordLastMessage();
+            message::send(ipc::ChatMessageAssist{
+                .senderId    = PChar->id,
+                .senderName  = PChar->getName(),
+                .message     = rawMessage,
+                .mentorRank  = PChar->aman().isMentor() ? PChar->aman().getMentorRank() : static_cast<uint8>(0),
+                .masteryRank = PChar->aman().getMasteryRank(),
+                .gmLevel     = PChar->m_GMlevel,
+                .messageType = MESSAGE_NA_ASSIST,
+            });
+
+            auditChat(PChar, "ASSISTE", rawMessage);
         }
         break;
     }

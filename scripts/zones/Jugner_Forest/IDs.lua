@@ -30,6 +30,9 @@ zones[xi.zone.JUGNER_FOREST] =
         ALEXIUS_ORDERS                = 7906,  -- Take that <keyitem> back and hand it to the master at the weapons shop. Got it?
         LOGGING_IS_POSSIBLE_HERE      = 7916,  -- Logging is possible here if you have <item>.
         VOIDWALKER_OBTAIN_KI          = 7923,  -- Obtained key item: <keyitem>!
+        DUG_UP                        = 8027,  -- Something was dug up here...
+        UNABLE_TO_INVESTIGATE         = 8028,  -- For some reason, you are unable to investigate this spot. There is a preternatural force at work here...
+        SENSE_OF_FOREBODING           = 8029,  -- A sense of foreboding fills the air...
         CONQUEST                      = 8067,  -- You've earned conquest points!
         GARRISON_BASE                 = 8435,  -- Hm? What is this? %? How do I know this is not some [San d'Orian/Bastokan/Windurstian] trick?
         TIME_ELAPSED                  = 8494,  -- Time elapsed: <number> [hour/hours] (Vana'diel time) <number> [minute/minutes] and <number> [second/seconds] (Earth time)
@@ -56,13 +59,14 @@ zones[xi.zone.JUGNER_FOREST] =
 
     mob =
     {
-        PANZER_PERCIVAL    = GetTableOfIDs('Panzer_Percival'), -- 2 NMs
-        SUPPLESPINE_MUJWUJ = GetFirstID('Supplespine_Mujwuj'),
-        KING_ARTHRO        = GetFirstID('King_Arthro'),
+        CERNUNNOS          = GetFirstID('Cernunnos'),
         FRAELISSA          = GetFirstID('Fraelissa'),
         FRADUBIO           = GetFirstID('Fradubio'),
+        GIOLLEMITTE        = GetFirstID('Giollemitte_B_Feroun'),
+        KING_ARTHRO        = GetFirstID('King_Arthro'),
         METEORMAULER       = GetFirstID('Meteormauler_Zhagtegg'),
-        CERNUNNOS          = GetFirstID('Cernunnos'),
+        PANZER_PERCIVAL    = GetTableOfIDs('Panzer_Percival'), -- 2 NMs
+        SUPPLESPINE_MUJWUJ = GetFirstID('Supplespine_Mujwuj'),
 
         VOIDWALKER =
         {
@@ -102,6 +106,7 @@ zones[xi.zone.JUGNER_FOREST] =
         OVERSEER_BASE = GetFirstID('Chaplion_RK'),
         LOGGING       = GetTableOfIDs('Logging_Point'),
         SIGNPOST      = GetTableOfIDs('Signpost'),
+        TIMELYVISITQM = GetFirstID('qm1'),
     },
 }
 

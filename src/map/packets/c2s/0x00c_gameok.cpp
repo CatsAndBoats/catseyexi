@@ -26,6 +26,7 @@
 #include "packets/inventory_size.h"
 #include "packets/jobpoint_details.h"
 #include "packets/menu_config.h"
+#include "treasure_pool.h"
 #include "utils/charutils.h"
 #include "utils/petutils.h"
 

@@ -175,7 +175,7 @@ enum MSGBASIC_ID : uint16
     MSGBASIC_CHECKPARAM_ILVL            = 731,
     MSGBASIC_CHECKPARAM_NAME            = 733,
     MSGBASIC_AUTO_EXCEEDS_CAPACITY      = 745, // Your automaton exceeds one or more elemental capacity values and cannot be activated.
-    MSGBASIC_MOUNT_REQUIRED_LEVEL       = 775, // You are unable to call forth your mount because your main job level is not at least <level>.
+    MSGBASIC_MOUNT_REQUIRED_LEVEL       = 773, // You are unable to call forth your mount because your main job level is not at least <level>.
 };
 
 class CBaseEntity;

@@ -23,9 +23,11 @@
 
 #include "common/logging.h"
 
-MapSocket::MapSocket(uint16 port, ReceiveFn onReceiveFn)
+MapSocket::MapSocket(asio::io_context& io_context, const uint16 port, const ReceiveFn& onReceiveFn)
 : port_(port)
-, socket_(io_context_)
+, io_context_(io_context)
+, socket_(io_context)
+, isRunning(true)
 , onReceiveFn_(onReceiveFn)
 {
     TracyZoneScoped;
@@ -69,7 +71,10 @@ void MapSocket::startReceive()
 
             onReceiveFn_(ec, buffer, ipp);
 
-            startReceive(); // Queue up more work
+            if (!io_context_.stopped() && socket_.is_open())
+            {
+                startReceive(); // Queue up more work
+            }
         });
 }
 
@@ -83,7 +88,10 @@ void MapSocket::recvFor(timer::duration duration)
     // Once run_for() or run() return the io_context enters a stopped state,
     // even if there are still pending asynchronous operations. You need to
     // call restart() to clear that state before you can run it again.
-    io_context_.restart();
+    if (isRunning)
+    {
+        io_context_.restart();
+    }
 }
 
 void MapSocket::send(const IPP& ipp, std::span<uint8> buffer)
@@ -110,4 +118,10 @@ void MapSocket::send(const IPP& ipp, std::span<uint8> buffer)
 
     // This will only be called in the middle of a doSocketsFor() call, so we don't
     // need to enqueue more work when we're done here.
+}
+
+void MapSocket::requestExit()
+{
+    isRunning = false;
+    io_context_.stop();
 }

@@ -38,6 +38,7 @@ extern sol::state lua;
 
 #include "common/xi.h"
 
+#include "attack.h"
 #include "items/item_equipment.h"
 #include "spell.h"
 
@@ -211,7 +212,7 @@ namespace luautils
     void PopulateIDLookupsByZone(std::optional<uint16> maybeZoneId = std::nullopt);
 
     void SendEntityVisualPacket(uint32 npcid, const char* command);
-    void InitInteractionGlobal();
+    void InitInteractionGlobal(const std::vector<uint16>& zoneIds);
     auto GetZone(uint16 zoneId) -> CZone*;
     auto GetItemByID(uint32 itemId) -> CItem*;
     auto GetNPCByID(uint32 npcid, sol::object const& instanceObj) -> CBaseEntity*;
@@ -269,6 +270,7 @@ namespace luautils
     uint8  VanadielMoonDirection();
     uint8  VanadielRSERace();
     uint8  VanadielRSELocation();
+    void   SetTimeOffset(int32 offset); // Manipulate earth time forward or backward by offset seconds. Affects Vana'Diel time.
     bool   IsMoonNew();
     bool   IsMoonFull();
     void   StartElevator(uint32 ElevatorID);
@@ -337,6 +339,7 @@ namespace luautils
     int32 OnMagicCastingCheck(CBaseEntity* PChar, CBaseEntity* PTarget, CSpell* PSpell);
     int32 OnSpellCast(CBattleEntity* PCaster, CBattleEntity* PTarget, CSpell* PSpell);
     void  OnSpellPrecast(CBattleEntity* PCaster, CSpell* PSpell);
+    void  OnSpellInterrupted(CBattleEntity* PCaster, CSpell* PSpell);
     auto  OnMobMagicPrepare(CBattleEntity* PCaster, CBattleEntity* PTarget, std::optional<SpellID> startingSpellId) -> std::optional<SpellID>;
     void  OnMagicHit(CBattleEntity* PCaster, CBattleEntity* PTarget, CSpell* PSpell);
     void  OnWeaponskillHit(CBattleEntity* PMob, CBaseEntity* PAttacker, uint16 PWeaponskill);
@@ -345,6 +348,7 @@ namespace luautils
     void OnMobInitialize(CBaseEntity* PMob);
     void ApplyMixins(CBaseEntity* PMob);
     void ApplyZoneMixins(CBaseEntity* PMob);
+    auto OnMobSpawnCheck(CBaseEntity* PMob) -> int32;
     void OnMobSpawn(CBaseEntity* PMob);
     void OnMobRoamAction(CBaseEntity* PMob); // triggers when event mob is ready for a custom roam action
     void OnMobRoam(CBaseEntity* PMob);
@@ -413,7 +417,6 @@ namespace luautils
 
     uint32 GetMobRespawnTime(uint32 mobid);
     void   DisallowRespawn(uint32 mobid, bool allowRespawn);
-    void   UpdateNMSpawnPoint(uint32 mobid);
 
     std::string GetServerMessage(uint8 language);               // Get the message to be delivered to player on first zone in of a session
     auto        GetRecentFishers(uint16 minutes) -> sol::table; // returns a list of recently active fishers (that fished in the last specified minutes)

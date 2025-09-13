@@ -75,9 +75,19 @@ CPetSkillState::CPetSkillState(CPetEntity* PEntity, uint16 targid, uint16 wsid)
 
         actionTarget.reaction   = REACTION::NONE;
         actionTarget.speceffect = SPECEFFECT::NONE;
-        actionTarget.animation  = 0;
-        actionTarget.param      = m_PSkill->getID();
-        actionTarget.messageID  = 326; // Seems hardcoded? TODO: Verify on more pet actions. Tested on Wyvern and SMN BPs.
+        if (m_PSkill->getMobSkillID() > 0)
+        {
+            actionTarget.animation = 94;
+            actionTarget.param     = m_PSkill->getMobSkillID();
+            actionTarget.messageID = 43; // Seems hardcoded for all jug pet skills that finish as a mob skill
+        }
+        else
+        {
+            actionTarget.animation = 0;
+            actionTarget.param     = m_PSkill->getID();
+            actionTarget.messageID = 326; // Seems hardcoded? TODO: Verify on more pet actions. Tested on Wyvern and SMN BPs.
+        }
+
         m_PEntity->loc.zone->PushPacket(m_PEntity, CHAR_INRANGE, std::make_unique<CActionPacket>(action));
     }
     m_PEntity->PAI->EventHandler.triggerListener("WEAPONSKILL_STATE_ENTER", m_PEntity, m_PSkill->getID());

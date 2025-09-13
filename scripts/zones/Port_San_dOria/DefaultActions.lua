@@ -35,7 +35,7 @@ return {
     ['Noquerelle']   = { event = 583 },
     ['Parcarin']     = { event = 566 },
     ['Phersula']     = { event = 775 },
-    ['Portaure']     = { event = 651 },
+    ['Portaure']     = { event = 650 },
     ['Prietta']      = { event = 596 },
     ['Rielle']       = { event = 564 },
     ['Sheridan']     = { event = 572 },

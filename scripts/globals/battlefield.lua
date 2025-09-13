@@ -183,7 +183,7 @@ xi.battlefield.id =
     WHOM_WILT_THOU_CALL                        = 132,
     SHADOW_LORD_BATTLE                         = 160,
     WHERE_TWO_PATHS_CONVERGE                   = 161,
-    KINDRED_SPIRITS                            = 162,
+    KINDRED_SPIRITS                            = 162, -- Experimental
     SURVIVAL_OF_THE_WISEST                     = 163,
     SMASH_A_MALEVOLENT_MENACE                  = 164, -- Experimental
     THROUGH_THE_QUICKSAND_CAVES                = 192, -- Converted
@@ -866,6 +866,7 @@ function Battlefield:onEntryEventUpdate(player, csid, option, npc)
         for _, member in pairs(alliance) do
             if
                 member:getZoneID() == zone and
+                member:getStatus() ~= xi.status.DISAPPEAR and
                 not member:hasStatusEffect(xi.effect.BATTLEFIELD) and
                 not member:getBattlefield()
             then
@@ -1103,6 +1104,24 @@ function Battlefield:onBattlefieldEnter(player, battlefield)
         end
     end
 
+    -- Handle mob initial spell casts (blaze spikes, protect, etc)
+    if player:getID() == initiatorId then
+        local mobs = battlefield:getMobs(true, true)
+        for _, mob in pairs(mobs) do
+            if mob:isSpawned() then
+                -- wait until initiator is out of cutscene
+                mob:addListener('ROAM_TICK', 'FIRST_CAST', function(mobArg)
+                    local firstPlayer = GetPlayerByID(initiatorId)
+                    if firstPlayer and not firstPlayer:isInEvent() then
+                        mobArg:castSpell()
+
+                        mobArg:removeListener('FIRST_CAST')
+                    end
+                end)
+            end
+        end
+    end
+
     local ID = zones[self.zoneId]
     player:messageSpecial(ID.text.ENTERING_THE_BATTLEFIELD_FOR, 0, self.index)
 
@@ -1250,9 +1269,13 @@ function Battlefield:handleLootRolls(battlefield, lootTable, npc)
         if lootGroup then
             local max = 0
 
-            for _, entry in pairs(lootGroup) do
+            for j, entry in pairs(lootGroup) do
                 if type(entry) == 'table' then
                     max = max + entry.weight
+
+                    if entry.item == nil then
+                        print(fmt('[ERROR] Battlefield ({}) has nil item at index {} of lootgroup with index {}', battlefield:getID(), j, i))
+                    end
                 end
             end
 
@@ -1267,7 +1290,7 @@ function Battlefield:handleLootRolls(battlefield, lootTable, npc)
                         current = current + entry.weight
 
                         if current >= roll then
-                            if entry.item == 0 then
+                            if entry.item == 0 or entry.item == nil then
                                 break
                             end
 

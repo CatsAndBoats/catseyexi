@@ -8,6 +8,7 @@ zones[xi.zone.SOUTHERN_SAN_DORIA] =
     text =
     {
         HOMEPOINT_SET                  = 24,    -- Home point set!
+        ASSIST_CHANNEL                 = 6424,  -- You will be able to use the Assist Channel until #/#/# at #:# (JST).
         ITEM_CANNOT_BE_OBTAINED        = 6429,  -- You cannot obtain the <item>. Come back after sorting your inventory.
         CANNOT_OBTAIN_THE_ITEM         = 6431,  -- You cannot obtain the item. Come back after sorting your inventory.
         FULL_INVENTORY_AFTER_TRADE     = 6433,  -- You cannot obtain the <item>. Try trading again after sorting your inventory.

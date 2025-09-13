@@ -21,6 +21,7 @@
 
 #include "0x0dc_config.h"
 
+#include "aman.h"
 #include "entities/charentity.h"
 #include "packets/char_appearance.h"
 #include "packets/char_status.h"
@@ -81,7 +82,7 @@ void GP_CLI_COMMAND_CONFIG::process(MapSession* PSession, CCharEntity* PChar) co
     // Flag set if the client has enabled mentor status. (/mentor)
     if (MentorFlg && PChar->playerConfig.MentorFlg != value)
     {
-        if (PChar->m_mentorUnlocked)
+        if (PChar->aman().hasMentorUnlocked())
         {
             updated                       = true;
             PChar->playerConfig.MentorFlg = value;

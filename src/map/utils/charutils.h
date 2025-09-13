@@ -98,12 +98,14 @@ namespace charutils
     void   AddCapacityPoints(CCharEntity* PChar, CBaseEntity* PMob, uint32 capacityPoints, int16 levelDiff = 0, bool isCapacityChain = false);
     void   DistributeCapacityPoints(CCharEntity* PChar, CMobEntity* PMob);
 
-    void TrySkillUP(CCharEntity* PChar, SKILLTYPE SkillID, uint8 lvl, bool forceSkillUp = false, bool useSubSkill = false);
-    void BuildingCharSkillsTable(CCharEntity* PChar);
-    void BuildingCharWeaponSkills(CCharEntity* PChar);
-    void BuildingCharAbilityTable(CCharEntity* PChar);
-    void BuildingCharTraitsTable(CCharEntity* PChar);
-    void BuildingCharPetAbilityTable(CCharEntity* PChar, CPetEntity* PPet, uint32 PetID);
+    void  TrySkillUP(CCharEntity* PChar, SKILLTYPE SkillID, uint8 lvl, bool forceSkillUp = false, bool useSubSkill = false);
+    bool  isArtsBonusActive(CCharEntity* PChar, SKILLTYPE SkillID);
+    int16 ArtsBonusSkill(CCharEntity* PChar, SKILLTYPE SkillID);
+    void  BuildingCharSkillsTable(CCharEntity* PChar);
+    void  BuildingCharWeaponSkills(CCharEntity* PChar);
+    void  BuildingCharAbilityTable(CCharEntity* PChar);
+    void  BuildingCharTraitsTable(CCharEntity* PChar);
+    void  BuildingCharPetAbilityTable(CCharEntity* PChar, CPetEntity* PPet, uint32 PetID);
 
     void DoTrade(CCharEntity* PChar, CCharEntity* PTarget);
     bool CanTrade(CCharEntity* PChar, CCharEntity* PTarget);
@@ -207,6 +209,7 @@ namespace charutils
     void SaveTeleport(CCharEntity* PChar, TELEPORT_TYPE type); // save the character's teleports (homepoints, outposts, maws, etc)
     void SaveDeathTime(CCharEntity* PChar);                    // save when this character last died
     void SavePlayTime(CCharEntity* PChar);                     // save this character's total play time
+    void SaveLastLogout(const CCharEntity* PChar);             // save the last logout time of this character
     bool hasMogLockerAccess(const CCharEntity* PChar);         // true if have access, false otherwise
 
     uint8 getQuestStatus(CCharEntity* PChar, uint8 log, uint8 quest); // Get Quest status (used in FishingUtils.cpp, allows to fish quest specific mobs, like PLD AF NM)
@@ -252,6 +255,7 @@ namespace charutils
     void  SetCharVar(CCharEntity* PChar, std::string const& var, int32 value, uint32 expiry = 0);
     int32 ClearCharVarsWithPrefix(CCharEntity* PChar, std::string const& prefix);
     void  ClearCharVarFromAll(std::string const& varName, bool localOnly = false);
+    void  IncrementCharVar(uint32 charId, std::string const& var, int32 value);
     void  IncrementCharVar(CCharEntity* PChar, std::string const& var, int32 value);
 
     auto FetchCharVar(uint32 charId, std::string const& var) -> std::pair<int32, uint32>;

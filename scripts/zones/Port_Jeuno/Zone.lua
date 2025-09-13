@@ -9,7 +9,6 @@ zoneObject.onInitialize = function(zone)
 end
 
 zoneObject.onZoneIn = function(player, prevZone)
-    local cs = -1
     local month = JstMonth()
     local day = JstDayOfTheMonth()
 
@@ -28,24 +27,21 @@ zoneObject.onZoneIn = function(player, prevZone)
         player:getZPos() == 0
     then
         if prevZone == xi.zone.SAN_DORIA_JEUNO_AIRSHIP then
-            cs = 10018
             player:setPos(-87.000, 12.000, 116.000, 128)
+            return 10018
         elseif prevZone == xi.zone.BASTOK_JEUNO_AIRSHIP then
-            cs = 10020
             player:setPos(-50.000, 12.000, -116.000, 0)
+            return 10020
         elseif prevZone == xi.zone.WINDURST_JEUNO_AIRSHIP then
-            cs = 10019
             player:setPos(16.000, 12.000, -117.000, 0)
+            return 10019
         elseif prevZone == xi.zone.KAZHAM_JEUNO_AIRSHIP then
-            cs = 10021
             player:setPos(-24.000, 12.000, 116.000, 128)
-        else
-            local position = math.random(1, 3) - 2
-            player:setPos(-192.5 , -5, position, 0)
+            return 10021
         end
     end
 
-    return cs
+    return xi.moghouse.onMoghouseZoneEvent(player, prevZone)
 end
 
 zoneObject.onConquestUpdate = function(zone, updatetype, influence, owner, ranking, isConquestAlliance)

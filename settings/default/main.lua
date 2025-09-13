@@ -54,6 +54,11 @@ xi.settings.main =
     DAILY_TALLY_LIMIT  = 50000,
     GOBBIE_BOX_MIN_AGE = 45, -- Minimum character age in days before a character can sign up for Gobbie Mystery Box
 
+    -- A.M.A.N.
+    ASSIST_CHANNEL_ENABLED            = true, -- Enable Assist Channel
+    ASSIST_CHANNEL_MEMBERSHIP_LENGTH  = 240,  -- How long returnees and new players will have access to the assist channel, in playtime hours.
+    ASSIST_CHANNEL_RETURNEE_LOGIN_GAP =  48,  -- How many days must have elapsed before returnees are added to the assist channel.
+
     -- Records of Eminence
     ENABLE_ROE            = 1, -- Enable Records of Eminence
     ENABLE_ROE_TIMED      = 1, -- Enable 4-hour timed records

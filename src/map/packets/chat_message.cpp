@@ -21,6 +21,7 @@
 
 #include "chat_message.h"
 
+#include "common/ipc_structs.h"
 #include "entities/charentity.h"
 #include <cstring>
 
@@ -83,4 +84,27 @@ CChatMessagePacket::CChatMessagePacket(const std::string& name, uint16 zone, CHA
 
     std::memcpy(buffer_.data() + 0x08, &name[0], std::min(name.size(), (size_t)0xF));
     std::memcpy(buffer_.data() + 0x17, &message[0], buffSize);
+}
+
+CChatMessagePacket::CChatMessagePacket(const ipc::ChatMessageAssist& payload)
+{
+    const auto buffSize = std::min<size_t>(payload.message.size(), 236);
+
+    // Build the packet.
+    this->setType(0x17);
+
+    this->setSize(0x104);
+
+    ref<uint8>(0x04) = payload.messageType;
+
+    if (payload.gmLevel >= 3)
+    {
+        ref<uint8>(0x05) = 0x01;
+    }
+
+    ref<uint16>(0x06) = payload.mentorRank ? payload.masteryRank : 0;
+    ref<uint16>(0x07) = payload.mentorRank;
+
+    std::memcpy(buffer_.data() + 0x08, &payload.senderName[0], std::min(payload.senderName.size(), static_cast<size_t>(0xF)));
+    std::memcpy(buffer_.data() + 0x17, &payload.message[0], buffSize);
 }

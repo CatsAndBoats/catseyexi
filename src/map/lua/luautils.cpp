@@ -46,19 +46,7 @@
 #include "lua_zone.h"
 
 #include "ai/ai_container.h"
-#include "ai/states/ability_state.h"
-#include "ai/states/attack_state.h"
-#include "ai/states/death_state.h"
-#include "ai/states/inactive_state.h"
-#include "ai/states/item_state.h"
-#include "ai/states/magic_state.h"
-#include "ai/states/mobskill_state.h"
-#include "ai/states/raise_state.h"
-#include "ai/states/range_state.h"
-#include "ai/states/respawn_state.h"
-#include "ai/states/weaponskill_state.h"
 
-#include "entities/automatonentity.h"
 #include "entities/baseentity.h"
 #include "entities/charentity.h"
 #include "entities/mobentity.h"
@@ -68,7 +56,6 @@
 #include "packets/action.h"
 #include "packets/char_emotion.h"
 #include "packets/chat_message.h"
-#include "packets/entity_update.h"
 #include "packets/entity_visual.h"
 #include "packets/menu_raisetractor.h"
 
@@ -84,22 +71,17 @@
 #include "utils/zoneutils.h"
 
 #include "ability.h"
-#include "alliance.h"
 #include "battlefield.h"
-#include "campaign_system.h"
 #include "conquest_system.h"
 #include "daily_system.h"
 #include "fishingcontest.h"
 #include "instance.h"
 #include "ipc_client.h"
-#include "los/zone_los.h"
-#include "map_networking.h"
-#include "map_server.h"
+#include "map_engine.h"
 #include "mob_modifier.h"
 #include "mobskill.h"
 #include "monstrosity.h"
 #include "navmesh.h"
-#include "party.h"
 #include "petskill.h"
 #include "roe.h"
 #include "spell.h"
@@ -107,11 +89,9 @@
 #include "timetriggers.h"
 #include "trade_container.h"
 #include "transport.h"
-#include "treasure_pool.h"
 #include "weapon_skill.h"
 #include "zone.h"
 #include "zone_entities.h"
-#include "zone_instance.h"
 
 #include <array>
 #include <filesystem>
@@ -302,6 +282,7 @@ namespace luautils
         lua.set_function("VanadielMoonDirection", &luautils::VanadielMoonDirection);
         lua.set_function("VanadielRSERace", &luautils::VanadielRSERace);
         lua.set_function("VanadielRSELocation", &luautils::VanadielRSELocation);
+        lua.set_function("SetTimeOffset", &luautils::SetTimeOffset);
         lua.set_function("IsMoonNew", &luautils::IsMoonNew);
         lua.set_function("IsMoonFull", &luautils::IsMoonFull);
         lua.set_function("RunElevator", &luautils::StartElevator);
@@ -316,7 +297,6 @@ namespace luautils
         lua.set_function("SendEntityVisualPacket", &luautils::SendEntityVisualPacket);
         lua.set_function("GetMobRespawnTime", &luautils::GetMobRespawnTime);
         lua.set_function("DisallowRespawn", &luautils::DisallowRespawn);
-        lua.set_function("UpdateNMSpawnPoint", &luautils::UpdateNMSpawnPoint);
         lua.set_function("GetRecentFishers", &luautils::GetRecentFishers);
         lua.set_function("NearLocation", &luautils::NearLocation);
         lua.set_function("GetFurthestValidPosition", &luautils::GetFurthestValidPosition);
@@ -1246,19 +1226,12 @@ namespace luautils
         return PNpc;
     }
 
-    void InitInteractionGlobal()
+    void InitInteractionGlobal(const std::vector<uint16>& zoneIds)
     {
         auto initZones = lua["InteractionGlobal"]["initZones"];
+        auto table     = sol::as_table(zoneIds);
 
-        std::vector<uint16> zoneIds;
-        // clang-format off
-        zoneutils::ForEachZone([&zoneIds](CZone* PZone)
-        {
-            zoneIds.emplace_back(PZone->GetID());
-        });
-        // clang-format on
-
-        auto result = initZones(zoneIds);
+        auto result = initZones(table);
 
         if (!result.valid())
         {
@@ -1649,6 +1622,14 @@ namespace luautils
         return vanadiel_time::rse::get_location();
     }
 
+    void SetTimeOffset(const int32 offset)
+    {
+        TracyZoneScoped;
+
+        earth_time::reset_offset();
+        earth_time::add_offset(std::chrono::seconds(offset));
+    }
+
     bool IsMoonNew()
     {
         TracyZoneScoped;
@@ -2007,7 +1988,7 @@ namespace luautils
             prevZoneStr = prevZone->getName();
         }
 
-        auto name     = PChar->m_moghouseID ? "Residential_Area" : destinationZone->getName();
+        auto name     = destinationZone->getName();
         auto filename = fmt::format("./scripts/zones/{}/Zone.lua", name);
 
         ShowTraceFmt("luautils::OnZoneIn: {}: {} -> {}", PChar->getName(), prevZoneStr, name);
@@ -2845,6 +2826,30 @@ namespace luautils
         }
     }
 
+    void OnSpellInterrupted(CBattleEntity* PCaster, CSpell* PSpell)
+    {
+        TracyZoneScoped;
+
+        if (PCaster->objtype != TYPE_MOB)
+        {
+            return;
+        }
+
+        sol::function onSpellInterrupted = getEntityCachedFunction(PCaster, "onSpellInterrupted");
+        if (!onSpellInterrupted.valid())
+        {
+            return;
+        }
+
+        auto result = onSpellInterrupted(PCaster, PSpell);
+        if (!result.valid())
+        {
+            sol::error err = result;
+            ShowError("luautils::onSpellInterrupted: %s", err.what());
+            ReportErrorToPlayer(PCaster, err.what());
+        }
+    }
+
     std::optional<SpellID> OnMobMagicPrepare(CBattleEntity* PCaster, CBattleEntity* PTarget, std::optional<SpellID> startingSpellId)
     {
         TracyZoneScoped;
@@ -2952,6 +2957,7 @@ namespace luautils
         return result.get_type(0) == sol::type::boolean ? result.get<bool>(0) : true;
     }
 
+    // Party building is performed after this, so it's safe to set link/superlink behavior in onMobInitialize
     void OnMobInitialize(CBaseEntity* PMob)
     {
         TracyZoneScoped;
@@ -3465,6 +3471,27 @@ namespace luautils
         }
     }
 
+    int32 OnMobSpawnCheck(CBaseEntity* PMob)
+    {
+        TracyZoneScoped;
+
+        auto onMobSpawnCheck = getEntityCachedFunction(PMob, "onMobSpawnCheck");
+        if (!onMobSpawnCheck.valid())
+        {
+            return 0;
+        }
+
+        auto result = onMobSpawnCheck(PMob);
+        if (!result.valid())
+        {
+            sol::error err = result;
+            ShowError("luautils::onMobSpawnCheck: %s", err.what());
+            return 0;
+        }
+
+        return result.get_type(0) == sol::type::number ? result.get<int32>(0) : 0;
+    }
+
     void OnMobSpawn(CBaseEntity* PMob)
     {
         TracyZoneScoped;
@@ -3474,18 +3501,18 @@ namespace luautils
             return;
         }
 
-        sol::function onMobSpawn = getEntityCachedFunction(PMob, "onMobSpawn");
-        if (!onMobSpawn.valid())
+        const sol::function onMobSpawn = getEntityCachedFunction(PMob, "onMobSpawn");
+        if (onMobSpawn.valid())
         {
-            return;
+            const auto result = onMobSpawn(PMob);
+            if (!result.valid())
+            {
+                sol::error err = result;
+                ShowError("luautils::onMobSpawn: %s", err.what());
+            }
         }
 
-        auto result = onMobSpawn(PMob);
-        if (!result.valid())
-        {
-            sol::error err = result;
-            ShowError("luautils::onMobSpawn: %s", err.what());
-        }
+        PMob->PAI->EventHandler.triggerListener("SPAWN", PMob);
     }
 
     void OnMobRoamAction(CBaseEntity* PMob)
@@ -4809,45 +4836,6 @@ namespace luautils
         }
     }
 
-    void UpdateNMSpawnPoint(uint32 mobid)
-    {
-        TracyZoneScoped;
-
-        CMobEntity* PMob = (CMobEntity*)zoneutils::GetEntity(mobid, TYPE_MOB);
-        if (PMob != nullptr)
-        {
-            int32 r = 0;
-
-            const auto rset = db::preparedStmt("SELECT COUNT(mobid) FROM `nm_spawn_points` WHERE mobid = ?", mobid);
-            if (rset && rset->rowsCount() && rset->next() && rset->get<uint32>(0) > 0)
-            {
-                r = xirand::GetRandomNumber(rset->get<uint32>(0));
-            }
-            else
-            {
-                ShowDebug("UpdateNMSpawnPoint: SQL error: No entries for mobid <%u> found.", mobid);
-                return;
-            }
-
-            const auto rset2 = db::preparedStmt("SELECT pos_x, pos_y, pos_z FROM `nm_spawn_points` WHERE mobid = ? AND pos = ?", mobid, r);
-            if (rset2 && rset2->rowsCount() && rset2->next())
-            {
-                PMob->m_SpawnPoint.rotation = xirand::GetRandomNumber(256);
-                PMob->m_SpawnPoint.x        = rset2->get<float>(0);
-                PMob->m_SpawnPoint.y        = rset2->get<float>(1);
-                PMob->m_SpawnPoint.z        = rset2->get<float>(2);
-            }
-            else
-            {
-                ShowDebug("UpdateNMSpawnPoint: SQL error or NM <%u> not found in nmspawnpoints table.", mobid);
-            }
-        }
-        else
-        {
-            ShowDebug("UpdateNMSpawnPoint: mob <%u> not found", mobid);
-        }
-    }
-
     /************************************************************************
      *                                                                       *
      *  Get Mob Respawn Time in seconds by Mob ID.                           *
@@ -4976,6 +4964,12 @@ namespace luautils
 
     sol::table GetFurthestValidPosition(CLuaBaseEntity* fromTarget, float distance, float theta)
     {
+        if (!fromTarget || !fromTarget->GetBaseEntity())
+        {
+            ShowError("luautils::GetFurthestValidPosition: fromTarget is null or invalid");
+            return sol::lua_nil;
+        }
+
         CBaseEntity* entity = fromTarget->GetBaseEntity();
         position_t   pos    = nearPosition(entity->loc.p, distance, theta);
 
@@ -5583,6 +5577,14 @@ namespace luautils
             luautils::OnEntityLoad(PMob);
 
             luautils::OnMobInitialize(PMob);
+            if (PInstance)
+            {
+                PInstance->FindPartyForMob(PMob);
+            }
+            else
+            {
+                PZone->FindPartyForMob(PMob);
+            }
             luautils::ApplyMixins(PMob);
             luautils::ApplyZoneMixins(PMob);
 

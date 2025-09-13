@@ -8,6 +8,7 @@ zones[xi.zone.WINDURST_WALLS] =
     text =
     {
         CONQUEST_BASE                  = 0,     -- Tallying conquest results...
+        ASSIST_CHANNEL                 = 6539,  -- You will be able to use the Assist Channel until #/#/# at #:# (JST).
         ITEM_CANNOT_BE_OBTAINED        = 6544,  -- You cannot obtain the <item>. Come back after sorting your inventory.
         FULL_INVENTORY_AFTER_TRADE     = 6548,  -- You cannot obtain the <item>. Try trading again after sorting your inventory.
         ITEM_OBTAINED                  = 6550,  -- Obtained: <item>.
@@ -41,7 +42,7 @@ zones[xi.zone.WINDURST_WALLS] =
         EARNED_ALLIED_NOTES            = 9657,  -- You have earned <number> Allied Note[/s]!
         OBTAINED_GUILD_POINTS          = 9658,  -- Obtained: <number> guild points.
         TEAR_IN_FABRIC_OF_SPACE        = 10870, -- There appears to be a tear in the fabric of space...
-        UNABLE_RACE_CHANGE             = 11470, -- You were unable to use the specified appearance for your character.
+        UNABLE_RACE_CHANGE             = 11475, -- You were unable to use the specified appearance for your character.
     },
     mob =
     {

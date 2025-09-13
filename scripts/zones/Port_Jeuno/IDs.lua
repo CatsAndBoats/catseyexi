@@ -7,6 +7,7 @@ zones[xi.zone.PORT_JEUNO] =
 {
     text =
     {
+        ASSIST_CHANNEL                = 6380, -- You will be able to use the Assist Channel until #/#/# at #:# (JST).
         ITEM_CANNOT_BE_OBTAINED       = 6385, -- You cannot obtain the <item>. Come back after sorting your inventory.
         MYSTIC_RETRIEVER              = 6388, -- You cannot obtain the <item>. Speak with the mystic retriever after sorting your inventory.
         ITEM_OBTAINED                 = 6391, -- Obtained: <item>.
@@ -30,6 +31,8 @@ zones[xi.zone.PORT_JEUNO] =
         COUNTER_NPC                   = 7085, -- I think the airships are a subtle form of pressure on the other three nations. That way, Jeuno can maintain the current balance of power.
         DEPARTURE_NPC                 = 7094, -- Have a safe flight!
         ARRIVAL_NPC                   = 7095, -- Enjoy your stay in Jeuno!
+        CONFISCATED                   = 7102, -- Your <keyitem> have been confiscated. You are temporarily suspended from boarding airships in Jeuno.
+        CLEARED_CUSTOMS               = 7106, -- You have cleared customs.
         DAPOL_DIALOG                  = 7108, -- Welcome to Port Jeuno, the busiest airship hub anywhere! You can't miss the awe-inspiring view of airships in flight!
         SECURITY_DIALOG               = 7111, -- Port Jeuno must remain secure. After all, if anything happened to the archduke, it would change the world!
         MOGHOUSE_EXIT                 = 7192, -- You have learned your way through the back alleys of Jeuno! Now you can exit to any area from your residence.

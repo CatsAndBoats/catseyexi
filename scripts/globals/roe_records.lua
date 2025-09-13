@@ -3138,7 +3138,7 @@ xi.roe.records =
     [228] =
     { -- Subjugation: Bloodsucker
         trigger = xi.roeTrigger.DEFEAT_MOB,
-        reqs = { mobID = set { 17461478 } },
+        reqs = { mobID = set { 17461478 } }, -- note that this mob's lua name is Bloodsucker_NM
         reward = { sparks = 500, exp = 1000 },
     },
 

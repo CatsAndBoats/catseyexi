@@ -27,6 +27,7 @@
 #include "ai/helpers/targetfind.h"
 #include "ai/states/attack_state.h"
 #include "ai/states/mobskill_state.h"
+#include "ai/states/respawn_state.h"
 #include "ai/states/weaponskill_state.h"
 #include "battlefield.h"
 #include "common/timer.h"
@@ -133,6 +134,7 @@ CMobEntity::CMobEntity()
 , m_HiPCLvl(0)
 , m_HiPartySize(0)
 , m_THLvl(0)
+, m_GilfinderLevel(0)
 , m_ItemStolen(false)
 , m_ItemDespoiled(false)
 , m_Family(0)
@@ -141,6 +143,7 @@ CMobEntity::CMobEntity()
 , m_Pool(0)
 , m_flags(0)
 , m_name_prefix(0)
+, m_spawnGroup(nullptr)
 , m_unk0(0)
 , m_unk1(8)
 , m_unk2(0)
@@ -389,6 +392,29 @@ bool CMobEntity::CanLink(position_t* pos, int16 superLink)
     return true;
 }
 
+bool CMobEntity::ShouldForceLink()
+{
+    // There are certain cases where mobs should always be able
+    // to link with other mobs, even if their families or sublinks
+    // do not align
+    if (loc.zone->GetTypeMask() & ZONE_TYPE::DYNAMIS)
+    {
+        return true;
+    }
+
+    if (m_Type & MOBTYPE_BATTLEFIELD)
+    {
+        return true;
+    }
+
+    if (getMobMod(MOBMOD_SUPERLINK))
+    {
+        return true;
+    }
+
+    return false;
+}
+
 bool CMobEntity::CanDeaggro() const
 {
     return !(m_Type & MOBTYPE_NOTORIOUS || m_Type & MOBTYPE_BATTLEFIELD);
@@ -590,18 +616,29 @@ bool CMobEntity::ValidTarget(CBattleEntity* PInitiator, uint16 targetFlags)
     return false;
 }
 
+bool CMobEntity::CanSpawnFromGroup()
+{
+    if (!m_spawnGroup)
+    {
+        return true;
+    }
+
+    return m_spawnGroup->isInSpawnPool(this->targid);
+}
+
 void CMobEntity::Spawn()
 {
     TracyZoneScoped;
     CBattleEntity::Spawn();
-    m_giveExp       = true;
-    m_HiPCLvl       = 0;
-    m_HiPartySize   = 0;
-    m_THLvl         = 0;
-    m_ItemStolen    = false;
-    m_ItemDespoiled = false;
-    m_DropItemTime  = 1000ms;
-    animationsub    = (uint8)getMobMod(MOBMOD_SPAWN_ANIMATIONSUB);
+    m_giveExp        = true;
+    m_HiPCLvl        = 0;
+    m_HiPartySize    = 0;
+    m_THLvl          = 0;
+    m_GilfinderLevel = 0;
+    m_ItemStolen     = false;
+    m_ItemDespoiled  = false;
+    m_DropItemTime   = 1000ms;
+    animationsub     = (uint8)getMobMod(MOBMOD_SPAWN_ANIMATIONSUB);
     SetCallForHelpFlag(false);
 
     PEnmityContainer->Clear();
@@ -643,6 +680,13 @@ void CMobEntity::Spawn()
 
     m_DespawnTimer = timer::time_point::min();
     luautils::OnMobSpawn(this);
+
+    // Set the despawn time if the mob has a non-zero idle despawn time modifier.
+    // This is used to despawn mobs that are not engaged in combat after a certain time.
+    if (getMobMod(MOBMOD_IDLE_DESPAWN) > 0)
+    {
+        SetDespawnTime(std::chrono::seconds(getMobMod(MOBMOD_IDLE_DESPAWN)));
+    }
 }
 
 void CMobEntity::OnWeaponSkillFinished(CWeaponSkillState& state, action_t& action)
@@ -1148,6 +1192,29 @@ void CMobEntity::OnDespawn(CDespawnState& /*unused*/)
 {
     TracyZoneScoped;
     FadeOut();
+
+    if (m_spawnGroup)
+    {
+        auto replacementTargID = m_spawnGroup->removeAndReplaceWithRandomMember(this->targid);
+        if (replacementTargID != this->targid) // Respawn normally if we got selected again, otherwise poke the replacement to do so
+        {
+            auto PMob = this->loc.zone->GetEntity(replacementTargID);
+            if (PMob && PMob->PAI)
+            {
+                // Check if replacement can switch into respawn state with our current respawn time
+                // if Internal_Respawn returns true, the mob will switch into respawn state with m_RespawnTime (should it be the target mob's respawn time?)
+                if (!PMob->PAI->Internal_Respawn(m_RespawnTime))
+                {
+                    // If they're already in the respawn state...
+                    if (PMob->PAI->IsCurrentState<CRespawnState>())
+                    {
+                        PMob->PAI->GetCurrentState()->ResetEntryTime(); // Reset their despawn time
+                    }
+                }
+            }
+        }
+    }
+
     PAI->Internal_Respawn(m_RespawnTime);
     luautils::OnMobDespawn(this);
     // #event despawn
@@ -1188,7 +1255,9 @@ void CMobEntity::Die()
 
             DistributeRewards();
             m_OwnerID.clean();
-            m_THLvl = 0;
+
+            m_THLvl          = 0;
+            m_GilfinderLevel = 0;
         }
     }));
     // clang-format on

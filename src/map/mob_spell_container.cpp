@@ -40,6 +40,7 @@ void CMobSpellContainer::ClearSpells()
     m_healList.clear();
     m_naList.clear();
     m_raiseList.clear();
+    m_severeList.clear();
     m_hasSpells = false;
 }
 
