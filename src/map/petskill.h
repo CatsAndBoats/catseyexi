@@ -41,6 +41,7 @@ public:
 
     uint16          getID() const;
     uint16          getAnimationID() const;
+    uint16          getMobSkillID() const;
     uint8           getAoe() const;
     float           getDistance() const;
     uint8           getFlag() const;
@@ -66,6 +67,7 @@ public:
 
     void setID(uint16 id);
     void setAnimationID(uint16 aid);
+    void setMobSkillID(uint16 skillID);
     void setAoe(uint8 aoe);
     void setDistance(float distance);
     void setFlag(uint8 flag);
@@ -89,7 +91,8 @@ public:
 
 private:
     uint16          m_ID;
-    uint16          m_AnimID; // animation id
+    uint16          m_AnimID;     // animation id
+    uint16          m_MobSkillID; // mobskill id for jug petskill packet to use instead of JA ability ID
     std::string     m_name;
     uint8           m_Aoe;
     float           m_Distance;

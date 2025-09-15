@@ -8,6 +8,7 @@ zones[xi.zone.PORT_SAN_DORIA] =
     text =
     {
         HOMEPOINT_SET                  = 24,    -- Home point set!
+        ASSIST_CHANNEL                 = 6424,  -- You will be able to use the Assist Channel until #/#/# at #:# (JST).
         ITEM_CANNOT_BE_OBTAINED        = 6429,  -- You cannot obtain the <item>. Come back after sorting your inventory.
         MYSTIC_RETRIEVER               = 6432,  -- You cannot obtain the <item>. Speak with the mystic retriever after sorting your inventory.
         FULL_INVENTORY_AFTER_TRADE     = 6433,  -- You cannot obtain the <item>. Try trading again after sorting your inventory.
@@ -42,6 +43,7 @@ zones[xi.zone.PORT_SAN_DORIA] =
         PICKPOCKET_CORIBALGEANT        = 7669,  -- I'd like to just to take a moogle and-- Ah, pardon me, I was lost in thought. No, I haven't seen anyone suspicious.
         PICKPOCKET_PARCARIN            = 7832,  -- Long live King Destin! Huh? Pickpockets? Can't you see I'm in the middle of something here?
         PICKPOCKET_SOLGIERTE           = 7835,  -- Confound them! Give me a sword and... Eh? A pickpocket? Do I look like I hang out with that sort?
+        LAY_LOW                        = 7861,  -- I'll ask you again once you get your flight privileges back in Jeuno. Best lay low for now.
         FFR_PORTAURE                   = 7862,  -- What's this? A magic shop? Hmm...I could use a new line of work, and magic just might be the ticket!
         PICKPOCKET_SHERIDAN            = 7866,  -- What? A pickpocket? Hey! I may be a loafer, but I'm no thief!
         FFR_ANSWALD                    = 7882,  -- A magic shop? Oh, it's right near here. I'll go check it out sometime.

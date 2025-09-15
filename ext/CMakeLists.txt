@@ -9,7 +9,7 @@ add_subdirectory(sol)
 # CPM Modules
 if(TRACY_ENABLE)
     # Tracy version tag, without the leading 'v'
-    set(TRACY_VERSION 0.11.1)
+    set(TRACY_VERSION 0.12.2)
 
     # Download client library
     CPMAddPackage(
@@ -293,6 +293,10 @@ set(WORLD_ONLY_EXTERNAL_LIBS
     nlohmann_json::nlohmann_json
 )
 
+set(TEST_ONLY_EXTERNAL_LIBS
+    bcrypt
+)
+
 #
 # copy external lib lists to parent scope
 #
@@ -319,5 +323,10 @@ set(SEARCH_ONLY_EXTERNAL_LIBS
 
 set(WORLD_ONLY_EXTERNAL_LIBS
     ${WORLD_ONLY_EXTERNAL_LIBS}
+    PARENT_SCOPE
+)
+
+set(TEST_ONLY_EXTERNAL_LIBS
+    ${TEST_ONLY_EXTERNAL_LIBS}
     PARENT_SCOPE
 )

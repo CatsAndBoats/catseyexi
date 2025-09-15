@@ -65,8 +65,10 @@ xi.msg.area =
 ---@enum xi.basic
 xi.msg.basic =
 {
-    NONE                            = 0, -- Display nothing
-    HIT_DMG                         = 1, -- <actor> hits <target> for <amount> points of damage.
+    NONE                            = 0,  -- Display nothing
+    HIT_DMG                         = 1,  -- <actor> hits <target> for <amount> points of damage.
+    HIT_MISS                        = 15, -- <actor> misses <target>.
+    HIT_CRIT                        = 67, -- <actor> scores a critical hit! <target> takes <amount> points of damage.
 
     -- Magic
     MAGIC_DMG                       = 2,   -- <caster> casts <spell>. <target> takes <amount> damage.
@@ -124,6 +126,7 @@ xi.msg.basic =
     SKILL_ENFEEB                    = 243, -- <user> uses <skill>. <target> receives the effect of <status>.
     SELF_HEAL_SECONDARY             = 263, -- <target> recovers <amount> HP.
     DAMAGE_SECONDARY                = 264, -- <target> takes <amount> points of damage.
+    RECOVERS_MP_SECONDARY           = 276, -- <target> recovers <amount> MP.
     SKILL_GAIN_EFFECT_2             = 319, -- <user> uses <skill>. <target> gains the effect of <status>.
     RANGED_ATTACK_HIT               = 352, -- <user> ranged attack hits <target> for <amount> points of damage.
     RANGED_ATTACK_CRIT              = 353, -- <user> ranged attack scores a critical hit! \n <target> takes <amount> points of damage.
@@ -223,10 +226,11 @@ xi.msg.basic =
     ALREADY_HAVE_KEY_ITEM           = 759, -- You already have key item: <key item>.
 
     -- Distance
-    TARG_OUT_OF_RANGE               = 4,  -- <target> is out of range.
-    UNABLE_TO_SEE_TARG              = 5,  -- Unable to see <target>.
-    LOSE_SIGHT                      = 36, -- You lose sight of <target>.
-    TOO_FAR_AWAY                    = 78, -- <target> is too far away.
+    TARG_OUT_OF_RANGE               = 4,   -- <target> is out of range.
+    TARG_OUT_OF_RANGE_2             = 154, -- <target> is out of range.
+    UNABLE_TO_SEE_TARG              = 5,   -- Unable to see <target>.
+    LOSE_SIGHT                      = 36,  -- You lose sight of <target>.
+    TOO_FAR_AWAY                    = 78,  -- <target> is too far away.
 
     -- Weaponskills
     READIES_WS                      = 43,  -- <actor> readies <weapon_skill>.
@@ -311,20 +315,24 @@ xi.msg.basic =
     RECOVERS_MP                     = 25,  -- <target> recovers <number> MP.
     RECOVERS_HP_AND_MP              = 26,  -- <target> recovers <number> HP and MP.
     IS_PARALYZED_2                  = 84,  -- <target> is paralyzed.
+    DOOM_COUNTER                    = 112, -- <target's> doom counter is now down to <param>.
     IS_STATUS                       = 203, -- <target> is <status>.
     IS_NO_LONGER_STATUS             = 204, -- <target> is no longer <status>.
     GAINS_EFFECT_OF_STATUS          = 205, -- <target> gains the effect of <status>.
     STATUS_WEARS_OFF                = 206, -- <target>'s <status> effect wears off.
     ABOUT_TO_WEAR_OFF               = 251, -- The effect of <status> is about to wear off.
     ALL_ABILITIES_RECHARGED         = 361, -- All of <target>'s abilities are recharged.
+    PETRIFICATION_COUNTER           = 530, -- <target's> petrification counter is now down to <param>.
 
     -- Battlefield
     UNABLE_TO_ACCESS_SJ             = 107, -- <player> is temporarily unable to access support job abilities
     TIME_LEFT                       = 202, -- Time left: (0:00:00)
+    SKILLCHAIN_COSMIC_ELUCIDATION   = 302, -- Skillchain: Cosmic Elucidation. <target> takes <number> points of damage.
 
     -- Dynamis
     TIME_DYNAMIS_EXTENDED           = 448, -- Time allowed in Dynamis has been extended by <param> minutes
     TIME_DYNAMIS_REMAINING          = 449, -- ----== WARNING ==----Time remaining in Dynamis: <param> minutes.
+
     -- Charm
     CHARM_SUCCESS                   = 136, -- <actor> uses charm. <target> is now under the <actor>'s control.
     CHARM_FAIL                      = 137, -- <actor> uses charm. <actor> fails to charm <target>.

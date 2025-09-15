@@ -26,6 +26,10 @@
 
 #include "basic.h"
 
+namespace ipc
+{
+    struct ChatMessageAssist;
+}
 // Extracted from client.
 enum CHAT_MESSAGE_TYPE : uint8
 {
@@ -76,6 +80,7 @@ enum class ChatMessageArea : uint8
     Party  = 3, // Party and Alliance
     Yell   = 4, // Yell zones only
     Unity  = 5, // Currently -all- unities
+    Assist = 6, // Assist zones
 };
 DECLARE_FORMAT_AS_UNDERLYING(ChatMessageArea);
 
@@ -87,4 +92,5 @@ public:
     static const uint16 id{ 0x17 };
     CChatMessagePacket(CCharEntity* PChar, CHAT_MESSAGE_TYPE MessageType, std::string const& message, std::string const& sender = std::string());
     CChatMessagePacket(const std::string& name, uint16 zone, CHAT_MESSAGE_TYPE MessageType, const std::string& message, uint8 gmLevel = 0);
+    CChatMessagePacket(const ipc::ChatMessageAssist& payload);
 };

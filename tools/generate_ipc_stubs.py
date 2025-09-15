@@ -16,7 +16,7 @@ import sys
 IPC_STRUCT_NAMES = [
     "EmptyStruct",
 
-    "CharLogin",
+    "AccountLogin",
     "CharZone",
     "CharVarUpdate",
 
@@ -26,6 +26,7 @@ IPC_STRUCT_NAMES = [
     "ChatMessageLinkshell",
     "ChatMessageUnity",
     "ChatMessageYell",
+    "ChatMessageAssist",
     "ChatMessageServerMessage",
     "ChatMessageCustom",
 
@@ -59,6 +60,8 @@ IPC_STRUCT_NAMES = [
     "EntityInformationResponse",
 
     "SendPlayerToLocation",
+
+    "AssistChannelEvent",
 ]
 
 

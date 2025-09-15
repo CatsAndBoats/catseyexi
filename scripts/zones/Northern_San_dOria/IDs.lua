@@ -11,6 +11,7 @@ zones[xi.zone.NORTHERN_SAN_DORIA] =
         ORIGINAL_MISSION_OFFSET       = 16,    -- Bring me one of those axes, and your mission will be a success. No running away now; we've a proud country to defend!
         HOMEPOINT_SET                 = 188,   -- Home point set!
         NOTHING_HAPPENS               = 327,   -- Nothing happens...
+        ASSIST_CHANNEL                = 6588,  -- You will be able to use the Assist Channel until #/#/# at #:# (JST).
         ITEM_CANNOT_BE_OBTAINED       = 6593,  -- You cannot obtain the <item>. Come back after sorting your inventory.
         ITEM_OBTAINED                 = 6599,  -- Obtained: <item>.
         GIL_OBTAINED                  = 6600,  -- Obtained <number> gil.

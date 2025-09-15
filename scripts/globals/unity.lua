@@ -106,7 +106,7 @@ end
 local function getChangeUnityCost(player, selection)
     local currentRank = player:getUnityRank()
     local newRank     = player:getUnityRank(selection)
-    local changeCost  = (500 * (11 - newRank)) - ((11 - currentRank) * 400)
+    local changeCost  = 500 * (11 - newRank) - 400 * (11 - currentRank)
 
     if changeCost < 100 then
         changeCost = 100
@@ -115,10 +115,10 @@ local function getChangeUnityCost(player, selection)
     return changeCost
 end
 
-function xi.unity.onTrade(player, npc, trade, eventid)
+xi.unity.onTrade = function(player, npc, trade, eventid)
 end
 
-function xi.unity.onTrigger(player, npc)
+xi.unity.onTrigger = function(player, npc)
     local zoneId             = player:getZoneID()
     local hasAllForOne       = player:hasEminenceRecord(5)
     local allForOneCompleted = player:getEminenceCompleted(5)
@@ -144,7 +144,7 @@ function xi.unity.onTrigger(player, npc)
     end
 end
 
-function xi.unity.onEventUpdate(player, csid, option, npc)
+xi.unity.onEventUpdate = function(player, csid, option, npc)
     local zoneId               = player:getZoneID()
     local ID                   = zones[zoneId]
     local accolades            = player:getCurrency('unity_accolades')
@@ -167,6 +167,17 @@ function xi.unity.onEventUpdate(player, csid, option, npc)
             local itemId = unityOptions[category][selection][1]
             local cost   = unityOptions[category][selection][4] * qty
 
+            -- Fail-safe.
+            if
+                accolades < cost or
+                remainingLimit < cost
+            then
+                player:updateEvent(utils.MAX_UINT32)
+
+                return
+            end
+
+            -- Grant item and update limits.
             if npcUtil.giveItem(player, { { itemId, qty } }) then
                 accolades = accolades - cost
                 player:delCurrency('unity_accolades', cost)
@@ -193,7 +204,7 @@ function xi.unity.onEventUpdate(player, csid, option, npc)
     end
 end
 
-function xi.unity.onEventFinish(player, csid, option, npc)
+xi.unity.onEventFinish = function(player, csid, option, npc)
     local zoneId    = player:getZoneID()
     local ID        = zones[zoneId]
     local category  = bit.band(option, 0x1F)

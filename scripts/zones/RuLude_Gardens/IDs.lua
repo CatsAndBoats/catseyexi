@@ -8,6 +8,7 @@ zones[xi.zone.RULUDE_GARDENS] =
     text =
     {
         CONQUEST_BASE                    = 0,     -- Tallying conquest results...
+        ASSIST_CHANNEL                   = 6520,  -- You will be able to use the Assist Channel until #/#/# at #:# (JST).
         ITEM_CANNOT_BE_OBTAINED          = 6525,  -- You cannot obtain the <item>. Come back after sorting your inventory.
         MYSTIC_RETRIEVER                 = 6528,  -- You cannot obtain the <item>. Speak with the mystic retriever after sorting your inventory.
         FULL_INVENTORY_AFTER_TRADE       = 6529,  -- You cannot obtain the <item>. Try trading again after sorting your inventory.

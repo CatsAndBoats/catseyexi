@@ -19,8 +19,7 @@
 ===========================================================================
 */
 
-#ifndef _CZONE_H
-#define _CZONE_H
+#pragma once
 
 #include "common/cbasetypes.h"
 #include "common/mmo.h"
@@ -35,6 +34,7 @@
 #include "battlefield_handler.h"
 #include "campaign_handler.h"
 #include "packets/weather.h"
+#include "spawn_group.h"
 #include "trigger_area.h"
 
 //
@@ -483,6 +483,7 @@ enum ZONEMISC : uint16
     MISC_TRUST            = 0x0800, // Ability to summon Trust NPC
     MISC_LOS_PLAYER_BLOCK = 0x1000, // Players can't use magic/JAs through walls if this is set
     MISC_LOS_OFF          = 0x2000, // Zone should not have LoS checks
+    MISC_ASSIST           = 0x4000, // Send and receive /assiste, /assistj commands
 };
 DECLARE_FORMAT_AS_UNDERLYING(ZONEMISC);
 
@@ -648,8 +649,9 @@ public:
     CBattlefieldHandler* m_BattlefieldHandler; // BCNM Instances in this zone
     CCampaignHandler*    m_CampaignHandler;    // WOTG campaign information for this zone
 
-    std::unique_ptr<CNavMesh> m_navMesh;
-    std::unique_ptr<ZoneLos>  lineOfSight;
+    std::unique_ptr<CNavMesh>                       m_navMesh;
+    std::unique_ptr<ZoneLos>                        lineOfSight;
+    std::map<uint32_t, std::unique_ptr<spawnGroup>> m_spawnGroups;
 
     timer::time_point m_LoadedAt; // The time the zone was loaded
 
@@ -703,5 +705,3 @@ protected:
 
     std::unordered_map<std::string, uint32> m_localVars;
 };
-
-#endif

@@ -37,7 +37,8 @@ namespace
         LOC_WARDROBE4,
         LOC_WARDROBE5,
         LOC_WARDROBE6,
-        LOC_WARDROBE7
+        LOC_WARDROBE7,
+        LOC_WARDROBE8
     };
 }
 

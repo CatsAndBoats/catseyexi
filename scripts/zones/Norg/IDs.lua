@@ -8,6 +8,7 @@ zones[xi.zone.NORG] =
     text =
     {
         HOMEPOINT_SET                 = 2,     -- Home point set!
+        ASSIST_CHANNEL                = 6402,  -- You will be able to use the Assist Channel until #/#/# at #:# (JST).
         ITEM_CANNOT_BE_OBTAINED       = 6407,  -- You cannot obtain the <item>. Come back after sorting your inventory.
         ITEM_OBTAINED                 = 6413,  -- Obtained: <item>.
         GIL_OBTAINED                  = 6414,  -- Obtained <number> gil.

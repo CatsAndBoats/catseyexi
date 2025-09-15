@@ -58,9 +58,5 @@ CCharSyncPacket::CCharSyncPacket(CCharEntity* PChar)
     }
 
     ref<uint8>(0x25) = PChar->jobs.job[PChar->GetMJob()];
-
-    // Moghouse menu flags?
-    auto mhflag             = PChar->profile.mhflag;
-    bool enableChangeFloors = (mhflag & 0x04) && (mhflag & 0x02) && (mhflag & 0x01) ? 0x01 : 0x00;
-    ref<uint8>(0x27)        = enableChangeFloors;
+    ref<uint8>(0x27) = PChar->profile.mhflag & 0x20 ? 1 : 0; // MogExpansionFlag - Is 2nd floor unlocked.
 }

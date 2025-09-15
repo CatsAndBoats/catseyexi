@@ -118,7 +118,7 @@ local function corsairSetup(caster, ability, action, effect, job)
     local roll = math.random(1, 6)
 
     caster:delStatusEffectSilent(xi.effect.DOUBLE_UP_CHANCE)
-    caster:addStatusEffectEx(xi.effect.DOUBLE_UP_CHANCE, xi.effect.DOUBLE_UP_CHANCE, roll, 0, 45, ability:getID(), effect, job, true)
+    caster:addStatusEffectEx(xi.effect.DOUBLE_UP_CHANCE, xi.effect.DOUBLE_UP_CHANCE, roll, 0, 45, 0, effect, job, 0, xi.effectSourceType.CORSAIR_ROLL, ability:getID(), caster:getID(), true)
     caster:setLocalVar('corsairRollTotal', roll)
     caster:setLocalVar('corsairDuEffect', effect)
     action:speceffect(caster:getID(), roll)
@@ -169,7 +169,7 @@ local function applyRoll(caster, target, inAbility, action, total, isDoubleup, c
     end
 
     caster:setLocalVar('corsairApplyingRoll', 1)
-    if not target:addCorsairRoll(caster:getMainJob(), caster:getMerit(xi.merit.BUST_DURATION), corsairRollMods[abilityId][4], effectpower, 0, duration, caster:getID(), total, corsairRollMods[abilityId][5]) then
+    if not target:addCorsairRoll(caster:getMainJob(), caster:getMerit(xi.merit.BUST_DURATION), corsairRollMods[abilityId][4], effectpower, 0, duration, corsairRollMods[abilityId][5], total, 0, xi.effectSourceType.CORSAIR_ROLL, caster:getID(), caster:getID()) then
         -- no effect or otherwise prevented
         if caster:getID() == target:getID() then                  -- dead code? you can't roll if the same roll is already active. There is no known buff that would prevent a corsair roll.
             currentAbility:setMsg(xi.msg.basic.ROLL_MAIN_FAIL)    -- no effect for the COR rolling if they had the buff already
@@ -197,6 +197,7 @@ local function applyRoll(caster, target, inAbility, action, total, isDoubleup, c
     end
 
     caster:setLocalVar('corsairApplyingRoll', 0)
+
     return total
 end
 
@@ -228,7 +229,7 @@ xi.job_utils.corsair.useDoubleUp = function(caster, target, ability, action)
         local roll     = prevRoll:getSubPower()
         local job      = duEffect:getTier()
 
-        caster:setLocalVar('corsairActiveRoll', duEffect:getSubType())
+        caster:setLocalVar('corsairActiveRoll', duEffect:getSourceTypeParam())
 
         local snakeEye = caster:getStatusEffect(xi.effect.SNAKE_EYE)
 

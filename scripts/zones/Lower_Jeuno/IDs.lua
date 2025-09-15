@@ -7,6 +7,7 @@ zones[xi.zone.LOWER_JEUNO] =
 {
     text =
     {
+        ASSIST_CHANNEL                = 6380,  -- You will be able to use the Assist Channel until #/#/# at #:# (JST).
         ITEM_CANNOT_BE_OBTAINED       = 6385,  -- You cannot obtain the <item>. Come back after sorting your inventory.
         ITEM_OBTAINED                 = 6391,  -- Obtained: <item>.
         GIL_OBTAINED                  = 6392,  -- Obtained <number> gil.
@@ -38,6 +39,8 @@ zones[xi.zone.LOWER_JEUNO] =
         MERTAIRE_DEFAULT              = 7446,  -- Who are you? Leave me alone!
         ITS_LOCKED                    = 7608,  -- It's locked.
         PAWKRIX_SHOP_DIALOG           = 7656,  -- Hey, we're fixin' up some stew. Gobbie food's good food!
+        PACKAGE_DELIVERED             = 7694,  -- You have completed your delivery of the <keyitem>.
+        DAMANGED_PACKAGE_DELIVERED    = 7695,  -- Due to extensive damage, the <keyitem> are thrown away.
         AMALASANDA_SHOP_DIALOG        = 7704,  -- Welcome to the Tenshodo. You want something, we got it. We got all kinds of special merchandise you won't find anywhere else!
         AKAMAFULA_SHOP_DIALOG         = 7705,  -- We ain't cheap, but you get what you pay for! Take your time, have a look around, see if there's somethin' you like.
         INVENTORY_INCREASED           = 7803,  -- Your inventory capacity has increased.

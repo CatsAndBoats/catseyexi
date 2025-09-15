@@ -8,6 +8,7 @@ zones[xi.zone.WINDURST_WOODS] =
     text =
     {
         CONQUEST_BASE                 = 0,     -- Tallying conquest results...
+        ASSIST_CHANNEL                = 6539,  -- You will be able to use the Assist Channel until #/#/# at #:# (JST).
         ITEM_CANNOT_BE_OBTAINED       = 6544,  -- You cannot obtain the <item>. Come back after sorting your inventory.
         CANNOT_OBTAIN_THE_ITEM        = 6546,  -- You cannot obtain the item. Come back after sorting your inventory.
         ITEM_OBTAINED                 = 6550,  -- Obtained: <item>.

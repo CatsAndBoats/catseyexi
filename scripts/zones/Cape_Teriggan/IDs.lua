@@ -47,6 +47,7 @@ zones[xi.zone.CAPE_TERIGGAN] =
     mob =
     {
         FROSTMANE              = GetFirstID('Frostmane'),
+        KILLER_JONNY           = GetFirstID('Killer_Jonny'),
         KREUTZET               = GetFirstID('Kreutzet'),
         AXESARION_THE_WANDERER = GetFirstID('Axesarion_the_Wanderer'),
         STOLAS                 = GetFirstID('Stolas'),

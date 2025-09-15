@@ -29,6 +29,17 @@
 
 namespace
 {
+    const std::set wardrobeContainers = {
+        LOC_WARDROBE,
+        LOC_WARDROBE2,
+        LOC_WARDROBE3,
+        LOC_WARDROBE4,
+        LOC_WARDROBE5,
+        LOC_WARDROBE6,
+        LOC_WARDROBE7,
+        LOC_WARDROBE8,
+    };
+
     // List of containers valid for character current status
     // Note: When sharing Mog House, client restricts menu but retail honors injected packets.
     //       However, you do not get access to your own Safe, Locker or Storage.
@@ -120,7 +131,7 @@ namespace
         }
 
         // Only equipment and weapons can be moved to the wardrobe.
-        if (to >= LOC_WARDROBE && to <= LOC_WARDROBE8)
+        if (wardrobeContainers.contains(to))
         {
             if (!PItem->isType(ITEM_EQUIPMENT) && !PItem->isType(ITEM_WEAPON))
             {

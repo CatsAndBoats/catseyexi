@@ -22,11 +22,11 @@
 #ifndef _CHARENTITY_H
 #define _CHARENTITY_H
 
+#include "aman.h"
 #include "event_info.h"
 #include "item_container.h"
 #include "map_session.h"
 #include "monstrosity.h"
-#include "treasure_pool.h"
 
 #include "common/cbasetypes.h"
 #include "common/mmo.h"
@@ -303,7 +303,6 @@ public:
     bool isSeekingParty() const;       // is seeking party or not
     bool isAnon() const;               // is /anon
     bool isAway() const;               // is /away (tells will not go through)
-    bool isMentor() const;             // If player is a mentor or not.
     bool hasAutoTargetEnabled() const; // has autotarget enabled
 
     profile_t       profile{};
@@ -520,10 +519,11 @@ public:
 
     timer::time_point m_LeaderCreatedPartyTime{}; // Time that a party member joined and this player was leader.
 
+    auto aman() -> CAMANContainer&;
+
     uint8 m_GMlevel;    // Level of the GM flag assigned to this character
     bool  m_isGMHidden; // GM Hidden flag to prevent player updates from being processed.
 
-    bool   m_mentorUnlocked;
     bool   m_jobMasterDisplay; // Job Master Stars display
     uint32 m_moghouseID;
     uint16 m_moghancementID;
@@ -664,6 +664,8 @@ protected:
     void TrackArrowUsageForScavenge(CItemWeapon* PAmmo);
 
 private:
+    xi::lazy<CAMANContainer> m_AMAN;
+
     std::unique_ptr<CItemContainer> m_Inventory;
     std::unique_ptr<CItemContainer> m_Mogsafe;
     std::unique_ptr<CItemContainer> m_Storage;

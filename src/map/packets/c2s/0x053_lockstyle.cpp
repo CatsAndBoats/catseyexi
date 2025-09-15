@@ -81,7 +81,7 @@ void GP_CLI_COMMAND_LOCKSTYLE::process(MapSession* PSession, CCharEntity* PChar)
                 uint16_t    itemId = item.ItemNo;
 
                 // Skip non-visible items
-                if (item.ItemIndex > SLOT_FEET)
+                if (item.EquipKind > SLOT_FEET)
                 {
                     continue;
                 }
@@ -91,12 +91,12 @@ void GP_CLI_COMMAND_LOCKSTYLE::process(MapSession* PSession, CCharEntity* PChar)
                 {
                     itemId = 0;
                 }
-                else if ((PItem->getEquipSlotId() & (1 << item.ItemIndex)) == 0) // item doesn't fit in slot
+                else if ((PItem->getEquipSlotId() & (1 << item.EquipKind)) == 0) // item doesn't fit in slot
                 {
                     itemId = 0;
                 }
 
-                PChar->styleItems[item.ItemIndex] = itemId;
+                PChar->styleItems[item.EquipKind] = itemId;
             }
 
             // Check if we need to remove conflicting slots. Essentially, packet injection shenanigan detector.

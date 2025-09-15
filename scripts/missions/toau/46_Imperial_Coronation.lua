@@ -29,7 +29,6 @@ mission.sections =
                     local properlyDressed = whitegateShared.doRoyalPalaceArmorCheck(player) and 1 or 0
 
                     if
-                        player:getMissionStatus(mission.areaId) == 2 and
                         player:getEquipID(xi.slot.MAIN) == 0 and
                         player:getEquipID(xi.slot.SUB) == 0 and
                         properlyDressed == 1

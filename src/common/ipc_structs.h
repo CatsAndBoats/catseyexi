@@ -29,8 +29,6 @@
 #include "map/packets/message_standard.h"
 #include "map/packets/party_invite.h"
 
-#include <cstdint>
-#include <iostream>
 #include <string>
 #include <vector>
 
@@ -40,10 +38,9 @@ namespace ipc
     {
     };
 
-    struct CharLogin
+    struct AccountLogin
     {
         uint32 accountId{};
-        uint32 charId{};
     };
 
     struct CharZone
@@ -123,6 +120,17 @@ namespace ipc
         CHAT_MESSAGE_TYPE messageType{ MESSAGE_YELL };
     };
 
+    struct ChatMessageAssist
+    {
+        uint32            senderId{};
+        std::string       senderName{};
+        std::string       message{};
+        uint8             mentorRank{ 0 };
+        uint8             masteryRank{ 1 };
+        uint8             gmLevel{};
+        CHAT_MESSAGE_TYPE messageType{ MESSAGE_NA_ASSIST };
+    };
+
     struct ChatMessageServerMessage
     {
         uint32            senderId{};
@@ -188,10 +196,11 @@ namespace ipc
 
     struct MessageStandard
     {
-        uint32 recipientId{};
-        MsgStd message{};
-        uint32 param0{};
-        uint32 param1{};
+        uint32      recipientId{};
+        MsgStd      message{};
+        uint32      param0{};
+        uint32      param1{};
+        std::string string2{};
     };
 
     struct MessageSystem
@@ -297,5 +306,12 @@ namespace ipc
         float  z{};
         uint8  rot{};
         uint32 moghouseId{};
+    };
+
+    struct AssistChannelEvent
+    {
+        uint32 senderId{};
+        uint32 receiverId{};
+        uint8  action{}; // GP_CLI_COMMAND_ASSIST_CHANNEL_KIND
     };
 } // namespace ipc

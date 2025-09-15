@@ -1,5 +1,6 @@
 -----------------------------------
 -- xi.effect.COURSERS_ROLL
+-- TODO: Enable modifier and define power in job_utils/corsair.lua
 -----------------------------------
 ---@type TEffect
 local effectObject = {}

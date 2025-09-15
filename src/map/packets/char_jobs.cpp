@@ -21,6 +21,7 @@
 
 #include <cstring>
 
+#include "aman.h"
 #include "char_jobs.h"
 #include "entities/charentity.h"
 #include "monstrosity.h"
@@ -47,11 +48,11 @@ CCharJobsPacket::CCharJobsPacket(CCharEntity* PChar)
 
     ref<uint16>(0x60) = PChar->m_EquipBlock; // Locked equipment slots
     ref<uint16>(0x62) =
-        PChar->m_StatsDebilitation; // Bit field. Underestimation of physical characteristics, the characteristic turns red and a red arrlow appears next to it.
+        PChar->m_StatsDebilitation; // Bit field. Underestimation of physical characteristics, the characteristic turns red and a red arrow appears next to it.
 
-    ref<uint8>(0x64) = 0x01; // Unknown, set due to Retail reference; suspicion around mentor unlock
-    ref<uint8>(0x65) = 0;    // Mentor Icon
-    ref<uint8>(0x66) = 0x01; // Mastery Rank (In Profile Menu)
+    ref<uint8>(0x64) = PChar->aman().canThumbsUp();    // can_thumbs_up_mentor
+    ref<uint8>(0x65) = PChar->aman().getMentorRank();  // mentor_rank
+    ref<uint8>(0x66) = PChar->aman().getMasteryRank(); // mastery_rank
 
     ref<uint8>(0x68) = 0; // Is job mastered, and has Master Breaker KI
     ref<uint8>(0x6D) = 0; // Master Level

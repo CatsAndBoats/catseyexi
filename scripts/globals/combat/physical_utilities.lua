@@ -80,6 +80,138 @@ local shieldSizeToBlockRateTable =
     [6] = 100, -- Ochain  https://www.bg-wiki.com/ffxi/Category:Shields
 }
 
+-- WARNING: This function is used in src/map/attack.cpp "ProcessDamage" function.
+-- If you update these parameters, update them there as well.
+---@param actor CBaseEntity
+---@param target CBaseEntity
+---@param slot xi.slot
+---@param physicalAttackType xi.physicalAttackType
+---@param isH2H boolean
+---@param isFirstSwing boolean
+---@param isSneakAttack boolean
+---@param isTrickAttack boolean
+---@param damageRatio number
+xi.combat.physical.calculateAttackDamage = function(actor, target, slot, physicalAttackType, isH2H, isFirstSwing, isSneakAttack, isTrickAttack, damageRatio)
+    local bonusBasePhysicalDamage = 0
+    local damage                  = 0
+
+    -- Sneak Attack
+    if isSneakAttack then
+        bonusBasePhysicalDamage = math.floor(bonusBasePhysicalDamage + actor:getStat(xi.mod.DEX) * (1 + actor:getMod(xi.mod.SNEAK_ATK_DEX) / 100))
+    end
+
+    -- Trick Attack
+    if isTrickAttack then
+        bonusBasePhysicalDamage = math.floor(bonusBasePhysicalDamage + actor:getStat(xi.mod.AGI) * (1 + actor:getMod(xi.mod.TRICK_ATK_AGI) / 100))
+    end
+
+    -- Consume Mana
+    bonusBasePhysicalDamage = bonusBasePhysicalDamage + xi.combat.damage.consumeManaAddition(actor)
+
+    -- Apply damage ratio multiplier.
+    local baseDamage = 0
+
+    if isH2H then
+        local naturalH2hDamage = math.floor(actor:getSkillLevel(xi.skill.HAND_TO_HAND) * 0.11) + 3
+        if physicalAttackType == xi.physicalAttackType.KICK then
+            baseDamage = naturalH2hDamage + actor:getMod(xi.mod.KICK_DMG) + bonusBasePhysicalDamage + xi.combat.physical.calculateMeleeStatFactor(actor, target)
+        else
+            baseDamage = naturalH2hDamage + actor:getWeaponDmg() + bonusBasePhysicalDamage + xi.combat.physical.calculateMeleeStatFactor(actor, target)
+        end
+    elseif slot == xi.slot.MAIN then
+        baseDamage = actor:getWeaponDmg() + bonusBasePhysicalDamage + xi.combat.physical.calculateMeleeStatFactor(actor, target)
+    elseif slot == xi.slot.SUB then
+        baseDamage = actor:getOffhandDmg() + bonusBasePhysicalDamage + xi.combat.physical.calculateMeleeStatFactor(actor, target)
+    elseif slot == xi.slot.AMMO then
+        baseDamage = actor:getRangedDmg() + xi.combat.physical.calculateRangedStatFactor(actor, target)
+    end
+
+    damage = math.floor(baseDamage * damageRatio)
+
+    -- Scarlet Delirium multiplier.
+    damage = math.floor(damage * xi.combat.damage.scarletDeliriumMultiplier(actor))
+
+    -- Double/Triple Attack multipliers.
+    local multiAttackMultiplier = 1
+    if physicalAttackType == xi.physicalAttackType.DOUBLE then
+        multiAttackMultiplier = 1 + actor:getMod(xi.mod.DOUBLE_ATTACK_DMG) / 100
+    elseif physicalAttackType == xi.physicalAttackType.TRIPLE then
+        multiAttackMultiplier = 1 + actor:getMod(xi.mod.TRIPLE_ATTACK_DMG) / 100
+    end
+
+    damage = math.floor(damage * multiAttackMultiplier)
+
+    -- Soul Eater additive damage.
+    damage = damage + xi.combat.damage.souleaterAddition(actor)
+
+    -- Damage multipliers
+    damage = actor:addDamageFromMultipliers(damage, physicalAttackType, slot, isFirstSwing)
+
+    -- Sneak Attack Augment
+    if
+        actor:getMod(xi.mod.AUGMENTS_SA) > 0 and
+        isSneakAttack and
+        actor:hasStatusEffect(xi.effect.SNEAK_ATTACK)
+    then
+        damage = math.floor(damage * (1 + actor:getMod(xi.mod.AUGMENTS_SA) / 100))
+    end
+
+    -- Trick Attack Augment
+    if
+        actor:getMod(xi.mod.AUGMENTS_TA) > 0 and
+        isTrickAttack and
+        actor:hasStatusEffect(xi.effect.TRICK_ATTACK)
+    then
+        damage = math.floor(damage * (1 + actor:getMod(xi.mod.AUGMENTS_TA) / 100))
+    end
+
+    --- Low level mobs can get negative fSTR so low they crater their (base weapon damage + fstr) to below 0.
+    --- Absorption isn't possible at this point in the calculation, so zero it.
+    if damage < 0 then
+        damage = 0
+    end
+
+    -- Apply Restraint Weaponskill Damage
+    if
+        isFirstSwing and
+        actor:hasStatusEffect(xi.effect.RESTRAINT)
+    then
+        local effect = actor:getStatusEffect(xi.effect.RESTRAINT)
+        local power  = effect and effect:getPower() or 30
+
+        if
+            effect and
+            power < 30
+        then
+            local jpBonus = actor:getJobPointLevel(xi.jp.RESTRAINT) * 2
+
+            -- Convert weapon delay and divide
+            -- Pull remainder of previous hit's value from Effect Sub Power
+            local boostPerRound = (3 * actor:getBaseDelay() / 50) / 385
+            local remainder     = effect:getSubPower() / 100
+
+            -- Calculate bonuses from Enhances Restraint, Job Point upgrades, and remainder from previous hit
+            boostPerRound = remainder + boostPerRound * (1 + actor:getMod(xi.Mod.ENHANCES_RESTRAINT) / 100) * (1 + jpBonus / 100)
+
+            -- Calculate new remainder and multiply by 100 so significant digits aren't lost
+            remainder     = math.floor((1 - (math.ceil(boostPerRound) - boostPerRound)) * 100)
+            boostPerRound = math.floor(boostPerRound)
+
+            -- Cap total power to +30% WSD
+            if power + boostPerRound > 30 then
+                boostPerRound = 30 - power
+            end
+
+            effect:setPower(power + boostPerRound)
+            effect:setSubPower(remainder)
+            actor:setMod(xi.mod.ALL_WSDMG_FIRST_HIT, boostPerRound)
+        end
+    end
+
+    -- TODO: add charutils::TrySkillUP call
+    return damage
+end
+
 -- 'fSTR' in English Wikis. 'SV function' in JP wiki and Studio Gobli.
 -- BG wiki: https://www.bg-wiki.com/ffxi/FSTR
 -- Gobli Wiki: https://w-atwiki-jp.translate.goog/studiogobli/pages/14.html?_x_tr_sl=auto&_x_tr_tl=en&_x_tr_hl=en&_x_tr_pto=wapp
@@ -353,7 +485,7 @@ xi.combat.physical.calculateMeleePDIF = function(actor, target, weaponType, wsAt
     local levelDifFactor = 0
 
     if applyLevelCorrection then
-        levelDifFactor = (actor:getMainLvl() - target:getMainLvl()) * 0.05
+        levelDifFactor = (actor:getMainLvl() - target:getMainLvl()) * 3 / 64 -- 3/64 from JP model which fits better
     end
 
     -- Only players suffer from negative level difference.
@@ -372,17 +504,27 @@ xi.combat.physical.calculateMeleePDIF = function(actor, target, weaponType, wsAt
         levelDifFactor = 0
     end
 
-    local cRatio = utils.clamp(baseRatio + levelDifFactor, 0, 10) -- Clamp for the lower limit, mainly.
-
     ----------------------------------------
     -- Step 3: wRatio and pDif Caps (Melee)
     ----------------------------------------
-    local wRatio             = cRatio + (isCritical and 1 or 0)
+    local wRatio             = baseRatio + (isCritical and 1 or 0)
     local pDifUpperCap       = 0
     local pDifLowerCap       = 0
     local damageLimitPlus    = actor:getMod(xi.mod.DAMAGE_LIMIT) / 100
     local damageLimitPercent = 1 + actor:getMod(xi.mod.DAMAGE_LIMITP) / 100
     local pDifFinalCap       = (xi.combat.physical.pDifWeaponCapTable[weaponType][2] + damageLimitPlus) * damageLimitPercent + (isCritical and 1 or 0)
+
+    -- https://www.bg-wiki.com/ffxi/PDIF#Average_Melee_pDIF(qRatio)
+    -- This is also known as "pDIF spike"
+    if wRatio > 0.5 and wRatio < 1.5 then -- 0.5 and 1.5 are 0% chance
+        local sRatio = (0.5 - math.abs(wRatio - 1)) * 1.2
+
+        sRatio = utils.clamp(sRatio, 0, 1 / 3) -- 1/3 (one-third), not 0.33
+
+        if math.random() <= sRatio then
+            return 1.0
+        end
+    end
 
     -- pDIF upper cap.
     if wRatio < 0.5 then
@@ -410,6 +552,11 @@ xi.combat.physical.calculateMeleePDIF = function(actor, target, weaponType, wsAt
         pDifLowerCap = wRatio - 0.375
     end
 
+    -- Apply level correction to UL/LL
+    -- https://www.ffxiah.com/forum/topic/57989/post-2016-level-correction-testing/
+    pDifLowerCap = pDifLowerCap + levelDifFactor
+    pDifUpperCap = pDifUpperCap + levelDifFactor
+
     pDif = math.random(pDifLowerCap * 1000, pDifUpperCap * 1000) / 1000
 
     ----------------------------------------
@@ -420,7 +567,7 @@ xi.combat.physical.calculateMeleePDIF = function(actor, target, weaponType, wsAt
     ----------------------------------------
     -- Step 5: Melee random factor.
     ----------------------------------------
-    local meleeRandom = math.random(100, 105) / 100
+    local meleeRandom = 1 + math.random(0, 5) * 0.01 -- 5 distinct values
 
     pDif = pDif * meleeRandom
 
@@ -945,36 +1092,37 @@ end
 
 xi.combat.physical.isParried = function(defender, attacker)
     local parried = false
-    if
-        xi.combat.physical.canParry(defender, attacker) and
-        xi.combat.physical.calculateParryRate(defender, attacker) > math.random(1, 100)
-    then
-        parried = true
 
-        -- https://www.bg-wiki.com/ffxi/Turms_Mittens
-        if
-            defender:getMod(xi.mod.PARRY_HP_RECOVERY) > 0 and
-            not defender:hasStatusEffect(xi.effect.CURSE_II)
-        then
-            local recoveryValue = defender:getMod(xi.mod.PARRY_HP_RECOVERY)
-            defender:addHP(recoveryValue)
-        end
+    if xi.combat.physical.canParry(defender, attacker) then
+        local isPC = defender:isPC()
 
-        if defender:isPC() then
-            -- handle tactical parry
-            if defender:hasTrait(xi.trait.TACTICAL_PARRY) then
-                defender:addTP(defender:getMod(xi.mod.TACTICAL_PARRY))
+        if xi.combat.physical.calculateParryRate(defender, attacker) > math.random(1, 100) then
+            parried = true
+
+            -- https://www.bg-wiki.com/ffxi/Turms_Mittens
+            if
+                defender:getMod(xi.mod.PARRY_HP_RECOVERY) > 0 and
+                not defender:hasStatusEffect(xi.effect.CURSE_II)
+            then
+                local recoveryValue = defender:getMod(xi.mod.PARRY_HP_RECOVERY)
+                defender:addHP(recoveryValue)
+            end
+
+            if isPC then
+                -- handle tactical parry
+                if defender:hasTrait(xi.trait.TACTICAL_PARRY) then
+                    defender:addTP(defender:getMod(xi.mod.TACTICAL_PARRY))
+                end
             end
         end
-    end
 
-    -- Handle skill ups.
-    if defender:isPC() then
+        -- Handle skill ups.
         if
-            parried or -- We parried
-            not xi.settings.map.PARRY_OLD_SKILLUP_STYLE -- Old style skillup is not enabled
+            isPC and
+            (parried or                                  -- We parried
+            not xi.settings.map.PARRY_OLD_SKILLUP_STYLE) -- Old style skillup is not enabled
         then
-            defender:trySkillUp(xi.skill.PARRY, attacker:getMainLvl())
+                defender:trySkillUp(xi.skill.PARRY, attacker:getMainLvl())
         end
     end
 

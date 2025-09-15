@@ -20,7 +20,6 @@
 */
 
 #include "zone_entities.h"
-
 #include "common/utils.h"
 #include "enmity_container.h"
 #include "instance.h"
@@ -125,10 +124,8 @@ CZoneEntities::~CZoneEntities()
         destroy(npc.second);
     }
 
-    for (auto character : m_charList)
-    {
-        destroy(character.second);
-    }
+    // destroying PChars in m_charList is handled via map_session (auto generated) destructor on cleanup.
+    m_charList.clear(); // Remove elements, do not call destructor.
 
     for (auto transport : m_TransportList)
     {
@@ -246,7 +243,6 @@ void CZoneEntities::InsertMOB(CBaseEntity* PMob)
     {
         PMob->loc.zone = m_zone;
 
-        FindPartyForMob(PMob);
         m_mobList[PMob->targid] = PMob;
 
         TryAddToNearbySpawnLists(PMob);
@@ -353,23 +349,23 @@ void CZoneEntities::FindPartyForMob(CBaseEntity* PEntity)
 
     CMobEntity* PMob = static_cast<CMobEntity*>(PEntity);
 
-    // force all mobs in a burning circle to link
-    ZONE_TYPE zonetype  = m_zone->GetTypeMask();
-    bool      forceLink = zonetype & ZONE_TYPE::DYNAMIS || PMob->getMobMod(MOBMOD_SUPERLINK);
-
-    if ((forceLink || PMob->m_Link || PMob->m_Type & MOBTYPE_BATTLEFIELD) && PMob->PParty == nullptr)
+    bool forceLink = PMob->ShouldForceLink();
+    // check for sublinks even if a family doesn't link with itself
+    int16 sublink = PMob->getMobMod(MOBMOD_SUBLINK);
+    if ((forceLink || PMob->m_Link || sublink) && PMob->PParty == nullptr)
     {
         FOR_EACH_PAIR_CAST_SECOND(CMobEntity*, PCurrentMob, m_mobList)
         {
-            if (!forceLink && !PCurrentMob->m_Link)
+            if (!forceLink && !sublink && !PCurrentMob->m_Link)
             {
                 continue;
             }
 
-            int16 sublink = PMob->getMobMod(MOBMOD_SUBLINK);
-
-            if (PCurrentMob->allegiance == PMob->allegiance &&
-                (forceLink || PCurrentMob->m_Family == PMob->m_Family || (sublink && sublink == PCurrentMob->getMobMod(MOBMOD_SUBLINK))))
+            if (
+                PCurrentMob->PParty && PCurrentMob->allegiance == PMob->allegiance &&
+                ((forceLink && PCurrentMob->ShouldForceLink()) ||
+                 (PCurrentMob->m_Link && PCurrentMob->m_Family == PMob->m_Family) ||
+                 (sublink && sublink == PCurrentMob->getMobMod(MOBMOD_SUBLINK))))
             {
                 if (PCurrentMob->PMaster == nullptr || PCurrentMob->PMaster->objtype == TYPE_MOB)
                 {
@@ -1396,7 +1392,11 @@ void CZoneEntities::TOTDChange(vanadiel_time::TOTD TOTD)
                 {
                     PMob->SetDespawnTime(0s);
                     PMob->m_AllowRespawn = true;
-                    PMob->Spawn();
+
+                    if ((PMob->m_spawnGroup && PMob->CanSpawnFromGroup()) || !PMob->m_spawnGroup)
+                    {
+                        PMob->Spawn();
+                    }
                 }
             }
         }
@@ -1409,7 +1409,11 @@ void CZoneEntities::TOTDChange(vanadiel_time::TOTD TOTD)
                 {
                     PMob->SetDespawnTime(0s);
                     PMob->m_AllowRespawn = true;
-                    PMob->Spawn();
+
+                    if ((PMob->m_spawnGroup && PMob->CanSpawnFromGroup()) || !PMob->m_spawnGroup)
+                    {
+                        PMob->Spawn();
+                    }
                 }
             }
         }
