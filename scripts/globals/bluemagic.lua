@@ -345,19 +345,34 @@ xi.spells.blue.useMagicalSpell = function(caster, target, spell, params)
     -- Monster correlation
     local correlationMultiplier = calculateCorrelation(params.ecosystem, target:getEcosystem(), caster:getMerit(xi.merit.MONSTER_CORRELATION))
 
+    -- Data
+    local spellId            = spell:getID()
+    local spellElement       = spell:getElement()
+    local spellGroup         = spell:getSpellGroup()
+    local skillType          = xi.skill.BLUE_MAGIC
+    local _, skillchainCount = xi.magicburst.formMagicBurst(spellElement, target) -- External function. Not present in magic.lua.
+
     -- Final D value
-    local finalD = (initialD + wsc) * (params.multiplier + azureBonus + correlationMultiplier) + statBonus
+    local finalDamage    = (initialD + wsc) * (params.multiplier + azureBonus + correlationMultiplier) + statBonus
 
-    -- Multitarget damage reduction
-    local finaldmg = math.floor(finalD * xi.spells.damage.calculateMTDR(spell))
+    finalDamage = math.floor(finalDamage * xi.combat.magicHitRate.calculateResistRate(caster, target, spellGroup, skillType, 0, spellElement, params.attribute, 0, 0))
+    finalDamage = math.floor(finalDamage * xi.spells.damage.calculateMTDR(spell))
+    finalDamage = math.floor(finalDamage * xi.spells.damage.calculateElementalStaffBonus(caster, spellElement))
+    finalDamage = math.floor(finalDamage * xi.spells.damage.calculateSDT(target, spellElement))
+    finalDamage = math.floor(finalDamage * xi.spells.damage.calculateDayAndWeather(caster, spellElement, false))
+    finalDamage = math.floor(finalDamage * xi.spells.damage.calculateMagicBonusDiff(caster, target, spellId, skillType, spellElement))
+    finalDamage = math.floor(finalDamage * xi.spells.damage.calculateIfMagicBurst(target, spellElement, skillchainCount))
+    finalDamage = math.floor(finalDamage * xi.spells.damage.calculateIfMagicBurstBonus(caster, target, spellId, skillType, spellElement))
+    finalDamage = math.floor(finalDamage * xi.spells.damage.calculateEbullienceMultiplier(caster, spellGroup))
+    finalDamage = math.floor(finalDamage * xi.settings.main.BLUE_POWER)
 
-    -- Resistance
-    finaldmg = math.floor(finaldmg * applyResistanceEffect(caster, target, spell, params))
+    if skillchainCount > 1 then
+        spell:setMsg(spell:getMagicBurstMessage()) -- "Magic Burst!"
 
-    -- MAB/MDB/weather/day/affinity/burst effect on damage
-    finaldmg = math.floor(addBonuses(caster, spell, target, finaldmg))
+        caster:triggerRoeEvent(xi.roeTrigger.MAGIC_BURST)
+    end
 
-    return xi.spells.blue.applySpellDamage(caster, target, spell, finaldmg, params, nil)
+    return xi.spells.blue.applySpellDamage(caster, target, spell, finalDamage, params, nil)
 end
 
 -- Spell script Helper function.
@@ -381,11 +396,30 @@ xi.spells.blue.useDrainSpell = function(caster, target, spell, params, damageCap
         finalDamage = utils.clamp(finalDamage, 0, damageCap)
     end
 
-    -- Multipliers
-    finalDamage = math.floor(finalDamage * applyResistanceEffect(caster, target, spell, params))
-    finalDamage = math.floor(addBonuses(caster, spell, target, finalDamage))
-    finalDamage = math.floor(finalDamage * xi.spells.damage.calculateTMDA(target, spell:getElement()))
+    -- Data
+    local spellId            = spell:getID()
+    local spellElement       = spell:getElement()
+    local spellGroup         = spell:getSpellGroup()
+    local skillType          = xi.skill.BLUE_MAGIC
+    local _, skillchainCount = xi.magicburst.formMagicBurst(spellElement, target) -- External function. Not present in magic.lua.
+
+    finalDamage = math.floor(finalDamage * xi.combat.magicHitRate.calculateResistRate(caster, target, spellGroup, skillType, 0, spellElement, params.attribute, 0, 0))
+    finalDamage = math.floor(finalDamage * xi.spells.damage.calculateMTDR(spell))
+    finalDamage = math.floor(finalDamage * xi.spells.damage.calculateElementalStaffBonus(caster, spellElement))
+    finalDamage = math.floor(finalDamage * xi.spells.damage.calculateSDT(target, spellElement))
+    finalDamage = math.floor(finalDamage * xi.spells.damage.calculateDayAndWeather(caster, spellElement, false))
+    finalDamage = math.floor(finalDamage * xi.spells.damage.calculateMagicBonusDiff(caster, target, spellId, skillType, spellElement))
+    finalDamage = math.floor(finalDamage * xi.spells.damage.calculateIfMagicBurst(target, spellElement, skillchainCount))
+    finalDamage = math.floor(finalDamage * xi.spells.damage.calculateIfMagicBurstBonus(caster, target, spellId, skillType, spellElement))
+    finalDamage = math.floor(finalDamage * xi.spells.damage.calculateEbullienceMultiplier(caster, spellGroup))
+    finalDamage = math.floor(finalDamage * xi.spells.damage.calculateTMDA(target, spellElement))
     finalDamage = math.floor(finalDamage * xi.settings.main.BLUE_POWER)
+
+    if skillchainCount > 1 then
+        spell:setMsg(spell:getMagicBurstMessage()) -- "Magic Burst!"
+
+        caster:triggerRoeEvent(xi.roeTrigger.MAGIC_BURST)
+    end
 
     -- MP drain
     if mpDrain then
@@ -611,20 +645,20 @@ xi.spells.blue.useEnfeeblingSpell = function(caster, target, spell, params)
     end
 
     -- Early return: Target is immune.
-    if xi.combat.statusEffect.isTargetImmune(target, params.effect, spellElement) then
+    if xi.data.statusEffect.isTargetImmune(target, params.effect, spellElement) then
         spell:setMsg(xi.msg.basic.MAGIC_COMPLETE_RESIST)
         return params.effect
     end
 
     -- Early return: Trait nullification trigger.
-    if xi.combat.statusEffect.isTargetResistant(caster, target, params.effect) then
+    if xi.data.statusEffect.isTargetResistant(caster, target, params.effect) then
         spell:setModifier(xi.msg.actionModifier.RESIST)
         spell:setMsg(xi.msg.basic.MAGIC_RESIST)
         return params.effect
     end
 
     -- Early return: Target already has an status effect that nullifies current.
-    if xi.combat.statusEffect.isEffectNullified(target, params.effect) then
+    if xi.data.statusEffect.isEffectNullified(target, params.effect) then
         spell:setMsg(xi.msg.basic.MAGIC_NO_EFFECT)
         return params.effect
     end
@@ -707,9 +741,9 @@ xi.spells.blue.applyBlueAdditionalEffect = function(caster, target, params, effe
         local duration = effectTable[entry][4]
 
         if
-            not xi.combat.statusEffect.isTargetImmune(target, effect, element) and   -- Target isn't immune.
-            not xi.combat.statusEffect.isTargetResistant(caster, target, effect) and -- Target didn't trigger a job trait resistance.
-            not xi.combat.statusEffect.isEffectNullified(target, effect)             -- Target doesn't have an status effect that nullifies current.
+            not xi.data.statusEffect.isTargetImmune(target, effect, element) and   -- Target isn't immune.
+            not xi.data.statusEffect.isTargetResistant(caster, target, effect) and -- Target didn't trigger a job trait resistance.
+            not xi.data.statusEffect.isEffectNullified(target, effect)             -- Target doesn't have an status effect that nullifies current.
         then
             target:addStatusEffect(effect, power, tick, math.floor(duration * resist))
         end

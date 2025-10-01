@@ -359,7 +359,6 @@ INSERT INTO `mob_family_mods` VALUES (106,56,-1,1); -- HP_STANDBACK: -1
 
 -- Evil Weapon: https://www.bg-wiki.com/ffxi/Category:Evil_Weapon
 INSERT INTO `mob_family_mods` VALUES (110,3,50,1);      -- MP_BASE: 50
-INSERT INTO `mob_family_mods` VALUES (110,29,13,0);     -- MDEF: 13
 INSERT INTO `mob_family_mods` VALUES (110,36,45,1);     -- ROAM_COOL: 45
 INSERT INTO `mob_family_mods` VALUES (110,51,3,1);      -- ROAM_TURNS: 3
 INSERT INTO `mob_family_mods` VALUES (110,52,30,1);     -- ROAM_RATE: 30
@@ -559,7 +558,6 @@ INSERT INTO `mob_family_mods` VALUES (174,51,4,1);  -- ROAM_TURNS: 4
 INSERT INTO `mob_family_mods` VALUES (174,52,30,1); -- ROAM_RATE: 30
 
 -- Magic Pot: https://www.bg-wiki.com/ffxi/Category:Magic_Pot
-INSERT INTO `mob_family_mods` VALUES (175,29,50,0);     -- MDEF: 50
 INSERT INTO `mob_family_mods` VALUES (175,31,5,1);      -- ROAM_DISTANCE: 5
 INSERT INTO `mob_family_mods` VALUES (175,36,55,1);     -- ROAM_COOL: 55
 INSERT INTO `mob_family_mods` VALUES (175,52,30,1);     -- ROAM_RATE: 30

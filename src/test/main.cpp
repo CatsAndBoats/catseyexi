@@ -19,13 +19,34 @@
 ===========================================================================
 */
 
+#include "common/lua.h"
+#include "common/tracy.h"
 #include "test_application.h"
+
+#include <iostream>
+#include <memory>
 
 int main(int argc, char** argv)
 {
-    const auto testApp = std::make_unique<TestApplication>(argc, argv);
+    TracySetThreadName("Test Thread");
+
+    auto testApp = std::make_unique<TestApplication>(argc, argv);
 
     testApp->run();
+
+    // Explicitly destroy TestApplication before the lua state get cleaned up
+    testApp.reset();
+
+    // TODO: This should be in ~Application but it needs more testing for xi_map
+    // TODO: This wouldn't be needed if lua wasn't global
+    lua_cleanup();
+
+#ifdef TRACY_ENABLE
+    // TODO: Tracy profiler exits when program is done
+    // Is there an option to keep it running despite the program exiting?
+    std::cout << "Press Enter to exit..." << std::endl;
+    std::cin.get();
+#endif
 
     return 0;
 }

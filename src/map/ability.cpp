@@ -22,7 +22,6 @@
 #include "ability.h"
 
 #include "common/database.h"
-#include "common/sql.h"
 
 #include "lua/luautils.h"
 
@@ -43,7 +42,6 @@ CAbility::CAbility(uint16 id)
 , m_CE(0)
 , m_VE(0)
 , m_meritModID(0)
-, m_mobskillId(0)
 {
 }
 
@@ -68,19 +66,9 @@ void CAbility::setID(uint16 id)
     m_ID = id;
 }
 
-void CAbility::setMobSkillID(uint16 id)
-{
-    m_mobskillId = id;
-}
-
 uint16 CAbility::getID() const
 {
     return m_ID;
-}
-
-uint16 CAbility::getMobSkillID() const
-{
-    return m_mobskillId;
 }
 
 void CAbility::setJob(JOBTYPE Job)
@@ -353,7 +341,6 @@ namespace ability
 
         const auto rset = db::preparedStmt("SELECT "
                                            "abilityId, "
-                                           "IFNULL(min_id, 0) AS mobskillId, "
                                            "name, "
                                            "job, "
                                            "level, "
@@ -373,9 +360,7 @@ namespace ability
                                            "meritModID, "
                                            "addType, "
                                            "content_tag "
-                                           "FROM abilities LEFT JOIN (SELECT mob_skill_name, MIN(mob_skill_id) AS min_id "
-                                           "FROM mob_skills GROUP BY mob_skill_name) mob_skills_1 ON "
-                                           "abilities.name = mob_skills_1.mob_skill_name "
+                                           "FROM abilities "
                                            "WHERE job < ? AND abilityId < ? "
                                            "ORDER BY job, level ASC",
                                            MAX_JOBTYPE, MAX_ABILITY_ID);
@@ -394,9 +379,8 @@ namespace ability
                 PAbilityList[abilityId] = std::make_unique<CAbility>(abilityId);
                 const auto& PAbility    = PAbilityList[abilityId];
 
-                PAbility->setMobSkillID(rset->get<uint16>("mobskillId"));
                 PAbility->setName(rset->get<std::string>("name"));
-                PAbility->setJob(static_cast<JOBTYPE>(rset->get<uint8>("job")));
+                PAbility->setJob(rset->get<JOBTYPE>("job"));
                 PAbility->setLevel(rset->get<uint8>("level"));
                 PAbility->setValidTarget(rset->get<uint16>("validTarget"));
                 PAbility->setRecastTime(std::chrono::seconds(rset->get<uint16>("recastTime")));
@@ -405,7 +389,7 @@ namespace ability
                 PAbility->setAnimationID(rset->get<uint16>("animation"));
                 PAbility->setAnimationTime(std::chrono::milliseconds(rset->get<uint16>("animationTime")));
                 PAbility->setCastTime(std::chrono::milliseconds(rset->get<uint16>("castTime")));
-                PAbility->setActionType(static_cast<ACTIONTYPE>(rset->get<uint8>("actionType")));
+                PAbility->setActionType(rset->get<ACTIONTYPE>("actionType"));
                 PAbility->setRange(rset->get<float>("range"));
                 PAbility->setAOE(rset->get<uint8>("isAOE"));
                 PAbility->setRecastId(rset->get<uint16>("recastId"));

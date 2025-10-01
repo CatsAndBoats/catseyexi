@@ -1,4 +1,9 @@
+add_subdirectory(c2s)
+add_subdirectory(s2c)
+
 set(PACKET_SOURCES
+    ${PACKET_C2S_SOURCES}
+    ${PACKET_S2C_SOURCES}
     ${CMAKE_CURRENT_SOURCE_DIR}/action.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/action.h
     ${CMAKE_CURRENT_SOURCE_DIR}/auction_house.cpp
@@ -24,8 +29,6 @@ set(PACKET_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/caught_fish.h
     ${CMAKE_CURRENT_SOURCE_DIR}/caught_monster.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/caught_monster.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/change_music.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/change_music.h
     ${CMAKE_CURRENT_SOURCE_DIR}/char_abilities.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/char_abilities.h
     ${CMAKE_CURRENT_SOURCE_DIR}/char_appearance.cpp
@@ -76,8 +79,6 @@ set(PACKET_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/currency2.h
     ${CMAKE_CURRENT_SOURCE_DIR}/delivery_box.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/delivery_box.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/downloading_data.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/downloading_data.h
     ${CMAKE_CURRENT_SOURCE_DIR}/entity_animation.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/entity_animation.h
     ${CMAKE_CURRENT_SOURCE_DIR}/entity_enable_list.cpp
@@ -86,8 +87,6 @@ set(PACKET_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/entity_set_name.h
     ${CMAKE_CURRENT_SOURCE_DIR}/entity_update.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/entity_update.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/entity_visual.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/entity_visual.h
     ${CMAKE_CURRENT_SOURCE_DIR}/event.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/event.h
     ${CMAKE_CURRENT_SOURCE_DIR}/event_string.cpp
@@ -242,8 +241,6 @@ set(PACKET_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/treasure_find_item.h
     ${CMAKE_CURRENT_SOURCE_DIR}/treasure_lot_item.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/treasure_lot_item.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/weather.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/weather.h
     ${CMAKE_CURRENT_SOURCE_DIR}/wide_scan.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/wide_scan.h
     ${CMAKE_CURRENT_SOURCE_DIR}/wide_scan_track.cpp

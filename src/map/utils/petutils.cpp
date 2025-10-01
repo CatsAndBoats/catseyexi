@@ -113,7 +113,7 @@ namespace petutils
             Pet->maxLevel  = rset->get<uint8>("maxLevel");
             Pet->time      = std::chrono::seconds(rset->get<uint32>("time"));
             Pet->radius    = rset->get<uint8>("mobradius");
-            Pet->EcoSystem = static_cast<ECOSYSTEM>(rset->get<uint8>("ecosystemID"));
+            Pet->EcoSystem = rset->get<ECOSYSTEM>("ecosystemID");
             Pet->m_Family  = rset->get<uint16>("familyid");
             Pet->mJob      = rset->get<uint8>("mJob");
             Pet->sJob      = rset->get<uint8>("sJob");
@@ -178,7 +178,7 @@ namespace petutils
             Pet->cmbDelay       = rset->get<uint16>("cmbDelay");
             Pet->name_prefix    = rset->get<uint8>("name_prefix");
             Pet->m_MobSkillList = rset->get<uint16>("skill_list_id");
-            Pet->m_dmgType      = static_cast<DAMAGE_TYPE>(rset->get<uint16>("damageType"));
+            Pet->m_dmgType      = rset->get<DAMAGE_TYPE>("damageType");
 
             g_PPetList.emplace_back(Pet);
         }
@@ -1644,38 +1644,24 @@ namespace petutils
     }
 
     /*
-    Familiars a pet.
+    Extends a charmed pet's charm duration between by a random number between minSeconds and maxSeconds
     */
-    void Familiar(CBattleEntity* PPet)
+    void ExtendCharm(CBattleEntity* PPet, uint16 minSeconds, uint16 maxSeconds)
     {
-        /*
-            Boost HP by 10%
-            Increase charm duration up to 30 mins
-            boost stats by 10%
-            */
-
         // only increase time for charmed mobs
-        if (PPet->objtype == TYPE_MOB && PPet->isCharmed)
+        if (!(PPet->objtype == TYPE_MOB && PPet->isCharmed))
         {
-            // increase charm duration
-            // 30 mins - 1-5 mins
-            PPet->charmTime += 30min - std::chrono::milliseconds(xirand::GetRandomNumber(300000u));
+            return;
         }
 
-        float rate = 0.10f;
+        // Sanity check range
+        if (minSeconds > maxSeconds || maxSeconds == 0)
+        {
+            return;
+        }
+        auto charmTimeIncrease = std::chrono::seconds(xirand::GetRandomNumber(minSeconds, maxSeconds));
 
-        // boost hp by 10%
-        uint16 boost = (uint16)(PPet->health.maxhp * rate);
-
-        PPet->health.maxhp += boost;
-        PPet->health.hp += boost;
-        PPet->UpdateHealth();
-
-        // boost stats by 10%
-        PPet->addModifier(Mod::ATTP, (int16)(rate * 100.0f));
-        PPet->addModifier(Mod::ACC, (int16)(rate * 100.0f));
-        PPet->addModifier(Mod::EVA, (int16)(rate * 100.0f));
-        PPet->addModifier(Mod::DEFP, (int16)(rate * 100.0f));
+        PPet->charmTime += charmTimeIncrease;
     }
 
     void LoadPet(CBattleEntity* PMaster, uint32 PetID, bool spawningFromZone)

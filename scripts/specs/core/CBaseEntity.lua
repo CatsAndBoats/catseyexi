@@ -10,8 +10,10 @@ local CBaseEntity = {}
 ---@param p1 integer?
 ---@param p2 integer?
 ---@param p3 integer?
+---@param showName boolean?
+---@param turn boolean?
 ---@return nil
-function CBaseEntity:showText(mob, messageID, p0, p1, p2, p3)
+function CBaseEntity:showText(mob, messageID, p0, p1, p2, p3, showName, turn)
 end
 
 ---@param PLuaBaseEntity CBaseEntity
@@ -3340,13 +3342,12 @@ end
 function CBaseEntity:takeWeaponskillDamage(attacker, damage, atkType, dmgType, slot, primary, tpMultiplier, bonusTP, targetTPMultiplier)
 end
 
----@nodiscard
 ---@param caster CBaseEntity
 ---@param spell CSpell
 ---@param damage integer
 ---@param atkType integer
 ---@param dmgType integer
----@return integer
+---@return nil
 function CBaseEntity:takeSpellDamage(caster, spell, damage, atkType, dmgType)
 end
 
@@ -3422,11 +3423,6 @@ end
 ---@param value integer?
 ---@return nil
 function CBaseEntity:setTrustTPSkillSettings(trigger, select, value)
-end
-
----@nodiscard
----@return boolean
-function CBaseEntity:hasValidJugPetItem()
 end
 
 ---@nodiscard

@@ -30,6 +30,7 @@
 #include "entities/mobentity.h"
 #include "job_points.h"
 #include "lua/luautils.h"
+#include "mob_modifier.h"
 #include "packets/action.h"
 #include "packets/message_basic.h"
 #include "spell.h"
@@ -42,6 +43,14 @@ CMagicState::CMagicState(CBattleEntity* PEntity, uint16 targid, SpellID spellid,
 , m_PSpell(nullptr)
 , m_flags(flags)
 {
+    if (auto PMob = dynamic_cast<CMobEntity*>(m_PEntity))
+    {
+        if (PMob->getMobMod(MOBMOD_NO_SPELL_COST) > 0)
+        {
+            m_flags |= MAGICFLAGS_IGNORE_MP;
+        }
+    }
+
     auto* PSpell = spell::GetSpell(spellid);
     if (PSpell == nullptr)
     {
@@ -109,6 +118,12 @@ CMagicState::CMagicState(CBattleEntity* PEntity, uint16 targid, SpellID spellid,
     // TODO: weaponskill lua object
     m_PEntity->PAI->EventHandler.triggerListener("MAGIC_START", m_PEntity, m_PSpell.get(), &action);
 
+    // if spell:setFlag(xi.magic.spellFlag.NO_START_MSG) is called, don't give spell start packet
+    if (GetSpell()->getFlag() & SPELLFLAG_NO_START_MSG)
+    {
+        actionTarget.messageID = 0; // Client will not emit a message if messageID is 0
+    }
+
     m_PEntity->loc.zone->PushPacket(m_PEntity, CHAR_INRANGE_SELF, std::make_unique<CActionPacket>(action));
 }
 
@@ -121,8 +136,7 @@ bool CMagicState::Update(timer::time_point tick)
     auto isTargetValid = [&]()
     {
         // m_PEntity->IsValidTarget checks if the target is dead and returns nullptr if so, so we don't need to duplicate it here.
-        if (!PTarget || m_errorMsg ||
-            (HasMoved() && (m_PEntity->objtype != TYPE_PET || static_cast<CPetEntity*>(m_PEntity)->getPetType() != PET_TYPE::AUTOMATON)))
+        if (!PTarget || m_errorMsg)
         {
             return false;
         }
@@ -158,7 +172,7 @@ bool CMagicState::Update(timer::time_point tick)
     if (tick > GetEntryTime() + m_castTime && !IsCompleted())
     {
         // CanCastSpell also does a range check which we don't want to check during midcast - mobs don't cancel spells during casting for being out of range
-        if (!isTargetValid() || !CanCastSpell(PTarget, true))
+        if (!isTargetValid() || !CanCastSpell(PTarget, true) || HasMoved())
         {
             m_PEntity->OnCastInterrupted(*this, action, msg, false);
             m_PEntity->loc.zone->PushPacket(m_PEntity, CHAR_INRANGE_SELF, std::make_unique<CActionPacket>(action));
@@ -287,6 +301,18 @@ bool CMagicState::Update(timer::time_point tick)
             m_PEntity->OnCastFinished(*this, action);
             m_PEntity->PAI->EventHandler.triggerListener("MAGIC_USE", m_PEntity, PTarget, m_PSpell.get(), &action);
             PTarget->PAI->EventHandler.triggerListener("MAGIC_TAKE", PTarget, m_PEntity, m_PSpell.get(), &action);
+        }
+
+        // Zero messageID so spells dont emit messages
+        if (GetSpell()->getFlag() & SPELLFLAG_NO_FINISH_MSG)
+        {
+            for (auto&& act : action.actionLists)
+            {
+                for (auto&& targ : act.actionTargets)
+                {
+                    targ.messageID = 0;
+                }
+            }
         }
 
         m_PEntity->loc.zone->PushPacket(m_PEntity, CHAR_INRANGE_SELF, std::make_unique<CActionPacket>(action));
@@ -420,8 +446,7 @@ bool CMagicState::HasCost()
         }
     }
     // check has mp available
-    else if (!m_PEntity->StatusEffectContainer->HasStatusEffect(EFFECT_MANAFONT) && !(m_flags & MAGICFLAGS_IGNORE_MP) &&
-             battleutils::CalculateSpellCost(m_PEntity, GetSpell()) > m_PEntity->health.mp)
+    else if (!battleutils::CanAffordSpell(m_PEntity, GetSpell(), m_flags))
     {
         if (m_PEntity->objtype == TYPE_MOB && m_PEntity->health.maxmp == 0)
         {
@@ -580,6 +605,12 @@ void CMagicState::ApplyEnmity(CBattleEntity* PTarget, int ce, int ve)
 
 bool CMagicState::HasMoved()
 {
+    // non-players can't get interrupted via movement due to edge case shenanigans seen from SE
+    if (m_PEntity->objtype != TYPE_PC)
+    {
+        return false;
+    }
+
     return floorf(m_startPos.x * 10 + 0.5f) / 10 != floorf(m_PEntity->loc.p.x * 10 + 0.5f) / 10 ||
            floorf(m_startPos.z * 10 + 0.5f) / 10 != floorf(m_PEntity->loc.p.z * 10 + 0.5f) / 10;
 }

@@ -23,7 +23,6 @@
 
 #include "common/database.h"
 #include "common/logging.h"
-#include "common/sql.h"
 #include "common/utils.h"
 #include "common/vana_time.h"
 
@@ -51,6 +50,7 @@
 #include "battleutils.h"
 #include "charutils.h"
 #include "enums/key_items.h"
+#include "enums/weather.h"
 #include "item_container.h"
 #include "itemutils.h"
 #include "map_engine.h"
@@ -325,16 +325,16 @@ namespace fishingutils
         return modifier;
     }
 
-    float GetWeatherModifier(CCharEntity* PChar)
+    auto GetWeatherModifier(const CCharEntity* PChar) -> float
     {
-        WEATHER weather    = zoneutils::GetZone(PChar->getZone())->GetWeather();
-        float   weatherMod = 1.0f;
+        const auto weather    = zoneutils::GetZone(PChar->getZone())->GetWeather();
+        float      weatherMod = 1.0f;
 
-        if (weather == WEATHER_RAIN)
+        if (weather == Weather::Rain)
         {
             weatherMod = 1.1f;
         }
-        else if (weather == WEATHER_SQUALL)
+        else if (weather == Weather::Squall)
         {
             weatherMod = 1.2f;
         }
@@ -3011,7 +3011,7 @@ namespace fishingutils
             fish->item            = rset->get<bool>("item");
             fish->maxhook         = rset->get<uint8>("max_hook");
             fish->rarity          = rset->get<uint16>("rarity");
-            fish->reqKeyItem      = static_cast<KeyItem>(rset->get<uint32>("required_keyitem"));
+            fish->reqKeyItem      = rset->get<KeyItem>("required_keyitem");
 
             fish->reqFish = new std::vector<uint16>();
 

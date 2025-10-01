@@ -1,0 +1,11 @@
+set(PACKET_S2C_SOURCES
+    ${CMAKE_CURRENT_SOURCE_DIR}/base.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/0x039_mapschedulor.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/0x039_mapschedulor.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/0x04f_equip_clear.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/0x057_weather.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/0x057_weather.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/0x05f_music.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/0x05f_music.cpp
+    PARENT_SCOPE
+)

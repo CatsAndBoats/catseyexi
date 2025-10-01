@@ -29,6 +29,7 @@
 #include "utils/battleutils.h"
 #include "utils/charutils.h"
 
+enum class MusicSlot : uint16_t;
 enum class ChocoboColor : uint8_t;
 class CBaseEntity;
 class CCharEntity;
@@ -42,6 +43,7 @@ class CLuaZone;
 
 class CLuaBaseEntity
 {
+protected:
     CBaseEntity* m_PBaseEntity;
 
 public:
@@ -55,7 +57,7 @@ public:
     friend std::ostream& operator<<(std::ostream& out, const CLuaBaseEntity& entity);
 
     // Messaging System
-    void showText(CLuaBaseEntity* mob, uint16 messageID, sol::object const& p0, sol::object const& p1, sol::object const& p2, sol::object const& p3);
+    void showText(CLuaBaseEntity* entity, uint16 messageID, sol::object const& p0, sol::object const& p1, sol::object const& p2, sol::object const& p3, sol::object const& p4, sol::object const& p5);
     void messageText(CLuaBaseEntity* PLuaBaseEntity, uint16 messageID, sol::object const& arg2, sol::object const& arg3);
     void printToPlayer(std::string const& message, sol::object const& messageTypeObj, sol::object const& nameObj);
     void printToArea(std::string const& message, sol::object const& arg1, sol::object const& arg2, sol::object const& arg3, sol::object const& arg4);
@@ -88,7 +90,7 @@ public:
     // Packets, Events, and Flags
     void injectPacket(std::string const& filename); // Send the character a packet kept in a file
     void injectActionPacket(uint32 inTargetID, uint16 inCategory, uint16 inAnimationID, uint16 inSpecEffect, uint16 inReaction, uint16 inMessage, uint16 inActionParam, uint16 inParam);
-    void entityVisualPacket(std::string const& command, sol::object const& entity);
+    void entityVisualPacket(std::string const& command, sol::object const& entity) const;
     void entityAnimationPacket(const char* command, sol::object const& target);
     void sendDebugPacket(sol::table const& packetData);
 
@@ -164,11 +166,11 @@ public:
     void hideNPC(sol::object const& seconds);
     void updateNPCHideTime(sol::object const& seconds); // Updates the length of time a NPC remains hidden, if shorter than the original hide time.
 
-    uint8 getWeather(sol::object const& ignoreScholar);
-    void  setWeather(uint8 weatherType); // Set Weather condition (GM COMMAND)
+    auto getWeather(sol::object const& ignoreScholar) const -> uint8;
+    void setWeather(Weather weatherType); // Set Weather condition (GM COMMAND)
 
     // PC Instructions
-    void changeMusic(uint16 blockID, uint16 musicTrackID);                  // Sets the specified music Track for specified music block.
+    void changeMusic(MusicSlot slotId, uint16 trackId) const;               // Sets the specified music Track for specified music block.
     void sendMenu(uint32 menu);                                             // Displays a menu (AH,Raise,Tractor,MH etc)
     bool sendGuild(uint16 guildID, uint8 open, uint8 close, uint8 holiday); // Sends guild shop menu
     void openSendBox() const;                                               // Opens send box (to deliver items)
@@ -263,8 +265,8 @@ public:
     uint8 getContainerSize(uint8 locationID);
     void  changeContainerSize(uint8 locationID, int8 newSize); // Increase/Decreases container size
     uint8 getFreeSlotsCount(sol::object const& locID);         // Gets value of free slots in Entity inventory
-    void  confirmTrade();                                      // Complete trade with an npc, only removing confirmed items
-    void  tradeComplete();                                     // Complete trade with an npc
+    void  confirmTrade() const;                                // Complete trade with an npc, only removing confirmed items
+    void  tradeComplete() const;                               // Complete trade with an npc
     auto  getTrade() -> CTradeContainer*;
 
     // Equipping
@@ -750,7 +752,7 @@ public:
     uint16 getWeaponHitCount(bool offhand); // Get PC weapon hit count (Occasionally Attacks N times weapons)
     uint32 addDamageFromMultipliers(uint32 damage, PHYSICAL_ATTACK_TYPE attackType, uint8 weaponSlot, bool allowProc);
 
-    void removeAmmo(uint8 ammoUsed);
+    void removeAmmo(sol::object const& ammoUsed) const;
 
     uint16 getWeaponSkillLevel(uint8 slotID);                        // Get Skill for equipped weapon
     uint16 getWeaponDamageType(uint8 slotID);                        // gets the type of weapon equipped
@@ -761,7 +763,7 @@ public:
     int32 takeWeaponskillDamage(CLuaBaseEntity* attacker, int32 damage, uint8 atkType, uint8 dmgType, uint8 slot, bool primary,
                                 float tpMultiplier, uint16 bonusTP, float targetTPMultiplier);
 
-    int32 takeSpellDamage(CLuaBaseEntity* caster, CLuaSpell* spell, int32 damage, uint8 atkType, uint8 dmgType);
+    void  takeSpellDamage(CLuaBaseEntity* caster, CLuaSpell* spell, int32 damage, uint8 atkType, uint8 dmgType);
     int32 takeSwipeLungeDamage(CLuaBaseEntity* caster, int32 damage, uint8 atkType, uint8 dmgType);
     int32 checkDamageCap(int32 damage);
     auto  handleSevereDamage(int32 damage, bool isPhysical) -> int32;
@@ -779,8 +781,6 @@ public:
     void   removeGambit(std::string const& id);
     void   removeAllGambits();
     void   setTrustTPSkillSettings(uint16 trigger, uint16 select, sol::object const& value);
-
-    bool hasValidJugPetItem();
 
     bool   hasPet();
     bool   hasJugPet();
@@ -800,7 +800,7 @@ public:
     void petAttack(CLuaBaseEntity* PEntity);
     void petAbility(uint16 abilityID); // Function exists, but is not implemented.  Warning will be displayed.
     void petRetreat();
-    void familiar();
+    void extendCharm(uint16 minSeconds, uint16 maxSeconds);
 
     void addPetMod(uint16 modID, int16 amount);
     void setPetMod(uint16 modID, int16 amount);

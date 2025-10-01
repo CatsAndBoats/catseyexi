@@ -1224,6 +1224,7 @@ INSERT INTO `mob_skill_lists` VALUES ('Genbu',277,806);
 INSERT INTO `mob_skill_lists` VALUES ('Genbu',277,807);
 INSERT INTO `mob_skill_lists` VALUES ('Genbu',277,808);
 INSERT INTO `mob_skill_lists` VALUES ('Genbu',277,809);
+INSERT INTO `mob_skill_lists` VALUES ('Seiryu',278,813);
 INSERT INTO `mob_skill_lists` VALUES ('Seiryu',278,814);
 INSERT INTO `mob_skill_lists` VALUES ('Seiryu',278,815);
 INSERT INTO `mob_skill_lists` VALUES ('Seiryu',278,816);
@@ -1935,7 +1936,8 @@ INSERT INTO `mob_skill_lists` VALUES ('Picolaton',418,403); -- Stormwind
 INSERT INTO `mob_skill_lists` VALUES ('Dahu',419,802); -- Great Sandstorm
 INSERT INTO `mob_skill_lists` VALUES ('Huwasi',420,678); -- Crystal Rain
 INSERT INTO `mob_skill_lists` VALUES ('Rogue_Receptacle',421,520); -- Double Ray
--- 422 to 435: free
+INSERT INTO `mob_skill_lists` VALUES ('Ullikummi',422,1035); -- Heavy Strike
+-- 423 to 435: free
 INSERT INTO `mob_skill_lists` VALUES ('Bloodlapper',436,2162);
 INSERT INTO `mob_skill_lists` VALUES ('Ghillie_Dhu',437,685);
 INSERT INTO `mob_skill_lists` VALUES ('Highlander_Lizard',438,371);
@@ -2474,7 +2476,7 @@ INSERT INTO `mob_skill_lists` VALUES ('Jug_Funguar',740,703);
 INSERT INTO `mob_skill_lists` VALUES ('Jug_Funguar',740,704);
 INSERT INTO `mob_skill_lists` VALUES ('Jug_Funguar',740,705);
 INSERT INTO `mob_skill_lists` VALUES ('Jug_Funguar',740,706);
-INSERT INTO `mob_skill_lists` VALUES ('Jug_Beetle',741,707); -- check id
+INSERT INTO `mob_skill_lists` VALUES ('Jug_Beetle',741,707);
 INSERT INTO `mob_skill_lists` VALUES ('Jug_Beetle',741,708);
 INSERT INTO `mob_skill_lists` VALUES ('Jug_Beetle',741,709);
 INSERT INTO `mob_skill_lists` VALUES ('Jug_Beetle',741,710);
@@ -2522,6 +2524,9 @@ INSERT INTO `mob_skill_lists` VALUES ('Jug_Hippogryph',753,751);
 INSERT INTO `mob_skill_lists` VALUES ('Jug_Hippogryph',753,752);
 INSERT INTO `mob_skill_lists` VALUES ('Jug_Hippogryph',753,797);
 INSERT INTO `mob_skill_lists` VALUES ('Jug_Hippogryph',753,798);
+INSERT INTO `mob_skill_lists` VALUES ('Jug_Adamantoise',754,753);
+INSERT INTO `mob_skill_lists` VALUES ('Jug_Adamantoise',754,754);
+INSERT INTO `mob_skill_lists` VALUES ('Jug_Adamantoise',754,755);
 INSERT INTO `mob_skill_lists` VALUES ('Jug_Apkallu',755,756);
 INSERT INTO `mob_skill_lists` VALUES ('Jug_Apkallu',755,757);
 INSERT INTO `mob_skill_lists` VALUES ('Jug_Pugil',756,758);
@@ -2550,11 +2555,10 @@ INSERT INTO `mob_skill_lists` VALUES ('Jug_Lynx',765,730);
 INSERT INTO `mob_skill_lists` VALUES ('Jug_Lynx',765,731);
 INSERT INTO `mob_skill_lists` VALUES ('Jug_Lynx',765,746);
 INSERT INTO `mob_skill_lists` VALUES ('Jug_Lynx',765,790);
-INSERT INTO `mob_skill_lists` VALUES ('Jug_Lycopodium',766,675);
-INSERT INTO `mob_skill_lists` VALUES ('Jug_Lycopodium',766,676);
-INSERT INTO `mob_skill_lists` VALUES ('Jug_Lycopodium',766,677);
-INSERT INTO `mob_skill_lists` VALUES ('Jug_Lycopodium',766,678);
-INSERT INTO `mob_skill_lists` VALUES ('Jug_Lycopodium',766,679);
+INSERT INTO `mob_skill_lists` VALUES ('Jug_Citrullus',766,675);
+INSERT INTO `mob_skill_lists` VALUES ('Jug_Citrullus',766,677);
+INSERT INTO `mob_skill_lists` VALUES ('Jug_Citrullus',766,678);
+INSERT INTO `mob_skill_lists` VALUES ('Jug_Citrullus',766,679);
 
 INSERT INTO `mob_skill_lists` VALUES ('Lamina-Hyakinthos',767,2210);
 INSERT INTO `mob_skill_lists` VALUES ('Corse_NM_staff',768,530);
@@ -4161,7 +4165,22 @@ INSERT INTO `mob_skill_lists` VALUES ('Exoplate_Phase_3',2059,998);
 INSERT INTO `mob_skill_lists` VALUES ('Exoplate_Phase_3',2059,999);
 INSERT INTO `mob_skill_lists` VALUES ('Exoplate_Phase_3',2059,1000);
 
--- Next ID : 2060
+INSERT INTO `mob_skill_lists` VALUES ('Infernal_Swarm',2060,334);
+INSERT INTO `mob_skill_lists` VALUES ('Infernal_Swarm',2060,335);
+
+INSERT INTO `mob_skill_lists` VALUES ('Dark_Ixion',2061,2334);
+INSERT INTO `mob_skill_lists` VALUES ('Dark_Ixion',2061,2335);
+INSERT INTO `mob_skill_lists` VALUES ('Dark_Ixion',2061,2336);
+INSERT INTO `mob_skill_lists` VALUES ('Dark_Ixion',2061,2337);
+INSERT INTO `mob_skill_lists` VALUES ('Dark_Ixion',2061,2338);
+
+INSERT INTO `mob_skill_lists` VALUES ('Gladiatorial_Weapon',2062,396);
+INSERT INTO `mob_skill_lists` VALUES ('Gladiatorial_Weapon',2062,397);
+INSERT INTO `mob_skill_lists` VALUES ('Gladiatorial_Weapon',2062,398);
+INSERT INTO `mob_skill_lists` VALUES ('Gladiatorial_Weapon',2062,513);
+INSERT INTO `mob_skill_lists` VALUES ('Gladiatorial_Weapon',2062,514);
+
+-- Next ID : 2063
 
 -- ------------------------------------------------------------
 -- Start of Ambuscade section
