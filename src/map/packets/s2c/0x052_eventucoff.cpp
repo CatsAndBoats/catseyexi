@@ -1,7 +1,7 @@
-﻿/*
+/*
 ===========================================================================
 
-  Copyright (c) 2010-2018 Darkstar Dev Teams
+  Copyright (c) 2025 LandSandBoat Dev Teams
 
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -19,13 +19,19 @@
 ===========================================================================
 */
 
-#include "release_special.h"
+#include "0x052_eventucoff.h"
 #include "entities/charentity.h"
 
-CSpecialReleasePacket::CSpecialReleasePacket(CCharEntity* PChar)
+GP_SERV_COMMAND_EVENTUCOFF::GP_SERV_COMMAND_EVENTUCOFF(CCharEntity* PChar, GP_SERV_COMMAND_EVENTUCOFF_MODE mode)
 {
-    this->setType(0x10E);
-    this->setSize(0x08);
+    auto& packet = this->data();
 
-    ref<uint8>(0x04) = 0; // unknown1
+    packet.Mode = mode;
+    // For Mode 2, pack the event ID.
+    if (mode == GP_SERV_COMMAND_EVENTUCOFF_MODE::CancelEvent && PChar->currentEvent)
+    {
+        packet.Mode = static_cast<GP_SERV_COMMAND_EVENTUCOFF_MODE>(static_cast<uint32_t>(packet.Mode) | PChar->currentEvent->eventId << 8);
+    }
+
+    PChar->m_Substate = CHAR_SUBSTATE::SUBSTATE_NONE;
 }

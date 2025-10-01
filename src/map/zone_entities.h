@@ -138,7 +138,5 @@ private:
     std::vector<CPetEntity*>   m_petsToDelete;
     std::vector<CTrustEntity*> m_trustsToDelete;
     std::vector<CMobEntity*>   m_aggroableMobs;
-    std::vector<CCharEntity*>  m_charsToLogout;
-    std::vector<CCharEntity*>  m_charsToWarp;
     std::vector<CCharEntity*>  m_charsToChangeZone;
 };

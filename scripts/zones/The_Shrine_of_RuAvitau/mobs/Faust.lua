@@ -40,6 +40,7 @@ local handleFaustFacingDirectionMechanics = function(faust)
 end
 
 entity.onMobInitialize = function(mob)
+    mob:setBaseSpeed(80) -- Note: setBaseSpeed() also updates the animation speed to match.
     mob:setMod(xi.mod.REGAIN, 500)
     mob:setMobMod(xi.mobMod.GIL_MIN, 18000)
     mob:setMobMod(xi.mobMod.GIL_MAX, 18000)

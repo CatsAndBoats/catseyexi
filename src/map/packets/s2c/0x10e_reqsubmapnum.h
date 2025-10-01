@@ -1,7 +1,7 @@
-﻿/*
+/*
 ===========================================================================
 
-  Copyright (c) 2010-2015 Darkstar Dev Teams
+  Copyright (c) 2025 LandSandBoat Dev Teams
 
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -19,25 +19,21 @@
 ===========================================================================
 */
 
-#include "release.h"
-#include "entities/charentity.h"
+#pragma once
 
-CReleasePacket::CReleasePacket(CCharEntity* PChar, RELEASE_TYPE releaseType)
+#include "base.h"
+
+class CCharEntity;
+
+// https://github.com/atom0s/XiPackets/tree/main/world/server/0x010E
+// This packet is sent by the server to update the clients sub map number.
+class GP_SERV_COMMAND_REQSUBMAPNUM final : public GP_SERV_PACKET<PacketS2C::GP_SERV_COMMAND_REQSUBMAPNUM, GP_SERV_COMMAND_REQSUBMAPNUM>
 {
-    this->setType(0x52);
-    this->setSize(0x08);
-
-    ref<uint8>(0x04) = static_cast<uint8>(releaseType);
-
-    if (releaseType == RELEASE_TYPE::SKIPPING)
+public:
+    struct PacketData
     {
-        ref<uint16>(0x05) = PChar->currentEvent->eventId;
-    }
+        uint32_t MapNum;
+    };
 
-    PChar->m_Substate = CHAR_SUBSTATE::SUBSTATE_NONE;
-}
-
-// Release Types
-// 0 - Conversation with npc without starting the event
-// 2 - Event (indicating the event id)
-// 4 - Fishing
+    GP_SERV_COMMAND_REQSUBMAPNUM(uint32_t mapNum);
+};

@@ -1,7 +1,7 @@
-﻿/*
+/*
 ===========================================================================
 
-  Copyright (c) 2010-2014 Darkstar Dev Teams
+  Copyright (c) 2025 LandSandBoat Dev Teams
 
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -19,19 +19,22 @@
 ===========================================================================
 */
 
-#include "caught_monster.h"
+#pragma once
 
-#include "entities/charentity.h"
-#include <string.h>
+#include "base.h"
 
-CCaughtMonsterPacket::CCaughtMonsterPacket(CCharEntity* PChar, uint16 messageID)
+class CCharEntity;
+
+// https://github.com/atom0s/XiPackets/tree/main/world/server/0x0107
+// This packet is sent by the server when the selling players bazaar has closed while the client was viewing it.
+class GP_SERV_COMMAND_BAZAAR_CLOSE final : public GP_SERV_PACKET<PacketS2C::GP_SERV_COMMAND_BAZAAR_CLOSE, GP_SERV_COMMAND_BAZAAR_CLOSE>
 {
-    this->setType(0x43);
-    this->setSize(0x40);
+public:
+    struct PacketData
+    {
+        uint8_t sName[16];
+        uint8_t padding00[4];
+    };
 
-    ref<uint32>(0x04) = PChar->id;
-    ref<uint32>(0x08) = PChar->targid;
-    ref<uint16>(0x0A) = messageID + 0x8000;
-
-    std::memcpy(buffer_.data() + 0x10, PChar->getName().c_str(), PChar->getName().size());
-}
+    GP_SERV_COMMAND_BAZAAR_CLOSE(const CCharEntity* PChar);
+};

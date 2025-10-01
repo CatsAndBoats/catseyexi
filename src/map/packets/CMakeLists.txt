@@ -11,24 +11,18 @@ set(PACKET_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/basic.h
     ${CMAKE_CURRENT_SOURCE_DIR}/bazaar_check.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/bazaar_check.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/bazaar_close.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/bazaar_close.h
     ${CMAKE_CURRENT_SOURCE_DIR}/bazaar_confirmation.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/bazaar_confirmation.h
     ${CMAKE_CURRENT_SOURCE_DIR}/bazaar_item.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/bazaar_item.h
     ${CMAKE_CURRENT_SOURCE_DIR}/bazaar_message.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/bazaar_message.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/bazaar_purchase.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/bazaar_purchase.h
     ${CMAKE_CURRENT_SOURCE_DIR}/blacklist_edit_response.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/blacklist_edit_response.h
     ${CMAKE_CURRENT_SOURCE_DIR}/campaign_map.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/campaign_map.h
     ${CMAKE_CURRENT_SOURCE_DIR}/caught_fish.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/caught_fish.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/caught_monster.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/caught_monster.h
     ${CMAKE_CURRENT_SOURCE_DIR}/char_abilities.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/char_abilities.h
     ${CMAKE_CURRENT_SOURCE_DIR}/char_appearance.cpp
@@ -89,12 +83,6 @@ set(PACKET_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/entity_update.h
     ${CMAKE_CURRENT_SOURCE_DIR}/event.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/event.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/event_string.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/event_string.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/event_update.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/event_update.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/event_update_string.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/event_update_string.h
     ${CMAKE_CURRENT_SOURCE_DIR}/fishing.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/fishing.h
     ${CMAKE_CURRENT_SOURCE_DIR}/fish_ranking.cpp
@@ -137,8 +125,6 @@ set(PACKET_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/linkshell_equip.h
     ${CMAKE_CURRENT_SOURCE_DIR}/linkshell_message.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/linkshell_message.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/lock_on.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/lock_on.h
     ${CMAKE_CURRENT_SOURCE_DIR}/macroequipset.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/macroequipset.h
     ${CMAKE_CURRENT_SOURCE_DIR}/map_marker.cpp
@@ -193,10 +179,6 @@ set(PACKET_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/position.h
     ${CMAKE_CURRENT_SOURCE_DIR}/quest_mission_log.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/quest_mission_log.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/release.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/release.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/release_special.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/release_special.h
     ${CMAKE_CURRENT_SOURCE_DIR}/roe_questlog.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/roe_questlog.h
     ${CMAKE_CURRENT_SOURCE_DIR}/roe_sparkupdate.cpp

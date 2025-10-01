@@ -197,4 +197,5 @@ xi.mobSuperFamily =
     DEFIANT          = 188,
     MACUIL           = 189,
     MEEBLE           = 190,
+    BOMB_CLUSTER     = 191,
 }

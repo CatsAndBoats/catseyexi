@@ -1,7 +1,11 @@
 -----------------------------------
--- Dark Ixion basic melee attack with horn
--- Note: Has basic autoattack-style messages, consumes no TP, and applies BIND effect
--- normal tp gain is applied since the skill is used in place of an autoattack
+--  Acheron Kick
+--
+--  Description: Physical Cone Attack damage behind user.
+--  Type: Physical
+--  Utsusemi/Blink absorb: 2-3 shadows
+--  Range: Back
+--  Dark Ixion CAN turn around to use this move on anyone with hate, regardless of their original position or even distance.
 -----------------------------------
 ---@type TMobSkill
 local mobskillObject = {}
@@ -11,27 +15,16 @@ mobskillObject.onMobSkillCheck = function(target, mob, skill)
 end
 
 mobskillObject.onMobWeaponSkill = function(target, mob, skill)
-    -- parameters for AE
-    local typeEffect = xi.effect.BIND
-    local power      = 1
-    local duration   = math.random(3, 15)
-
     -- perform physical attack
-    local numhits = 1
+    local numhits = 3
     local accmod  = 1
     local ftp     = 1
     local info    = xi.mobskills.mobPhysicalMove(mob, target, skill, numhits, accmod, ftp, xi.mobskills.physicalTpBonus.NO_EFFECT, 0, 0, 0)
     local dmg     = xi.mobskills.mobFinalAdjustments(info.dmg, mob, skill, target, xi.attackType.PHYSICAL, xi.damageType.PIERCING, info.hitslanded)
 
-    -- if skill hit, apply dmg and AE
+    -- if skill hit, apply dmg
     if not skill:hasMissMsg() then
-        skill:setMsg(xi.msg.basic.HIT_DMG)
         target:takeDamage(dmg, mob, xi.attackType.PHYSICAL, xi.damageType.PIERCING)
-
-        xi.mobskills.mobPhysicalStatusEffectMove(mob, target, skill, typeEffect, power, 0, duration)
-    elseif dmg == 0 then
-        -- basic miss (not shadows or anticipation)
-        skill:setMsg(xi.msg.basic.EVADES)
     end
 
     return dmg

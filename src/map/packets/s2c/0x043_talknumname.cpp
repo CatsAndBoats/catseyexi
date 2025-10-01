@@ -1,7 +1,7 @@
 /*
 ===========================================================================
 
-  Copyright (c) 2010-2014 Darkstar Dev Teams
+  Copyright (c) 2025 LandSandBoat Dev Teams
 
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -19,18 +19,19 @@
 ===========================================================================
 */
 
-#ifndef _CCAUGHTMONSTERPACKET_H_
-#define _CCAUGHTMONSTERPACKET_H_
+#include "0x043_talknumname.h"
 
-#include "basic.h"
-#include "common/cbasetypes.h"
+#include <cstring>
 
-class CCharEntity;
+#include "entities/charentity.h"
 
-class CCaughtMonsterPacket : public CBasicPacket
+GP_SERV_COMMAND_TALKNUMNAME::GP_SERV_COMMAND_TALKNUMNAME(const CCharEntity* PChar, const uint16_t msgId)
 {
-public:
-    CCaughtMonsterPacket(CCharEntity* PChar, uint16 messageID);
-};
+    auto& packet = this->data();
 
-#endif
+    packet.UniqueNo = PChar->id;
+    packet.ActIndex = PChar->targid;
+    packet.MesNum   = msgId + 0x8000; // TODO: This needs to be reworked
+
+    std::memcpy(packet.sName, PChar->getName().c_str(), std::min<size_t>(PChar->getName().size(), sizeof(packet.sName)));
+}

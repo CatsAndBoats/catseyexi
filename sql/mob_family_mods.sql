@@ -211,15 +211,10 @@ INSERT INTO `mob_family_mods` VALUES (62,36,50,1); -- ROAM_COOL: 50
 -- Chariot
 INSERT INTO `mob_family_mods` VALUES (63,10,15,1); -- SUBLINK: 15
 
--- Cluster
+-- Bomb-Cluster
 INSERT INTO `mob_family_mods` VALUES (68,36,40,1); -- ROAM_COOL: 40
 INSERT INTO `mob_family_mods` VALUES (68,51,2,1);  -- ROAM_TURNS: 2
 INSERT INTO `mob_family_mods` VALUES (68,52,20,1); -- ROAM_RATE: 20
-
--- Cluster
-INSERT INTO `mob_family_mods` VALUES (69,36,40,1); -- ROAM_COOL: 40
-INSERT INTO `mob_family_mods` VALUES (69,51,2,1);  -- ROAM_TURNS: 2
-INSERT INTO `mob_family_mods` VALUES (69,52,20,1); -- ROAM_RATE: 20
 
 -- Cockatrice
 INSERT INTO `mob_family_mods` VALUES (70,36,30,1); -- ROAM_COOL: 30
@@ -247,12 +242,6 @@ INSERT INTO `mob_family_mods` VALUES (74,388,-5000,0); -- UDMGBREATH: -5000
 INSERT INTO `mob_family_mods` VALUES (74,389,-2500,0); -- UDMGMAGIC: -2500
 
 -- Crab
-INSERT INTO `mob_family_mods` VALUES (75,36,15,1); -- ROAM_COOL: 15
-
--- Crab
-INSERT INTO `mob_family_mods` VALUES (76,36,15,1); -- ROAM_COOL: 15
-
--- Crab
 INSERT INTO `mob_family_mods` VALUES (77,36,15,1); -- ROAM_COOL: 15
 
 -- Crawler
@@ -267,11 +256,6 @@ INSERT INTO `mob_family_mods` VALUES (80,52,30,1);  -- ROAM_RATE: 30
 -- Diremite
 INSERT INTO `mob_family_mods` VALUES (81,36,50,1);  -- ROAM_COOL: 50
 INSERT INTO `mob_family_mods` VALUES (81,51,2,1);   -- ROAM_TURNS: 2
-
--- Doll
-INSERT INTO `mob_family_mods` VALUES (83,31,5,1);  -- ROAM_DISTANCE: 5
-INSERT INTO `mob_family_mods` VALUES (83,36,55,1); -- ROAM_COOL: 55
-INSERT INTO `mob_family_mods` VALUES (83,52,30,1); -- ROAM_RATE: 30
 
 -- Doll
 INSERT INTO `mob_family_mods` VALUES (84,31,5,1);  -- ROAM_DISTANCE: 5
@@ -394,12 +378,6 @@ INSERT INTO `mob_family_mods` VALUES (121,52,30,1);   -- ROAM_RATE: 30
 
 -- Ghrah: https://www.bg-wiki.com/ffxi/Category:Ghrah
 INSERT INTO `mob_family_mods` VALUES (122,389,-1250,0); -- UDMGMAGIC: -1250
-
--- Ghrah: https://www.bg-wiki.com/ffxi/Category:Ghrah
-INSERT INTO `mob_family_mods` VALUES (123,389,-1250,0); -- UDMGMAGIC: -1250
-
--- Ghrah: https://www.bg-wiki.com/ffxi/Category:Ghrah
-INSERT INTO `mob_family_mods` VALUES (124,389,-1250,0); -- UDMGMAGIC: -1250
 
 -- Greater Bird
 INSERT INTO `mob_family_mods` VALUES (125,36,40,1);   -- ROAM_COOL: 40
@@ -680,16 +658,6 @@ INSERT INTO `mob_family_mods` VALUES (221,36,50,1);   -- ROAM_COOL: 50
 INSERT INTO `mob_family_mods` VALUES (221,51,2,1);    -- ROAM_TURNS: 2
 INSERT INTO `mob_family_mods` VALUES (221,52,30,1);   -- ROAM_RATE: 30
 
--- Shadow
-INSERT INTO `mob_family_mods` VALUES (222,36,50,1);   -- ROAM_COOL: 50
-INSERT INTO `mob_family_mods` VALUES (222,51,2,1);    -- ROAM_TURNS: 2
-INSERT INTO `mob_family_mods` VALUES (222,52,30,1);   -- ROAM_RATE: 30
-
--- Shadow
-INSERT INTO `mob_family_mods` VALUES (223,36,50,1);   -- ROAM_COOL: 50
-INSERT INTO `mob_family_mods` VALUES (223,51,2,1);    -- ROAM_TURNS: 2
-INSERT INTO `mob_family_mods` VALUES (223,52,30,1);   -- ROAM_RATE: 30
-
 -- Sheep
 INSERT INTO `mob_family_mods` VALUES (226,31,15,1); -- ROAM_DISTANCE: 15
 INSERT INTO `mob_family_mods` VALUES (226,36,60,1); -- ROAM_COOL: 60
@@ -880,21 +848,8 @@ INSERT INTO `mob_family_mods` VALUES (359,54,100,1);  -- GIL_BONUS: 100
 -- Sabotender-Florido
 INSERT INTO `mob_family_mods` VALUES (362,10,7,1); -- SUBLINK: 7
 
--- Doll-Faust
-INSERT INTO `mob_family_mods` VALUES (367,31,5,1);  -- ROAM_DISTANCE: 5
-INSERT INTO `mob_family_mods` VALUES (367,36,55,1); -- ROAM_COOL: 55
-INSERT INTO `mob_family_mods` VALUES (367,52,30,1); -- ROAM_RATE: 30
-
--- Doll-Despot
-INSERT INTO `mob_family_mods` VALUES (368,31,5,1);  -- ROAM_DISTANCE: 5
-INSERT INTO `mob_family_mods` VALUES (368,36,55,1); -- ROAM_COOL: 55
-INSERT INTO `mob_family_mods` VALUES (368,52,30,1); -- ROAM_RATE: 30
-
 -- Leech
 INSERT INTO `mob_family_mods` VALUES (369,31,15,1); -- ROAM_DISTANCE: 15
-
--- Crab
-INSERT INTO `mob_family_mods` VALUES (372,36,15,1); -- ROAM_COOL: 15
 
 -- Raptor
 INSERT INTO `mob_family_mods` VALUES (376,31,30,1); -- ROAM_DISTANCE: 30
@@ -920,9 +875,6 @@ INSERT INTO `mob_family_mods` VALUES (404,52,30,1); -- ROAM_RATE: 30
 
 -- Lamiae-Medusa
 INSERT INTO `mob_family_mods` VALUES (469,10,10,1); -- SUBLINK: 10
-
--- Behemoth-Kb
-INSERT INTO `mob_family_mods` VALUES (479,36,50,1); -- ROAM_COOL: 50
 
 -- Ajido-Marujido
 INSERT INTO `mob_family_mods` VALUES (481,41,988,1); -- TELEPORT_START: 988

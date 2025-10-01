@@ -1,7 +1,7 @@
-﻿/*
+/*
 ===========================================================================
 
-  Copyright (c) 2010-2015 Darkstar Dev Teams
+  Copyright (c) 2025 LandSandBoat Dev Teams
 
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -19,19 +19,11 @@
 ===========================================================================
 */
 
-#ifndef _CBAZAARPURCHASEPACKET_H
-#define _CBAZAARPURCHASEPACKET_H
+#include "0x10e_reqsubmapnum.h"
 
-#include "common/cbasetypes.h"
-
-#include "basic.h"
-
-class CCharEntity;
-
-class CBazaarPurchasePacket : public CBasicPacket
+GP_SERV_COMMAND_REQSUBMAPNUM::GP_SERV_COMMAND_REQSUBMAPNUM(const uint32_t mapNum)
 {
-public:
-    CBazaarPurchasePacket(CCharEntity* PChar, bool result);
-};
+    auto& packet = this->data();
 
-#endif
+    packet.MapNum = mapNum;
+}

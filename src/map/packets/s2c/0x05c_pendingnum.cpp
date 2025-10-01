@@ -1,7 +1,7 @@
-﻿/*
+/*
 ===========================================================================
 
-  Copyright (c) 2010-2015 Darkstar Dev Teams
+  Copyright (c) 2025 LandSandBoat Dev Teams
 
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -19,28 +19,17 @@
 ===========================================================================
 */
 
-#ifndef _CRELEASEPACKET_H
-#define _CRELEASEPACKET_H
+#include "0x05c_pendingnum.h"
 
-#include "common/cbasetypes.h"
-
-#include "basic.h"
-
-enum class RELEASE_TYPE : uint8
+GP_SERV_COMMAND_PENDINGNUM::GP_SERV_COMMAND_PENDINGNUM(const std::vector<std::pair<uint8_t, uint32_t>>& params)
 {
-    STANDARD    = 0,
-    EVENT       = 1,
-    SKIPPING    = 2,
-    PLAYERINPUT = 3, /* Used by player input based event updates. Packet 0x060 (String and Numerical)*/
-    FISHING     = 4
-};
+    auto& packet = this->data();
 
-class CCharEntity;
-
-class CReleasePacket : public CBasicPacket
-{
-public:
-    CReleasePacket(CCharEntity* PChar, RELEASE_TYPE releaseType = RELEASE_TYPE::STANDARD);
-};
-
-#endif
+    for (const auto& [index, value] : params)
+    {
+        if (index < std::size(packet.num))
+        {
+            packet.num[index] = static_cast<int32_t>(value);
+        }
+    }
+}

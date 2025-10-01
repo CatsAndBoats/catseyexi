@@ -16,10 +16,6 @@ entity.onTrigger = function(player, npc)
         player:getCharVar('PathOfTheBard_Event') == 1
     then
         player:startEvent(2)
-
-    -- DEFAULT DIALOG
-    else
-        player:messageSpecial(ID.text.SONG_RUNES_DEFAULT)
     end
 end
 

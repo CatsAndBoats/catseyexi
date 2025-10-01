@@ -89,8 +89,6 @@ CZoneEntities::CZoneEntities(CZone* zone)
     m_petsToDelete.reserve(INTERMEDIATE_CONTAINER_RESERVE_SIZE);
     m_trustsToDelete.reserve(INTERMEDIATE_CONTAINER_RESERVE_SIZE);
     m_aggroableMobs.reserve(INTERMEDIATE_CONTAINER_RESERVE_SIZE);
-    m_charsToLogout.reserve(INTERMEDIATE_CONTAINER_RESERVE_SIZE);
-    m_charsToWarp.reserve(INTERMEDIATE_CONTAINER_RESERVE_SIZE);
     m_charsToChangeZone.reserve(INTERMEDIATE_CONTAINER_RESERVE_SIZE);
 }
 
@@ -1903,17 +1901,7 @@ void CZoneEntities::ZoneServer(timer::time_point tick)
             }
         }
 
-        // Else-if chain so only one end-result can be processed.
-        // This is done to prevent multiple-deletion of PChar
-        if (PChar->status == STATUS_TYPE::SHUTDOWN) // EFFECT_LEAVEGAME effect wore off or char got SHUTDOWN from some other location
-        {
-            m_charsToLogout.emplace_back(PChar);
-        }
-        else if (PChar->requestedWarp) // EFFECT_TELEPORT can request players to warp
-        {
-            m_charsToWarp.emplace_back(PChar);
-        }
-        else if (PChar->requestedZoneChange) // EFFECT_TELEPORT can request players to change zones
+        if (PChar->requestedZoneChange || PChar->requestedWarp || PChar->status == STATUS_TYPE::SHUTDOWN)
         {
             m_charsToChangeZone.emplace_back(PChar);
         }
@@ -1963,20 +1951,6 @@ void CZoneEntities::ZoneServer(timer::time_point tick)
         }
     }
 
-    // forceLogout eventually removes the char from m_charList -- so we must remove them here
-    for (auto* PChar : m_charsToLogout)
-    {
-        PChar->clearPacketList();
-        charutils::ForceLogout(PChar);
-    }
-
-    // Warp players (do not recover HP/MP)
-    for (auto* PChar : m_charsToWarp)
-    {
-        PChar->clearPacketList();
-        charutils::HomePoint(PChar, false);
-    }
-
     // Change player's zone (teleports, etc)
     for (auto* PChar : m_charsToChangeZone)
     {
@@ -1991,7 +1965,20 @@ void CZoneEntities::ZoneServer(timer::time_point tick)
             continue;
         }
 
-        charutils::SendToZone(PChar, PChar->loc.destination);
+        if (PChar->status == STATUS_TYPE::SHUTDOWN)
+        {
+            charutils::ForceLogout(PChar);
+        }
+        else if (PChar->requestedWarp)
+        {
+            charutils::HomePoint(PChar, false);
+        }
+        else if (PChar->loc.destination != 0xFFFF)
+        {
+            charutils::SendToZone(PChar, PChar->loc.destination);
+        }
+
+        charutils::removeCharFromZone(PChar);
     }
 
     if (tick > m_EffectCheckTime)
@@ -2070,8 +2057,6 @@ void CZoneEntities::ZoneServer(timer::time_point tick)
     m_petsToDelete.clear();
     m_trustsToDelete.clear();
     m_aggroableMobs.clear();
-    m_charsToLogout.clear();
-    m_charsToWarp.clear();
     m_charsToChangeZone.clear();
 }
 

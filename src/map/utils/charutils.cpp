@@ -6707,6 +6707,11 @@ namespace charutils
     {
         TracyZoneScoped;
 
+        if (PChar->PSession->blowfish.status == BLOWFISH_PENDING_ZONE)
+        {
+            return;
+        }
+
         auto ipp = IPP(zoneutils::GetZoneIPP(zoneId));
         if (ipp.getIP() == 0)
         {
@@ -6731,11 +6736,6 @@ namespace charutils
                          PChar->m_moghouseID, PChar->loc.boundary,
                          PChar->id);
 
-        message::send(ipc::CharZone{
-            .charId            = PChar->id,
-            .destinationZoneId = PChar->loc.destination,
-        });
-
         if (PChar->shouldPetPersistThroughZoning())
         {
             PChar->setPetZoningInfo();
@@ -6751,9 +6751,13 @@ namespace charutils
             charutils::forceSynthCritFail("SendToZone", PChar);
         }
 
+        PChar->requestedZoneChange = true;
+        PChar->requestedWarp       = false; // a previous warp can get us here, which could infinitely loop. So un-request warp.
+
+        PChar->PSession->zone_ipp = {};
         PChar->pushPacket<CServerIPPacket>(PChar, 2, IPP(ipp));
 
-        removeCharFromZone(PChar);
+        PChar->status = STATUS_TYPE::DISAPPEAR;
     }
 
     void SendDisconnect(CCharEntity* PChar)
@@ -6761,20 +6765,18 @@ namespace charutils
         TracyZoneScoped;
 
         SaveCharPosition(PChar);
+        PChar->clearPacketList();
 
-        message::send(ipc::CharZone{
-            .charId            = PChar->id,
-            .destinationZoneId = 0xFFFF, // Clear cache
-        });
+        PChar->loc.destination     = 0xFFFF;
+        PChar->status              = STATUS_TYPE::SHUTDOWN;
+        PChar->requestedZoneChange = true;
 
         PChar->pushPacket<CServerIPPacket>(PChar, 1, IPP());
-
-        removeCharFromZone(PChar);
     }
 
+    // This is just an alias for SendDisconnect?
     void ForceLogout(CCharEntity* PChar)
     {
-        PChar->status = STATUS_TYPE::SHUTDOWN;
         charutils::SendDisconnect(PChar);
     }
 

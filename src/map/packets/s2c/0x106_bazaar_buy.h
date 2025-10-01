@@ -1,7 +1,7 @@
-﻿/*
+/*
 ===========================================================================
 
-  Copyright (c) 2010-2015 Darkstar Dev Teams
+  Copyright (c) 2025 LandSandBoat Dev Teams
 
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -19,20 +19,29 @@
 ===========================================================================
 */
 
-#ifndef _CLOCKONPACKET_H
-#define _CLOCKONPACKET_H
+#pragma once
 
-#include "common/cbasetypes.h"
+#include "base.h"
 
-#include "basic.h"
-
-class CCharEntity;
-class CBattleEntity;
-
-class CLockOnPacket : public CBasicPacket
+enum class GP_BAZAAR_BUY_STATE : uint32_t
 {
-public:
-    CLockOnPacket(CCharEntity* PChar, CBattleEntity* PTarget);
+    OK  = 0,
+    ERR = 1,
+    END = 2
 };
 
-#endif
+class CCharEntity;
+
+// https://github.com/atom0s/XiPackets/tree/main/world/server/0x0106
+// This packet is sent by the server when the client has made, or attempted to make, a purchase from another players Bazaar.
+class GP_SERV_COMMAND_BAZAAR_BUY final : public GP_SERV_PACKET<PacketS2C::GP_SERV_COMMAND_BAZAAR_BUY, GP_SERV_COMMAND_BAZAAR_BUY>
+{
+public:
+    struct PacketData
+    {
+        GP_BAZAAR_BUY_STATE State;
+        uint8_t             sName[16];
+    };
+
+    GP_SERV_COMMAND_BAZAAR_BUY(const CCharEntity* PChar, GP_BAZAAR_BUY_STATE state);
+};

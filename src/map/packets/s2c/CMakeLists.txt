@@ -1,11 +1,29 @@
 set(PACKET_S2C_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/base.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/0x033_eventstr.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/0x033_eventstr.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/0x039_mapschedulor.h
     ${CMAKE_CURRENT_SOURCE_DIR}/0x039_mapschedulor.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/0x043_talknumname.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/0x043_talknumname.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/0x04f_equip_clear.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/0x052_eventucoff.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/0x052_eventucoff.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/0x057_weather.h
     ${CMAKE_CURRENT_SOURCE_DIR}/0x057_weather.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/0x058_assist.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/0x058_assist.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/0x05c_pendingnum.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/0x05c_pendingnum.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/0x05d_pendingstr.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/0x05d_pendingstr.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/0x05f_music.h
     ${CMAKE_CURRENT_SOURCE_DIR}/0x05f_music.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/0x106_bazaar_buy.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/0x106_bazaar_buy.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/0x107_bazaar_close.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/0x107_bazaar_close.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/0x10e_reqsubmapnum.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/0x10e_reqsubmapnum.cpp
     PARENT_SCOPE
 )

@@ -25,10 +25,6 @@ entity.onTrigger = function(player, npc)
     -- PATH OF THE BARD
     elseif player:getQuestStatus(xi.questLog.JEUNO, xi.quest.id.jeuno.PATH_OF_THE_BARD) == xi.questStatus.QUEST_COMPLETED then
         player:startEvent(143) -- so now you're one of us, huh?
-
-    -- DEFAULT RESPONSE
-    else
-        player:startEvent(141)
     end
 end
 

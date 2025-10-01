@@ -1,7 +1,7 @@
-﻿/*
+/*
 ===========================================================================
 
-  Copyright (c) 2010-2018 Darkstar Dev Teams
+  Copyright (c) 2025 LandSandBoat Dev Teams
 
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -19,17 +19,16 @@
 ===========================================================================
 */
 
-#ifndef _CRELEASE_SPECIALPACKET_H
-#define _CRELEASE_SPECIALPACKET_H
+#include "0x106_bazaar_buy.h"
 
-#include "basic.h"
+#include <cstring>
 
-class CCharEntity;
+#include "entities/charentity.h"
 
-class CSpecialReleasePacket : public CBasicPacket
+GP_SERV_COMMAND_BAZAAR_BUY::GP_SERV_COMMAND_BAZAAR_BUY(const CCharEntity* PChar, const GP_BAZAAR_BUY_STATE state)
 {
-public:
-    CSpecialReleasePacket(CCharEntity* PChar);
-};
+    auto& packet = this->data();
 
-#endif
+    packet.State = state;
+    std::memcpy(packet.sName, PChar->getName().c_str(), std::min<size_t>(PChar->getName().size(), sizeof(packet.sName)));
+}

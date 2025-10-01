@@ -1,7 +1,7 @@
-﻿/*
+/*
 ===========================================================================
 
-  Copyright (c) 2010-2015 Darkstar Dev Teams
+  Copyright (c) 2025 LandSandBoat Dev Teams
 
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -19,24 +19,25 @@
 ===========================================================================
 */
 
-#ifndef _CEVENTUPDATESTRINGPACKET_H
-#define _CEVENTUPDATESTRINGPACKET_H
+#pragma once
 
-#include "common/cbasetypes.h"
-#include "common/mmo.h"
-
-#include <string>
-
-#include "basic.h"
+#include "base.h"
 
 class CCharEntity;
+class CBattleEntity;
 
-class CEventUpdateStringPacket : public CBasicPacket
+// https://github.com/atom0s/XiPackets/tree/main/world/server/0x0058
+// This packet is sent by the server to respond to a client assist request. (/assist)
+class GP_SERV_COMMAND_ASSIST final : public GP_SERV_PACKET<PacketS2C::GP_SERV_COMMAND_ASSIST, GP_SERV_COMMAND_ASSIST>
 {
 public:
-    CEventUpdateStringPacket(std::string const& string0 = "", std::string const& string1 = "", std::string const& string2 = "", std::string const& string3 = "",
-                             uint32 param0 = 0, uint32 param1 = 0, uint32 param2 = 0, uint32 param3 = 0, uint32 param4 = 0, uint32 param5 = 0,
-                             uint32 param6 = 0, uint32 param7 = 0, uint32 param8 = 0);
-};
+    struct PacketData
+    {
+        uint32_t UniqueNo;
+        uint32_t AssistNo;
+        uint16_t ActIndex;
+        uint16_t padding00;
+    };
 
-#endif
+    GP_SERV_COMMAND_ASSIST(const CCharEntity* PChar, const CBattleEntity* PTarget);
+};

@@ -1,7 +1,7 @@
-﻿/*
+/*
 ===========================================================================
 
-  Copyright (c) 2010-2015 Darkstar Dev Teams
+  Copyright (c) 2025 LandSandBoat Dev Teams
 
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -19,19 +19,15 @@
 ===========================================================================
 */
 
-#ifndef _CBAZAARCLOSEPACKET_H
-#define _CBAZAARCLOSEPACKET_H
+#include "0x107_bazaar_close.h"
 
-#include "common/cbasetypes.h"
+#include <cstring>
 
-#include "basic.h"
+#include "entities/charentity.h"
 
-class CCharEntity;
-
-class CBazaarClosePacket : public CBasicPacket
+GP_SERV_COMMAND_BAZAAR_CLOSE::GP_SERV_COMMAND_BAZAAR_CLOSE(const CCharEntity* PChar)
 {
-public:
-    CBazaarClosePacket(CCharEntity* PChar);
-};
+    auto& packet = this->data();
 
-#endif
+    std::memcpy(packet.sName, PChar->getName().c_str(), std::min<size_t>(PChar->getName().size(), sizeof(packet.sName)));
+}

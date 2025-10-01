@@ -70,10 +70,6 @@ entity.onTrigger = function(player, npc)
 
     elseif theRequiem == xi.questStatus.QUEST_COMPLETED then
         player:startEvent(134) -- Standard dialog after "The Requiem"
-
-    -- DEFAULT DIALOG
-    else
-        player:startEvent(181)
     end
 end
 

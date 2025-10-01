@@ -82,6 +82,9 @@ local changeHornState = function(mob, state)
         mob:setAnimationSub(hornStateData.animationSub)
         mob:hideHP(hornStateData.hideHP)
     end
+
+    -- reset phasechange timer
+    mob:setLocalVar('phaseChange', GetSystemTime() + math.random(60, 240))
 end
 
 xi.darkixion.zoneinfo =
@@ -322,11 +325,7 @@ xi.darkixion.roamingMods = function(mob)
 
     -- ensure he's in initial state for beginning of fight
     mob:setMobSkillAttack(39)
-    mob:setLocalVar('trampling', 0)
-    mob:setLocalVar('doubleUpWS', 0)
     mob:setLocalVar('trampleCount', 0)
-    mob:setLocalVar('PhaseChange', GetSystemTime() + math.random(60, 240))
-    mob:setLocalVar('lastHit', 0)
     mob:setBehavior(0)
     mob:setAutoAttackEnabled(true)
     mob:setMobAbilityEnabled(true)
@@ -426,7 +425,6 @@ local checkHornBreak = function(mob, attacker)
         math.random(1, 100) <= 5
     then
         changeHornState(mob, 2)
-        mob:setLocalVar('doubleUpWS', 0)
     end
 end
 
@@ -445,19 +443,65 @@ xi.darkixion.onMobWeaponSkill = function(target, mob, skill)
             mob:getAnimationSub() == 2 and
             math.random(1, 100) <= 25
         then
-            mob:setAnimationSub(3)
-            mob:setLocalVar('doubleUpWS', 0)
-
-            -- reset phasechange timer
-            mob:setLocalVar('phaseChange', GetSystemTime() + math.random(60, 240))
-
             -- If horn is restored by heal, glow and allow animation to finish, then restore horn
+            skill:setFinalAnimationSub(3)
             mob:queue(0, function(mobArg)
                 mobArg:stun(500)
                 changeHornState(mobArg, 1)
             end)
         end
+    elseif skillID == xi.mobSkill.DI_GLOW then
+        -- glow TP move telegraphs a damaging TP move, perform it now
+        local skillList =
+        {
+            xi.mobSkill.WRATH_OF_ZEUS,
+            xi.mobSkill.LIGHTNING_SPEAR,
+            xi.mobSkill.ACHERON_KICK,
+            xi.mobSkill.RAMPANT_STANCE,
+        }
+
+        local chosenSkill = utils.randomEntry(skillList)
+
+        -- adjust behavior so he doesn't sneak another move in between the sequence
+        mob:setBehavior(xi.behavior.NO_TURN + xi.behavior.STANDBACK)
+        mob:setAutoAttackEnabled(false)
+        mob:useMobAbility(chosenSkill)
+        if mob:getAnimationSub() == 3 then
+            -- queue a second if in glowing phase
+            mob:useMobAbility(chosenSkill)
+        end
+    elseif
+        skillID == xi.mobSkill.DI_HORN_ATTACK or
+        skillID == xi.mobSkill.DI_BITE_ATTACK or
+        skillID == xi.mobSkill.DI_KICK_ATTACK
+    then
+        -- determine if we want to run (trample) soon, do it randomly off autos, more frequent and more runs when low
+        if mob:getAnimationSub() == 0 then
+            local mobHPP = mob:getHPP()
+            local trampleCount = mob:getLocalVar('trampleCount')
+
+            local random = math.random(1, 100)
+            if random <= 30 and mobHPP < 33 then
+                trampleCount = trampleCount + math.random(1, 3)
+            elseif random <= 20 and mobHPP < 50 then
+                trampleCount = trampleCount + math.random(1, 2)
+            elseif random <= 10 then
+                trampleCount = trampleCount + 1
+            end
+
+            -- this variable will determine if Ixion can trample, but it's also gated by animation sub and a timestamp
+            mob:setLocalVar('trampleCount', utils.clamp(trampleCount, 0, 3)) -- Safety net for trample count
+        end
     end
+
+    -- once TP move sequences are done, reset mob behaviors
+    mob:queue(0, function(mobArg)
+        if not xi.combat.behavior.isEntityBusy(mobArg) then
+            mobArg:setBehavior(0)
+            mob:setAutoAttackEnabled(true)
+            mob:setMobAbilityEnabled(true)
+        end
+    end)
 end
 
 xi.darkixion.onMobInitialize = function(mob)
@@ -471,11 +515,59 @@ xi.darkixion.onMobInitialize = function(mob)
     mob:setMobMod(xi.mobMod.NO_REST, 10)
 end
 
+-- either turn in a random direction, or turn away from skillTarget to use acheron kick
+local turnForSkill = function(mob, skillTarget)
+    local mobPos = mob:getPos()
+    local lookAtPos = { x = mobPos.x + math.random(-4, 4), y = mobPos.y, z = mobPos.z + math.random(-4, 4) }
+
+    if skillTarget then
+        local targetPos = skillTarget:getPos()
+        lookAtPos.x = 2 * mobPos.x - targetPos.x
+        lookAtPos.z = 2 * mobPos.z - targetPos.z
+    end
+
+    mob:lookAt(lookAtPos)
+end
+
+-- Dark Ixion CAN turn around to use this move on anyone with hate
+local acheronKickPositioning = function(mob)
+    local skillTarget = mob:getTarget() -- mobskill has TARGET_SELF flag, extract target from battleTarget
+    local targets = mob:getEnmityList()
+    if skillTarget then
+        -- current target may not be on the enmity table, if it is then there's a slightly higher chance to target it
+        table.insert(targets, { entity = skillTarget })
+    end
+
+    local potentialTargets = {}
+    for _, entry in ipairs(targets) do
+        if entry.entity and mob:checkDistance(entry.entity) < 15 then
+            table.insert(potentialTargets, entry.entity)
+        end
+    end
+
+    if #potentialTargets == 0 then
+        return
+    end
+
+    skillTarget = utils.randomEntry(potentialTargets)
+
+    turnForSkill(mob, skillTarget)
+end
+
 xi.darkixion.onMobSpawn = function(mob)
     xi.darkixion.roamingMods(mob)
     SetServerVariable('DarkIxion_PopTime', GetSystemTime())
 
     mob:setAggressive(true)
+
+    -- pre-mobskill listeners to turn mob as appropriate
+    mob:addListener('WEAPONSKILL_STATE_ENTER', 'IXION_WS_STATE_ENTER', function(mobArg, skillId)
+        if skillId == xi.mobSkill.ACHERON_KICK then
+            acheronKickPositioning(mobArg)
+        elseif skillId == xi.mobSkill.LIGHTNING_SPEAR then
+            turnForSkill(mobArg, nil)
+        end
+    end)
 end
 
 xi.darkixion.onMobRoam = function(mob)
@@ -511,6 +603,7 @@ xi.darkixion.onMobEngage = function(mob, target)
     mob:setMod(xi.mod.UDMGRANGE, 0)
     mob:setMod(xi.mod.UDMGBREATH, 0)
     mob:setMod(xi.mod.UDMGMAGIC, 0)
+    mob:setLocalVar('phaseChange', GetSystemTime() + math.random(60, 240))
 end
 
 xi.darkixion.onMobDisengage = function(mob)
@@ -535,4 +628,101 @@ xi.darkixion.onMobDisengage = function(mob)
 end
 
 xi.darkixion.onMobFight = function(mob, target)
+    -- This section deals with him glowing (double TP moves)
+    local animationSub = mob:getAnimationSub()
+    if
+        not xi.combat.behavior.isEntityBusy(mob) and
+        GetSystemTime() >= mob:getLocalVar('phaseChange') and
+        (animationSub == 0 or
+        animationSub == 3)
+    then
+        mob:setLocalVar('phaseChange', GetSystemTime() + math.random(60, 240))
+
+        animationSub = animationSub ~= 0 and 0 or 3
+        mob:setAnimationSub(animationSub)
+        mob:stun(500)
+    end
+
+    -- Everything below deals with his charge attack (trample)
+    if
+        not xi.combat.behavior.isEntityBusy(mob) and
+        mob:getLocalVar('trampleCount') >= 1 and
+        GetSystemTime() >= mob:getLocalVar('nextTrampleTime') and
+        animationSub == 0  -- don't trample if horn is broken
+    then
+        mob:setTP(0)
+        xi.darkixion.beginTramplePath(mob)
+    end
+
+    if animationSub == 1 then
+        -- cleanly exit trample when reaching the point (TODO check explicitly for a scripted path?)
+        -- runPathTime timestamp hard exit in case of navmesh abuse
+        if
+            mob:isFollowingPath() and
+            GetSystemTime() < mob:getLocalVar('tramplePathTime')
+        then
+            xi.darkixion.trampleEntitiesInFront(mob)
+        else
+            xi.darkixion.endTramplePath(mob)
+        end
+    end
+end
+
+xi.darkixion.beginTramplePath = function(mob)
+    -- global table to track current trample path
+    xi.darkixion.hitList = {}
+
+    mob:setAnimationSub(1)
+    mob:setLocalVar('isBusy', 1)
+    mob:setAutoAttackEnabled(false)
+    mob:setMobAbilityEnabled(false)
+    mob:setBaseSpeed(70)
+    mob:setBehavior(xi.behavior.NO_TURN + xi.behavior.STANDBACK)
+
+    -- TODO implement choosing a random ENTITY within 30 yalms and running towards them
+    -- for now, he'll just prance around then go back to fighting
+    local tramplePos = mob:getPos()
+    tramplePos.x = tramplePos.x + math.random(-30, 30)
+    tramplePos.z = tramplePos.z + math.random(-30, 30)
+    mob:clearPath()
+    mob:lookAt(tramplePos)
+    xi.darkixion.trampleEntitiesInFront(mob)
+    mob:pathTo(tramplePos.x, tramplePos.y, tramplePos.z, xi.path.flag.WALLHACK + xi.path.flag.RUN + xi.path.flag.SCRIPT + xi.path.flag.SLIDE)
+    -- max time to let a single trample path take to avoid navmesh abuse
+    mob:setLocalVar('tramplePathTime', GetSystemTime() + 10)
+end
+
+xi.darkixion.endTramplePath = function(mob)
+    local trampleCount = mob:getLocalVar('trampleCount') - 1
+    if trampleCount > 0 then
+        -- trample again at a random entity in range
+        xi.darkixion.beginTramplePath(mob)
+    else
+        trampleCount = 0
+        mob:setAnimationSub(0)
+        mob:stun(500)
+
+        mob:setLocalVar('isBusy', 0)
+        mob:setAutoAttackEnabled(true)
+        mob:setMobAbilityEnabled(true)
+        mob:setBaseSpeed(40)
+        mob:setBehavior(0)
+
+        mob:setLocalVar('nextTrampleTime', GetSystemTime() + math.random(15, 60))
+    end
+
+    mob:setLocalVar('trampleCount', trampleCount)
+end
+
+xi.darkixion.trampleEntitiesInFront = function(mob)
+    -- TODO find entities in range, check if they're in a conal in front of Ixion, and xi.mobSkill.DI_TRAMPLE them if so
+    -- Any entities found should be checked against xi.darkixion.hitList, not attempted if in the list, and added to it whether or not they're in front
+
+    -- Example logic using ixion's current battle target
+    local trampleTarget = mob:getTarget()
+    if not utils.contains(trampleTarget, xi.darkixion.hitList) then
+        table.insert(xi.darkixion.hitList, trampleTarget)
+        -- TODO see if we can make this not pause Ixion's pathing
+        mob:useMobAbility(xi.mobSkill.DI_TRAMPLE, trampleTarget, 0)
+    end
 end
