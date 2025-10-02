@@ -92,19 +92,19 @@ content.groups =
 content.loot =
 {
     {
-        { item =    0, weight = 950 }, -- Nothing
-        { item = 1842, weight =  50 }, -- Cloud Evoker
+        { itemId =    0, weight = 950 }, -- Nothing
+        { itemId = 1842, weight =  50 }, -- Cloud Evoker
     },
     {
-        { item =     0, weight = 500 }, -- Nothing
-        { item = 15433, weight = 250 }, -- Reverend Sash
-        { item = 15434, weight = 250 }, -- Vanguard Belt
+        { itemId =     0, weight = 500 }, -- Nothing
+        { itemId = 15433, weight = 250 }, -- Reverend Sash
+        { itemId = 15434, weight = 250 }, -- Vanguard Belt
     },
     {
-        { item =     0, weight = 350 }, -- Nothing
-        { item = 13550, weight = 200 }, -- Crossbowman's Ring
-        { item = 14675, weight = 150 }, -- Woodsman Ring
-        { item = 13549, weight = 300 }, -- Ether Ring
+        { itemId =     0, weight = 350 }, -- Nothing
+        { itemId = 13550, weight = 200 }, -- Crossbowman's Ring
+        { itemId = 14675, weight = 150 }, -- Woodsman Ring
+        { itemId = 13549, weight = 300 }, -- Ether Ring
     },
 }
 

@@ -54,45 +54,45 @@ content.groups =
 content.loot =
 {
     {
-        { item =    0, weight = 200 }, --  Nothing
-        { item = 5287, weight = 100 }, --  Bitter Cluster
-        { item = 5286, weight = 100 }, --  Burning Cluster
-        { item = 5288, weight = 100 }, --  Fleeting Cluster
-        { item = 5289, weight = 100 }, --  Profane Cluster
-        { item = 5290, weight = 100 }, --  Startling Cluster
-        { item = 5291, weight = 100 }, --  Somber Cluster
-        { item = 5292, weight = 100 }, --  Radiant Cluster
-        { item = 5293, weight = 100 }, --  Malevolent Cluster
+        { itemId =    0, weight = 200 }, --  Nothing
+        { itemId = 5287, weight = 100 }, --  Bitter Cluster
+        { itemId = 5286, weight = 100 }, --  Burning Cluster
+        { itemId = 5288, weight = 100 }, --  Fleeting Cluster
+        { itemId = 5289, weight = 100 }, --  Profane Cluster
+        { itemId = 5290, weight = 100 }, --  Startling Cluster
+        { itemId = 5291, weight = 100 }, --  Somber Cluster
+        { itemId = 5292, weight = 100 }, --  Radiant Cluster
+        { itemId = 5293, weight = 100 }, --  Malevolent Cluster
     },
     {
-        { item =    0, weight = 200 }, --  Nothing
-        { item = 5287, weight = 100 }, --  Bitter Cluster
-        { item = 5286, weight = 100 }, --  Burning Cluster
-        { item = 5288, weight = 100 }, --  Fleeting Cluster
-        { item = 5293, weight = 100 }, --  Malevolent Cluster
-        { item = 5289, weight = 100 }, --  Profane Cluster
-        { item = 5292, weight = 100 }, --  Radiant Cluster
-        { item = 5291, weight = 100 }, --  Somber Cluster
-        { item = 5290, weight = 100 }, --  Startling Cluster
+        { itemId =    0, weight = 200 }, --  Nothing
+        { itemId = 5287, weight = 100 }, --  Bitter Cluster
+        { itemId = 5286, weight = 100 }, --  Burning Cluster
+        { itemId = 5288, weight = 100 }, --  Fleeting Cluster
+        { itemId = 5293, weight = 100 }, --  Malevolent Cluster
+        { itemId = 5289, weight = 100 }, --  Profane Cluster
+        { itemId = 5292, weight = 100 }, --  Radiant Cluster
+        { itemId = 5291, weight = 100 }, --  Somber Cluster
+        { itemId = 5290, weight = 100 }, --  Startling Cluster
     },
     {
-        { item =    0, weight = 200 }, --  Nothing
-        { item = 5287, weight = 100 }, --  Bitter Cluster
-        { item = 5286, weight = 100 }, --  Burning Cluster
-        { item = 5288, weight = 100 }, --  Fleeting Cluster
-        { item = 5293, weight = 100 }, --  Malevolent Cluster
-        { item = 5289, weight = 100 }, --  Profane Cluster
-        { item = 5292, weight = 100 }, --  Radiant Cluster
-        { item = 5291, weight = 100 }, --  Somber Cluster
-        { item = 5290, weight = 100 }, --  Startling Cluster
+        { itemId =    0, weight = 200 }, --  Nothing
+        { itemId = 5287, weight = 100 }, --  Bitter Cluster
+        { itemId = 5286, weight = 100 }, --  Burning Cluster
+        { itemId = 5288, weight = 100 }, --  Fleeting Cluster
+        { itemId = 5293, weight = 100 }, --  Malevolent Cluster
+        { itemId = 5289, weight = 100 }, --  Profane Cluster
+        { itemId = 5292, weight = 100 }, --  Radiant Cluster
+        { itemId = 5291, weight = 100 }, --  Somber Cluster
+        { itemId = 5290, weight = 100 }, --  Startling Cluster
     },
     {
-        { item =    0, weight = 500 }, --  Nothing
-        { item = 1798, weight = 100 }, --  Vernal Vision (Evasion Earring)
-        { item = 1799, weight = 100 }, --  Punctilious Vision (Parrying Earring)
-        { item = 1802, weight = 100 }, --  Audacious Vision (Divine Earring)
-        { item = 1807, weight = 100 }, --  Vivid Vision (Healing Earring)
-        { item = 1810, weight = 100 }, --  Endearing Vision (Singing Earring)
+        { itemId =    0, weight = 500 }, --  Nothing
+        { itemId = 1798, weight = 100 }, --  Vernal Vision (Evasion Earring)
+        { itemId = 1799, weight = 100 }, --  Punctilious Vision (Parrying Earring)
+        { itemId = 1802, weight = 100 }, --  Audacious Vision (Divine Earring)
+        { itemId = 1807, weight = 100 }, --  Vivid Vision (Healing Earring)
+        { itemId = 1810, weight = 100 }, --  Endearing Vision (Singing Earring)
     },
 }
 
