@@ -38,24 +38,21 @@
 #include "entities/npcentity.h"
 #include "entities/trustentity.h"
 
-#include "packets/change_music.h"
 #include "packets/char_sync.h"
-#include "packets/entity_set_name.h"
 #include "packets/entity_update.h"
-#include "packets/entity_visual.h"
 #include "packets/wide_scan.h"
 
 #include "lua/luautils.h"
 
 #include "battlefield.h"
+#include "enums/weather.h"
+#include "packets/s2c/0x05f_music.h"
 #include "utils/battleutils.h"
 #include "utils/charutils.h"
 #include "utils/moduleutils.h"
 #include "utils/petutils.h"
 #include "utils/synthutils.h"
 #include "utils/zoneutils.h"
-
-#include <unordered_set>
 
 namespace
 {
@@ -92,8 +89,6 @@ CZoneEntities::CZoneEntities(CZone* zone)
     m_petsToDelete.reserve(INTERMEDIATE_CONTAINER_RESERVE_SIZE);
     m_trustsToDelete.reserve(INTERMEDIATE_CONTAINER_RESERVE_SIZE);
     m_aggroableMobs.reserve(INTERMEDIATE_CONTAINER_RESERVE_SIZE);
-    m_charsToLogout.reserve(INTERMEDIATE_CONTAINER_RESERVE_SIZE);
-    m_charsToWarp.reserve(INTERMEDIATE_CONTAINER_RESERVE_SIZE);
     m_charsToChangeZone.reserve(INTERMEDIATE_CONTAINER_RESERVE_SIZE);
 }
 
@@ -378,7 +373,7 @@ void CZoneEntities::FindPartyForMob(CBaseEntity* PEntity)
     }
 }
 
-void CZoneEntities::TransportDepart(uint16 boundary, uint16 zone)
+void CZoneEntities::TransportDepart(uint16 boundary, uint16 prevZoneId, uint16 transport)
 {
     TracyZoneScoped;
 
@@ -403,12 +398,12 @@ void CZoneEntities::TransportDepart(uint16 boundary, uint16 zone)
                 }
             }
 
-            luautils::OnTransportEvent(PCurrentChar, zone);
+            luautils::OnTransportEvent(PCurrentChar, prevZoneId, transport);
         }
     }
 }
 
-void CZoneEntities::WeatherChange(WEATHER weather)
+void CZoneEntities::WeatherChange(Weather weather)
 {
     TracyZoneScoped;
 
@@ -421,7 +416,7 @@ void CZoneEntities::WeatherChange(WEATHER weather)
         // can't detect by scent in this weather
         if (PCurrentMob->getMobMod(MOBMOD_DETECTION) & DETECT_SCENT)
         {
-            PCurrentMob->m_disableScent = (weather == WEATHER_RAIN || weather == WEATHER_SQUALL || weather == WEATHER_BLIZZARDS);
+            PCurrentMob->m_disableScent = (weather == Weather::Rain || weather == Weather::Squall || weather == Weather::Blizzards);
         }
 
         if (PCurrentMob->m_EcoSystem == ECOSYSTEM::ELEMENTAL && PCurrentMob->PMaster == nullptr && PCurrentMob->m_SpawnType & SPAWNTYPE_WEATHER)
@@ -440,7 +435,7 @@ void CZoneEntities::WeatherChange(WEATHER weather)
         }
         else if (PCurrentMob->m_SpawnType & SPAWNTYPE_FOG)
         {
-            if (weather == WEATHER_FOG)
+            if (weather == Weather::Fog)
             {
                 PCurrentMob->SetDespawnTime(0s);
                 PCurrentMob->m_AllowRespawn = true;
@@ -461,13 +456,13 @@ void CZoneEntities::WeatherChange(WEATHER weather)
     }
 }
 
-void CZoneEntities::MusicChange(uint16 BlockID, uint16 MusicTrackID)
+void CZoneEntities::MusicChange(MusicSlot slotId, uint16 trackId)
 {
     TracyZoneScoped;
 
     FOR_EACH_PAIR_CAST_SECOND(CCharEntity*, PChar, m_charList)
     {
-        PChar->pushPacket<CChangeMusicPacket>(BlockID, MusicTrackID);
+        PChar->pushPacket<GP_SERV_COMMAND_MUSIC>(slotId, trackId);
     }
 }
 
@@ -1906,17 +1901,7 @@ void CZoneEntities::ZoneServer(timer::time_point tick)
             }
         }
 
-        // Else-if chain so only one end-result can be processed.
-        // This is done to prevent multiple-deletion of PChar
-        if (PChar->status == STATUS_TYPE::SHUTDOWN) // EFFECT_LEAVEGAME effect wore off or char got SHUTDOWN from some other location
-        {
-            m_charsToLogout.emplace_back(PChar);
-        }
-        else if (PChar->requestedWarp) // EFFECT_TELEPORT can request players to warp
-        {
-            m_charsToWarp.emplace_back(PChar);
-        }
-        else if (PChar->requestedZoneChange) // EFFECT_TELEPORT can request players to change zones
+        if (PChar->requestedZoneChange || PChar->requestedWarp || PChar->status == STATUS_TYPE::SHUTDOWN)
         {
             m_charsToChangeZone.emplace_back(PChar);
         }
@@ -1966,20 +1951,6 @@ void CZoneEntities::ZoneServer(timer::time_point tick)
         }
     }
 
-    // forceLogout eventually removes the char from m_charList -- so we must remove them here
-    for (auto* PChar : m_charsToLogout)
-    {
-        PChar->clearPacketList();
-        charutils::ForceLogout(PChar);
-    }
-
-    // Warp players (do not recover HP/MP)
-    for (auto* PChar : m_charsToWarp)
-    {
-        PChar->clearPacketList();
-        charutils::HomePoint(PChar, false);
-    }
-
     // Change player's zone (teleports, etc)
     for (auto* PChar : m_charsToChangeZone)
     {
@@ -1994,7 +1965,20 @@ void CZoneEntities::ZoneServer(timer::time_point tick)
             continue;
         }
 
-        charutils::SendToZone(PChar, PChar->loc.destination);
+        if (PChar->status == STATUS_TYPE::SHUTDOWN)
+        {
+            charutils::ForceLogout(PChar);
+        }
+        else if (PChar->requestedWarp)
+        {
+            charutils::HomePoint(PChar, false);
+        }
+        else if (PChar->loc.destination != 0xFFFF)
+        {
+            charutils::SendToZone(PChar, PChar->loc.destination);
+        }
+
+        charutils::removeCharFromZone(PChar);
     }
 
     if (tick > m_EffectCheckTime)
@@ -2073,14 +2057,17 @@ void CZoneEntities::ZoneServer(timer::time_point tick)
     m_petsToDelete.clear();
     m_trustsToDelete.clear();
     m_aggroableMobs.clear();
-    m_charsToLogout.clear();
-    m_charsToWarp.clear();
     m_charsToChangeZone.clear();
 }
 
 CZone* CZoneEntities::GetZone()
 {
     return m_zone;
+}
+
+auto CZoneEntities::GetEffectCheckTime() const -> timer::time_point
+{
+    return m_EffectCheckTime;
 }
 
 EntityList_t CZoneEntities::GetCharList() const

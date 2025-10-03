@@ -32,7 +32,7 @@
 #include "packets/chocobo_digging.h"
 #include "packets/inventory_finish.h"
 #include "packets/message_system.h"
-#include "packets/release.h"
+#include "packets/s2c/0x052_eventucoff.h"
 #include "recast_container.h"
 #include "status_effect.h"
 #include "status_effect_container.h"
@@ -90,7 +90,7 @@ void GP_CLI_COMMAND_ACTION::process(MapSession* PSession, CCharEntity* PChar) co
 
             if (PChar->m_Costume != 0 || PChar->animation == ANIMATION_SYNTH || (PChar->CraftContainer && PChar->CraftContainer->getItemsCount() > 0))
             {
-                PChar->pushPacket<CReleasePacket>(PChar, RELEASE_TYPE::STANDARD);
+                PChar->pushPacket<GP_SERV_COMMAND_EVENTUCOFF>(PChar, GP_SERV_COMMAND_EVENTUCOFF_MODE::Standard);
                 return;
             }
 
@@ -102,7 +102,7 @@ void GP_CLI_COMMAND_ACTION::process(MapSession* PSession, CCharEntity* PChar) co
                 PChar->getZone() != ZONEID::ZONE_FERETORY &&
                 !settings::get<bool>("main.MONSTROSITY_TRIGGER_NPCS"))
             {
-                PChar->pushPacket<CReleasePacket>(PChar, RELEASE_TYPE::STANDARD);
+                PChar->pushPacket<GP_SERV_COMMAND_EVENTUCOFF>(PChar, GP_SERV_COMMAND_EVENTUCOFF_MODE::Standard);
                 return;
             }
 
@@ -122,7 +122,7 @@ void GP_CLI_COMMAND_ACTION::process(MapSession* PSession, CCharEntity* PChar) co
             if (!PChar->isNpcLocked())
             {
                 PChar->eventPreparation->reset();
-                PChar->pushPacket<CReleasePacket>(PChar, RELEASE_TYPE::STANDARD);
+                PChar->pushPacket<GP_SERV_COMMAND_EVENTUCOFF>(PChar, GP_SERV_COMMAND_EVENTUCOFF_MODE::Standard);
             }
         }
         break;
@@ -279,7 +279,7 @@ void GP_CLI_COMMAND_ACTION::process(MapSession* PSession, CCharEntity* PChar) co
             if (PChar->m_moghouseID != 0)
             {
                 ShowWarningFmt("GP_CLI_COMMAND_ACTION: Player {} trying to fish in Mog House", PChar->getName());
-                PChar->pushPacket<CReleasePacket>(PChar, RELEASE_TYPE::FISHING);
+                PChar->pushPacket<GP_SERV_COMMAND_EVENTUCOFF>(PChar, GP_SERV_COMMAND_EVENTUCOFF_MODE::Fishing);
                 return;
             }
 

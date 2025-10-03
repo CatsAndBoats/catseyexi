@@ -1,7 +1,7 @@
 -----------------------------------
 -- The Scarlet King
 -- Chamber of Oracles KSNM30, Atropos Orb
--- !additem 1175
+-- !additem 1180
 -----------------------------------
 local chamberOfOraclesID = zones[xi.zone.CHAMBER_OF_ORACLES]
 -----------------------------------
@@ -11,16 +11,10 @@ local content = Battlefield:new({
     battlefieldId    = xi.battlefield.id.SCARLET_KING,
     maxPlayers       = 6,
     timeLimit        = utils.minutes(30),
-    index            = 7,
+    index            = 7, -- "The Scarlet King"
     entryNpc         = 'SC_Entrance',
     exitNpc          = 'Shimmering_Circle',
     requiredItems    = { xi.item.ATROPOS_ORB, wearMessage = chamberOfOraclesID.text.A_CRACK_HAS_FORMED, wornMessage = chamberOfOraclesID.text.ORB_IS_CRACKED },
-    armouryCrates    =
-    {
-        chamberOfOraclesID.mob.SECUTOR_XI_XXXII + 4,
-        chamberOfOraclesID.mob.SECUTOR_XI_XXXII + 9,
-        chamberOfOraclesID.mob.SECUTOR_XI_XXXII + 14,
-    },
 })
 
 content:addEssentialMobs({ 'Purson' })
@@ -28,57 +22,71 @@ content:addEssentialMobs({ 'Purson' })
 content.loot =
 {
     {
-        { item = 1116, weight = 1000 }, -- Manticore Hair
+        { itemId = xi.item.GIL,                        weight = 1000, amount = 24000 }, -- gil
     },
+
     {
-        { item = 1163, weight = 1000 }, -- Manticore Hide
+        { itemId = xi.item.MANTICORE_HIDE,             weight = 1000 }, -- Manticore Hide
     },
+
     {
-        { item = 1110,  weight = 200 }, -- Beetle Blood
-        { item = 17579, weight = 200 }, -- WWyvern Perch
-        { item = 17825, weight = 200 }, -- Honebami
-        { item = 17997, weight = 200 }, -- Argent Dagger
-        { item = 17998, weight = 200 }, -- Thanatos Baselard
+        { itemId = xi.item.LOCK_OF_MANTICORE_HAIR,     weight = 700 }, -- Manticore Hair
+        { itemId = xi.item.POLE_GRIP,                  weight = 100 }, -- Pole Grip
+        { itemId = xi.item.SWORD_STRAP,                weight = 100 }, -- Sword Strap
+        { itemId = xi.item.SPEAR_STRAP,                weight = 100 }, -- Spear Strap
     },
+
     {
-        { item = 4659,  weight = 250 }, -- Shell IV
-        { item = 17577, weight = 150 }, -- Capricorn Staff
-        { item = 17938, weight = 150 }, -- Woodville's Axe
-        { item = 18048, weight = 150 }, -- King Maker
-        { item = 18211, weight = 150 }, -- Gawain's Axe
-        { item = 18372, weight = 150 }, -- Balan's Sword
+        { itemId = xi.item.ARGENT_DAGGER,              weight = 200 }, -- Argent Dagger
+        { itemId = xi.item.HONEBAMI,                   weight = 200 }, -- Honebami
+        { itemId = xi.item.THANATOS_BASELARD,          weight = 200 }, -- Thanatos Baselard
+        { itemId = xi.item.KING_MAKER,                 weight = 200 }, -- King Maker
+        { itemId = xi.item.BALANS_SWORD,               weight = 200 }, -- Balans Sword
     },
+
     {
-        { item =  4174,  weight = 350 }, -- Vile Elixir
-        { item =  4175,  weight = 100 }, -- Vile Elixir +1
-        { item =  4613,  weight = 100 }, -- Cure V
-        { item = 19025,  weight = 250 }, -- Pole Grip
-        { item = 19026,  weight = 100 }, -- Spear Strap
-        { item = 19027,  weight = 100 }, -- Claymore Grip
+        { itemId = xi.item.VILE_ELIXIR_P1,             weight =  250 }, -- Vile Elixir +1
+        { itemId = xi.item.VILE_ELIXIR,                weight =  750 }, -- Vile Elixir
     },
+
     {
-        { item = 645,  weight =  50 }, -- Chunk Of Darksteel Ore
-        { item = 646,  weight =  50 }, -- Chunk Of Adaman Ore
-        { item = 700,  weight = 100 }, -- Mahogany Log
-        { item = 703,  weight = 100 }, -- Petrified Log
-        { item = 738,  weight =  50 }, -- Chunk Of Platinum Ore
-        { item = 739,  weight =  50 }, -- Chunk Of Orichalcum Ore
-        { item = 745,  weight =  25 }, -- Gold Ingot
-        { item = 746,  weight =  50 }, -- Chunk Of Gold Ore
-        { item = 830,  weight =  25 }, -- Square Of Rainbow Cloth
-        { item = 844,  weight = 100 }, -- Phoenix Feather
-        { item = 1132, weight = 100 }, -- Square Of Raxa
-        { item = 4172, weight = 100 }, -- Reraiser
-        { item = 4173, weight =  50 }, -- Hi-reraiser
-        { item = 4774, weight = 150 }, -- Thunder III
+        { itemId = xi.item.WOODVILLES_AXE,             weight = 200 }, -- Woodvilles Axe
+        { itemId = xi.item.BALINS_SWORD,               weight = 200 }, -- Balin's Sword
+        { itemId = xi.item.WYVERN_PERCH,               weight = 200 }, -- Wyvern Perch
+        { itemId = xi.item.GAWAINS_AXE,                weight = 200 }, -- Gawains's Axe
+        { itemId = xi.item.CAPRICORN_STAFF,            weight = 200 }, -- Capricorn Staff
     },
+
     {
-        { item = 0,    weight = 650 }, -- Nothing
-        { item = 658,  weight = 100 }, -- Damascus Ingot
-        { item = 836,  weight =  50 }, -- Square Of Damascene Cloth
-        { item = 837,  weight =  50 }, -- Spool Of Malboro Fiber
-        { item = 942,  weight =  50 }, -- Philosophers Stone
-        { item = 1132, weight = 100 }, -- Square Of Raxa
+        { itemId = xi.item.CHUNK_OF_DARKSTEEL_ORE,     weight =  70 }, -- Chunk of Darksteel Ore
+        { itemId = xi.item.CHUNK_OF_GOLD_ORE,          weight =  50 }, -- Chunk of Gold Ore
+        { itemId = xi.item.CHUNK_OF_PLATINUM_ORE,      weight =  50 }, -- Chunk of Platinum Ore
+        { itemId = xi.item.CHUNK_OF_ADAMAN_ORE,        weight =  20 }, -- Chunk of Adaman Ore
+        { itemId = xi.item.CHUNK_OF_ORICHALCUM_ORE,    weight =  20 }, -- Chunk of Orichalcum Ore
+        { itemId = xi.item.GOLD_INGOT,                 weight =  20 }, -- Gold Ingot
+        { itemId = xi.item.MAHOGANY_LOG,               weight =  60 }, -- Mahogany Log
+        { itemId = xi.item.PETRIFIED_LOG,              weight =  40 }, -- Petrified Log
+        { itemId = xi.item.PHOENIX_FEATHER,            weight =  40 }, -- Phoenix Feather
+        { itemId = xi.item.PHILOSOPHERS_STONE,         weight =  30 }, -- Philosophers Stone
+        { itemId = xi.item.VIAL_OF_BLACK_BEETLE_BLOOD, weight =  30 }, -- Vial of Black Beetle Blood
+        { itemId = xi.item.SQUARE_OF_RAINBOW_CLOTH,    weight =  50 }, -- Square of Rainbow Cloth
+        { itemId = xi.item.SQUARE_OF_RAXA,             weight =  20 }, -- Square of Raxa
+        { itemId = xi.item.SCROLL_OF_THUNDER_III,      weight =  30 }, -- Scroll of Thunder III
+        { itemId = xi.item.SCROLL_OF_CURE_V,           weight =  20 }, -- Scroll of Cure V
+        { itemId = xi.item.SCROLL_OF_RAISE_III,        weight =  20 }, -- Scroll of Raise III
+        { itemId = xi.item.RERAISER,                   weight =  30 }, -- Reraiser
+        { itemId = xi.item.HI_RERAISER,                weight =  20 }, -- Hi-Reraiser
+        { itemId = xi.item.NONE,                       weight = 400 }, -- Nothing
+    },
+
+    {
+        { itemId = xi.item.SQUARE_OF_DAMASCENE_CLOTH, weight = 30 },  -- Square Of Damascene Cloth
+        { itemId = xi.item.DAMASCUS_INGOT,            weight = 90 },  -- Damascus Ingot
+        { itemId = xi.item.SPOOL_OF_MALBORO_FIBER,    weight = 30 },  -- Spool Of Malboro Fiber
+        { itemId = xi.item.PHILOSOPHERS_STONE,        weight = 130 }, -- Philosophers Stone
+        { itemId = xi.item.PHOENIX_FEATHER,           weight = 120 }, -- Phoenix Feather
+        { itemId = xi.item.SQUARE_OF_RAXA,            weight = 100 }, -- Square Of Raxa
+        { itemId = xi.item.NONE,                      weight = 500 }, -- Nothing
     }
 }
 

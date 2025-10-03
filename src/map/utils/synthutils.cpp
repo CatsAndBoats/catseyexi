@@ -247,7 +247,7 @@ namespace synthutils
             const auto recipe = SynthRecipe{
                 .ID              = rset->get<uint32>("ID"),
                 .Desynth         = rset->get<uint8>("Desynth"),
-                .RequiredKeyItem = static_cast<KeyItem>(rset->get<uint16>("KeyItem")),
+                .RequiredKeyItem = rset->get<KeyItem>("KeyItem"),
                 .Wood            = rset->get<uint8>("Wood"),
                 .Smith           = rset->get<uint8>("Smith"),
                 .Gold            = rset->get<uint8>("Gold"),

@@ -274,7 +274,7 @@ void BuildTrustData(uint32 TrustID)
             data->m_MobSkillList = rset->get<uint16>("skill_list_id");
 
             data->radius    = rset->get<uint8>("mobradius");
-            data->EcoSystem = static_cast<ECOSYSTEM>(rset->get<uint8>("ecosystemID"));
+            data->EcoSystem = rset->get<ECOSYSTEM>("ecosystemID");
             data->HPscale   = rset->get<float>("HP");
             data->MPscale   = rset->get<float>("MP");
 

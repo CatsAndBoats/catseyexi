@@ -23,29 +23,29 @@ content:addEssentialMobs({ 'Bugboy' })
 content.loot =
 {
     {
-        { item =    0, weight = 900 }, -- Nothing
-        { item = 1842, weight = 100 }, -- Cloud Evoker
+        { itemId =    0, weight = 900 }, -- Nothing
+        { itemId = 1842, weight = 100 }, -- Cloud Evoker
     },
     {
-        { item = 1767, weight = 333 }, -- Eltoro Leather
-        { item = 1762, weight = 333 }, -- Cassia Lumber
-        { item = 1771, weight = 334 }, -- Dragon Bone
+        { itemId = 1767, weight = 333 }, -- Eltoro Leather
+        { itemId = 1762, weight = 333 }, -- Cassia Lumber
+        { itemId = 1771, weight = 334 }, -- Dragon Bone
     },
     {
-        { item =     0, weight = 625 }, -- nothing
-        { item = 18009, weight =  75 }, -- Martial Knife
-        { item = 18056, weight =  75 }, -- Martial Scythe
-        { item = 13695, weight =  75 }, -- Commander's Cape
-        { item = 15195, weight = 100 }, -- Faerie Hairpin
-        { item =  4748, weight =  50 }, -- Raise III
+        { itemId =     0, weight = 625 }, -- nothing
+        { itemId = 18009, weight =  75 }, -- Martial Knife
+        { itemId = 18056, weight =  75 }, -- Martial Scythe
+        { itemId = 13695, weight =  75 }, -- Commander's Cape
+        { itemId = 15195, weight = 100 }, -- Faerie Hairpin
+        { itemId =  4748, weight =  50 }, -- Raise III
     },
     {
-        { item =     0, weight = 625 }, -- nothing
-        { item = 18009, weight =  75 }, -- Martial Knife
-        { item = 18056, weight =  75 }, -- Martial Scythe
-        { item = 13695, weight =  75 }, -- Commander's Cape
-        { item = 15195, weight = 100 }, -- Faerie Hairpin
-        { item =  4748, weight =  50 }, -- Raise III
+        { itemId =     0, weight = 625 }, -- nothing
+        { itemId = 18009, weight =  75 }, -- Martial Knife
+        { itemId = 18056, weight =  75 }, -- Martial Scythe
+        { itemId = 13695, weight =  75 }, -- Commander's Cape
+        { itemId = 15195, weight = 100 }, -- Faerie Hairpin
+        { itemId =  4748, weight =  50 }, -- Raise III
     },
 }
 

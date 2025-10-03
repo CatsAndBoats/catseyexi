@@ -59,33 +59,33 @@ content.groups =
 content.loot =
 {
     {
-        { item = xi.item.NONE,         weight = 800 },
-        { item = xi.item.CLOUD_EVOKER, weight = 200 },
+        { itemId = xi.item.NONE,         weight = 800 },
+        { itemId = xi.item.CLOUD_EVOKER, weight = 200 },
     },
     {
-        { item = xi.item.NONE,           weight = 325 },
-        { item = xi.item.ONIMARU,        weight = 100 },
-        { item = xi.item.BLAU_DOLCH,     weight = 250 },
-        { item = xi.item.STONE_SPLITTER, weight = 150 },
-        { item = xi.item.FRENZY_FIFE,    weight = 175 },
+        { itemId = xi.item.NONE,           weight = 325 },
+        { itemId = xi.item.ONIMARU,        weight = 100 },
+        { itemId = xi.item.BLAU_DOLCH,     weight = 250 },
+        { itemId = xi.item.STONE_SPLITTER, weight = 150 },
+        { itemId = xi.item.FRENZY_FIFE,    weight = 175 },
     },
     {
-        { item = xi.item.NONE,           weight = 670 },
-        { item = xi.item.MANEATER,       weight = 100 },
-        { item = xi.item.WAGH_BAGHNAKHS, weight =  65 },
-        { item = xi.item.RAISE_II_ROD,   weight =  65 },
-        { item = xi.item.CORSE_CAPE,     weight = 100 },
+        { itemId = xi.item.NONE,           weight = 670 },
+        { itemId = xi.item.MANEATER,       weight = 100 },
+        { itemId = xi.item.WAGH_BAGHNAKHS, weight =  65 },
+        { itemId = xi.item.RAISE_II_ROD,   weight =  65 },
+        { itemId = xi.item.CORSE_CAPE,     weight = 100 },
     },
     {
-        { item = xi.item.NONE,                     weight = 325 },
-        { item = xi.item.POT_OF_VIRIDIAN_URUSHI,   weight = 350 },
-        { item = xi.item.SQUARE_OF_ELTORO_LEATHER, weight = 325 },
+        { itemId = xi.item.NONE,                     weight = 325 },
+        { itemId = xi.item.POT_OF_VIRIDIAN_URUSHI,   weight = 350 },
+        { itemId = xi.item.SQUARE_OF_ELTORO_LEATHER, weight = 325 },
     },
     {
-        { item = xi.item.NONE,                   weight = 150 },
-        { item = xi.item.UNICORN_HORN,           weight = 225 },
-        { item = xi.item.PIECE_OF_CASSIA_LUMBER, weight = 375 },
-        { item = xi.item.DRAGON_BONE,            weight = 250 },
+        { itemId = xi.item.NONE,                   weight = 150 },
+        { itemId = xi.item.UNICORN_HORN,           weight = 225 },
+        { itemId = xi.item.PIECE_OF_CASSIA_LUMBER, weight = 375 },
+        { itemId = xi.item.DRAGON_BONE,            weight = 250 },
     },
 }
 

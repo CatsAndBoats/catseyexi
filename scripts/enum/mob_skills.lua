@@ -44,6 +44,10 @@ xi.mobSkill =
 
     VELOCIOUS_BLADE          =  347, -- Mammet-800
 
+    SMITE_OF_FURY            =  396,
+    FLURRY_OF_RAGE           =  397,
+    WHISPERS_OF_IRE          =  398,
+
     RANGED_ATTACK_2          =  412,
 
     SCISSION_THRUST          =  419, -- Mammet-800
@@ -65,17 +69,28 @@ xi.mobSkill =
     TRANSMOGRIFICATION       =  487, -- Mammet-800
 
     SELF_DESTRUCT            =  511,
+    SMITE_OF_RAGE            =  513,
+    WHIRL_OF_RAGE            =  514,
 
     DANSE_MACABRE            =  533,
+
+    PANZERFAUST              =  536,
+    TYPHOON                  =  539,
 
     TREMOROUS_TREAD          =  540, -- Mammet-800
 
     VULTURE_3                =  626,
 
+    CRYSTAL_RAIN             =  678,
+    CRYSTAL_WEAPON_FIRE      =  679, -- Zipacna Weapon Start
+    CRYSTAL_WEAPON_WATER     =  682, -- Zipacna Weapon End
+
     BENEDICTION_1            =  689, -- Season's Greetings KSNM 30 (Gilagoge Tlugvi)
     HUNDRED_FISTS_1          =  690, -- Season's Greetings KSNM 30 (Goga Tlugvi)
 
     BLOOD_WEAPON_1           =  695,
+
+    CHARM                    =  710,
 
     MEIKYO_SHISUI_1          =  730, -- Tenzen, etc...
     MIJIN_GAKURE_1           =  731, -- Season's Greetings KSNM 30 (Ulagohvsdi Tlugvi)
@@ -83,6 +98,8 @@ xi.mobSkill =
     CALL_WYVERN              =  732,
 
     FAMILIAR_1               =  740, -- "Tango with a Tracker" Shikaree X
+
+    GREAT_WHIRLWIND_1        =  803,
 
     DISPELLING_WIND          =  813,
     DEADLY_DRIVE             =  814,
@@ -111,6 +128,13 @@ xi.mobSkill =
     DIAMOND_DUST_1           =  884, -- Confirmed usage: "Trial by Ice" bcnm. Regular avatar-type mobs (Shiva).
 
     JUDGMENT_BOLT_1          =  893, -- Confirmed usage: "Trial by Lightning" bcnm. Regular avatar-type mobs (Ramuh).
+
+    PET_FLAME_BREATH         =  900,
+    PET_FROST_BREATH         =  901,
+    PET_GUST_BREATH          =  902,
+    PET_SAND_BREATH          =  903,
+    PET_LIGHTNING_BREATH     =  904,
+    PET_HYDRO_BREATH         =  905,
 
     SEARING_LIGHT_1          =  912, -- Confirmed usage: Regular avatar-type mobs (Carbuncle).
     INFERNO_2                =  913, -- Confirmed usage: Untargetable avatar astral flow. (Ex. Kirin) (Ifrit model avatar)
@@ -158,8 +182,18 @@ xi.mobSkill =
     MANTLE_PIERCE            = 1349,
 
     AERIAL_COLLISION         = 1353,
+    SPINE_LASH               = 1355,
+    TIDAL_DIVE               = 1357,
+    PLASMA_CHARGE            = 1358,
 
     SINUATE_RUSH             = 1367,
+
+    WING_THRUST              = 1378,
+    AURORAL_WIND             = 1379,
+    IMPACT_STREAM            = 1380,
+    DEPURATION               = 1381,
+    CRYSTALINE_COCOON        = 1382,
+    MEDUSA_JAVELIN           = 1386,
 
     AMATSU_TORIMAI           = 1390,
     AMATSU_KAZAKIRI          = 1391,
@@ -235,11 +269,26 @@ xi.mobSkill =
     VOID_OF_REPENTANCE       = 2146,
     DIVINE_JUDGMENT          = 2147,
 
+    GRIM_GLOWER              = 2156,
+
     PEDAL_PIROUETTE          = 2210,
 
     HELL_SCISSORS            = 2221,
 
     QUEASYSHROOM_2           = 2232,
+
+    DI_HORN_ATTACK           = 2329,
+    DI_BITE_ATTACK           = 2330,
+    DI_KICK_ATTACK           = 2331,
+    DI_TRAMPLE               = 2332,
+    DI_GLOW                  = 2333,
+    WRATH_OF_ZEUS            = 2334,
+    LIGHTNING_SPEAR          = 2335,
+    ACHERON_KICK             = 2336,
+    DAMSEL_MEMENTO           = 2337,
+    RAMPANT_STANCE           = 2338,
+
+    OPPRESSIVE_GLARE         = 2392,
 
     ROAR_3                   = 2406,
 

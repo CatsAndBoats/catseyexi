@@ -40,6 +40,7 @@
 
 #include "automatonentity.h"
 #include "battleentity.h"
+#include "packets/s2c/base.h"
 #include "petentity.h"
 
 #include "utils/fishingutils.h"
@@ -441,7 +442,8 @@ public:
     void pushPacket(Args&&... args)
     {
         // TODO: This could hook into pooling of packet objects, etc.
-        pushPacket(std::make_unique<T>(std::forward<Args>(args)...));
+        auto packet = std::make_unique<T>(std::forward<Args>(args)...);
+        pushPacket(std::move(packet));
     }
 
     void   pushPacket(std::unique_ptr<CBasicPacket>&&);                                   // Push packet to packet list

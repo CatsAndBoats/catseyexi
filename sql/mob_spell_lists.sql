@@ -679,6 +679,7 @@ INSERT INTO `mob_spell_lists` VALUES ('Genbu',24,227,1,255); -- poisonga_iii (1~
 INSERT INTO `mob_spell_lists` VALUES ('Genbu',24,240,1,255); -- drown (1~255)
 
 -- Seiryu (25)
+INSERT INTO `mob_spell_lists` VALUES ('Seiryu',25,53,1,255);  -- blink (1~255)
 INSERT INTO `mob_spell_lists` VALUES ('Seiryu',25,157,1,255); -- aero_iv (1~255)
 INSERT INTO `mob_spell_lists` VALUES ('Seiryu',25,186,1,255); -- aeroga_iii (1~255)
 INSERT INTO `mob_spell_lists` VALUES ('Seiryu',25,208,1,255); -- tornado (1~255)
@@ -5029,7 +5030,27 @@ INSERT INTO `mob_spell_lists` VALUES ('Bastet',493,239,1,255); -- Shock (1~255)
 INSERT INTO `mob_spell_lists` VALUES ('Bastet',493,251,1,255); -- Shock Spikes (1~255)
 INSERT INTO `mob_spell_lists` VALUES ('Bastet',493,252,1,255); -- Stun (1~255)
 
--- IDs 494-496 free for use
+-- Ullikummi (494)
+INSERT INTO `mob_spell_lists` VALUES ('Ullikummi',494,34,1,255);  -- Diaga II (1~255)
+INSERT INTO `mob_spell_lists` VALUES ('Ullikummi',494,40,1,255);  -- Banishga III (1~255)
+INSERT INTO `mob_spell_lists` VALUES ('Ullikummi',494,112,1,255); -- Flash (1~255)
+
+-- Olla Grande
+INSERT INTO `mob_spell_lists` VALUES ('Olla_Grande',495,21,50,94);   -- holy (50~94)
+INSERT INTO `mob_spell_lists` VALUES ('Olla_Grande',495,24,36,255);  -- dia_ii (36~64)
+INSERT INTO `mob_spell_lists` VALUES ('Olla_Grande',495,31,73,255);  -- banish_iv (73~255)
+INSERT INTO `mob_spell_lists` VALUES ('Olla_Grande',495,35,74,255);  -- diaga_iii (74~255)
+INSERT INTO `mob_spell_lists` VALUES ('Olla_Grande',495,40,69,255);  -- banishga_iii (69~255)
+INSERT INTO `mob_spell_lists` VALUES ('Olla_Grande',495,53,19,255);  -- blink (19~255)
+INSERT INTO `mob_spell_lists` VALUES ('Olla_Grande',495,54,28,255);  -- stoneskin (28~255)
+INSERT INTO `mob_spell_lists` VALUES ('Olla_Grande',495,56,13,255);  -- slow (13~255)
+INSERT INTO `mob_spell_lists` VALUES ('Olla_Grande',495,57,40,255);  -- haste (40~255)
+INSERT INTO `mob_spell_lists` VALUES ('Olla_Grande',495,58,4,255);   -- paralyze (4~255)
+INSERT INTO `mob_spell_lists` VALUES ('Olla_Grande',495,59,15,255);  -- silence (15~255)
+INSERT INTO `mob_spell_lists` VALUES ('Olla_Grande',495,111,66,255); -- regen_iii (66~255)
+INSERT INTO `mob_spell_lists` VALUES ('Olla_Grande',495,112,45,255); -- flash (45~255)
+
+-- ID 496 free for use
 
 -- Cemetery Cherry
 INSERT INTO `mob_spell_lists` VALUES ('Cemetery_Cherry',497,274,1,255); -- Sleepga II

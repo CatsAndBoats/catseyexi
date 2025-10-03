@@ -17,7 +17,6 @@
 -----------------------------------
 require('scripts/globals/teleports') -- For warp weapon proc.
 require('scripts/globals/magic') -- For resist functions
-require('scripts/globals/utils') -- For clamping function
 -----------------------------------
 xi = xi or {}
 xi.additionalEffect = xi.additionalEffect or {}
@@ -127,6 +126,7 @@ xi.additionalEffect.procType =
     ABSORB_STATUS = 11,
     SELF_BUFF     = 12,
     DEATH         = 13,
+    NM_SPECIFIC   = 14,
 }
 
 -- TODO: add resistance check for params.element
@@ -147,23 +147,54 @@ xi.additionalEffect.procFunctions[xi.additionalEffect.procType.DAMAGE] = functio
     return subEffect, msgID, msgParam
 end
 
--- TODO: add resistance check for params.element
--- TODO: add 1/2 duration or full duration only
--- TODO: verify how macc works with this
-xi.additionalEffect.procFunctions[xi.additionalEffect.procType.DEBUFF] =  function(attacker, defender, item, params)
-    local subEffect = params.subEffect
-    local msgID     = 0
-    local msgParam  = 0
-
-    if params.addStatus and params.addStatus > 0 then
-        local tick = xi.additionalEffect.statusAttack(params.addStatus, defender)
-        msgID      = xi.msg.basic.ADD_EFFECT_STATUS_2 -- TODO: does anything use ADD_EFFECT_STATUS? STatus bolts are observed on retail to use _2.
-
-        defender:addStatusEffect(params.addStatus, params.power, tick, params.duration)
-        msgParam = params.addStatus
+xi.additionalEffect.procFunctions[xi.additionalEffect.procType.DEBUFF] = function(actor, target, item, params)
+    -- Early return: No actor or target.
+    if
+        not actor or
+        not target
+    then
+        return 0, 0, 0
     end
 
-    return subEffect, msgID, msgParam
+    -- Validate parameters.
+    local effectId      = utils.defaultIfNil(params.addStatus, 0)
+    local subEffect     = utils.defaultIfNil(params.subEffect, 0)
+    local actionElement = xi.data.statusEffect.getAssociatedElement(effectId, xi.element.NONE)
+
+    -- Early return: No effect to apply.
+    if effectId == 0 then
+        return 0, 0, 0
+    end
+
+    -- Early return: Target is immune to the effect.
+    if xi.data.statusEffect.isTargetImmune(target, effectId, actionElement) then
+        return 0, 0, 0
+    end
+
+    -- Early return: Trait nullifies effect.
+    if xi.data.statusEffect.isTargetResistant(actor, target, effectId) then
+        return 0, 0, 0
+    end
+
+    -- Early return: Incompatible effect in place.
+    if xi.data.statusEffect.isEffectNullified(target, effectId) then
+        return 0, 0, 0
+    end
+
+    -- Early return: Regular resist rate.
+    local resistRate = xi.combat.magicHitRate.calculateResistRate(actor, target, 0, 0, xi.skillRank.A, actionElement, xi.mod.INT, effectId, 0)
+    if resistRate < 0.5 then
+        return 0, 0, 0
+    end
+
+    -- Apply status effect.
+    local power    = params.power
+    local tick     = xi.additionalEffect.statusAttack(effectId, target)
+    local duration = math.floor(params.duration * resistRate)
+
+    target:addStatusEffect(effectId, power, tick, duration)
+
+    return subEffect, xi.msg.basic.ADD_EFFECT_STATUS_2, effectId
 end
 
 xi.additionalEffect.procFunctions[xi.additionalEffect.procType.HP_HEAL] =  function(attacker, defender, item, params)
@@ -367,6 +398,41 @@ xi.additionalEffect.procFunctions[xi.additionalEffect.procType.HPMPTP_DRAIN] = f
     }
 
     return xi.additionalEffect.procFunctions[drainFuncs[drainRoll]](attacker, defender, item, params)
+end
+
+xi.additionalEffect.procFunctions[xi.additionalEffect.procType.NM_SPECIFIC] = function(attacker, defender, item, params)
+    local subEffect = params.subEffect
+    local msgID     = 0
+    local msgParam  = 0
+    local defenderName = defender:getName()
+
+    switch(defenderName): caseof
+    {
+        ['Brigandish_Blade'] = function()
+            -- Calculate damage
+            local damage = xi.additionalEffect.calcDamage(attacker, params.element, defender, params.damage)
+            msgID = xi.msg.basic.ADD_EFFECT_DMG
+            msgParam = damage
+
+            -- If Brigandish Blade has damage immunity (at 1% HP), remove it
+            if defender:getMod(xi.mod.UDMGPHYS) == -10000 then
+                -- Remove all damage immunities
+                defender:setMod(xi.mod.UDMGPHYS, 0)
+                defender:setMod(xi.mod.UDMGRANGE, 0)
+                defender:setMod(xi.mod.UDMGMAGIC, 0)
+                defender:setMod(xi.mod.UDMGBREATH, 0)
+
+                defender:setLocalVar('killable', 1)
+                defender:setUnkillable(false)
+            end
+        end,
+
+        ['default'] = function()
+            return 0, 0, 0
+        end,
+    }
+
+    return subEffect, msgID, msgParam
 end
 
 -- paralyze on hit, fire damage on hit, etc.

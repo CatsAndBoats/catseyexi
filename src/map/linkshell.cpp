@@ -393,7 +393,7 @@ namespace linkshell
             const auto linkshellid = rset->get<uint32>("linkshellid");
             const auto color       = rset->get<uint16>("color");
             const auto name        = rset->get<std::string>("name");
-            const auto postrights  = static_cast<GP_CLI_COMMAND_SET_LSMSG_WRITELEVEL>(rset->get<uint8>("postrights"));
+            const auto postrights  = rset->get<GP_CLI_COMMAND_SET_LSMSG_WRITELEVEL>("postrights");
 
             auto PLinkshell = std::make_unique<CLinkshell>(linkshellid);
 

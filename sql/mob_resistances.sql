@@ -159,7 +159,7 @@ INSERT INTO `mob_resistances` VALUES (118,'Gargouille',0,0,0,0,0,0,0,0,0,0,0,0,0
 INSERT INTO `mob_resistances` VALUES (119,'Gear - Archaic_Gear',0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,4,-1,4,1,1,1,1,1,-1,4,1,1);
 INSERT INTO `mob_resistances` VALUES (120,'Gear',0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,4,-1,4,1,1,1,1,1,-1,4,1,1);
 INSERT INTO `mob_resistances` VALUES (121,'Ghost',-2500,-2500,-5000,-5000,0,0,0,0,0,0,0,0,0,-3,4,-2,0,-2,-2,-3,4,5,5,-2,0,-2,-3,4,5);
-INSERT INTO `mob_resistances` VALUES (122,'Ghrah',0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-3,11,0,0,0,0,0,-3,11,11);
+INSERT INTO `mob_resistances` VALUES (122,'Ghrah',0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0);
 INSERT INTO `mob_resistances` VALUES (123,'Ghrah',-2500,-2500,-2500,-2500,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-3,11,0,0,0,0,0,-3,11,11);
 INSERT INTO `mob_resistances` VALUES (124,'Ghrah - Jailer_of_Fortitude',-1250,-1250,-1250,-1250,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-3,11,0,0,0,0,0,-3,11,11);
 INSERT INTO `mob_resistances` VALUES (125,'Greater_Bird',-2500,2500,0,-2500,0,0,0,0,0,0,0,0,0,1,-3,4,1,1,1,1,1,-3,-3,4,1,1,1,1,1);

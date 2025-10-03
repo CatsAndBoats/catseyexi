@@ -113,7 +113,24 @@ xi.combat.physical.calculateAttackDamage = function(actor, target, slot, physica
 
     if isH2H then
         local naturalH2hDamage = math.floor(actor:getSkillLevel(xi.skill.HAND_TO_HAND) * 0.11) + 3
-        if physicalAttackType == xi.physicalAttackType.KICK then
+        local kickDamage = 0
+
+        if actor:isMob() then
+            local mobH2HPenalty = 1.0
+            local regionID      = actor:getCurrentRegion()
+
+            if regionID <= xi.region.LIMBUS then
+                mobH2HPenalty = 0.425 -- Vanilla - COP
+            else
+                mobH2HPenalty = 0.650
+            end
+
+            if physicalAttackType == xi.physicalAttackType.KICK then
+                kickDamage = actor:getMod(xi.mod.KICK_DMG)
+            end
+
+            baseDamage = (actor:getWeaponDmg() + kickDamage + bonusBasePhysicalDamage + xi.combat.physical.calculateMeleeStatFactor(actor, target)) * mobH2HPenalty
+        elseif physicalAttackType == xi.physicalAttackType.KICK then
             baseDamage = naturalH2hDamage + actor:getMod(xi.mod.KICK_DMG) + bonusBasePhysicalDamage + xi.combat.physical.calculateMeleeStatFactor(actor, target)
         else
             baseDamage = naturalH2hDamage + actor:getWeaponDmg() + bonusBasePhysicalDamage + xi.combat.physical.calculateMeleeStatFactor(actor, target)
@@ -409,7 +426,7 @@ xi.combat.physical.calculateFTPBonus = function(actor)
             wsElementalProperties[scProp2][elementChecked] == 1 or
             wsElementalProperties[scProp3][elementChecked] == 1
         then
-            fTPBonus = fTPBonus + actor:getMod(xi.combat.element.getElementalFTPModifier(elementChecked)) / 256
+            fTPBonus = fTPBonus + actor:getMod(xi.data.element.getElementalFTPModifier(elementChecked)) / 256
 
             if dayElement == elementChecked then
                 fTPBonus = fTPBonus + actor:getMod(xi.mod.DAY_FTP_BONUS) / 256
@@ -420,6 +437,76 @@ xi.combat.physical.calculateFTPBonus = function(actor)
     fTPBonus = fTPBonus + actor:getMod(xi.mod.ANY_FTP_BONUS) / 256
 
     return fTPBonus
+end
+
+---@param wRatio number
+---@param pDifFinalCap number
+xi.combat.physical.wRatioCapPC = function(wRatio, pDifFinalCap)
+    local pDifUpperCap = 0
+    local pDifLowerCap = 0
+
+    -- pDIF upper cap.
+    if wRatio < 0.5 then
+        pDifUpperCap = wRatio + 0.5
+    elseif wRatio < 0.7 then
+        pDifUpperCap = 1
+    elseif wRatio < 1.2 then
+        pDifUpperCap = wRatio + 0.3
+    elseif wRatio < 1.5 then
+        pDifUpperCap = wRatio + wRatio * 0.25
+    else
+        pDifUpperCap = math.min(wRatio + 0.375, pDifFinalCap)
+    end
+
+    -- pDIF lower cap.
+    if wRatio < 0.38 then
+        pDifLowerCap = 0
+    elseif wRatio < 1.25 then
+        pDifLowerCap = wRatio * 1176 / 1024 - 448 / 1024
+    elseif wRatio < 1.51 then
+        pDifLowerCap = 1
+    elseif wRatio < 2.44 then
+        pDifLowerCap = wRatio * 1176 / 1024 - 775 / 1024
+    else
+        pDifLowerCap = wRatio - 0.375
+    end
+
+    return pDifUpperCap, pDifLowerCap
+end
+
+-- wRatio cap for non-PCs
+---@param wRatio number
+---@param pDifFinalCap number
+xi.combat.physical.wRatioCapOthers = function(wRatio, pDifFinalCap)
+    local pDifUpperCap = 0
+    local pDifLowerCap = 0
+
+    -- see https://www.ffxiah.com/forum/topic/58479/monster-pdif-curves-and-other-info/
+    -- pDIF upper cap.
+    if wRatio < 0.55 then
+        pDifUpperCap = 0.6 + 760 / 1024 * wRatio
+    elseif wRatio <= 0.8 then
+        pDifUpperCap = 1
+    elseif wRatio < 1.2 then
+        pDifUpperCap = 1 + 1127 / 1024 * (wRatio - 0.8)
+    elseif wRatio < 1.5 then
+        pDifUpperCap = 1474 / 1024 + 1105 / 1024 * (wRatio - 1235 / 1024)
+    else
+        pDifUpperCap = math.min(1803 / 1024 + 1070 / 1024 * (wRatio - 1.5), pDifFinalCap)
+    end
+
+    -- pDIF lower cap.
+    if wRatio <= 0.4 then
+        pDifLowerCap = 0.25
+    elseif wRatio < 1.35 then
+        pDifLowerCap = 0.25 + (827 / 1024) * (wRatio - 0.4)
+    elseif wRatio <= 1.60 then
+        pDifLowerCap = 1
+    else
+        pDifLowerCap = 1 + (1120 / 1024) * (wRatio - 1.59)
+    end
+
+    return pDifUpperCap, pDifLowerCap
 end
 
 -- WARNING: This function is used in src/utils/battleutils.cpp "GetDamageRatio" function.
@@ -514,42 +601,40 @@ xi.combat.physical.calculateMeleePDIF = function(actor, target, weaponType, wsAt
     local damageLimitPercent = 1 + actor:getMod(xi.mod.DAMAGE_LIMITP) / 100
     local pDifFinalCap       = (xi.combat.physical.pDifWeaponCapTable[weaponType][2] + damageLimitPlus) * damageLimitPercent + (isCritical and 1 or 0)
 
-    -- https://www.bg-wiki.com/ffxi/PDIF#Average_Melee_pDIF(qRatio)
-    -- This is also known as "pDIF spike"
-    if wRatio > 0.5 and wRatio < 1.5 then -- 0.5 and 1.5 are 0% chance
-        local sRatio = (0.5 - math.abs(wRatio - 1)) * 1.2
+    if actor:isPC() then
+        -- https://www.bg-wiki.com/ffxi/PDIF#Average_Melee_pDIF(qRatio)
+        -- This is also known as "pDIF spike"
+        if wRatio > 0.5 and wRatio < 1.5 then -- 0.5 and 1.5 are 0% chance
+            local sRatio = (0.5 - math.abs(wRatio - 1)) * 1.2
 
-        sRatio = utils.clamp(sRatio, 0, 1 / 3) -- 1/3 (one-third), not 0.33
+            sRatio = utils.clamp(sRatio, 0, 1 / 3) -- 1/3 (one-third), not 0.33
 
-        if math.random() <= sRatio then
+            if math.random(1, 10000) / 10000 <= sRatio then
+                return 1.0
+            end
+        end
+
+        pDifLowerCap, pDifUpperCap = xi.combat.physical.wRatioCapPC(wRatio, pDifFinalCap)
+    else -- Mobs and pets, unconfirmed if pets use this same formula
+        -- https://www.ffxiah.com/forum/topic/58479/monster-pdif-curves-and-other-info/#3751498
+        -- This is also known as "pDIF spike"
+        local sRatio = 0
+
+        if wRatio > 0.0 and wRatio < 1.75 then
+            sRatio = -5 / 9 + (10 / 9) * wRatio
+        elseif wRatio <= 1.3 then
+            sRatio = 0.3
+        else
+            sRatio = 5 / 3 - (270 / 256) * wRatio
+        end
+
+        sRatio = utils.clamp(sRatio, 0, 0.3)
+
+        if math.random(1, 10000) / 10000 <= sRatio then
             return 1.0
         end
-    end
 
-    -- pDIF upper cap.
-    if wRatio < 0.5 then
-        pDifUpperCap = wRatio + 0.5
-    elseif wRatio < 0.7 then
-        pDifUpperCap = 1
-    elseif wRatio < 1.2 then
-        pDifUpperCap = wRatio + 0.3
-    elseif wRatio < 1.5 then
-        pDifUpperCap = wRatio + wRatio * 0.25
-    else
-        pDifUpperCap = math.min(wRatio + 0.375, pDifFinalCap)
-    end
-
-    -- pDIF lower cap.
-    if wRatio < 0.38 then
-        pDifLowerCap = 0
-    elseif wRatio < 1.25 then
-        pDifLowerCap = wRatio * 1176 / 1024 - 448 / 1024
-    elseif wRatio < 1.51 then
-        pDifLowerCap = 1
-    elseif wRatio < 2.44 then
-        pDifLowerCap = wRatio * 1176 / 1024 - 775 / 1024
-    else
-        pDifLowerCap = wRatio - 0.375
+        pDifLowerCap, pDifUpperCap = xi.combat.physical.wRatioCapOthers(wRatio, pDifFinalCap)
     end
 
     -- Apply level correction to UL/LL

@@ -56,7 +56,6 @@
 #include "packets/action.h"
 #include "packets/char_emotion.h"
 #include "packets/chat_message.h"
-#include "packets/entity_visual.h"
 #include "packets/menu_raisetractor.h"
 
 #include "utils/battleutils.h"
@@ -77,11 +76,13 @@
 #include "fishingcontest.h"
 #include "instance.h"
 #include "ipc_client.h"
+#include "items/item_furnishing.h"
 #include "map_engine.h"
 #include "mob_modifier.h"
 #include "mobskill.h"
 #include "monstrosity.h"
 #include "navmesh.h"
+#include "packets/s2c/0x039_mapschedulor.h"
 #include "petskill.h"
 #include "roe.h"
 #include "spell.h"
@@ -356,11 +357,6 @@ namespace luautils
         CLuaZone::Register();
         CLuaItem::Register();
 
-        // Load globals
-        // Truly global files first
-        lua.safe_script_file("./scripts/globals/common.lua");
-        lua.safe_script_file("./scripts/globals/utils.lua");
-
         // Load global enums
         for (auto const& entry : sorted_directory_iterator<std::filesystem::directory_iterator>("./scripts/enum"))
         {
@@ -369,6 +365,42 @@ namespace luautils
                 auto relative_path_string = entry.relative_path().generic_string();
 
                 ShowTrace("Loading enum script %s", relative_path_string);
+
+                auto result = lua.safe_script_file(relative_path_string);
+                if (!result.valid())
+                {
+                    sol::error err = result;
+                    ShowError(err.what());
+                }
+            }
+        }
+
+        // Load global utilities
+        for (auto const& entry : sorted_directory_iterator<std::filesystem::directory_iterator>("./scripts/utils"))
+        {
+            if (entry.extension() == ".lua")
+            {
+                auto relative_path_string = entry.relative_path().generic_string();
+
+                ShowTrace("Loading utility script %s", relative_path_string);
+
+                auto result = lua.safe_script_file(relative_path_string);
+                if (!result.valid())
+                {
+                    sol::error err = result;
+                    ShowError(err.what());
+                }
+            }
+        }
+
+        // Load global data
+        for (auto const& entry : sorted_directory_iterator<std::filesystem::directory_iterator>("./scripts/data"))
+        {
+            if (entry.extension() == ".lua")
+            {
+                auto relative_path_string = entry.relative_path().generic_string();
+
+                ShowTrace("Loading data script %s", relative_path_string);
 
                 auto result = lua.safe_script_file(relative_path_string);
                 if (!result.valid())
@@ -424,7 +456,8 @@ namespace luautils
 
                 // Spec meta files should not be cached, and are only used
                 // for Lua Language Server parsing
-                if (!parts.empty() && parts[2] == "specs")
+                // Test files are handled by xi_test exclusively
+                if (!parts.empty() && (parts[2] == "specs" || parts[2] == "tests"))
                 {
                     continue;
                 }
@@ -1180,13 +1213,13 @@ namespace luautils
     }
 
     // temporary solution for geysers in Dangruf_Wadi
-    void SendEntityVisualPacket(uint32 npcid, const char* command)
+    void SendEntityVisualPacket(const uint32 npcId, const char* command)
     {
         TracyZoneScoped;
 
-        if (CBaseEntity* PNpc = zoneutils::GetEntity(npcid, TYPE_NPC))
+        if (CBaseEntity* PNpc = zoneutils::GetEntity(npcId, TYPE_NPC))
         {
-            PNpc->loc.zone->PushPacket(PNpc, CHAR_INRANGE, std::make_unique<CEntityVisualPacket>(PNpc, command));
+            PNpc->loc.zone->PushPacket(PNpc, CHAR_INRANGE, std::make_unique<GP_SERV_COMMAND_MAPSCHEDULOR>(PNpc, command));
         }
     }
 
@@ -1226,16 +1259,23 @@ namespace luautils
         return PNpc;
     }
 
-    void InitInteractionGlobal(const std::vector<uint16>& zoneIds)
+    void InitInteractionGlobal()
     {
         auto initZones = lua["InteractionGlobal"]["initZones"];
-        auto table     = sol::as_table(zoneIds);
 
-        auto result = initZones(table);
+        std::vector<uint16> zoneIds;
+        // clang-format off
+        zoneutils::ForEachZone([&zoneIds](const CZone* PZone)
+        {
+            zoneIds.emplace_back(PZone->GetID());
+        });
+        // clang-format on
+
+        const auto result = initZones(zoneIds);
 
         if (!result.valid())
         {
-            sol::error err = result;
+            const sol::error err = result;
             ShowError("luautils::InitInteractionGlobal: %s", err.what());
         }
     }
@@ -3269,7 +3309,7 @@ namespace luautils
             return;
         }
 
-        uint8 weather = PMob->loc.zone->GetWeather();
+        auto weather = PMob->loc.zone->GetWeather();
 
         auto result = onMobDisengage(PMob, weather);
         if (!result.valid())
@@ -3501,6 +3541,8 @@ namespace luautils
             return;
         }
 
+        PMob->PAI->EventHandler.triggerListener("PRESPAWN", PMob);
+
         const sol::function onMobSpawn = getEntityCachedFunction(PMob, "onMobSpawn");
         if (onMobSpawn.valid())
         {
@@ -3665,14 +3707,14 @@ namespace luautils
         }
     }
 
-    void OnZoneWeatherChange(uint16 ZoneID, uint8 weather)
+    void OnZoneWeatherChange(const uint16 zoneId, Weather weather)
     {
         TracyZoneScoped;
 
-        CZone* PZone = zoneutils::GetZone(ZoneID);
+        CZone* PZone = zoneutils::GetZone(zoneId);
         if (PZone == nullptr)
         {
-            ShowWarning("Invalid ZoneID passed to function (%d).", ZoneID);
+            ShowWarning("Invalid ZoneID passed to function (%d).", zoneId);
             return;
         }
 
@@ -4663,7 +4705,7 @@ namespace luautils
         charutils::ClearCharVarFromAll(varName);
     }
 
-    void OnTransportEvent(CCharEntity* PChar, uint32 TransportID)
+    void OnTransportEvent(CCharEntity* PChar, uint16 prevZoneId, uint16 transportId)
     {
         TracyZoneScoped;
 
@@ -4675,7 +4717,7 @@ namespace luautils
             return;
         }
 
-        auto result = onTransportEvent(PChar, TransportID);
+        auto result = onTransportEvent(PChar, prevZoneId, transportId);
         if (!result.valid())
         {
             sol::error err = result;

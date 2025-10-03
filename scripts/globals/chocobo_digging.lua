@@ -3,9 +3,7 @@
 -- http://ffxiclopedia.wikia.com/wiki/Chocobo_Digging
 -- https://www.bg-wiki.com/bg/Category:Chocobo_Digging
 -----------------------------------
-require('scripts/globals/combat/element_tables')
 require('scripts/globals/roe')
-require('scripts/globals/utils')
 require('scripts/missions/amk/helpers')
 -----------------------------------
 xi = xi or {}
@@ -2232,7 +2230,7 @@ local function  handleDiggingLayer(player, zoneId, currentLayer)
         if
             isElementalOreZone and                                              -- Zone can drop ore.
             playerRank >= xi.craftRank.CRAFTSMAN and                            -- Digging level must be 60+
-            xi.combat.element.getWeatherElement(weather) ~= xi.element.NONE and -- Weather must be elemental.
+            xi.data.element.getWeatherElement(weather) ~= xi.element.NONE and -- Weather must be elemental.
             moon >= 7 and moon <= 21 and                                        -- Moon must be between those values.
             randomRoll <= 100
         then
@@ -2265,14 +2263,22 @@ local function handleFatigue(player, text, todayDigCount)
     if math.random(1, 100) <= player:getMod(xi.mod.DIG_BYPASS_FATIGUE) then
         player:messageSpecial(text.FOUND_ITEM_WITH_EASE)
     else
-        player:setVar('[DIG]DigCount', todayDigCount + 1, NextJstDay())
+        xi.chocoboDig.updateFatigue(player, todayDigCount + 1)
     end
+end
+
+xi.chocoboDig.fetchFatigue = function(player)
+    return player:getCharVar('[DIG]DigCount')
+end
+
+xi.chocoboDig.updateFatigue = function(player, newValue)
+    player:setVar('[DIG]DigCount', newValue, NextJstDay())
 end
 
 xi.chocoboDig.start = function(player)
     local zoneId        = player:getZoneID()
     local text          = zones[zoneId].text
-    local todayDigCount = player:getCharVar('[DIG]DigCount')
+    local todayDigCount = xi.chocoboDig.fetchFatigue(player)
     local currentX      = player:getXPos()
     local currentZ      = player:getZPos()
     local currentXSign  = 0

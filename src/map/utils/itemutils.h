@@ -19,20 +19,12 @@
 ===========================================================================
 */
 
-#ifndef _ITEMUTILS_H
-#define _ITEMUTILS_H
+#pragma once
 
 #include <vector>
 
 #include "items/item.h"
 #include "items/item_currency.h"
-#include "items/item_equipment.h"
-#include "items/item_fish.h"
-#include "items/item_furnishing.h"
-#include "items/item_general.h"
-#include "items/item_linkshell.h"
-#include "items/item_puppet.h"
-#include "items/item_usable.h"
 #include "items/item_weapon.h"
 
 #define MAX_ITEMID        32768
@@ -115,6 +107,4 @@ namespace itemutils
     CItemWeapon* GetUnarmedH2HItem();
 
     DropList_t* GetDropList(uint16 DropID);
-
 }; // namespace itemutils
-#endif

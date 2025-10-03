@@ -28,14 +28,8 @@ quest.sections =
 
         [xi.zone.LOWER_JEUNO] =
         {
-            ['Bki_Tbujhja'] =
-            {
-                onTrigger = function(player, npc)
-                    if quest:getVar(player, 'Prog') >= 1 then
-                        return quest:progressEvent(181)
-                    end
-                end,
-            },
+
+            ['Mataligeat'] = quest:event(140),
 
             ['Mertaire'] =
             {
@@ -43,7 +37,7 @@ quest.sections =
                     if quest:getVar(player, 'Prog') == 0 then
                         return quest:progressEvent(102)
                     else
-                        return quest:messageSpecial(lowerJeunoID.text.MERTAIRE_MALLIEBELL_LEFT)
+                        return quest:messageName(lowerJeunoID.text.MERTAIRE_MALLIEBELL_LEFT, 0, 0, 0, 0, true, false)
                     end
                 end,
             },
@@ -53,10 +47,6 @@ quest.sections =
                 [102] = function(player, csid, option, npc)
                     quest:setVar(player, 'Prog', 1)
                 end,
-
-                [181] = function(player, csid, option, npc)
-                    quest:setVar(player, 'Prog', 2)
-                end,
             },
         },
 
@@ -65,8 +55,8 @@ quest.sections =
             ['Song_Runes'] =
             {
                 onTrigger = function(player, npc)
-                    if quest:getVar(player, 'Prog') == 2 then
-                        return quest:progressEvent(0)
+                    if quest:getVar(player, 'Prog') == 1 then
+                        return quest:progressCutscene(0)
                     end
                 end,
             },
@@ -74,7 +64,7 @@ quest.sections =
             onEventFinish =
             {
                 [0] = function(player, csid, option, npc)
-                    quest:setVar(player, 'Prog', 3)
+                    quest:setVar(player, 'Prog', 2)
                 end,
             },
         },
@@ -82,8 +72,7 @@ quest.sections =
 
     {
         check = function(player, status, vars)
-            return vars.Prog == 3 or
-                status == xi.questStatus.QUEST_COMPLETED
+            return vars.Prog == 2
         end,
 
         [xi.zone.BUBURIMU_PENINSULA] =
@@ -109,6 +98,12 @@ quest.sections =
                     end
                 end,
             },
+        },
+
+        [xi.zone.LOWER_JEUNO] =
+        {
+            ['Mataligeat'] = quest:event(140),
+            ['Mertaire'] = quest:messageName(lowerJeunoID.text.MERTAIRE_MALLIEBELL_LEFT, 0, 0, 0, 0, true, false),
         },
     },
 }
