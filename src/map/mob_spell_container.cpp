@@ -107,7 +107,9 @@ void CMobSpellContainer::AddSpell(SpellID spellId)
 void CMobSpellContainer::RemoveSpell(SpellID spellId)
 {
     auto findAndRemove = [](std::vector<SpellID>& list, SpellID id)
-    { list.erase(std::remove(list.begin(), list.end(), id), list.end()); };
+    {
+        list.erase(std::remove(list.begin(), list.end(), id), list.end());
+    };
 
     findAndRemove(m_gaList, spellId);
     findAndRemove(m_damageList, spellId);
@@ -349,7 +351,7 @@ std::optional<SpellID> CMobSpellContainer::GetBestAgainstTargetWeakness(CBattleE
     std::size_t            weakestIndex     = std::distance(resistances.begin(), std::min_element(resistances.begin(), resistances.end()));
     std::optional<SpellID> choice           = std::nullopt;
     auto                   Weakness_Element = weakestIndex + 1;
-    if (spell::GetSpell(spellId) != 0)
+    if (spell::GetSpell(spellId) != nullptr)
     {
         auto Spell_Element = spell::GetSpell(spellId)->getElement();
         if (Spell_Element == Weakness_Element)

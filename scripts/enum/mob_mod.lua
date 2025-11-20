@@ -18,7 +18,7 @@ xi.mobMod =
     GA_CHANCE              = 7,  -- % chance to use -ga spell
     HEAL_CHANCE            = 8,  -- % chance to use heal
     HP_HEAL_CHANCE         = 9,  -- can cast cures below this HP %
-    SUBLINK                = 10, -- sub link group
+    SUBLINK                = 10, -- Sub link group. Enables mobs from different families to link if they share a SUBLINK value.
     LINK_RADIUS            = 11, -- link radius
     SEES_THROUGH_ILLUSION  = 12, -- Mob can see through the Illusion effect that grants effects similar to Sneak & Invisible without this mod and allows aggro (see Viscious Liquid in mamook)
     SEVERE_SPELL_CHANCE    = 13, -- % chance to use a severe spell like death or impact
@@ -97,4 +97,7 @@ xi.mobMod =
     BASE_DAMAGE_MULTIPLIER = 86, -- Multiplies the mob's base damage. Example: 150 = x1.5
     DAMAGE_OFFSET          = 87, -- Adds or subtracts the mob's base damage offset.
     RANGED_DAMAGE_OFFSET   = 88, -- Adds or subtracts the mob's ranged base damage offset.
+    AVATAR_PETID           = 89, -- A value from xi.petId to select model/ability from when owner uses astral flow
+    AVATAR_ASTRAL_DELAY    = 90, -- Number of milliseconds to delay AF after avatar spawn
+    H2H_SINGLE_SWING       = 91, -- Mob will have only one swing per attack even as MNK with H2H skill
 }

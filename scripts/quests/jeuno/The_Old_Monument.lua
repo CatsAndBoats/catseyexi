@@ -54,9 +54,21 @@ quest.sections =
         {
             ['Song_Runes'] =
             {
+                onTrade = function(player, npc, trade)
+                    if
+                        quest:getVar(player, 'Prog') == 2 and
+                        npcUtil.tradeHasExactly(trade, xi.item.SHEET_OF_PARCHMENT)
+                    then
+                        return quest:progressCutscene(2)
+                    end
+                end,
+
                 onTrigger = function(player, npc)
-                    if quest:getVar(player, 'Prog') == 1 then
+                    local questProgress = quest:getVar(player, 'Prog')
+                    if questProgress == 1 then
                         return quest:progressCutscene(0)
+                    elseif questProgress == 2 then
+                        return quest:messageSpecial(buburimuID.text.SONG_RUNES_REQUIRE, xi.item.SHEET_OF_PARCHMENT)
                     end
                 end,
             },
@@ -66,30 +78,7 @@ quest.sections =
                 [0] = function(player, csid, option, npc)
                     quest:setVar(player, 'Prog', 2)
                 end,
-            },
-        },
-    },
 
-    {
-        check = function(player, status, vars)
-            return vars.Prog == 2
-        end,
-
-        [xi.zone.BUBURIMU_PENINSULA] =
-        {
-            ['Song_Runes'] =
-            {
-                onTrade = function(player, npc, trade)
-                    if npcUtil.tradeHasExactly(trade, xi.item.SHEET_OF_PARCHMENT) then
-                        return quest:progressEvent(2)
-                    end
-                end,
-
-                onTrigger = quest:messageSpecial(buburimuID.text.SONG_RUNES_REQUIRE, xi.item.SHEET_OF_PARCHMENT),
-            },
-
-            onEventFinish =
-            {
                 [2] = function(player, csid, option, npc)
                     player:messageSpecial(buburimuID.text.SONG_RUNES_WRITING, xi.item.SHEET_OF_PARCHMENT)
 
@@ -98,12 +87,6 @@ quest.sections =
                     end
                 end,
             },
-        },
-
-        [xi.zone.LOWER_JEUNO] =
-        {
-            ['Mataligeat'] = quest:event(140),
-            ['Mertaire'] = quest:messageName(lowerJeunoID.text.MERTAIRE_MALLIEBELL_LEFT, 0, 0, 0, 0, true, false),
         },
     },
 }

@@ -154,10 +154,8 @@ xi.job_utils.ranger.useEagleEyeShot = function(player, target, ability, action)
     -- Set the message id ourselves
     if tpHits + extraHits > 0 then
         action:messageID(target:getID(), xi.msg.basic.JA_DAMAGE)
-        action:speceffect(target:getID(), 32)
     else
         action:messageID(target:getID(), xi.msg.basic.JA_MISS_2)
-        action:speceffect(target:getID(), 0)
     end
 
     return damage
@@ -165,11 +163,15 @@ end
 
 xi.job_utils.ranger.useVelocityShot = function(player, target, ability, action)
     player:addStatusEffect(xi.effect.VELOCITY_SHOT, 1, 0, 7200)
+
+    return xi.effect.VELOCITY_SHOT
 end
 
 xi.job_utils.ranger.useSharpshot = function(player, target, ability, action)
     local power = 40 + player:getMod(xi.mod.SHARPSHOT)
     player:addStatusEffect(xi.effect.SHARPSHOT, power, 0, 60)
+
+    return xi.effect.SHARPSHOT
 end
 
 xi.job_utils.ranger.useScavenge = function(player, target, ability, action)
@@ -218,10 +220,14 @@ end
 xi.job_utils.ranger.useCamouflage = function(player, target, ability, action)
     local duration = math.random(30, 300) * (1 + 0.01 * player:getMod(xi.mod.CAMOUFLAGE_DURATION))
     player:addStatusEffect(xi.effect.CAMOUFLAGE, 1 , 0, math.floor(duration * xi.settings.main.SNEAK_INVIS_DURATION_MULTIPLIER))
+
+    return xi.effect.CAMOUFLAGE
 end
 
 xi.job_utils.ranger.useBarrage = function(player, target, ability, action)
     player:addStatusEffect(xi.effect.BARRAGE, 0, 0, 60)
+
+    return xi.effect.BARRAGE
 end
 
 xi.job_utils.ranger.useShadowbind = function(player, target, ability, action)
@@ -251,6 +257,8 @@ end
 
 xi.job_utils.ranger.useUnlimitedShot = function(player, target, ability, action)
     player:addStatusEffect(xi.effect.UNLIMITED_SHOT, 1, 0, 60)
+
+    return xi.effect.UNLIMITED_SHOT
 end
 
 xi.job_utils.ranger.useFlashyShot = function(player, target, ability, action)
@@ -263,6 +271,8 @@ end
 
 xi.job_utils.ranger.useDoubleShot = function(player, target, ability, action)
     player:addStatusEffect(xi.effect.DOUBLE_SHOT, 40, 0, 90)
+
+    return xi.effect.DOUBLE_SHOT
 end
 
 xi.job_utils.ranger.useBountyShot = function(player, target, ability, action)
@@ -279,7 +289,7 @@ xi.job_utils.ranger.useBountyShot = function(player, target, ability, action)
 
     player:removeAmmo(1) -- TODO: does this check recycle?
 
-    action:speceffect(target:getID(), 0x01) -- functional, animation not correct without this
+    action:info(target:getID(), 1) -- Bounty shot sets the first bit likely for animation purposes
     ability:setMsg(xi.msg.basic.JA_NO_EFFECT_2)
 
     target:updateClaim(player)
@@ -337,6 +347,8 @@ end
 
 xi.job_utils.ranger.useDecoyShot = function(player, target, ability, action)
     target:addStatusEffect(xi.effect.DECOY_SHOT, 11, 1, 30)
+
+    return xi.effect.DECOY_SHOT
 end
 
 xi.job_utils.ranger.useHoverShot = function(player, target, ability, action)
@@ -345,4 +357,6 @@ end
 
 xi.job_utils.ranger.useOverkill = function(player, target, ability, action)
     player:addStatusEffect(xi.effect.OVERKILL, 11, 1, 60)
+
+    return xi.effect.OVERKILL
 end

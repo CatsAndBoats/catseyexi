@@ -81,23 +81,24 @@ end
 -- Returns an integer number of minutes since midnight from a time string like "HH:MM"
 ---@nodiscard
 ---@param timeString string
----@param addDays integer?
 ---@return integer
-function utils.timeStringToMinutes(timeString, addDays)
-    addDays = addDays or 0
+utils.timeStringToMinutes = function(timeString)
+    local convertedTime  = -1
     local hours, minutes = timeString:match('^(%d%d?):(%d%d)$')
     hours   = tonumber(hours)
     minutes = tonumber(minutes)
 
     -- Validate time.
-    local validHours   = hours and hours >= 0 and hours < 24
     local validMinutes = minutes and minutes >= 0 and minutes < 60
+    local validHours   = hours and hours >= 0 and (hours < 24 or (hours == 24 and minutes == 0))
 
     if not validHours or not validMinutes then
         print(fmt('[ERROR] Invalid time string: ({}). Expected HH:MM', timeString))
 
-        return -1
+        return convertedTime
     end
 
-    return hours * 60 + minutes + addDays * 1440
+    convertedTime = hours * 60 + minutes
+
+    return utils.clamp(convertedTime, 0, 1440)
 end

@@ -91,7 +91,8 @@ xi.battlefield.returnCode =
     INCREMENT_REQUEST = 3,
     LOCKED            = 4,
     REQS_NOT_MET      = 5,
-    BATTLEFIELD_FULL  = 6
+    BATTLEFIELD_FULL  = 6,
+    PARTY_ENGAGED     = 9, -- Used as 2nd parameter to LOCKED
 }
 
 xi.battlefield.leaveCode =
@@ -777,6 +778,16 @@ end
 -- will still send the appropriate position packet, but not change the values for the player.
 
 function Battlefield:onEntryEventUpdate(player, csid, option, npc)
+    -- Can't enter if party locked the battlefield
+    local isEnteringExisting = player:getLocalVar('[BCNM]EnterExisting') == 1
+    if isEnteringExisting and not player:hasStatusEffect(xi.effect.BATTLEFIELD) then
+        player:setLocalVar('[BCNM]EnterExisting', 0)
+        player:setLocalVar('[battlefield]area', 0)
+        player:updateEvent(xi.battlefield.returnCode.LOCKED, xi.battlefield.returnCode.PARTY_ENGAGED)
+        player:setLocalVar('noPosUpdate', 1)
+        return 0
+    end
+
     local clearTime = 1
     local name      = 'Meme'
     local partySize = 1
@@ -963,7 +974,10 @@ function Battlefield:onBattlefieldInitialize(battlefield)
     end
 
     for mobId, path in pairs(self.paths) do
-        GetMobByID(mobId):pathThrough(path, xi.path.flag.PATROL)
+        local mEntity = GetMobByID(mobId)
+        if mEntity then
+            mEntity:pathThrough(path, xi.path.flag.PATROL)
+        end
     end
 
     self:setupBattlefield(battlefield)
@@ -1252,7 +1266,7 @@ end
 function Battlefield:handleOpenArmouryCrate(player, npc)
     npcUtil.openCrate(npc, function()
         local battlefield = player:getBattlefield()
-        self:handleLootRolls(battlefield, self.loot, npc)
+        self:handleLootRolls(battlefield, self.loot, npc, player:getMod(xi.mod.MOGHANCEMENT_GIL_BONUS_P))
         battlefield:setStatus(xi.battlefield.status.WON)
         battlefield:setLocalVar('cutsceneTimer', self.delayToExit)
 
@@ -1260,7 +1274,7 @@ function Battlefield:handleOpenArmouryCrate(player, npc)
     end)
 end
 
-function Battlefield:handleLootRolls(battlefield, lootTable, npc)
+function Battlefield:handleLootRolls(battlefield, lootTable, npc, gilBonusMod)
     local players = battlefield:getPlayers()
     local firstPlayer = players[1]
 
@@ -1269,10 +1283,11 @@ function Battlefield:handleLootRolls(battlefield, lootTable, npc)
         if entry.itemId ~= xi.item.GIL then
             firstPlayer:addTreasure(entry.itemId, npc)
         else
-            local gilPerPlayer = entry.amount / #players
+            local gilBonusPct  = (100 + gilBonusMod) / 100
+            local gilPerPlayer = entry.amount * gilBonusPct / #players
 
             for _, player in ipairs(players) do
-                npcUtil.giveCurrency(player, 'gil', gilPerPlayer)
+                npcUtil.giveCurrency(player, 'gil', gilPerPlayer, true)
             end
         end
     end
@@ -1425,7 +1440,7 @@ function BattlefieldMission:onEventFinishWin(player, csid, option, npc)
 
     -- Only grant mission XP once per JP midnight
     if self.grantXP and self:getVar(player, 'XP') <= GetSystemTime() then
-        self:setVar(player, 'XP', getMidnight())
+        self:setVar(player, 'XP', JstMidnight())
         player:addExp(self.grantXP)
     end
 end
@@ -1450,9 +1465,11 @@ function BattlefieldQuest:new(data)
     local obj = Battlefield:new(data)
     setmetatable(obj, self)
 
-    obj.questArea  = data.questArea
-    obj.quest      = data.quest
-    obj.canLoseExp = data.canLoseExp or false
+    obj.questArea     = data.questArea
+    obj.quest         = data.quest
+    obj.canLoseExp    = data.canLoseExp or false
+    obj.requiredVar   = data.requiredVar
+    obj.requiredValue = data.requiredValue
 
     return obj
 end

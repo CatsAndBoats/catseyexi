@@ -7,7 +7,7 @@ local zoneObject = {}
 zoneObject.onInitialize = function(zone)
     zone:registerCuboidTriggerArea(1,   57, -1.0,  -70,   62,  1.0,  -65) -- Sets Mark for 'Got It All' Quest cutscene.
     zone:registerCuboidTriggerArea(2,  -96, -7.0,  121,  -64, -5.0,  137) -- Sets Mark for 'Vanishing Act' Quest cutscene.
-    zone:registerCuboidTriggerArea(3,   20, -7.2,  -51,   39, -7.2,  -40) -- ToAU Mission 1, X region. Salaheem's Sentinels, second platform.
+    zone:registerCuboidTriggerArea(3,   31, -7.0,  -60,   39, -6.0,  -52) -- ToAU Mission 1, X region. Salaheem's Sentinels, second platform.
     zone:registerCuboidTriggerArea(4,   68, -1.0,   30,   91,  1.0,   53) -- ToAU Mission 4 region. Walahra Temple.
     zone:registerCuboidTriggerArea(5,   64, -7.0, -137,   95, -5.0, -123) -- ToAU Mission 4 region. Shaharat Teahouse.
     zone:registerCuboidTriggerArea(6,   30, -6.6,  -60,   39, -6.6,  -50) -- ToAU Mission 11 region. Salaheem's Sentinels, first platform.
@@ -120,7 +120,7 @@ zoneObject.onEventFinish = function(player, csid, option, npc)
         player:setCharVar('AgainstAllOdds', 1)                                          -- Set For Corsair BCNM
         player:addQuest(xi.questLog.AHT_URHGAN, xi.quest.id.ahtUrhgan.AGAINST_ALL_ODDS) -- Start of af 3 not completed yet
         npcUtil.giveKeyItem(player, xi.ki.LIFE_FLOAT)
-        player:setCharVar('AgainstAllOddsTimer', getMidnight())
+        player:setCharVar('AgainstAllOddsTimer', JstMidnight())
     end
 end
 

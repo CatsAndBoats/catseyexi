@@ -20,13 +20,21 @@
 */
 
 #include "lua/helpers/lua_client_entity_pair_actions.h"
+
+#include "ai/ai_container.h"
 #include "common/logging.h"
+#include "common/timer.h"
+#include "common/utils.h"
+#include "enums/packet_c2s.h"
 #include "lua/helpers/lua_client_entity_pair_entities.h"
 #include "lua/helpers/lua_client_entity_pair_events.h"
 #include "lua/helpers/lua_client_entity_pair_packets.h"
 #include "lua/lua_client_entity_pair.h"
+#include "lua/lua_simulation.h"
 #include "lua/lua_spy.h"
 #include "map/ability.h"
+#include "map/ai/controllers/player_controller.h"
+#include "map/enums/party_kind.h"
 #include "map/lua/lua_baseentity.h"
 #include "map/packets/c2s/0x01a_action.h"
 #include "map/packets/c2s/0x036_item_transfer.h"
@@ -34,11 +42,33 @@
 #include "map/packets/c2s/0x06e_group_solicit_req.h"
 #include "map/packets/c2s/0x074_group_solicit_res.h"
 #include "map/spell.h"
+#include "map/status_effect_container.h"
+#include "packets/c2s/0x015_pos.h"
+#include "test_char.h"
 #include "test_common.h"
 
 CLuaClientEntityPairActions::CLuaClientEntityPairActions(CLuaClientEntityPair* parent)
 : parent_(parent)
 {
+}
+
+/************************************************************************
+ *  Function: move()
+ *  Purpose : Emits packet to move the character.
+ *  Example : player.actions:move(10, 10, 10)
+ *  Notes   :
+ ************************************************************************/
+
+void CLuaClientEntityPairActions::move(const float x, const float y, const float z, sol::optional<uint8_t> rot) const
+{
+    const auto packet    = parent_->packets().createPacket(PacketC2S::GP_CLI_COMMAND_POS);
+    auto*      posPacket = packet->as<GP_CLI_COMMAND_POS>();
+    posPacket->x         = x;
+    posPacket->z         = y;
+    posPacket->y         = z;
+    posPacket->dir       = rot.value_or(0);
+
+    parent_->packets().sendBasicPacket(*packet);
 }
 
 /************************************************************************
@@ -56,7 +86,7 @@ void CLuaClientEntityPairActions::useSpell(CLuaBaseEntity* target, const SpellID
         return;
     }
 
-    const auto packet               = parent_->packets().createPacket(0x1A);
+    const auto packet               = parent_->packets().createPacket(PacketC2S::GP_CLI_COMMAND_ACTION);
     auto*      actionPacket         = packet->as<GP_CLI_COMMAND_ACTION>();
     actionPacket->UniqueNo          = target->getID();
     actionPacket->ActIndex          = target->getTargID();
@@ -81,7 +111,7 @@ void CLuaClientEntityPairActions::useWeaponskill(CLuaBaseEntity* target, const u
         return;
     }
 
-    const auto packet                 = parent_->packets().createPacket(0x1A);
+    const auto packet                 = parent_->packets().createPacket(PacketC2S::GP_CLI_COMMAND_ACTION);
     auto*      actionPacket           = packet->as<GP_CLI_COMMAND_ACTION>();
     actionPacket->UniqueNo            = target->getID();
     actionPacket->ActIndex            = target->getTargID();
@@ -106,7 +136,7 @@ void CLuaClientEntityPairActions::useAbility(CLuaBaseEntity* target, const ABILI
         return;
     }
 
-    const auto packet                = parent_->packets().createPacket(0x1A);
+    const auto packet                = parent_->packets().createPacket(PacketC2S::GP_CLI_COMMAND_ACTION);
     auto*      actionPacket          = packet->as<GP_CLI_COMMAND_ACTION>();
     actionPacket->UniqueNo           = target->getID();
     actionPacket->ActIndex           = target->getTargID();
@@ -131,12 +161,11 @@ void CLuaClientEntityPairActions::changeTarget(CLuaBaseEntity* target) const
         return;
     }
 
-    const auto packet = parent_->packets().createPacket(0x1A);
-
-    auto* actionPacket     = packet->as<GP_CLI_COMMAND_ACTION>();
-    actionPacket->UniqueNo = target->getID();
-    actionPacket->ActIndex = target->getTargID();
-    actionPacket->ActionID = static_cast<uint16>(GP_CLI_COMMAND_ACTION_ACTIONID::ChangeTarget);
+    const auto packet       = parent_->packets().createPacket(PacketC2S::GP_CLI_COMMAND_ACTION);
+    auto*      actionPacket = packet->as<GP_CLI_COMMAND_ACTION>();
+    actionPacket->UniqueNo  = target->getID();
+    actionPacket->ActIndex  = target->getTargID();
+    actionPacket->ActionID  = static_cast<uint16>(GP_CLI_COMMAND_ACTION_ACTIONID::ChangeTarget);
 
     parent_->packets().sendBasicPacket(*packet);
 }
@@ -156,7 +185,7 @@ void CLuaClientEntityPairActions::rangedAttack(CLuaBaseEntity* target) const
         return;
     }
 
-    const auto packet       = parent_->packets().createPacket(0x1A);
+    const auto packet       = parent_->packets().createPacket(PacketC2S::GP_CLI_COMMAND_ACTION);
     auto*      actionPacket = packet->as<GP_CLI_COMMAND_ACTION>();
     actionPacket->UniqueNo  = target->getID();
     actionPacket->ActIndex  = target->getTargID();
@@ -180,7 +209,7 @@ void CLuaClientEntityPairActions::useItem(CLuaBaseEntity* target, const uint8 sl
         return;
     }
 
-    const auto packet             = parent_->packets().createPacket(0x37);
+    const auto packet             = parent_->packets().createPacket(PacketC2S::GP_CLI_COMMAND_ITEM_USE);
     auto*      itemPacket         = packet->as<GP_CLI_COMMAND_ITEM_USE>();
     itemPacket->UniqueNo          = target->getID();
     itemPacket->ItemNum           = 0;
@@ -206,7 +235,7 @@ void CLuaClientEntityPairActions::trigger(CLuaBaseEntity* target, sol::optional<
         return;
     }
 
-    const auto packet       = parent_->packets().createPacket(0x1A);
+    const auto packet       = parent_->packets().createPacket(PacketC2S::GP_CLI_COMMAND_ACTION);
     auto*      actionPacket = packet->as<GP_CLI_COMMAND_ACTION>();
     actionPacket->UniqueNo  = target->getID();
     actionPacket->ActIndex  = target->getTargID();
@@ -234,11 +263,11 @@ void CLuaClientEntityPairActions::inviteToParty(CLuaBaseEntity* player) const
         return;
     }
 
-    const auto packet       = parent_->packets().createPacket(0x6E);
+    const auto packet       = parent_->packets().createPacket(PacketC2S::GP_CLI_COMMAND_GROUP_SOLICIT_REQ);
     auto*      invitePacket = packet->as<GP_CLI_COMMAND_GROUP_SOLICIT_REQ>();
     invitePacket->UniqueNo  = player->getID();
     invitePacket->ActIndex  = player->getTargID();
-    invitePacket->Kind      = static_cast<uint8>(GP_CLI_COMMAND_GROUP_SOLICIT_REQ_KIND::Party);
+    invitePacket->Kind      = PartyKind::Party;
 
     parent_->packets().sendBasicPacket(*packet);
 }
@@ -258,11 +287,11 @@ void CLuaClientEntityPairActions::formAlliance(CLuaBaseEntity* player) const
         return;
     }
 
-    const auto packet       = parent_->packets().createPacket(0x6E);
+    const auto packet       = parent_->packets().createPacket(PacketC2S::GP_CLI_COMMAND_GROUP_SOLICIT_REQ);
     auto*      invitePacket = packet->as<GP_CLI_COMMAND_GROUP_SOLICIT_REQ>();
     invitePacket->UniqueNo  = player->getID();
     invitePacket->ActIndex  = player->getTargID();
-    invitePacket->Kind      = static_cast<uint8>(GP_CLI_COMMAND_GROUP_SOLICIT_REQ_KIND::Alliance);
+    invitePacket->Kind      = PartyKind::Alliance;
 
     parent_->packets().sendBasicPacket(*packet);
 }
@@ -276,7 +305,7 @@ void CLuaClientEntityPairActions::formAlliance(CLuaBaseEntity* player) const
 
 void CLuaClientEntityPairActions::acceptPartyInvite() const
 {
-    const auto packet         = parent_->packets().createPacket(0x74);
+    const auto packet         = parent_->packets().createPacket(PacketC2S::GP_CLI_COMMAND_GROUP_SOLICIT_RES);
     auto*      responsePacket = packet->as<GP_CLI_COMMAND_GROUP_SOLICIT_RES>();
     responsePacket->Res       = static_cast<uint8>(GP_CLI_COMMAND_GROUP_SOLICIT_RES_RES::Accept);
 
@@ -314,9 +343,8 @@ void CLuaClientEntityPairActions::tradeNpc(const sol::object& npcQuery, const so
         return;
     }
 
-    const auto packet = parent_->packets().createPacket(0x36);
-
-    auto* tradePacket = packet->as<GP_CLI_COMMAND_ITEM_TRANSFER>();
+    const auto packet      = parent_->packets().createPacket(PacketC2S::GP_CLI_COMMAND_ITEM_TRANSFER);
+    auto*      tradePacket = packet->as<GP_CLI_COMMAND_ITEM_TRANSFER>();
 
     tradePacket->UniqueNo = npc.value().getID();
     tradePacket->ActIndex = npc.value().getTargID();
@@ -364,9 +392,124 @@ void CLuaClientEntityPairActions::tradeNpc(const sol::object& npcQuery, const so
     }
 }
 
+/************************************************************************
+ *  Function: acceptRaise()
+ *  Purpose : Emits packet to accept a pending raise prompt.
+ *  Example : player.actions:acceptRaise()
+ *  Notes   :
+ ************************************************************************/
+
+void CLuaClientEntityPairActions::acceptRaise() const
+{
+    const auto packet                      = parent_->packets().createPacket(PacketC2S::GP_CLI_COMMAND_ACTION);
+    auto*      responsePacket              = packet->as<GP_CLI_COMMAND_ACTION>();
+    responsePacket->ActionID               = static_cast<uint8_t>(GP_CLI_COMMAND_ACTION_ACTIONID::RaiseMenu);
+    responsePacket->HomepointMenu.StatusId = GP_CLI_COMMAND_ACTION_HOMEPOINTMENU::Accept;
+
+    parent_->packets().sendBasicPacket(*packet);
+}
+
+/************************************************************************
+ *  Function: engage()
+ *  Purpose : Moves char in range of mob and engages it.
+ *  Example : player.actions:engage(mob)
+ *  Notes   : Will make both entities face each other.
+ ************************************************************************/
+
+void CLuaClientEntityPairActions::engage(CLuaBaseEntity* mob) const
+{
+    auto* PChar = parent_->testChar()->entity();
+    auto* PMob  = mob->GetBaseEntity();
+
+    // 1. Move the player next to the mob
+    this->move(PMob->loc.p.x - 1.0f, PMob->loc.p.y, PMob->loc.p.z, std::nullopt);
+
+    // 2. Make the player and the mob face each other
+    PChar->loc.p.rotation = worldAngle(PChar->loc.p, PMob->loc.p);
+    PMob->loc.p.rotation  = worldAngle(PMob->loc.p, PChar->loc.p);
+
+    // 3. Change last attack time so we can engage immediately
+    auto* controller = static_cast<CPlayerController*>(parent_->testChar()->entity()->PAI->GetController());
+    controller->setLastAttackTime(timer::now() - 30s);
+
+    // 4. Send packet to engage
+    const auto packet       = parent_->packets().createPacket(PacketC2S::GP_CLI_COMMAND_ACTION);
+    auto*      attackPacket = packet->as<GP_CLI_COMMAND_ACTION>();
+    attackPacket->UniqueNo  = mob->getID();
+    attackPacket->ActIndex  = mob->getTargID();
+    attackPacket->ActionID  = static_cast<uint8_t>(GP_CLI_COMMAND_ACTION_ACTIONID::Attack);
+
+    parent_->packets().sendBasicPacket(*packet);
+}
+
+/************************************************************************
+ *  Function: skillchain()
+ *  Purpose : Executes a sequence of weaponskills to create a skillchain.
+ *  Example : player.actions:skillchain(mob, xi.weaponskill.TACHI_FUDO, xi.weaponskill.TACHI_FUDO)
+ *  Notes   : Auto-engages target, sets TP, and bypasses timing by manipulating effect state.
+ *            Supports multistep skillchains with 2+ weaponskills.
+ ************************************************************************/
+
+void CLuaClientEntityPairActions::skillchain(CLuaBaseEntity* target, sol::variadic_args weaponskillIds) const
+{
+    if (!target)
+    {
+        TestError("CLuaClientEntityPairActions::skillchain: Invalid target");
+        return;
+    }
+
+    std::vector<uint16> wsIds;
+    for (const auto& arg : weaponskillIds)
+    {
+        if (arg.is<uint16>())
+        {
+            wsIds.push_back(arg.as<uint16>());
+        }
+    }
+
+    if (wsIds.size() < 2)
+    {
+        TestError("CLuaClientEntityPairActions::skillchain: Need at least 2 weaponskills");
+        return;
+    }
+
+    auto*       PChar = parent_->testChar()->entity();
+    const auto* PMob  = static_cast<CBattleEntity*>(target->GetBaseEntity());
+
+    this->engage(target);
+
+    for (size_t i = 0; i < wsIds.size(); ++i)
+    {
+        PChar->health.tp = 3000;
+
+        PChar->PAI->Internal_WeaponSkill(PMob->targid, wsIds[i]);
+        parent_->simulation()->skipTime(2);
+
+        if (i >= 1)
+        {
+            if (!PMob->StatusEffectContainer->GetStatusEffect(EFFECT_SKILLCHAIN, 0))
+            {
+                TestError("Skillchain effect not found after weaponskill #{}", i + 1);
+            }
+        }
+
+        if (i < wsIds.size() - 1)
+        {
+            parent_->simulation()->skipTime(3);
+
+            // Backdate skillchain effect to bypass 3s timing window for next WS
+            if (auto* scEffect = PMob->StatusEffectContainer->GetStatusEffect(EFFECT_SKILLCHAIN, 0))
+            {
+                scEffect->SetStartTime(timer::now() - 5s);
+            }
+        }
+    }
+}
+
 void CLuaClientEntityPairActions::Register()
 {
     SOL_USERTYPE("CClientEntityPairActions", CLuaClientEntityPairActions);
+    SOL_REGISTER("move", CLuaClientEntityPairActions::move);
     SOL_REGISTER("useSpell", CLuaClientEntityPairActions::useSpell);
     SOL_REGISTER("useWeaponskill", CLuaClientEntityPairActions::useWeaponskill);
     SOL_REGISTER("useAbility", CLuaClientEntityPairActions::useAbility);
@@ -378,4 +521,7 @@ void CLuaClientEntityPairActions::Register()
     SOL_REGISTER("formAlliance", CLuaClientEntityPairActions::formAlliance);
     SOL_REGISTER("acceptPartyInvite", CLuaClientEntityPairActions::acceptPartyInvite);
     SOL_REGISTER("tradeNpc", CLuaClientEntityPairActions::tradeNpc);
+    SOL_REGISTER("acceptRaise", CLuaClientEntityPairActions::acceptRaise);
+    SOL_REGISTER("engage", CLuaClientEntityPairActions::engage);
+    SOL_REGISTER("skillchain", CLuaClientEntityPairActions::skillchain);
 }

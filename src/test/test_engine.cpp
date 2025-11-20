@@ -33,6 +33,7 @@
 #include "test_suite.h"
 
 #include <chrono>
+#include <format>
 #include <sol/sol.hpp>
 #include <spdlog/spdlog.h>
 #include <utility>
@@ -163,8 +164,7 @@ auto TestEngine::executeSuite(const TestSuite& suite, HookContext context) -> Te
             simulation_->setSetupContext(false);
 
             // Report the setup failure
-            reportSetupTeardownFailure(suite, "setup()",
-                                       fmt::format("Setup failed: {}", err.what()));
+            reportSetupTeardownFailure(suite, "setup()", fmt::format("Setup failed: {}", err.what()));
 
             results.total++;
             results.failed++;
@@ -234,8 +234,7 @@ auto TestEngine::executeSuite(const TestSuite& suite, HookContext context) -> Te
             ShowErrorFmt("Teardown failed for {}: {}", suite.name(), err.what());
 
             // Report the teardown failure
-            reportSetupTeardownFailure(suite, "teardown()",
-                                       fmt::format("Teardown failed: {}", err.what()));
+            reportSetupTeardownFailure(suite, "teardown()", fmt::format("Teardown failed: {}", err.what()));
 
             results.total++;
             results.failed++;

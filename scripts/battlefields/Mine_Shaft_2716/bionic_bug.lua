@@ -1,8 +1,9 @@
 -----------------------------------
 -- Bionic Bug
--- Mine Shaft #2716 battlefield
+-- Level 75 ENM
+-- !addkeyitem SHAFT_2716_OPERATING_LEVER
 -----------------------------------
-local ID = zones[xi.zone.MINE_SHAFT_2716]
+local mineShaft2716ID = zones[xi.zone.MINE_SHAFT_2716]
 -----------------------------------
 
 local content = Battlefield:new({
@@ -13,9 +14,9 @@ local content = Battlefield:new({
     timeLimit        = utils.minutes(30),
     index            = 2,
     entryNpc         = '_0d0',
-    exitNpc          = { '_0d1', '_0d2', '_0d3'  }, -- copied from existing mine shaft 2716 battlefield
-    requiredKeyItems = { xi.ki.SHAFT_2716_OPERATING_LEVER, message = ID.text.THE_PARTY_WILL_BE_REMOVED + 8 },
-    experimental     = true,
+    exitNpcs         = { '_0d1', '_0d2', '_0d3' },
+    requiredKeyItems = { xi.ki.SHAFT_2716_OPERATING_LEVER, message = mineShaft2716ID.text.SNAPS_IN_TWO, },
+    grantXP          = 3000,
 })
 
 content:addEssentialMobs({ 'Bugboy' })
@@ -23,29 +24,32 @@ content:addEssentialMobs({ 'Bugboy' })
 content.loot =
 {
     {
-        { itemId =    0, weight = 900 }, -- Nothing
-        { itemId = 1842, weight = 100 }, -- Cloud Evoker
+        { itemId = xi.item.DRAGON_BONE,              weight = 334 },
+        { itemId = xi.item.PIECE_OF_CASSIA_LUMBER,   weight = 333 },
+        { itemId = xi.item.SQUARE_OF_ELTORO_LEATHER, weight = 333 },
     },
+
     {
-        { itemId = 1767, weight = 333 }, -- Eltoro Leather
-        { itemId = 1762, weight = 333 }, -- Cassia Lumber
-        { itemId = 1771, weight = 334 }, -- Dragon Bone
+        { itemId = xi.item.NONE,                     weight = 900 },
+        { itemId = xi.item.CLOUD_EVOKER,             weight = 100 },
     },
+
     {
-        { itemId =     0, weight = 625 }, -- nothing
-        { itemId = 18009, weight =  75 }, -- Martial Knife
-        { itemId = 18056, weight =  75 }, -- Martial Scythe
-        { itemId = 13695, weight =  75 }, -- Commander's Cape
-        { itemId = 15195, weight = 100 }, -- Faerie Hairpin
-        { itemId =  4748, weight =  50 }, -- Raise III
+        { itemId = xi.item.NONE,                     weight = 625 },
+        { itemId = xi.item.COMMANDERS_CAPE,          weight =  75 },
+        { itemId = xi.item.FAERIE_HAIRPIN,           weight = 100 },
+        { itemId = xi.item.MARTIAL_KNIFE,            weight =  75 },
+        { itemId = xi.item.MARTIAL_SCYTHE,           weight =  75 },
+        { itemId = xi.item.SCROLL_OF_RAISE_III,      weight =  50 },
     },
+
     {
-        { itemId =     0, weight = 625 }, -- nothing
-        { itemId = 18009, weight =  75 }, -- Martial Knife
-        { itemId = 18056, weight =  75 }, -- Martial Scythe
-        { itemId = 13695, weight =  75 }, -- Commander's Cape
-        { itemId = 15195, weight = 100 }, -- Faerie Hairpin
-        { itemId =  4748, weight =  50 }, -- Raise III
+        { itemId = xi.item.NONE,                     weight = 625 },
+        { itemId = xi.item.COMMANDERS_CAPE,          weight =  75 },
+        { itemId = xi.item.FAERIE_HAIRPIN,           weight = 100 },
+        { itemId = xi.item.MARTIAL_KNIFE,            weight =  75 },
+        { itemId = xi.item.MARTIAL_SCYTHE,           weight =  75 },
+        { itemId = xi.item.SCROLL_OF_RAISE_III,      weight =  50 },
     },
 }
 

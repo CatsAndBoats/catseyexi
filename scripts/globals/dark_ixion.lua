@@ -1,7 +1,8 @@
 -----------------------------------
 -- Area: One of many zones in Shadowreign zones
 --   NM: Dark Ixion
--- https://ffxiclopedia.fandom.com/wiki/Dark_Ixion
+-- Info: https://ffxiclopedia.fandom.com/wiki/Dark_Ixion
+--       https://www.bg-wiki.com/ffxi/Dark_Ixion
 --[[
     Find DI by:
     - checking the server's zone var: "!checkvar server DarkIxion_ZoneID"
@@ -42,25 +43,28 @@ xi = xi or {}
 xi.darkixion = xi.darkixion or {}
 
 -- TODOs, notes, and reminders
-
--- mob:AnimationSub() -- 0 is normal || Charging is animation sub 1  || 2 is broken horn || 3 is glowing and causes horn to repair
 -- TODO: dmg taken from front/rear (if we can)
+local animationSubs =
+{
+    NORMAL      = 0, -- can trample
+    TRAMPLE     = 1, -- animation during trample event
+    HORN_BROKEN = 2, -- broken horn, cannot trample or double-up mobskills
+    GLOWING     = 3, -- glowing: doubles up mobskills and used shortly during horn regrowth
+}
 
 xi.darkixion.hpValue = GetServerVariable('DarkIxion_HP')
 xi.darkixion.hornState = GetServerVariable('DarkIxion_HornState')
 xi.darkixion.hornStates =
 {
-    -- not broken
     [1] =
     {
-        animationSub = 0,
+        animationSub = animationSubs.NORMAL,
         hideHP = true,
     },
 
-    -- broken
     [2] =
     {
-        animationSub = 2,
+        animationSub = animationSubs.HORN_BROKEN,
         hideHP = false,
     },
 }
@@ -308,9 +312,10 @@ xi.darkixion.roamingMods = function(mob)
 
     -- don't take damage until the fight officially starts
     mob:setMod(xi.mod.UDMGPHYS, -10000)
-    mob:setMod(xi.mod.UDMGRANGE, -10000)
+    mob:setMod(xi.mod.UDMGRANGE, 0) -- TODO figure out how to make Ixion only take damage from stygian ash
     mob:setMod(xi.mod.UDMGBREATH, -10000)
     mob:setMod(xi.mod.UDMGMAGIC, -10000)
+    mob:setMod(xi.mod.REGAIN, 0)
 
     -- restore hp just in case something caused him to regen while roaming
     if xi.darkixion.hpValue == 0 then
@@ -418,9 +423,10 @@ xi.darkixion.onMobDespawn = function(mob)
 end
 
 local checkHornBreak = function(mob, attacker)
+    local animationSub = mob:getAnimationSub()
     if
         not xi.combat.behavior.isEntityBusy(mob) and
-        (mob:getAnimationSub() == 0 or mob:getAnimationSub() == 3) and
+        (animationSub == animationSubs.NORMAL or animationSub == animationSubs.GLOWING) and
         (attacker ~= nil and attacker:isInfront(mob)) and
         math.random(1, 100) <= 5
     then
@@ -440,7 +446,7 @@ xi.darkixion.onMobWeaponSkill = function(target, mob, skill)
     local skillID = skill:getID()
     if skillID == xi.mobSkill.DAMSEL_MEMENTO then -- sometimes after healing, fix horn
         if
-            mob:getAnimationSub() == 2 and
+            mob:getAnimationSub() == animationSubs.HORN_BROKEN and
             math.random(1, 100) <= 25
         then
             -- If horn is restored by heal, glow and allow animation to finish, then restore horn
@@ -466,7 +472,7 @@ xi.darkixion.onMobWeaponSkill = function(target, mob, skill)
         mob:setBehavior(xi.behavior.NO_TURN + xi.behavior.STANDBACK)
         mob:setAutoAttackEnabled(false)
         mob:useMobAbility(chosenSkill)
-        if mob:getAnimationSub() == 3 then
+        if mob:getAnimationSub() == animationSubs.GLOWING then
             -- queue a second if in glowing phase
             mob:useMobAbility(chosenSkill)
         end
@@ -476,7 +482,7 @@ xi.darkixion.onMobWeaponSkill = function(target, mob, skill)
         skillID == xi.mobSkill.DI_KICK_ATTACK
     then
         -- determine if we want to run (trample) soon, do it randomly off autos, more frequent and more runs when low
-        if mob:getAnimationSub() == 0 then
+        if mob:getAnimationSub() == animationSubs.NORMAL then
             local mobHPP = mob:getHPP()
             local trampleCount = mob:getLocalVar('trampleCount')
 
@@ -498,8 +504,8 @@ xi.darkixion.onMobWeaponSkill = function(target, mob, skill)
     mob:queue(0, function(mobArg)
         if not xi.combat.behavior.isEntityBusy(mobArg) then
             mobArg:setBehavior(0)
-            mob:setAutoAttackEnabled(true)
-            mob:setMobAbilityEnabled(true)
+            mobArg:setAutoAttackEnabled(true)
+            mobArg:setMobAbilityEnabled(true)
         end
     end)
 end
@@ -559,6 +565,7 @@ xi.darkixion.onMobSpawn = function(mob)
     SetServerVariable('DarkIxion_PopTime', GetSystemTime())
 
     mob:setAggressive(true)
+    mob:setRoamFlags(bit.bor(mob:getRoamFlags(), xi.roamFlag.SCRIPTED)) -- do not roam around, only path during roam via patrol path
 
     -- pre-mobskill listeners to turn mob as appropriate
     mob:addListener('WEAPONSKILL_STATE_ENTER', 'IXION_WS_STATE_ENTER', function(mobArg, skillId)
@@ -580,22 +587,29 @@ xi.darkixion.onMobRoam = function(mob)
     end
 
     if not mob:isFollowingPath() then
-        -- Ensures he always cleanly paths (doesn't clip through terrain)
         local pathList = xi.darkixion.zoneinfo[mob:getZoneID()].pathList
-        if not mob:atPoint(pathList[1].x, pathList[1].y, pathList[1].z) then
+        if mob:checkDistance(pathList[1]) > 50 then
+            -- not patrolling and is very far from first point in list, path back
+            -- This ensures he always cleanly paths when roaming (doesn't clip through terrain)
             mob:pathTo(pathList[1].x, pathList[1].y, pathList[1].z, xi.path.flag.RUN)
         else
+            -- patrol list persists through combat so if a wipe happens, Ixion will resume pathing when doing the runaway mechanic
             mob:pathThrough(pathList, bit.bor(xi.path.flag.RUN, xi.path.flag.PATROL))
         end
     end
 end
 
 xi.darkixion.onMobEngage = function(mob, target)
-    mob:setMod(xi.mod.REGAIN, 20) -- 'has tp regen': https://www.bluegartr.com/threads/59044-Ixion-discussion-thread/page8
     xi.darkixion.roamingMods(mob)
+
     -- if stygian ash missed or aggro via any other means, immediately disengage (even if hearing/sight aggro 'If you get too close, DI runs away')
-    if mob:getLocalVar('StygianLanded') ~= 1 then
+    if mob:getLocalVar('aeFromItemId') == xi.item.PINCH_OF_STYGIAN_ASH then
+        mob:setLocalVar('RunAway', 0)
+    else
         mob:disengage()
+        -- TODO figure out how to make Ixion only take damage from stygian ash
+        -- Note that xi.darkixion.roamingMods resets his hp to the stored value, so this is a display issue only
+        -- i.e. there's no concern of say hitting him with high dmg WS, letting him run away, and doing it again when you find him in another zone
         return
     end
 
@@ -603,6 +617,7 @@ xi.darkixion.onMobEngage = function(mob, target)
     mob:setMod(xi.mod.UDMGRANGE, 0)
     mob:setMod(xi.mod.UDMGBREATH, 0)
     mob:setMod(xi.mod.UDMGMAGIC, 0)
+    mob:setMod(xi.mod.REGAIN, 20) -- 'has tp regen': https://www.bluegartr.com/threads/59044-Ixion-discussion-thread/page8
     mob:setLocalVar('phaseChange', GetSystemTime() + math.random(60, 240))
 end
 
@@ -624,7 +639,7 @@ xi.darkixion.onMobDisengage = function(mob)
 
     -- no chance of him staying in this zone unless an ash is landed before he runs away and despawns
     mob:setAggressive(false)
-    mob:setLocalVar('StygianLanded', 0)
+    mob:setLocalVar('aeFromItemId', 0)
 end
 
 xi.darkixion.onMobFight = function(mob, target)
@@ -633,12 +648,13 @@ xi.darkixion.onMobFight = function(mob, target)
     if
         not xi.combat.behavior.isEntityBusy(mob) and
         GetSystemTime() >= mob:getLocalVar('phaseChange') and
-        (animationSub == 0 or
-        animationSub == 3)
+        (animationSub == animationSubs.NORMAL or
+        animationSub == animationSubs.GLOWING)
     then
         mob:setLocalVar('phaseChange', GetSystemTime() + math.random(60, 240))
 
-        animationSub = animationSub ~= 0 and 0 or 3
+        -- alternate phase between normal (can trample) and glowing (double-up mobskills)
+        animationSub = animationSub ~= animationSubs.NORMAL and animationSubs.NORMAL or animationSubs.GLOWING
         mob:setAnimationSub(animationSub)
         mob:stun(500)
     end
@@ -648,13 +664,13 @@ xi.darkixion.onMobFight = function(mob, target)
         not xi.combat.behavior.isEntityBusy(mob) and
         mob:getLocalVar('trampleCount') >= 1 and
         GetSystemTime() >= mob:getLocalVar('nextTrampleTime') and
-        animationSub == 0  -- don't trample if horn is broken
+        animationSub == animationSubs.NORMAL  -- don't trample if horn is broken or any other sequence is happening
     then
         mob:setTP(0)
         xi.darkixion.beginTramplePath(mob)
     end
 
-    if animationSub == 1 then
+    if animationSub == animationSubs.TRAMPLE then
         -- cleanly exit trample when reaching the point (TODO check explicitly for a scripted path?)
         -- runPathTime timestamp hard exit in case of navmesh abuse
         if
@@ -668,38 +684,90 @@ xi.darkixion.onMobFight = function(mob, target)
     end
 end
 
+-- Used by Trample mechanics
+local getEnemiesInRange = function(mob, distance)
+    local targetTypeFlag = xi.targetType.SELF + xi.targetType.ANY_ALLEGIANCE -- self + any_allegiance is the targetfind code for "target myself, and find any enemies in range"
+    local findFlags = xi.findFlag.HIT_ALL -- target doesn't need to be on enmity list
+    local aoeCenter = xi.aoeRadius.ATTACKER
+    local enemies = mob:getEntitiesInRange(mob, xi.aoeType.ROUND, aoeCenter, distance, findFlags, targetTypeFlag)
+
+    return enemies
+end
+
 xi.darkixion.beginTramplePath = function(mob)
     -- global table to track current trample path
     xi.darkixion.hitList = {}
 
-    mob:setAnimationSub(1)
+    mob:setAnimationSub(animationSubs.TRAMPLE)
     mob:setLocalVar('isBusy', 1)
     mob:setAutoAttackEnabled(false)
     mob:setMobAbilityEnabled(false)
     mob:setBaseSpeed(70)
     mob:setBehavior(xi.behavior.NO_TURN + xi.behavior.STANDBACK)
 
-    -- TODO implement choosing a random ENTITY within 30 yalms and running towards them
-    -- for now, he'll just prance around then go back to fighting
+    -- choose a random ENTITY within 30 yalms and charge towards them
+    -- can also trample at someone close. Fallback to a random spot nearby
+    mob:setLocalVar('trampleTargID', 0)
     local tramplePos = mob:getPos()
-    tramplePos.x = tramplePos.x + math.random(-30, 30)
-    tramplePos.z = tramplePos.z + math.random(-30, 30)
+    tramplePos.x = tramplePos.x + math.random(-10, 10)
+    tramplePos.z = tramplePos.z + math.random(-10, 10)
+    local potentialTargets = getEnemiesInRange(mob, 30)
+    local trampleTarget = nil
+    if #potentialTargets > 0 then
+        for i = 1, 3 do
+            -- rather than loop the whole list, just try a few times to get an entity other than Ixion
+            if trampleTarget == nil or trampleTarget == mob then
+                trampleTarget = utils.randomEntry(potentialTargets)
+            end
+        end
+    end
+
+    -- ANY_ALLEGIANCE + SELF returns the actor itself in the list
+    if trampleTarget and trampleTarget ~= mob then
+        -- store targid of the trample destination to ensure pathing wonkiness doesn't make them avoid trample
+        -- this target will be hit by trample if it's ever within 7 yalms during the trample pathing
+        mob:setLocalVar('trampleTargID', trampleTarget:getTargID())
+
+        -- choose point by drawing a line between Ixion and target, then extending it beyond
+        local overshootDistance = 5
+        local mobPos = mob:getPos()
+        local xM  = mobPos.x
+        local zM  = mobPos.z
+        local targetPos = trampleTarget:getPos()
+        local xT  = targetPos.x
+        local yT  = targetPos.y
+        local zT  = targetPos.z
+        -- deltas
+        local xD  = xT - xM
+        local zD  = zT - zM
+
+        -- complete the square
+        local rss = math.sqrt(xD * xD + zD * zD)
+        local xU  = xD / rss
+        local zU  = zD / rss
+        tramplePos = { x  = xT + (xU * overshootDistance), y = yT, z = zT + (zU * overshootDistance) }
+    end
+
     mob:clearPath()
     mob:lookAt(tramplePos)
     xi.darkixion.trampleEntitiesInFront(mob)
     mob:pathTo(tramplePos.x, tramplePos.y, tramplePos.z, xi.path.flag.WALLHACK + xi.path.flag.RUN + xi.path.flag.SCRIPT + xi.path.flag.SLIDE)
     -- max time to let a single trample path take to avoid navmesh abuse
-    mob:setLocalVar('tramplePathTime', GetSystemTime() + 10)
+    -- some paths can take upwards of 20+s with certain terrain, but no need to let Ixion path that long
+    mob:setLocalVar('tramplePathTime', GetSystemTime() + 15)
 end
 
 xi.darkixion.endTramplePath = function(mob)
+    -- variable is unused until the next trample sequence
+    xi.darkixion.hitList = {}
+
     local trampleCount = mob:getLocalVar('trampleCount') - 1
     if trampleCount > 0 then
         -- trample again at a random entity in range
         xi.darkixion.beginTramplePath(mob)
     else
         trampleCount = 0
-        mob:setAnimationSub(0)
+        mob:setAnimationSub(animationSubs.NORMAL)
         mob:stun(500)
 
         mob:setLocalVar('isBusy', 0)
@@ -715,14 +783,35 @@ xi.darkixion.endTramplePath = function(mob)
 end
 
 xi.darkixion.trampleEntitiesInFront = function(mob)
-    -- TODO find entities in range, check if they're in a conal in front of Ixion, and xi.mobSkill.DI_TRAMPLE them if so
-    -- Any entities found should be checked against xi.darkixion.hitList, not attempted if in the list, and added to it whether or not they're in front
+    local trampleTargID = mob:getLocalVar('trampleTargID')
 
-    -- Example logic using ixion's current battle target
-    local trampleTarget = mob:getTarget()
-    if not utils.contains(trampleTarget, xi.darkixion.hitList) then
-        table.insert(xi.darkixion.hitList, trampleTarget)
-        -- TODO see if we can make this not pause Ixion's pathing
-        mob:useMobAbility(xi.mobSkill.DI_TRAMPLE, trampleTarget, 0)
+    -- find entities in range
+    --  check if they're in a conal in front of Ixion
+    --  skip them if they have already been considered during this path
+    --  xi.mobSkill.DI_TRAMPLE otherwise
+    local potentialTargets = getEnemiesInRange(mob, 7)
+    for _, potentialTarget in ipairs(potentialTargets) do
+        -- ANY_ALLEGIANCE + SELF returns the actor itself in the list
+        -- targetfind has no height restrictions, just finding entities within a sphere of the mob
+        -- TODO should we limit trample consideration to within 5 yalms vertically: math.abs(mob:getPos().y - potentialTarget:getPos().y) <= 5
+        -- This would make things like the watchtowers in jugner_s somewhat safe, I believe this is a valid strategy in retail
+        if
+            potentialTarget and
+            potentialTarget ~= mob
+        then
+            -- ignore if already considered during this trample path
+            if not xi.darkixion.hitList[potentialTarget:getTargID()] then
+                xi.darkixion.hitList[potentialTarget:getTargID()] = true
+
+                -- trample the found entity if it's in front
+                -- or if it's the original trample target (to avoid weird pathing issues causing the final target to be seen as not in front)
+                if
+                    potentialTarget:isInfront(mob, 30) or
+                    potentialTarget:getTargID() == trampleTargID
+                then
+                    mob:useMobAbility(xi.mobSkill.DI_TRAMPLE, potentialTarget)
+                end
+            end
+        end
     end
 end

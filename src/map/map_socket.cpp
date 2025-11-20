@@ -23,12 +23,13 @@
 
 #include "common/logging.h"
 
-MapSocket::MapSocket(asio::io_context& io_context, const uint16 port, const ReceiveFn& onReceiveFn)
+MapSocket::MapSocket(asio::io_context& io_context, const uint16 port, ReceiveFn onReceiveFn)
 : port_(port)
 , io_context_(io_context)
 , socket_(io_context)
+, buffer_{}
 , isRunning(true)
-, onReceiveFn_(onReceiveFn)
+, onReceiveFn_(std::move(onReceiveFn))
 {
     TracyZoneScoped;
 
@@ -56,8 +57,7 @@ void MapSocket::startReceive()
     TracyZoneScoped;
 
     socket_.async_receive_from(
-        asio::buffer(buffer_), remote_endpoint_,
-        [this](const std::error_code& ec, std::size_t bytes_recvd)
+        asio::buffer(buffer_), remote_endpoint_, [this](const std::error_code& ec, std::size_t bytes_recvd)
         {
             // NOTE: ASIO returns the address in host byte order, but we store it in network byte order,
             //     : so we convert it back.
