@@ -58,13 +58,13 @@ endif(TRACY_ENABLE)
 CPMAddPackage(
     NAME fmt
     GITHUB_REPOSITORY fmtlib/fmt
-    GIT_TAG 10.1.1
+    GIT_TAG 11.2.0
 ) # defines: fmt::fmt
 
 CPMAddPackage(
     NAME spdlog
     GITHUB_REPOSITORY gabime/spdlog
-    GIT_TAG v1.15.0
+    GIT_TAG v1.15.3
     OPTIONS
         "SPDLOG_ENABLE_PCH ON"
         "SPDLOG_FMT_EXTERNAL ON"
@@ -99,8 +99,8 @@ CPMAddPackage(
 
 CPMAddPackage(
     NAME efsw
-    GITHUB_REPOSITORY SpartanJ/efsw
-    GIT_TAG 62f785c56b7a34f035193d4cb831921347b586b8 # 1.4.1
+    GITHUB_REPOSITORY zach2good/efsw
+    GIT_TAG c37c7e0fc6bbd63659edeba458273c35a51513da # master
     OPTIONS
         "VERBOSE OFF"
         "NO_ATOMICS OFF"
@@ -205,7 +205,7 @@ endif()
 CPMAddPackage(
     NAME bcrypt
     GITHUB_REPOSITORY zach2good/libbcrypt
-    GIT_TAG fb50b847ae760f16ab84a367452027b246df13e1
+    GIT_TAG ac197c7b0bd26b6a90ee2ed9be7b12eb5a9e7455
     DOWNLOAD_ONLY ON
 ) # defines: bcrypt
 if(bcrypt_ADDED) # bcrypt's cmake isn't suitable for us
@@ -283,6 +283,7 @@ endif()
 
 set(CONNECT_ONLY_EXTERNAL_LIBS
     bcrypt
+    nlohmann_json::nlohmann_json
 )
 
 set(MAP_ONLY_EXTERNAL_LIBS

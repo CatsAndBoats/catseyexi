@@ -40,7 +40,8 @@
 
 #include "packets/char_sync.h"
 #include "packets/entity_update.h"
-#include "packets/wide_scan.h"
+#include "packets/s2c/0x0f4_tracking_list.h"
+#include "packets/s2c/0x0f6_tracking_state.h"
 
 #include "lua/luautils.h"
 
@@ -56,25 +57,27 @@
 
 namespace
 {
-    constexpr auto DYNAMIC_ENTITY_TARGID_RANGE_START      = 0x700;
-    constexpr auto ENTITY_RENDER_DISTANCE                 = 50.0f;
-    constexpr auto ENTITY_VERTICAL_RENDER_DISTANCE        = 20.0f;
-    constexpr auto VERTICAL_RENDER_DISTANCE_OFFSET        = 0.5f;
-    constexpr auto CHARACTER_SYNC_DISTANCE                = 45.0f;
-    constexpr auto CHARACTER_DESPAWN_DISTANCE             = 50.0f;
-    constexpr auto CHARACTER_SWAP_MAX                     = 5U;
-    constexpr auto CHARACTER_SYNC_LIMIT_MAX               = 32U;
-    constexpr auto CHARACTER_SYNC_DISTANCE_SWAP_THRESHOLD = 30U;
-    constexpr auto CHARACTER_SYNC_PARTY_SIGNIFICANCE      = 100000U;
-    constexpr auto CHARACTER_SYNC_ALLI_SIGNIFICANCE       = 10000U;
-    constexpr auto PERSIST_CHECK_CHARACTERS               = 20U;
-    constexpr auto INTERMEDIATE_CONTAINER_RESERVE_SIZE    = 16U;
 
-    inline bool isWithinVerticalDistance(CBaseEntity* source, CBaseEntity* target)
-    {
-        const float verticalDistance = target->loc.p.y - source->loc.p.y - VERTICAL_RENDER_DISTANCE_OFFSET;
-        return std::abs(verticalDistance) <= ENTITY_VERTICAL_RENDER_DISTANCE;
-    }
+constexpr auto DYNAMIC_ENTITY_TARGID_RANGE_START      = 0x700;
+constexpr auto ENTITY_RENDER_DISTANCE                 = 50.0f;
+constexpr auto ENTITY_VERTICAL_RENDER_DISTANCE        = 20.0f;
+constexpr auto VERTICAL_RENDER_DISTANCE_OFFSET        = 0.5f;
+constexpr auto CHARACTER_SYNC_DISTANCE                = 45.0f;
+constexpr auto CHARACTER_DESPAWN_DISTANCE             = 50.0f;
+constexpr auto CHARACTER_SWAP_MAX                     = 5U;
+constexpr auto CHARACTER_SYNC_LIMIT_MAX               = 32U;
+constexpr auto CHARACTER_SYNC_DISTANCE_SWAP_THRESHOLD = 30U;
+constexpr auto CHARACTER_SYNC_PARTY_SIGNIFICANCE      = 100000U;
+constexpr auto CHARACTER_SYNC_ALLI_SIGNIFICANCE       = 10000U;
+constexpr auto PERSIST_CHECK_CHARACTERS               = 20U;
+constexpr auto INTERMEDIATE_CONTAINER_RESERVE_SIZE    = 16U;
+
+inline bool isWithinVerticalDistance(CBaseEntity* source, CBaseEntity* target)
+{
+    const float verticalDistance = target->loc.p.y - source->loc.p.y - VERTICAL_RENDER_DISTANCE_OFFSET;
+    return std::abs(verticalDistance) <= ENTITY_VERTICAL_RENDER_DISTANCE;
+}
+
 } // namespace
 
 typedef std::pair<float, CCharEntity*> CharScorePair;
@@ -684,7 +687,7 @@ bool CZoneEntities::CharListEmpty() const
     return m_charList.empty();
 }
 
-void CZoneEntities::ForEachChar(std::function<void(CCharEntity*)> const& func)
+void CZoneEntities::ForEachChar(const std::function<void(CCharEntity*)>& func)
 {
     FOR_EACH_PAIR_CAST_SECOND(CCharEntity*, PChar, m_charList)
     {
@@ -692,7 +695,7 @@ void CZoneEntities::ForEachChar(std::function<void(CCharEntity*)> const& func)
     }
 }
 
-void CZoneEntities::ForEachMob(std::function<void(CMobEntity*)> const& func)
+void CZoneEntities::ForEachMob(const std::function<void(CMobEntity*)>& func)
 {
     FOR_EACH_PAIR_CAST_SECOND(CMobEntity*, PMob, m_mobList)
     {
@@ -700,7 +703,7 @@ void CZoneEntities::ForEachMob(std::function<void(CMobEntity*)> const& func)
     }
 }
 
-void CZoneEntities::ForEachNpc(std::function<void(CNpcEntity*)> const& func)
+void CZoneEntities::ForEachNpc(const std::function<void(CNpcEntity*)>& func)
 {
     FOR_EACH_PAIR_CAST_SECOND(CNpcEntity*, PNpc, m_npcList)
     {
@@ -708,7 +711,7 @@ void CZoneEntities::ForEachNpc(std::function<void(CNpcEntity*)> const& func)
     }
 }
 
-void CZoneEntities::ForEachTrust(std::function<void(CTrustEntity*)> const& func)
+void CZoneEntities::ForEachTrust(const std::function<void(CTrustEntity*)>& func)
 {
     FOR_EACH_PAIR_CAST_SECOND(CTrustEntity*, PTrust, m_trustList)
     {
@@ -716,7 +719,7 @@ void CZoneEntities::ForEachTrust(std::function<void(CTrustEntity*)> const& func)
     }
 }
 
-void CZoneEntities::ForEachPet(std::function<void(CPetEntity*)> const& func)
+void CZoneEntities::ForEachPet(const std::function<void(CPetEntity*)>& func)
 {
     FOR_EACH_PAIR_CAST_SECOND(CPetEntity*, PPet, m_petList)
     {
@@ -724,7 +727,7 @@ void CZoneEntities::ForEachPet(std::function<void(CPetEntity*)> const& func)
     }
 }
 
-void CZoneEntities::ForEachAlly(std::function<void(CMobEntity*)> const& func)
+void CZoneEntities::ForEachAlly(const std::function<void(CMobEntity*)>& func)
 {
     FOR_EACH_PAIR_CAST_SECOND(CMobEntity*, PAlly, m_allyList)
     {
@@ -1656,18 +1659,18 @@ void CZoneEntities::WideScan(CCharEntity* PChar, uint16 radius)
 {
     TracyZoneScoped;
 
-    PChar->pushPacket<CWideScanPacket>(WIDESCAN_BEGIN);
+    PChar->pushPacket<GP_SERV_COMMAND_TRACKING_STATE>(GP_TRACKING_STATE::ListStart);
     for (const auto& entityList : { m_npcList, m_mobList })
     {
         for (const auto& [_, PEntity] : entityList)
         {
             if (PEntity->isWideScannable() && isWithinDistance(PChar->loc.p, PEntity->loc.p, radius))
             {
-                PChar->pushPacket<CWideScanPacket>(PChar, PEntity);
+                PChar->pushPacket<GP_SERV_COMMAND_TRACKING_LIST>(PChar, PEntity);
             }
         }
     }
-    PChar->pushPacket<CWideScanPacket>(WIDESCAN_END);
+    PChar->pushPacket<GP_SERV_COMMAND_TRACKING_STATE>(GP_TRACKING_STATE::ListEnd);
 }
 
 void CZoneEntities::ZoneServer(timer::time_point tick)
@@ -1903,7 +1906,7 @@ void CZoneEntities::ZoneServer(timer::time_point tick)
 
         if (PChar->requestedZoneChange || PChar->requestedWarp || PChar->status == STATUS_TYPE::SHUTDOWN)
         {
-            m_charsToChangeZone.emplace_back(PChar);
+            m_charsToChangeZone.insert(PChar);
         }
     }
 
@@ -1951,35 +1954,52 @@ void CZoneEntities::ZoneServer(timer::time_point tick)
         }
     }
 
-    // Change player's zone (teleports, etc)
-    for (auto* PChar : m_charsToChangeZone)
+    // Process players waiting to zone.
+    // If lazy loading a zone, the players may get processed on the next tick.
+    // clang-format off
+    std::erase_if(m_charsToChangeZone, [](auto* PChar)
     {
-        PChar->clearPacketList();
-
         auto ipp = zoneutils::GetZoneIPP(PChar->loc.destination);
 
         // This is already checked in CLueBaseEntity::setPos, but better to have a check...
-        if (ipp == 0)
+        // Don't care about IPP if player is logging out
+        // TODO: loc.destination should be optional since 0 is a legitimate zone.
+        if (ipp == 0 && PChar->status != STATUS_TYPE::SHUTDOWN)
         {
             ShowWarning(fmt::format("Char {} requested zone ({}) returned IPP of 0", PChar->name, PChar->loc.destination));
-            continue;
+            return true;
         }
 
         if (PChar->status == STATUS_TYPE::SHUTDOWN)
         {
+            PChar->clearPacketList();
             charutils::ForceLogout(PChar);
         }
         else if (PChar->requestedWarp)
         {
-            charutils::HomePoint(PChar, false);
+            if (!zoneutils::IsZoneReady(PChar->profile.home_point.destination))
+            {
+                return false;
+            }
+
+            PChar->clearPacketList();
+            charutils::HomePoint(PChar, PChar->isDead());
         }
         else if (PChar->loc.destination != 0xFFFF)
         {
+            if (!zoneutils::IsZoneReady(PChar->loc.destination))
+            {
+                return false;
+            }
+
+            PChar->clearPacketList();
             charutils::SendToZone(PChar, PChar->loc.destination);
         }
 
         charutils::removeCharFromZone(PChar);
-    }
+        return true;
+    });
+    // clang-format on
 
     if (tick > m_EffectCheckTime)
     {
@@ -2057,7 +2077,6 @@ void CZoneEntities::ZoneServer(timer::time_point tick)
     m_petsToDelete.clear();
     m_trustsToDelete.clear();
     m_aggroableMobs.clear();
-    m_charsToChangeZone.clear();
 }
 
 CZone* CZoneEntities::GetZone()

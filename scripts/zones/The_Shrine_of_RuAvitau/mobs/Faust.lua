@@ -50,6 +50,8 @@ entity.onMobInitialize = function(mob)
     mob:addImmunity(xi.immunity.ELEGY)
     mob:addImmunity(xi.immunity.LIGHT_SLEEP)
     mob:addImmunity(xi.immunity.SLOW)
+    mob:addImmunity(xi.immunity.TERROR)
+    mob:addImmunity(xi.immunity.PLAGUE)
 end
 
 entity.onMobSpawn = function(mob)

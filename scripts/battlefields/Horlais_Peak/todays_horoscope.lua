@@ -1,6 +1,6 @@
 -----------------------------------
 -- Today's Horoscope
--- Horlais Peak KS30, Lachesis Orb
+-- Horlais Peak KSNM, Lachesis Orb
 -- !additem 1178
 -----------------------------------
 local horlaisID = zones[xi.zone.HORLAIS_PEAK]
@@ -15,6 +15,8 @@ local content = Battlefield:new({
     entryNpc         = 'BC_Entrance',
     exitNpc          = 'Burning_Circle',
     requiredItems    = { xi.item.LACHESIS_ORB, wearMessage = horlaisID.text.A_CRACK_HAS_FORMED, wornMessage = horlaisID.text.ORB_IS_CRACKED },
+
+    experimental     = true,
 })
 
 content:addEssentialMobs({ 'Aries' })
@@ -22,63 +24,68 @@ content:addEssentialMobs({ 'Aries' })
 content.loot =
 {
     {
-        { itemId = 65535, weight = 1000, amount = 24000 }, -- Gil
+        { itemId = xi.item.GIL,                        weight = 1000, amount = 24000 },
     },
+
     {
-        { itemId =  1474, weight = 1000 }, -- Infinity Core (custom drop)
+        { itemId = xi.item.GONDO_SHIZUNORI,            weight = 250 },
+        { itemId = xi.item.RAMPAGER,                   weight = 250 },
+        { itemId = xi.item.RETRIBUTOR,                 weight = 250 },
+        { itemId = xi.item.GRAVEDIGGER,                weight = 250 },
     },
+
     {
-        { itemId = 18053, weight =  222 }, -- Gravedigger
-        { itemId = 18097, weight =  302 }, -- Gondo-Shizunori
-        { itemId = 18217, weight =  245 }, -- Rampager
-        { itemId = 17944, weight =  231 }, -- Retributor
+        { itemId = xi.item.RAMPAGING_HORN,             weight = 300 },
+        { itemId = xi.item.LUMBERING_HORN,             weight = 300 },
+        { itemId = xi.item.CLAYMORE_GRIP,              weight = 100 },
+        { itemId = xi.item.POLE_GRIP,                  weight = 100 },
+        { itemId = xi.item.SWORD_STRAP,                weight = 200 },
     },
+
     {
-        { itemId = 15295, weight = 250 }, -- Hierarch Belt
-        { itemId = 15294, weight = 338 }, -- Warwolf Belt
-        { itemId = 12407, weight = 206 }, -- Palmerin's Shield
-        { itemId = 14871, weight = 206 }, -- Trainer's Gloves
+        { itemId = xi.item.ADAMAN_INGOT,               weight = 250 },
+        { itemId = xi.item.ORICHALCUM_INGOT,           weight = 250 },
+        { itemId = xi.item.ARIES_MANTLE,               weight = 500 },
     },
+
     {
-        { itemId =     0, weight = 342 },   -- Nothing
-        { itemId = 13693, weight = 250 },   -- Aries Mantle
-        { itemId =   655, weight = 230 },   -- Adaman Ingot
-        { itemId =   747, weight = 178 },   -- Orichalcum Ingot
+        { itemId = xi.item.HIERARCH_BELT,              weight = 250 },
+        { itemId = xi.item.PALMERINS_SHIELD,           weight = 250 },
+        { itemId = xi.item.TRAINERS_GLOVES,            weight = 250 },
+        { itemId = xi.item.WARWOLF_BELT,               weight = 250 },
     },
+
     {
-        { itemId =   911, weight = 292 },   -- Rampaging Horn
-        { itemId =   910, weight = 265 },   -- Lumbering Horn
-        { itemId = 19024, weight = 354 }, -- Sword Strap
-        { itemId = 19027, weight =  89 },  -- Claymore Grip
+        { itemId = xi.item.CHUNK_OF_DARKSTEEL_ORE,     weight =  50 },
+        { itemId = xi.item.CHUNK_OF_GOLD_ORE,          weight =  50 },
+        { itemId = xi.item.CHUNK_OF_MYTHRIL_ORE,       weight =  50 },
+        { itemId = xi.item.CHUNK_OF_PLATINUM_ORE,      weight =  50 },
+        { itemId = xi.item.EBONY_LOG,                  weight =  50 },
+        { itemId = xi.item.MAHOGANY_LOG,               weight =  50 },
+        { itemId = xi.item.PETRIFIED_LOG,              weight =  50 },
+        { itemId = xi.item.PHILOSOPHERS_STONE,         weight =  50 },
+        { itemId = xi.item.SPOOL_OF_GOLD_THREAD,       weight =  50 },
+        { itemId = xi.item.SQUARE_OF_RAINBOW_CLOTH,    weight =  50 },
+        { itemId = xi.item.SQUARE_OF_RAXA,             weight =  50 },
+        { itemId = xi.item.CORAL_FRAGMENT,             weight =  50 },
+        { itemId = xi.item.DEMON_HORN,                 weight =  50 },
+        { itemId = xi.item.HANDFUL_OF_WYVERN_SCALES,   weight =  50 },
+        { itemId = xi.item.RAM_HORN,                   weight =  50 },
+        { itemId = xi.item.SLAB_OF_GRANITE,            weight =  50 },
+        { itemId = xi.item.RERAISER,                   weight =  50 },
+        { itemId = xi.item.HI_RERAISER,                weight =  50 },
+        { itemId = xi.item.VILE_ELIXIR,                weight =  50 },
+        { itemId = xi.item.VILE_ELIXIR_P1,             weight =  50 },
     },
+
     {
-        { itemId =  737, weight = 109 },   -- Chunk Of Gold Ore
-        { itemId = 4172, weight =  34 },   -- Reraiser
-        { itemId =  644, weight =  41 },    -- Chunk Of Mythril Ore
-        { itemId =  902, weight =  61 },    -- Demon Horn
-        { itemId =  702, weight = 121 },   -- Ebony Log
-        { itemId =  866, weight =  44 },    -- Handful Of Wyvern Scales
-        { itemId = 4175, weight =  27 },   -- Vile Elixir +1
-        { itemId =  700, weight =  41 },    -- Mahogany Log
-        { itemId =  887, weight =  80 },    -- Coral Fragment
-        { itemId =  703, weight =  72 },    -- Petrified Log
-        { itemId =  844, weight = 111 },   -- Phoenix Feather
-        { itemId =  738, weight =  44 },    -- Chunk Of Platinum Ore
-        { itemId =  895, weight =  14 },    -- Ram Horn
-        { itemId =  830, weight =  14 },    -- Square Of Rainbow Cloth
-        { itemId =  645, weight =  68 },    -- Chunk Of Darksteel Ore
-        { itemId = 4173, weight =  14 },   -- Hi-reraiser
-        { itemId = 1132, weight = 105 },  -- Square Of Raxa
-    },
-    {
-        { itemId =   0, weight =  150 },     -- Nothing
-        { itemId =  836, weight =  90 },    -- Square Of Damascene Cloth
-        { itemId =  658, weight =  29 },    -- Damascus Ingot
-        { itemId =  942, weight = 148 },   -- Philosophers Stone
-        { itemId =  844, weight = 234 },   -- Phoenix Feather
-        { itemId =  837, weight =  76 },    -- Spool Of Malboro Fiber
-        { itemId = 1132, weight = 232 },  -- Square Of Raxa
-        { itemId = 1110, weight =  41 },   -- Vial Of Black Beetle Blood
+        { itemId = xi.item.VIAL_OF_BLACK_BEETLE_BLOOD, weight =  63 },
+        { itemId = xi.item.SQUARE_OF_DAMASCENE_CLOTH,  weight =  62 },
+        { itemId = xi.item.DAMASCUS_INGOT,             weight =  62 },
+        { itemId = xi.item.SPOOL_OF_MALBORO_FIBER,     weight =  63 },
+        { itemId = xi.item.PHILOSOPHERS_STONE,         weight = 200 },
+        { itemId = xi.item.PHOENIX_FEATHER,            weight = 350 },
+        { itemId = xi.item.SQUARE_OF_RAXA,             weight = 200 },
     },
 }
 

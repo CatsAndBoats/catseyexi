@@ -154,7 +154,7 @@ local setupTrainFollowing = function(mob)
         local currentSlave = GetMobByID(slaveGlobeID)
         if currentSlave and currentSlave:isAlive() then
             local action = currentSlave:getCurrentAction()
-            if action ~= xi.act.NONE and action ~= xi.act.DEATH then
+            if action ~= xi.action.category.NONE and action ~= xi.action.category.DEATH then
                 currentSlave:follow(followTarget, xi.followType.ROAM)
                 followTarget = currentSlave
             end
@@ -187,6 +187,8 @@ entity.onMobInitialize = function(mob)
     mob:addImmunity(xi.immunity.DARK_SLEEP)
     mob:addImmunity(xi.immunity.LIGHT_SLEEP)
     mob:addImmunity(xi.immunity.SILENCE)
+    mob:addImmunity(xi.immunity.TERROR)
+    mob:addImmunity(xi.immunity.PLAGUE)
 end
 
 entity.onMobSpawn = function(mob)
@@ -195,23 +197,13 @@ entity.onMobSpawn = function(mob)
 
     -- Silently reapply shock spikes immediately
     mob:addListener('EFFECT_LOSE', 'MG_SPIKES', function(mobArg, effect)
-        if effect:getEffectType() == xi.effect.SHOCK_SPIKES then
+        if
+            mobArg:isAlive() and
+            effect:getEffectType() == xi.effect.SHOCK_SPIKES
+        then
             mobArg:addStatusEffectEx(xi.effect.SHOCK_SPIKES, xi.effect.SHOCK_SPIKES, 60, 0, 3600, true)
         end
     end)
-end
-
-entity.onMobFight = function(mob, target)
-    -- Keep pets linked
-    for _, slaveGlobeID in ipairs(slaveGlobes) do
-        local pet = GetMobByID(slaveGlobeID)
-        if pet and pet:getCurrentAction() == xi.act.ROAMING then
-            pet:updateEnmity(target)
-        end
-    end
-
-    -- Try to spawn a slave globe
-    trySpawnSlaveGlobe(mob)
 end
 
 -- Handle path completion and start new patrol paths
@@ -247,23 +239,38 @@ entity.onAdditionalEffect = function(mob, target, damage)
     return xi.mob.onAddEffect(mob, target, damage, xi.mob.ae.ENTHUNDER, { damage = 110 })
 end
 
-entity.onMobDeath = function(mob, player, optParams)
-    mob:setRespawnTime(math.random(10800, 21600)) -- respawn 3-6 hrs
-
+entity.onMobFight = function(mob, target)
+    -- Keep pets linked
     for _, slaveGlobeID in ipairs(slaveGlobes) do
         local pet = GetMobByID(slaveGlobeID)
-        if pet and pet:isSpawned() then
-            DespawnMob(slaveGlobeID)
+        if pet and pet:getCurrentAction() == xi.action.category.ROAMING then
+            pet:updateEnmity(target)
         end
     end
+
+    -- Try to spawn a slave globe
+    trySpawnSlaveGlobe(mob)
 end
 
 entity.onMobDisengage = function(mob)
     mob:setLocalVar('isPatrolling', 0) -- reset patrol so it can pick a new path
+
     setupTrainFollowing(mob)
 end
 
+entity.onMobDeath = function(mob, player, optParams)
+    if optParams.isKiller or optParams.noKiller then
+        for _, slaveGlobeID in ipairs(slaveGlobes) do
+            local pet = GetMobByID(slaveGlobeID)
+            if pet and pet:isSpawned() then
+                DespawnMob(slaveGlobeID)
+            end
+        end
+    end
+end
+
 entity.onMobDespawn = function(mob)
+    mob:removeListener('MG_SPIKES')
     mob:setRespawnTime(math.random(10800, 21600)) -- 3 to 6 hours
 end
 

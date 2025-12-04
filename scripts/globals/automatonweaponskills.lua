@@ -48,8 +48,8 @@ xi.autows.doAutoPhysicalWeaponskill = function(attacker, target, wsID, tp, prima
     calcParams.bonusTP = wsParams.bonusTP or 0
     calcParams.bonusfTP = flameHolderFTP or 0
     calcParams.bonusAcc = 0 + attacker:getMod(xi.mod.WSACC)
-    calcParams.firstHitRate = xi.weaponskills.getHitRate(attacker, target, calcParams.bonusAcc + 100) -- TODO: do automatons get first hit acc bonus?
-    calcParams.hitRate      = xi.weaponskills.getHitRate(attacker, target, calcParams.bonusAcc)
+    calcParams.firstHitRate = xi.combat.physicalHitRate.getPhysicalHitRate(attacker, target, calcParams.bonusAcc + 100, xi.attackAnimation.RIGHT_ATTACK, true) -- TODO: do automatons get first hit acc bonus?
+    calcParams.hitRate      = xi.combat.physicalHitRate.getPhysicalHitRate(attacker, target, calcParams.bonusAcc, xi.attackAnimation.RIGHT_ATTACK, true)
     calcParams.skillType = attack.weaponType
     calcParams.tpUsed = tp
 
@@ -85,6 +85,9 @@ xi.autows.doAutoPhysicalWeaponskill = function(attacker, target, wsID, tp, prima
     else
         skill:setMsg(xi.msg.basic.SKILL_MISS)
     end
+
+    skill:setAttackType(xi.attackType.PHYSICAL)
+    skill:setCritical(calcParams.criticalHit)
 
     return finaldmg, calcParams.criticalHit, calcParams.tpHitsLanded, calcParams.extraHitsLanded, calcParams.shadowsAbsorbed
 end
@@ -149,6 +152,9 @@ xi.autows.doAutoRangedWeaponskill = function(attacker, target, wsID, wsParams, t
     else
         skill:setMsg(xi.msg.basic.SKILL_MISS)
     end
+
+    skill:setAttackType(xi.attackType.RANGED)
+    skill:setCritical(calcParams.criticalHit)
 
     return finaldmg, calcParams.criticalHit, calcParams.tpHitsLanded, calcParams.extraHitsLanded, calcParams.shadowsAbsorbed
 end

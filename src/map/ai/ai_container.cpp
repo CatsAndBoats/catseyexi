@@ -28,7 +28,7 @@
 #include "entities/battleentity.h"
 #include "entities/charentity.h"
 #include "entities/mobentity.h"
-#include "packets/entity_animation.h"
+#include "packets/s2c/0x038_schedulor.h"
 #include "states/ability_state.h"
 #include "states/attack_state.h"
 #include "states/death_state.h"
@@ -51,7 +51,9 @@ CAIContainer::CAIContainer(CBaseEntity* _PEntity)
 {
 }
 
-CAIContainer::CAIContainer(CBaseEntity* _PEntity, std::unique_ptr<CPathFind>&& _pathfind, std::unique_ptr<CController>&& _controller,
+CAIContainer::CAIContainer(CBaseEntity*                   _PEntity,
+                           std::unique_ptr<CPathFind>&&   _pathfind,
+                           std::unique_ptr<CController>&& _controller,
                            std::unique_ptr<CTargetFind>&& _targetfind)
 : TargetFind(std::move(_targetfind))
 , PathFind(std::move(_pathfind))

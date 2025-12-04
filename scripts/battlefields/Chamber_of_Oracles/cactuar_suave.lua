@@ -15,12 +15,7 @@ local content = Battlefield:new({
     entryNpc         = 'SC_Entrance',
     exitNpc          = 'Shimmering_Circle',
     requiredItems    = { xi.item.CLOTHO_ORB, wearMessage = chamberOfOraclesID.text.A_CRACK_HAS_FORMED, wornMessage = chamberOfOraclesID.text.ORB_IS_CRACKED },
-    armouryCrates    =
-    {
-        chamberOfOraclesID.mob.SECUTOR_XI_XXXII + 4,
-        chamberOfOraclesID.mob.SECUTOR_XI_XXXII + 9,
-        chamberOfOraclesID.mob.SECUTOR_XI_XXXII + 14,
-    },
+    experimental     = true,
 })
 
 content:addEssentialMobs({ 'Sabotender_Campeon', 'Sabotender_Amante' })
@@ -28,53 +23,100 @@ content:addEssentialMobs({ 'Sabotender_Campeon', 'Sabotender_Amante' })
 content.loot =
 {
     {
-        { itemId = 916,  weight = 700 }, -- Cactuar Needle
-        { itemId = 1236, weight = 250 }, -- Cactus Stems
-        { itemId = 1592, weight =  50 }, -- Cactuar Root
+        { itemId = xi.item.GIL,                        weight = 1000, amount = 24000 },
     },
+
     {
-        { itemId = 15152, weight = 250 }, -- Cactuar Ribbon
-        { itemId = 17577, weight = 250 }, -- Capricorn staff
-        { itemId = 17997, weight = 250 }, -- Argent Dagger
-        { itemId = 18372, weight = 250 }, -- Balan's Sword
+        { itemId = xi.item.CACTUAR_NEEDLE,             weight = 1000 },
     },
+
     {
-        { itemId = 17246, weight = 200 }, -- Ziska's Crossbow
-        { itemId = 17825, weight = 200 }, -- Honebami
-        { itemId = 17790, weight = 200 }, -- Unji
-        { itemId = 17999, weight = 200 }, -- Taillefer's Dagger
-        { itemId = 18089, weight = 200 }, -- Schiltron Spear
+        { itemId = xi.item.BAG_OF_CACTUS_STEMS,        weight = 1000 },
     },
+
     {
-        { itemId = 644,  weight = 50 }, -- Chunk Of Mythril Ore
-        { itemId = 645,  weight = 50 }, -- Chunk Of Darksteel Ore
-        { itemId = 700,  weight = 50 }, -- Mahogany Log
-        { itemId = 702,  weight = 50 }, -- Ebony Log
-        { itemId = 703,  weight = 50 }, -- Petrified Log
-        { itemId = 823,  weight = 50 }, -- Spool Of Gold Thread
-        { itemId = 830,  weight = 50 }, -- Square Of Rainbow Cloth
-        { itemId = 844,  weight = 50 }, -- Phoenix Feather
-        { itemId = 866,  weight = 50 }, -- Handful Of Wyvern Scales
-        { itemId = 887,  weight = 50 }, -- Coral Fragment
-        { itemId = 895,  weight = 50 }, -- Ram Horn
-        { itemId = 902,  weight = 50 }, -- Demon Horn
-        { itemId = 942,  weight = 50 }, -- Philosophers Stone
-        { itemId = 1465, weight = 50 }, -- Slab Of Granite
-        { itemId = 1132, weight = 50 }, -- Square Of Raxa
-        { itemId = 4174, weight = 50 }, -- Vile Elixir
-        { itemId = 4175, weight = 50 }, -- Vile Elixir +1
-        { itemId = 4613, weight = 50 }, -- Cure V
-        { itemId = 4659, weight = 50 }, -- Shell IV
-        { itemId = 4774, weight = 50 }, -- Thunder III
+        { itemId = xi.item.TAILLEFERS_DAGGER,          weight = 187 },
+        { itemId = xi.item.SCHILTRON_SPEAR,            weight = 188 },
+        { itemId = xi.item.ZISKAS_CROSSBOW,            weight = 187 },
+        { itemId = xi.item.UNJI,                       weight = 188 },
+        { itemId = xi.item.DAMASCUS_INGOT,             weight =  62 },
+        { itemId = xi.item.SPOOL_OF_MALBORO_FIBER,     weight =  63 },
+        { itemId = xi.item.SQUARE_OF_DAMASCENE_CLOTH,  weight =  62 },
+        { itemId = xi.item.VIAL_OF_BLACK_BEETLE_BLOOD, weight =  63 },
     },
+
     {
-        { itemId = 0,    weight = 250 }, -- Nothing
-        { itemId = 658,  weight = 100 }, -- Damascus Ingot
-        { itemId = 836,  weight = 150 }, -- Square Of Damascene Cloth
-        { itemId = 837,  weight = 100 }, -- Spool Of Malboro Fiber
-        { itemId = 942,  weight = 100 }, -- Philosophers Stone
-        { itemId = 844,  weight =  50 }, -- Phoenix Feather
-        { itemId = 1132, weight = 250 }, -- Square Of Raxa
+        { itemId = xi.item.CACTUAR_RIBBON,             weight = 250 },
+        { itemId = xi.item.POLE_GRIP,                  weight = 200 },
+        { itemId = xi.item.SWORD_STRAP,                weight = 150 },
+        { itemId = xi.item.SPEAR_STRAP,                weight = 150 },
+        { itemId = xi.item.VILE_ELIXIR,                weight = 125 },
+        { itemId = xi.item.VILE_ELIXIR_P1,             weight = 125 },
+    },
+
+    {
+        { itemId = xi.item.NONE,                       weight = 150 },
+        { itemId = xi.item.KING_MAKER,                 weight = 150 },
+        { itemId = xi.item.BALANS_SWORD,               weight = 150 },
+        { itemId = xi.item.ARGENT_DAGGER,              weight = 150 },
+        { itemId = xi.item.CAPRICORN_STAFF,            weight = 150 },
+        { itemId = xi.item.LIGHT_SPIRIT_PACT,          weight =  50 },
+        { itemId = xi.item.SCROLL_OF_CURE_V,           weight =  50 },
+        { itemId = xi.item.SCROLL_OF_RAISE_III,        weight =  50 },
+        { itemId = xi.item.SCROLL_OF_SHELL_IV,         weight =  50 },
+        { itemId = xi.item.SCROLL_OF_THUNDER_III,      weight =  50 },
+    },
+
+    {
+        { itemId = xi.item.CHUNK_OF_DARKSTEEL_ORE,     weight =  55 },
+        { itemId = xi.item.CHUNK_OF_GOLD_ORE,          weight =  56 },
+        { itemId = xi.item.CHUNK_OF_MYTHRIL_ORE,       weight =  56 },
+        { itemId = xi.item.CHUNK_OF_PLATINUM_ORE,      weight =  55 },
+        { itemId = xi.item.EBONY_LOG,                  weight =  56 },
+        { itemId = xi.item.MAHOGANY_LOG,               weight =  56 },
+        { itemId = xi.item.PETRIFIED_LOG,              weight =  55 },
+        { itemId = xi.item.PHILOSOPHERS_STONE,         weight =  55 },
+        { itemId = xi.item.SPOOL_OF_GOLD_THREAD,       weight =  56 },
+        { itemId = xi.item.SQUARE_OF_RAINBOW_CLOTH,    weight =  56 },
+        { itemId = xi.item.SQUARE_OF_RAXA,             weight =  55 },
+        { itemId = xi.item.CORAL_FRAGMENT,             weight =  55 },
+        { itemId = xi.item.DEMON_HORN,                 weight =  55 },
+        { itemId = xi.item.HANDFUL_OF_WYVERN_SCALES,   weight =  55 },
+        { itemId = xi.item.RAM_HORN,                   weight =  56 },
+        { itemId = xi.item.SLAB_OF_GRANITE,            weight =  56 },
+        { itemId = xi.item.RERAISER,                   weight =  56 },
+        { itemId = xi.item.HI_RERAISER,                weight =  56 },
+    },
+
+    {
+        { itemId = xi.item.NONE,                       weight = 360 },
+        { itemId = xi.item.CHUNK_OF_DARKSTEEL_ORE,     weight =  40 },
+        { itemId = xi.item.CHUNK_OF_GOLD_ORE,          weight =  40 },
+        { itemId = xi.item.CHUNK_OF_MYTHRIL_ORE,       weight =  40 },
+        { itemId = xi.item.CHUNK_OF_PLATINUM_ORE,      weight =  40 },
+        { itemId = xi.item.EBONY_LOG,                  weight =  40 },
+        { itemId = xi.item.MAHOGANY_LOG,               weight =  40 },
+        { itemId = xi.item.PETRIFIED_LOG,              weight =  40 },
+        { itemId = xi.item.PHILOSOPHERS_STONE,         weight =  40 },
+        { itemId = xi.item.SPOOL_OF_GOLD_THREAD,       weight =  40 },
+        { itemId = xi.item.SQUARE_OF_RAINBOW_CLOTH,    weight =  40 },
+        { itemId = xi.item.SQUARE_OF_RAXA,             weight =  40 },
+        { itemId = xi.item.CORAL_FRAGMENT,             weight =  40 },
+        { itemId = xi.item.DEMON_HORN,                 weight =  40 },
+        { itemId = xi.item.HANDFUL_OF_WYVERN_SCALES,   weight =  40 },
+        { itemId = xi.item.RAM_HORN,                   weight =  40 },
+        { itemId = xi.item.SLAB_OF_GRANITE,            weight =  40 },
+    },
+
+    {
+        { itemId = xi.item.NONE,                       weight = 300 },
+        { itemId = xi.item.VIAL_OF_BLACK_BEETLE_BLOOD, weight =  44 },
+        { itemId = xi.item.SQUARE_OF_DAMASCENE_CLOTH,  weight =  43 },
+        { itemId = xi.item.DAMASCUS_INGOT,             weight =  43 },
+        { itemId = xi.item.SPOOL_OF_MALBORO_FIBER,     weight =  44 },
+        { itemId = xi.item.PHILOSOPHERS_STONE,         weight = 140 },
+        { itemId = xi.item.PHOENIX_FEATHER,            weight = 245 },
+        { itemId = xi.item.SQUARE_OF_RAXA,             weight = 140 },
     },
 }
 

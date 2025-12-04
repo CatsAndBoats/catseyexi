@@ -96,8 +96,9 @@ xi.additionalEffect.calcDamage = function(attacker, element, defender, damage)
     params.bonusmab   = 0
     params.includemab = false -- May possibly need to include mab on case by case basis, further tests needed
     damage            = addBonusesAbility(attacker, element, defender, damage, params)
-    damage            = damage * applyResistanceAddEffect(attacker, defender, element, 0)
-    damage            = damage * xi.spells.damage.calculateNukeAbsorbOrNullify(defender, element)
+    damage            = math.floor(damage * applyResistanceAddEffect(attacker, defender, element, 0))
+    damage            = math.floor(damage * xi.spells.damage.calculateAbsorption(defender, element, true))
+    damage            = math.floor(damage * xi.spells.damage.calculateNullification(defender, element, true, false))
     -- Todo: make sure day/weather/affinity bonuses tie in right here
     damage            = finalMagicNonSpellAdjustments(attacker, defender, element, damage)
 
@@ -235,6 +236,11 @@ xi.additionalEffect.procFunctions[xi.additionalEffect.procType.HP_DRAIN] =  func
     params.element = xi.element.DARK
     local damage = xi.additionalEffect.calcDamage(attacker, params.element, defender, params.damage)
 
+    -- Undead cannot be drained
+    if defender:isUndead() then
+        return 0, 0, 0
+    end
+
     if damage > defender:getHP() then
         damage = defender:getHP()
     end
@@ -256,6 +262,11 @@ xi.additionalEffect.procFunctions[xi.additionalEffect.procType.MP_DRAIN] =  func
     params.element = xi.element.DARK
     local damage = xi.additionalEffect.calcDamage(attacker, params.element, defender, params.damage)
 
+    -- Undead cannot be drained
+    if defender:isUndead() then
+        return 0, 0, 0
+    end
+
     if damage > defender:getMP() then
         damage = defender:getMP()
     end
@@ -276,6 +287,11 @@ xi.additionalEffect.procFunctions[xi.additionalEffect.procType.TP_DRAIN] =  func
 
     -- Hardcoded for now
     params.element = xi.element.DARK
+
+    -- Undead cannot be drained
+    if defender:isUndead() then
+        return 0, 0, 0
+    end
 
     local damage = xi.additionalEffect.calcDamage(attacker, params.element, defender, params.damage)
 
@@ -400,20 +416,13 @@ xi.additionalEffect.procFunctions[xi.additionalEffect.procType.HPMPTP_DRAIN] = f
     return xi.additionalEffect.procFunctions[drainFuncs[drainRoll]](attacker, defender, item, params)
 end
 
-xi.additionalEffect.procFunctions[xi.additionalEffect.procType.NM_SPECIFIC] = function(attacker, defender, item, params)
-    local subEffect = params.subEffect
-    local msgID     = 0
-    local msgParam  = 0
-    local defenderName = defender:getName()
-
-    switch(defenderName): caseof
-    {
-        ['Brigandish_Blade'] = function()
-            -- Calculate damage
-            local damage = xi.additionalEffect.calcDamage(attacker, params.element, defender, params.damage)
-            msgID = xi.msg.basic.ADD_EFFECT_DMG
-            msgParam = damage
-
+-- NM-specific additional effects configuration table
+-- Options: requiredItem, specialAction, customSubEffect, customMsgID, customMsgParam
+-- Add new entries here: ['NM_Name'] = { requiredItem = xi.item.ITEM_ID, specialAction = function() }
+xi.additionalEffect.nmSpecificConfigs = {
+    ['Brigandish_Blade'] = {
+        requiredItem = xi.item.BUCCANEERS_KNIFE,
+        specialAction = function(defender)
             -- If Brigandish Blade has damage immunity (at 1% HP), remove it
             if defender:getMod(xi.mod.UDMGPHYS) == -10000 then
                 -- Remove all damage immunities
@@ -426,11 +435,66 @@ xi.additionalEffect.procFunctions[xi.additionalEffect.procType.NM_SPECIFIC] = fu
                 defender:setUnkillable(false)
             end
         end,
-
-        ['default'] = function()
-            return 0, 0, 0
+    },
+    ['Seiryu'] = {
+        requiredItem = xi.item.ZEPHYR,
+        specialAction = function(defender)
+            defender:setMobMod(xi.mobMod.ADD_EFFECT, 0)
         end,
-    }
+    },
+    ['Genbu'] = {
+        requiredItem = xi.item.ANTARCTIC_WIND,
+        specialAction = function(defender)
+            defender:setMobMod(xi.mobMod.ADD_EFFECT, 0)
+        end,
+    },
+    ['Suzaku'] = {
+        requiredItem = xi.item.ARCTIC_WIND,
+        specialAction = function(defender)
+            defender:setMobMod(xi.mobMod.ADD_EFFECT, 0)
+        end,
+    },
+    ['Byakko'] = {
+        requiredItem = xi.item.EAST_WIND,
+        specialAction = function(defender)
+            defender:setMobMod(xi.mobMod.ADD_EFFECT, 0)
+        end,
+    },
+}
+
+-- NM_SPECIFIC additional effect trigger
+xi.additionalEffect.procFunctions[xi.additionalEffect.procType.NM_SPECIFIC] = function(attacker, defender, item, params)
+    local subEffect = params.subEffect
+    local msgID     = 0
+    local msgParam  = 0
+    local defenderName = defender:getName()
+
+    local config = xi.additionalEffect.nmSpecificConfigs[defenderName]
+    if
+        config and
+        (config.requiredItem == item:getID() or
+        config.requiredItem == xi.item.NONE)
+    then
+        -- Calculate damage
+        local damage = xi.additionalEffect.calcDamage(attacker, params.element, defender, params.damage)
+        msgID = xi.msg.basic.ADD_EFFECT_DMG
+        msgParam = damage
+
+        -- Execute special action if configured
+        if config.specialAction then
+            config.specialAction(defender)
+        end
+
+        subEffect = config.customSubEffect or subEffect
+        msgID = config.customMsgID or msgID
+        msgParam = config.customMsgParam or msgParam
+    else
+        if defender and item then
+            defender:setLocalVar('aeFromItemId', item:getID())
+        end
+
+        return 0, 0, 0
+    end
 
     return subEffect, msgID, msgParam
 end

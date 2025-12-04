@@ -720,6 +720,11 @@ end
 
 ---@nodiscard
 ---@return integer
+function CBaseEntity:getPreviousZoneLineID()
+end
+
+---@nodiscard
+---@return integer
 function CBaseEntity:getCurrentRegion()
 end
 
@@ -1405,6 +1410,11 @@ end
 function CBaseEntity:setWallhack(enable)
 end
 
+---@param isFrozen boolean
+---@return nil
+function CBaseEntity:setFreezeFlag(isFrozen)
+end
+
 ---@nodiscard
 ---@return boolean
 function CBaseEntity:isJailed()
@@ -1526,7 +1536,7 @@ end
 ---@param jobID integer
 ---@param level integer
 ---@return nil
-function CBaseEntity:addJobTraits(jobID, level)
+function CBaseEntity:addWyvernJobTraits(jobID, level)
 end
 
 ---@nodiscard
@@ -2294,11 +2304,9 @@ function CBaseEntity:delLearnedAbility(abilityID)
 end
 
 ---@param spellID integer
----@param silentLog boolean?
----@param save boolean?
----@param sendUpdate boolean?
+---@param arg0 table?
 ---@return nil
-function CBaseEntity:addSpell(spellID, silentLog, save, sendUpdate)
+function CBaseEntity:addSpell(spellID, arg0)
 end
 
 ---@nodiscard
@@ -2314,8 +2322,9 @@ function CBaseEntity:canLearnSpell(spellID)
 end
 
 ---@param spellID integer
+---@param arg0 table?
 ---@return nil
-function CBaseEntity:delSpell(spellID)
+function CBaseEntity:delSpell(spellID, arg0)
 end
 
 ---@return nil
@@ -3179,8 +3188,9 @@ function CBaseEntity:getStat(statId, optSlot)
 end
 
 ---@nodiscard
+---@param maybeAttackNumber integer?
 ---@return integer
-function CBaseEntity:getACC()
+function CBaseEntity:getACC(maybeAttackNumber)
 end
 
 ---@nodiscard
@@ -3231,12 +3241,6 @@ end
 ---@param damageType integer?
 ---@return integer
 function CBaseEntity:rangedDmgTaken(damage, damageType)
-end
-
----@nodiscard
----@param damage number
----@return integer
-function CBaseEntity:breathDmgTaken(damage)
 end
 
 ---@param damage number
@@ -3959,8 +3963,9 @@ end
 ---@param skillID integer
 ---@param PLuaBaseEntity CBaseEntity?
 ---@param castTimeOverride number?
+---@param ignoreDistance boolean?
 ---@return nil
-function CBaseEntity:useMobAbility(skillID, PLuaBaseEntity, castTimeOverride)
+function CBaseEntity:useMobAbility(skillID, PLuaBaseEntity, castTimeOverride, ignoreDistance)
 end
 
 ---@return nil

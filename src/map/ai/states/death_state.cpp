@@ -24,13 +24,15 @@
 #include "ai/ai_container.h"
 #include "entities/battleentity.h"
 #include "entities/charentity.h"
-#include "packets/menu_raisetractor.h"
+#include "packets/s2c/0x0f9_res.h"
 #include "status_effect.h"
 #include "status_effect_container.h"
 
 namespace
 {
-    static const timer::duration TIME_TO_SEND_RERAISE_MENU = 8s;
+
+static const timer::duration TIME_TO_SEND_RERAISE_MENU = 8s;
+
 }
 
 CDeathState::CDeathState(CBattleEntity* PEntity, timer::duration death_time)
@@ -52,7 +54,7 @@ CDeathState::CDeathState(CBattleEntity* PEntity, timer::duration death_time)
 bool CDeathState::Update(timer::time_point tick)
 {
     // It's completed
-    if (IsCompleted() || m_PEntity->animation != ANIMATION_DEATH)
+    if (IsCompleted() || !m_PEntity->isDead())
     {
         return true;
     }
@@ -71,7 +73,7 @@ bool CDeathState::Update(timer::time_point tick)
             auto* PChar = static_cast<CCharEntity*>(m_PEntity);
             if (PChar->m_hasRaise)
             {
-                PChar->pushPacket<CRaiseTractorMenuPacket>(PChar, TYPE_RAISE);
+                PChar->pushPacket<GP_SERV_COMMAND_RES>(PChar, GP_SERV_COMMAND_RES_TYPE::Raise);
                 m_raiseSent = true;
             }
         }

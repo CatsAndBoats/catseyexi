@@ -1,9 +1,9 @@
 -----------------------------------
--- ENM: Simulant
--- Spire of Holla
+-- Simulant
+-- Spire of Holla ENM30
+-- !addkeyitem 670
 -----------------------------------
-require('scripts/missions/cop/helpers')
-local spireofHollaID = zones[xi.zone.SPIRE_OF_HOLLA]
+local spireOfHollaID = zones[xi.zone.SPIRE_OF_HOLLA]
 -----------------------------------
 
 local content = Battlefield:new({
@@ -14,39 +14,58 @@ local content = Battlefield:new({
     timeLimit        = utils.minutes(30),
     index            = 1,
     entryNpc         = '_0h0',
-    exitNpcs         = { '_0j1', '_0j2', '_0j3' },
-    requiredKeyItems = { xi.ki.CENSER_OF_ABANDONMENT, message = spireofHollaID.text.THE_PARTY_WILL_BE_REMOVED + 8 },
-    grantXP          = 1500,
+    exitNpcs         = { '_0h1', '_0h2', '_0h3' },
+    requiredKeyItems = { xi.ki.CENSER_OF_ABANDONMENT, message = spireOfHollaID.text.FADES_INTO_NOTHINGNESS },
+    grantXP          = 3000,
     armouryCrates    =
     {
-        spireofHollaID.mob.WREAKER + 7,
-        spireofHollaID.mob.WREAKER + 12,
-        spireofHollaID.mob.WREAKER + 17,
+        spireOfHollaID.mob.COGITATOR + 4,
+        spireOfHollaID.mob.COGITATOR + 9,
+        spireOfHollaID.mob.COGITATOR + 14
     },
 })
-
-function content:entryRequirement(player, npc, isRegistrant, trade)
-    local currentRequirements = player:hasCompletedMission(xi.mission.log_id.COP, xi.mission.id.cop.THE_MOTHERCRYSTALS)
-    return currentRequirements
-end
-
-function content:checkSkipCutscene(player)
-    return player:hasCompletedMission(xi.mission.log_id.COP, xi.mission.id.cop.THE_MOTHERCRYSTALS)
-end
-
-content:addEssentialMobs({ 'Cogitator' })
 
 content.groups =
 {
     {
-        mobs = { 'Cogitator' },
-        superlink = true,
-        spawned = true,
-        death = utils.bind(content.handleAllMonstersDefeated, content),
+        mobIds =
+        {
+            {
+                spireOfHollaID.mob.COGITATOR,
+            },
+
+            {
+                spireOfHollaID.mob.COGITATOR + 5,
+            },
+
+            {
+                spireOfHollaID.mob.COGITATOR + 10,
+            },
+        },
+        allDeath  = utils.bind(content.handleAllMonstersDefeated, content),
     },
+
     {
-        mobs = { 'Weeper' },
-        superlink = true,
+        mobIds =
+        {
+            {
+                spireOfHollaID.mob.COGITATOR + 1,
+                spireOfHollaID.mob.COGITATOR + 2,
+                spireOfHollaID.mob.COGITATOR + 3,
+            },
+
+            {
+                spireOfHollaID.mob.COGITATOR + 6,
+                spireOfHollaID.mob.COGITATOR + 7,
+                spireOfHollaID.mob.COGITATOR + 8,
+            },
+
+            {
+                spireOfHollaID.mob.COGITATOR + 11,
+                spireOfHollaID.mob.COGITATOR + 12,
+                spireOfHollaID.mob.COGITATOR + 13,
+            },
+        },
         spawned = false,
     },
 }
@@ -54,45 +73,25 @@ content.groups =
 content.loot =
 {
     {
-        { itemId =    0, weight = 200 }, --  Nothing
-        { itemId = 5287, weight = 100 }, --  Bitter Cluster
-        { itemId = 5286, weight = 100 }, --  Burning Cluster
-        { itemId = 5288, weight = 100 }, --  Fleeting Cluster
-        { itemId = 5289, weight = 100 }, --  Profane Cluster
-        { itemId = 5290, weight = 100 }, --  Startling Cluster
-        { itemId = 5291, weight = 100 }, --  Somber Cluster
-        { itemId = 5292, weight = 100 }, --  Radiant Cluster
-        { itemId = 5293, weight = 100 }, --  Malevolent Cluster
+        quantity = 3,
+        { itemId = xi.item.NONE,                           weight = 200 },
+        { itemId = xi.item.CLUSTER_OF_BURNING_MEMORIES,    weight = 100 },
+        { itemId = xi.item.CLUSTER_OF_BITTER_MEMORIES,     weight = 100 },
+        { itemId = xi.item.CLUSTER_OF_FLEETING_MEMORIES,   weight = 100 },
+        { itemId = xi.item.CLUSTER_OF_PROFANE_MEMORIES,    weight = 100 },
+        { itemId = xi.item.CLUSTER_OF_STARTLING_MEMORIES,  weight = 100 },
+        { itemId = xi.item.CLUSTER_OF_SOMBER_MEMORIES,     weight = 100 },
+        { itemId = xi.item.CLUSTER_OF_RADIANT_MEMORIES,    weight = 100 },
+        { itemId = xi.item.CLUSTER_OF_MALEVOLENT_MEMORIES, weight = 100 },
     },
+
     {
-        { itemId =    0, weight = 200 }, --  Nothing
-        { itemId = 5287, weight = 100 }, --  Bitter Cluster
-        { itemId = 5286, weight = 100 }, --  Burning Cluster
-        { itemId = 5288, weight = 100 }, --  Fleeting Cluster
-        { itemId = 5293, weight = 100 }, --  Malevolent Cluster
-        { itemId = 5289, weight = 100 }, --  Profane Cluster
-        { itemId = 5292, weight = 100 }, --  Radiant Cluster
-        { itemId = 5291, weight = 100 }, --  Somber Cluster
-        { itemId = 5290, weight = 100 }, --  Startling Cluster
-    },
-    {
-        { itemId =    0, weight = 200 }, --  Nothing
-        { itemId = 5287, weight = 100 }, --  Bitter Cluster
-        { itemId = 5286, weight = 100 }, --  Burning Cluster
-        { itemId = 5288, weight = 100 }, --  Fleeting Cluster
-        { itemId = 5293, weight = 100 }, --  Malevolent Cluster
-        { itemId = 5289, weight = 100 }, --  Profane Cluster
-        { itemId = 5292, weight = 100 }, --  Radiant Cluster
-        { itemId = 5291, weight = 100 }, --  Somber Cluster
-        { itemId = 5290, weight = 100 }, --  Startling Cluster
-    },
-    {
-        { itemId =    0, weight = 500 }, --  Nothing
-        { itemId = 1798, weight = 100 }, --  Vernal Vision (Evasion Earring)
-        { itemId = 1799, weight = 100 }, --  Punctilious Vision (Parrying Earring)
-        { itemId = 1802, weight = 100 }, --  Audacious Vision (Divine Earring)
-        { itemId = 1807, weight = 100 }, --  Vivid Vision (Healing Earring)
-        { itemId = 1810, weight = 100 }, --  Endearing Vision (Singing Earring)
+        { itemId = xi.item.NONE,                           weight = 500 },
+        { itemId = xi.item.VERNAL_VISION,                  weight = 100 },
+        { itemId = xi.item.PUNCTILIOUS_VISION,             weight = 100 },
+        { itemId = xi.item.AUDACIOUS_VISION,               weight = 100 },
+        { itemId = xi.item.VIVID_VISION,                   weight = 100 },
+        { itemId = xi.item.ENDEARING_VISION,               weight = 100 },
     },
 }
 

@@ -1,8 +1,8 @@
 -----------------------------------
--- ENM: Playing Host
--- Spire of Mea
+-- Playing Host
+-- Spire of Mea ENM30
+-- !addkeyitem 672
 -----------------------------------
-require('scripts/missions/cop/helpers')
 local spireOfMeaID = zones[xi.zone.SPIRE_OF_MEA]
 -----------------------------------
 
@@ -14,39 +14,54 @@ local content = Battlefield:new({
     timeLimit        = utils.minutes(30),
     index            = 1,
     entryNpc         = '_0l0',
-    exitNpcs         = { '_0j1', '_0j2', '_0j3' },
-    requiredKeyItems = { xi.ki.CENSER_OF_ANIMUS, message = spireOfMeaID.text.THE_PARTY_WILL_BE_REMOVED + 8 },
-    grantXP          = 1500,
+    exitNpcs         = { '_0l1', '_0l2', '_0l3' },
+    requiredKeyItems = { xi.ki.CENSER_OF_ANIMUS, message = spireOfMeaID.text.FADES_INTO_NOTHINGNESS },
+    grantXP          = 3000,
     armouryCrates    =
     {
-        spireOfMeaID.mob.DELVER + 7,
-        spireOfMeaID.mob.DELVER + 12,
-        spireOfMeaID.mob.DELVER + 17,
+        spireOfMeaID.mob.ENVIER + 4,
+        spireOfMeaID.mob.ENVIER + 9,
+        spireOfMeaID.mob.ENVIER + 14,
     },
 })
 
-function content:entryRequirement(player, npc, isRegistrant, trade)
-    local currentRequirements = player:hasCompletedMission(xi.mission.log_id.COP, xi.mission.id.cop.THE_MOTHERCRYSTALS)
-    return currentRequirements
-end
-
-function content:checkSkipCutscene(player)
-    return player:hasCompletedMission(xi.mission.log_id.COP, xi.mission.id.cop.THE_MOTHERCRYSTALS)
-end
-
-content:addEssentialMobs({ 'Envier' })
-
 content.groups =
 {
+    -- Envier
     {
-        mobs = { 'Envier' },
-        superlink = true,
-        spawned = true,
-        death = utils.bind(content.handleAllMonstersDefeated, content),
+        mobIds =
+        {
+            { spireOfMeaID.mob.ENVIER      },
+            { spireOfMeaID.mob.ENVIER + 5  },
+            { spireOfMeaID.mob.ENVIER + 10 },
+        },
+
+        allDeath  = utils.bind(content.handleAllMonstersDefeated, content),
     },
+
+    -- Seether
     {
-        mobs = { 'Seether' },
-        superlink = true,
+        mobIds =
+        {
+            {
+                spireOfMeaID.mob.ENVIER + 1,
+                spireOfMeaID.mob.ENVIER + 2,
+                spireOfMeaID.mob.ENVIER + 3,
+            },
+
+            {
+                spireOfMeaID.mob.ENVIER + 6,
+                spireOfMeaID.mob.ENVIER + 7,
+                spireOfMeaID.mob.ENVIER + 8,
+            },
+
+            {
+                spireOfMeaID.mob.ENVIER + 11,
+                spireOfMeaID.mob.ENVIER + 12,
+                spireOfMeaID.mob.ENVIER + 13,
+            },
+        },
+
         spawned = false,
     },
 }
@@ -54,45 +69,25 @@ content.groups =
 content.loot =
 {
     {
-        { itemId =    0, weight = 200 }, -- Nothing
-        { itemId = 5287, weight = 100 }, -- Bitter Cluster
-        { itemId = 5286, weight = 100 }, -- Burning Cluster
-        { itemId = 5288, weight = 100 }, -- Fleeting Cluster
-        { itemId = 5293, weight = 100 }, -- Malevolent Cluster
-        { itemId = 5289, weight = 100 }, -- Profane Cluster
-        { itemId = 5292, weight = 100 }, -- Radiant Cluster
-        { itemId = 5291, weight = 100 }, -- Somber Cluster
-        { itemId = 5290, weight = 100 }, -- Startling Cluster
+        quantity = 3,
+        { itemId = xi.item.NONE,                           weight = 200 },
+        { itemId = xi.item.CLUSTER_OF_BURNING_MEMORIES,    weight = 100 },
+        { itemId = xi.item.CLUSTER_OF_BITTER_MEMORIES,     weight = 100 },
+        { itemId = xi.item.CLUSTER_OF_FLEETING_MEMORIES,   weight = 100 },
+        { itemId = xi.item.CLUSTER_OF_PROFANE_MEMORIES,    weight = 100 },
+        { itemId = xi.item.CLUSTER_OF_STARTLING_MEMORIES,  weight = 100 },
+        { itemId = xi.item.CLUSTER_OF_SOMBER_MEMORIES,     weight = 100 },
+        { itemId = xi.item.CLUSTER_OF_RADIANT_MEMORIES,    weight = 100 },
+        { itemId = xi.item.CLUSTER_OF_MALEVOLENT_MEMORIES, weight = 100 },
     },
+
     {
-        { itemId =    0, weight = 200 }, -- Nothing
-        { itemId = 5287, weight = 100 }, -- Bitter Cluster
-        { itemId = 5286, weight = 100 }, -- Burning Cluster
-        { itemId = 5288, weight = 100 }, -- Fleeting Cluster
-        { itemId = 5293, weight = 100 }, -- Malevolent Cluster
-        { itemId = 5289, weight = 100 }, -- Profane Cluster
-        { itemId = 5292, weight = 100 }, -- Radiant Cluster
-        { itemId = 5291, weight = 100 }, -- Somber Cluster
-        { itemId = 5290, weight = 100 }, -- Startling Cluster
-    },
-    {
-        { itemId =    0, weight = 200 }, -- Nothing
-        { itemId = 5287, weight = 100 }, -- Bitter Cluster
-        { itemId = 5286, weight = 100 }, -- Burning Cluster
-        { itemId = 5288, weight = 100 }, -- Fleeting Cluster
-        { itemId = 5293, weight = 100 }, -- Malevolent Cluster
-        { itemId = 5289, weight = 100 }, -- Profane Cluster
-        { itemId = 5292, weight = 100 }, -- Radiant Cluster
-        { itemId = 5291, weight = 100 }, -- Somber Cluster
-        { itemId = 5290, weight = 100 }, -- Startling Cluster
-    },
-    {
-        { itemId =    0, weight = 500 }, -- Nothing
-        { itemId = 1801, weight = 100 }, -- Solemn Vision (Guarding Earring)
-        { itemId = 1804, weight = 100 }, -- Valiant Vision (Augmenting Earring)
-        { itemId = 1806, weight = 100 }, -- Pretentious Vision (Elemental Earring)
-        { itemId = 1809, weight = 100 }, -- Malicious Vision (Ninjutsu Earring)
-        { itemId = 1812, weight = 100 }, -- Pristine Vision (Wind Earring)
+        { itemId = xi.item.NONE,                           weight = 500 },
+        { itemId = xi.item.SOLEMN_VISION,                  weight = 100 },
+        { itemId = xi.item.VALIANT_VISION,                 weight = 100 },
+        { itemId = xi.item.PRETENTIOUS_VISION,             weight = 100 },
+        { itemId = xi.item.MALICIOUS_VISION,               weight = 100 },
+        { itemId = xi.item.PRISTINE_VISION,                 weight = 100 },
     },
 }
 

@@ -357,16 +357,16 @@ INSERT INTO `mob_skill_lists` VALUES ('Doomed',86,489);
 INSERT INTO `mob_skill_lists` VALUES ('Doomed',86,490);
 INSERT INTO `mob_skill_lists` VALUES ('Doomed',86,491);
 INSERT INTO `mob_skill_lists` VALUES ('Doomed',86,492);
-INSERT INTO `mob_skill_lists` VALUES ('Dragon',87,642);
-INSERT INTO `mob_skill_lists` VALUES ('Dragon',87,643);
-INSERT INTO `mob_skill_lists` VALUES ('Dragon',87,644);
-INSERT INTO `mob_skill_lists` VALUES ('Dragon',87,645);
-INSERT INTO `mob_skill_lists` VALUES ('Dragon',87,646);
-INSERT INTO `mob_skill_lists` VALUES ('Dragon',87,647);
-INSERT INTO `mob_skill_lists` VALUES ('Dragon',87,648);
-INSERT INTO `mob_skill_lists` VALUES ('Dragon',87,649);
-INSERT INTO `mob_skill_lists` VALUES ('Dragon',87,650);
-INSERT INTO `mob_skill_lists` VALUES ('Dragon',87,651);
+INSERT INTO `mob_skill_lists` VALUES ('Dragon',87,642); -- Flame Breath
+INSERT INTO `mob_skill_lists` VALUES ('Dragon',87,643); -- Poison Breath
+INSERT INTO `mob_skill_lists` VALUES ('Dragon',87,644); -- Wind Breath
+INSERT INTO `mob_skill_lists` VALUES ('Dragon',87,645); -- Body Slam
+INSERT INTO `mob_skill_lists` VALUES ('Dragon',87,646); -- Heavy Stomp
+INSERT INTO `mob_skill_lists` VALUES ('Dragon',87,647); -- Chaos Blade
+INSERT INTO `mob_skill_lists` VALUES ('Dragon',87,648); -- Petro Eyes
+INSERT INTO `mob_skill_lists` VALUES ('Dragon',87,649); -- Voidsong
+INSERT INTO `mob_skill_lists` VALUES ('Dragon',87,650); -- Thornsong
+INSERT INTO `mob_skill_lists` VALUES ('Dragon',87,651); -- Lodesong
 -- 88: Bloody Bones
 -- 89: Draugar
 INSERT INTO `mob_skill_lists` VALUES ('Dvergr',90,2113);
@@ -562,16 +562,16 @@ INSERT INTO `mob_skill_lists` VALUES ('Hecteyes',139,437);
 INSERT INTO `mob_skill_lists` VALUES ('Hecteyes',139,438);
 INSERT INTO `mob_skill_lists` VALUES ('Hecteyes',139,440);
 INSERT INTO `mob_skill_lists` VALUES ('Hippogryph',140,576);
+INSERT INTO `mob_skill_lists` VALUES ('Hippogryph',140,577);
 INSERT INTO `mob_skill_lists` VALUES ('Hippogryph',140,578);
--- INSERT INTO `mob_skill_lists` VALUES ('Hippogryph',140,579);
--- INSERT INTO `mob_skill_lists` VALUES ('Hippogryph',140,580);
-INSERT INTO `mob_skill_lists` VALUES ('Hippogryph',140,2828);
-INSERT INTO `mob_skill_lists` VALUES ('Hippogryph',141,576);
-INSERT INTO `mob_skill_lists` VALUES ('Hippogryph',141,578);
--- INSERT INTO `mob_skill_lists` VALUES ('Hippogryph',141,579);
--- INSERT INTO `mob_skill_lists` VALUES ('Hippogryph',141,580);
--- INSERT INTO `mob_skill_lists` VALUES ('Hippogryph',141,1330);
-INSERT INTO `mob_skill_lists` VALUES ('Hippogryph',141,2828);
+INSERT INTO `mob_skill_lists` VALUES ('Hippogryph',140,579);
+INSERT INTO `mob_skill_lists` VALUES ('Hippogryph',140,580);
+INSERT INTO `mob_skill_lists` VALUES ('Hippogryph_NM',141,576);
+INSERT INTO `mob_skill_lists` VALUES ('Hippogryph_NM',141,577);
+INSERT INTO `mob_skill_lists` VALUES ('Hippogryph_NM',141,578);
+INSERT INTO `mob_skill_lists` VALUES ('Hippogryph_NM',141,579);
+INSERT INTO `mob_skill_lists` VALUES ('Hippogryph_NM',141,580);
+INSERT INTO `mob_skill_lists` VALUES ('Hippogryph_NM',141,1330);
 INSERT INTO `mob_skill_lists` VALUES ('Hound',142,465);
 INSERT INTO `mob_skill_lists` VALUES ('Hound',142,466);
 INSERT INTO `mob_skill_lists` VALUES ('Hound',142,467);
@@ -971,7 +971,6 @@ INSERT INTO `mob_skill_lists` VALUES ('ShadowLord',224,668);
 INSERT INTO `mob_skill_lists` VALUES ('ShadowLord',224,671);
 INSERT INTO `mob_skill_lists` VALUES ('ShadowLord',224,672);
 INSERT INTO `mob_skill_lists` VALUES ('ShadowLord',224,673);
-INSERT INTO `mob_skill_lists` VALUES ('ShadowLord',225,669);
 INSERT INTO `mob_skill_lists` VALUES ('Sheep',226,260);
 INSERT INTO `mob_skill_lists` VALUES ('Sheep',226,261);
 INSERT INTO `mob_skill_lists` VALUES ('Sheep',226,262);
@@ -1256,11 +1255,6 @@ INSERT INTO `mob_skill_lists` VALUES ('Grav_iton',282,920);
 INSERT INTO `mob_skill_lists` VALUES ('Grav_iton',282,921);
 INSERT INTO `mob_skill_lists` VALUES ('Melusine',283,2198); -- winter_breeze
 -- 284: Oupire
-INSERT INTO `mob_skill_lists` VALUES ('Gulool',285,1731);
-INSERT INTO `mob_skill_lists` VALUES ('Gulool',285,1732);
-INSERT INTO `mob_skill_lists` VALUES ('Gulool',285,1733);
-INSERT INTO `mob_skill_lists` VALUES ('Gulool',285,1734);
-INSERT INTO `mob_skill_lists` VALUES ('Gulool',285,1738);
 INSERT INTO `mob_skill_lists` VALUES ('Gulool',285,1797);
 INSERT INTO `mob_skill_lists` VALUES ('Gulool',285,1798);
 INSERT INTO `mob_skill_lists` VALUES ('Gulool',285,1799);
@@ -1862,8 +1856,6 @@ INSERT INTO `mob_skill_lists` VALUES ('TiamatWyrm',393,1285);
 INSERT INTO `mob_skill_lists` VALUES ('TiamatWyrm',393,1286);
 INSERT INTO `mob_skill_lists` VALUES ('Ealdnarche (Celestial Nexus, phase 2)',394,985); -- Stellar Burst
 INSERT INTO `mob_skill_lists` VALUES ('Ealdnarche (Celestial Nexus, phase 2)',394,986); -- Vortex
-INSERT INTO `mob_skill_lists` VALUES ('Ealdnarche (Celestial Nexus, phase 2)',394,988); -- Warp In
-INSERT INTO `mob_skill_lists` VALUES ('Ealdnarche (Celestial Nexus, phase 2)',394,989); -- Warp Out
 INSERT INTO `mob_skill_lists` VALUES ('Ealdnarche (Celestial Nexus, phase 2)',394,1006); -- Omega Javelin
 INSERT INTO `mob_skill_lists` VALUES ('Calcabrina',395,537);
 -- 396: Bedrock_Barry
@@ -1938,7 +1930,11 @@ INSERT INTO `mob_skill_lists` VALUES ('Dahu',419,802); -- Great Sandstorm
 INSERT INTO `mob_skill_lists` VALUES ('Huwasi',420,678); -- Crystal Rain
 INSERT INTO `mob_skill_lists` VALUES ('Rogue_Receptacle',421,520); -- Double Ray
 INSERT INTO `mob_skill_lists` VALUES ('Ullikummi',422,1035); -- Heavy Strike
--- 423 to 435: free
+INSERT INTO `mob_skill_lists` VALUES ('OrcCaster',423,605);
+INSERT INTO `mob_skill_lists` VALUES ('OrcCaster',423,606);
+INSERT INTO `mob_skill_lists` VALUES ('OrcCaster',423,608);
+INSERT INTO `mob_skill_lists` VALUES ('OrcCaster',423,766);
+-- 424 to 435: free
 INSERT INTO `mob_skill_lists` VALUES ('Bloodlapper',436,2162);
 INSERT INTO `mob_skill_lists` VALUES ('Ghillie_Dhu',437,685);
 INSERT INTO `mob_skill_lists` VALUES ('Highlander_Lizard',438,371);
@@ -2208,6 +2204,7 @@ INSERT INTO `mob_skill_lists` VALUES ('Zeid',480,980); -- Freeze Bite
 INSERT INTO `mob_skill_lists` VALUES ('Zeid',480,981); -- GroundStrike
 INSERT INTO `mob_skill_lists` VALUES ('Zeid',480,982); -- Abyssal Drain
 INSERT INTO `mob_skill_lists` VALUES ('Zeid',480,983); -- Abyssal strike
+INSERT INTO `mob_skill_lists` VALUES ('Zeid',480,987); -- Shockwave
 INSERT INTO `mob_skill_lists` VALUES ('Ajido-Marujido',481,988); -- Warp In (Works the same as Ealdnarche's)
 INSERT INTO `mob_skill_lists` VALUES ('Ajido-Marujido',481,989); -- Warp Out (Works the same as Ealdnarche's)
 INSERT INTO `mob_skill_lists` VALUES ('Volker',482,973); -- Red Lotus Blade
@@ -2343,12 +2340,7 @@ INSERT INTO `mob_skill_lists` VALUES ('Craver_NM',707,1234);
 INSERT INTO `mob_skill_lists` VALUES ('Craver_NM',707,1274);
 INSERT INTO `mob_skill_lists` VALUES ('Craver_NM',707,1275);
 INSERT INTO `mob_skill_lists` VALUES ('Craver_NM',707,1276);
--- INSERT INTO `mob_skill_lists` VALUES ('Propagator',708,741); -- Replaced with list 138
--- INSERT INTO `mob_skill_lists` VALUES ('Propagator',708,744);
--- INSERT INTO `mob_skill_lists` VALUES ('Propagator',708,747);
--- INSERT INTO `mob_skill_lists` VALUES ('Propagator',708,750);
--- INSERT INTO `mob_skill_lists` VALUES ('Propagator',708,752);
--- INSERT INTO `mob_skill_lists` VALUES ('Propagator',708,755);
+-- 708: free
 INSERT INTO `mob_skill_lists` VALUES ('Jagil',709,449);
 INSERT INTO `mob_skill_lists` VALUES ('Jagil',709,450);
 INSERT INTO `mob_skill_lists` VALUES ('Jagil',709,451);
@@ -2654,8 +2646,8 @@ INSERT INTO `mob_skill_lists` VALUES ('Alexander_LowHP',785,2146); -- Void of Re
 INSERT INTO `mob_skill_lists` VALUES ('Alexander_LowHP',785,2147); -- Divine Judgment    "Accept thy destruction..."
 INSERT INTO `mob_skill_lists` VALUES ('Alkonost',786,576); -- back heel
 INSERT INTO `mob_skill_lists` VALUES ('Alkonost',786,578); -- nihlity song
--- INSERT INTO `mob_skill_lists` VALUES ('Alkonost',786,579); -- choke breath
--- INSERT INTO `mob_skill_lists` VALUES ('Alkonost',786,580); -- fantod
+INSERT INTO `mob_skill_lists` VALUES ('Alkonost',786,579); -- choke breath
+INSERT INTO `mob_skill_lists` VALUES ('Alkonost',786,580); -- fantod
 INSERT INTO `mob_skill_lists` VALUES ('Alkonost',786,1330); -- hoof volley
 INSERT INTO `mob_skill_lists` VALUES ('Alkonost',786,2828); -- jettatura
 -- 787: free
@@ -3688,8 +3680,6 @@ INSERT INTO `mob_skill_lists` VALUES ('Kamlanaut (Apoc Nigh)',1143,829); -- Grea
 INSERT INTO `mob_skill_lists` VALUES ('Kamlanaut (Apoc Nigh)',1143,830); -- Light Blade
 INSERT INTO `mob_skill_lists` VALUES ('Ealdnarche (Apoc Nigh)',1144,985); -- Stellar Burst
 INSERT INTO `mob_skill_lists` VALUES ('Ealdnarche (Apoc Nigh)',1144,986); -- Vortex
-INSERT INTO `mob_skill_lists` VALUES ('Ealdnarche (Apoc Nigh)',1144,988); -- Warp In (Works the same as Ealdnarche's)
-INSERT INTO `mob_skill_lists` VALUES ('Ealdnarche (Apoc Nigh)',1144,989); -- Warp Out (Works the same as Ealdnarche's)
 INSERT INTO `mob_skill_lists` VALUES ('Ealdnarche (Apoc Nigh)',1144,1006); -- Omega Javelin
 INSERT INTO `mob_skill_lists` VALUES ('Atori-Tutori_qm',1145,7); -- Howling Fist
 INSERT INTO `mob_skill_lists` VALUES ('Atori-Tutori_qm',1145,9); -- Asuran Fists
@@ -3893,14 +3883,9 @@ INSERT INTO `mob_skill_lists` VALUES ('Snaggletooth_Peapuk',2006,1722);
 INSERT INTO `mob_skill_lists` VALUES ('Snaggletooth_Peapuk',2006,1724);
 
 INSERT INTO `mob_skill_lists` VALUES ('Dahak',2007,642); -- flame_breath
-INSERT INTO `mob_skill_lists` VALUES ('Dahak',2007,643); -- poison_breath
-INSERT INTO `mob_skill_lists` VALUES ('Dahak',2007,644); -- wind_breath
 INSERT INTO `mob_skill_lists` VALUES ('Dahak',2007,645); -- body_slam
-INSERT INTO `mob_skill_lists` VALUES ('Dahak',2007,646); -- heavy_stomp
-INSERT INTO `mob_skill_lists` VALUES ('Dahak',2007,647); -- chaos_blade
 INSERT INTO `mob_skill_lists` VALUES ('Dahak',2007,648); -- petro_eyes
 INSERT INTO `mob_skill_lists` VALUES ('Dahak',2007,650); -- thornsong
-INSERT INTO `mob_skill_lists` VALUES ('Dahak',2007,651); -- lodesong
 INSERT INTO `mob_skill_lists` VALUES ('Dahak',2007,1792); -- nullsong
 
 INSERT INTO `mob_skill_lists` VALUES ('Fairy_Ring_Attack',2008,1620); -- mephitic_spore
@@ -3931,10 +3916,10 @@ INSERT INTO `mob_skill_lists` VALUES ('Colo-Colo',2014,394); -- blood_drain
 INSERT INTO `mob_skill_lists` VALUES ('Colo-Colo',2014,1155); -- subsonics
 INSERT INTO `mob_skill_lists` VALUES ('Colo-Colo',2014,1156); -- marrow_drain
 
-INSERT INTO `mob_skill_lists` VALUES ('Furies',2015,395); -- jetstream
-INSERT INTO `mob_skill_lists` VALUES ('Furies',2015,393); -- sonic_boom
-INSERT INTO `mob_skill_lists` VALUES ('Furies',2015,1157); -- slipstream
-INSERT INTO `mob_skill_lists` VALUES ('Furies',2015,1158); -- turbulence
+INSERT INTO `mob_skill_lists` VALUES ('Bat_CoP',2015,395); -- jetstream
+INSERT INTO `mob_skill_lists` VALUES ('Bat_CoP',2015,393); -- sonic_boom
+INSERT INTO `mob_skill_lists` VALUES ('Bat_CoP',2015,1157); -- slipstream
+INSERT INTO `mob_skill_lists` VALUES ('Bat_CoP',2015,1158); -- turbulence
 
 INSERT INTO `mob_skill_lists` VALUES ('Mind_Hoarder',2016,524); -- mind_drain
 
@@ -4073,11 +4058,11 @@ INSERT INTO `mob_skill_lists` VALUES ('Himinrjot',2042,497); -- Lowing
 -- Himinrjot auto-attacks
 INSERT INTO `mob_skill_lists` VALUES ('Himinrjot_aa',2043,2127); -- Snort (2127)
 
-INSERT INTO `mob_skill_lists` VALUES ('Morbol_Emperor',2044,316);  -- Impale
-INSERT INTO `mob_skill_lists` VALUES ('Morbol_Emperor',2044,317);  -- Vampiric Lash
-INSERT INTO `mob_skill_lists` VALUES ('Morbol_Emperor',2044,319);  -- Bad Breath
-INSERT INTO `mob_skill_lists` VALUES ('Morbol_Emperor',2044,320);  -- Sweet Breath
-INSERT INTO `mob_skill_lists` VALUES ('Morbol_Emperor',2044,1793); -- Vampiric Root
+INSERT INTO `mob_skill_lists` VALUES ('Morbol_ToAU',2044,316);  -- Impale
+INSERT INTO `mob_skill_lists` VALUES ('Morbol_ToAU',2044,317);  -- Vampiric Lash
+INSERT INTO `mob_skill_lists` VALUES ('Morbol_ToAU',2044,319);  -- Bad Breath
+INSERT INTO `mob_skill_lists` VALUES ('Morbol_ToAU',2044,320);  -- Sweet Breath
+INSERT INTO `mob_skill_lists` VALUES ('Morbol_ToAU',2044,1793); -- Vampiric Root
 
 INSERT INTO `mob_skill_lists` VALUES ('Nihhus',2045,2099); -- Batterhorn
 INSERT INTO `mob_skill_lists` VALUES ('Nihhus',2045,2100); -- Clobber
@@ -4178,7 +4163,131 @@ INSERT INTO `mob_skill_lists` VALUES ('Gladiatorial_Weapon',2062,398);
 INSERT INTO `mob_skill_lists` VALUES ('Gladiatorial_Weapon',2062,513);
 INSERT INTO `mob_skill_lists` VALUES ('Gladiatorial_Weapon',2062,514);
 
--- Next ID : 2063
+INSERT INTO `mob_skill_lists` VALUES ('The_Waughoon_Kid',2063,581);
+INSERT INTO `mob_skill_lists` VALUES ('The_Waughoon_Kid',2063,583);
+INSERT INTO `mob_skill_lists` VALUES ('The_Waughoon_Kid',2063,584);
+INSERT INTO `mob_skill_lists` VALUES ('The_Waughoon_Kid',2063,586);
+
+INSERT INTO `mob_skill_lists` VALUES ('Prehistoric_Pigeons',2064,400); -- Triple Attack
+INSERT INTO `mob_skill_lists` VALUES ('Prehistoric_Pigeons',2064,402); -- Feather Barrier
+INSERT INTO `mob_skill_lists` VALUES ('Prehistoric_Pigeons',2064,403); -- Stormwind
+INSERT INTO `mob_skill_lists` VALUES ('Prehistoric_Pigeons',2064,922); -- Blind Vortex
+INSERT INTO `mob_skill_lists` VALUES ('Prehistoric_Pigeons',2064,923); -- Giga Scream
+INSERT INTO `mob_skill_lists` VALUES ('Prehistoric_Pigeons',2064,924); -- Dread Dive
+
+INSERT INTO `mob_skill_lists` VALUES ('Celery',2065,472);  -- Grave Reel
+INSERT INTO `mob_skill_lists` VALUES ('Celery',2065,473);  -- Ectosmash
+INSERT INTO `mob_skill_lists` VALUES ('Celery',2065,474);  -- Fear Touch
+INSERT INTO `mob_skill_lists` VALUES ('Celery',2065,475);  -- Terror Touch
+INSERT INTO `mob_skill_lists` VALUES ('Celery',2065,1339); -- Bane
+INSERT INTO `mob_skill_lists` VALUES ('Celery',2065,477);  -- Dark Sphere
+
+INSERT INTO `mob_skill_lists` VALUES ('Spell_Spitter_Spilospok',2066,1082); -- Smokebomb
+INSERT INTO `mob_skill_lists` VALUES ('Spell_Spitter_Spilospok',2066,1084); -- Crispy Candle
+INSERT INTO `mob_skill_lists` VALUES ('Spell_Spitter_Spilospok',2066,1086); -- Paralysis Shower
+
+INSERT INTO `mob_skill_lists` VALUES ('Book_Browser_Bokabraq',2067,1084); -- Crispy Candle
+INSERT INTO `mob_skill_lists` VALUES ('Book_Browser_Bokabraq',2067,1088); -- Goblin Rush
+
+INSERT INTO `mob_skill_lists` VALUES ('Chemical_Cook_Chemachiq',2068,1084); -- Crispy Candle
+INSERT INTO `mob_skill_lists` VALUES ('Chemical_Cook_Chemachiq',2068,1088); -- Goblin Rush
+
+INSERT INTO `mob_skill_lists` VALUES ('Flame_Dragon',2069,642); -- Flame Breath
+INSERT INTO `mob_skill_lists` VALUES ('Flame_Dragon',2069,645); -- Body Slam
+INSERT INTO `mob_skill_lists` VALUES ('Flame_Dragon',2069,647); -- Chaos Blade
+INSERT INTO `mob_skill_lists` VALUES ('Flame_Dragon',2069,649); -- Voidsong
+
+INSERT INTO `mob_skill_lists` VALUES ('Poison_Dragon',2070,643); -- Poison Breath
+INSERT INTO `mob_skill_lists` VALUES ('Poison_Dragon',2070,645); -- Body Slam
+INSERT INTO `mob_skill_lists` VALUES ('Poison_Dragon',2070,647); -- Chaos Blade
+INSERT INTO `mob_skill_lists` VALUES ('Poison_Dragon',2070,651); -- Lodesong
+
+INSERT INTO `mob_skill_lists` VALUES ('Wind_Dragon',2071,644); -- Wind Breath
+INSERT INTO `mob_skill_lists` VALUES ('Wind_Dragon',2071,646); -- Heavy Stomp
+INSERT INTO `mob_skill_lists` VALUES ('Wind_Dragon',2071,648); -- Petro Eyes
+INSERT INTO `mob_skill_lists` VALUES ('Wind_Dragon',2071,650); -- Thornsong
+
+INSERT INTO `mob_skill_lists` VALUES ('Dragonian_Berzerker',2072,645); -- Body Slam
+INSERT INTO `mob_skill_lists` VALUES ('Dragonian_Berzerker',2072,646); -- Heavy Stomp
+
+INSERT INTO `mob_skill_lists` VALUES ('Dragonian_Minstrel',2073,649); -- Voidsong
+INSERT INTO `mob_skill_lists` VALUES ('Dragonian_Minstrel',2073,650); -- Thornsong
+INSERT INTO `mob_skill_lists` VALUES ('Dragonian_Minstrel',2073,651); -- Lodesong
+
+INSERT INTO `mob_skill_lists` VALUES ('Fire_Pukis',2074,642); -- Flame Breath
+INSERT INTO `mob_skill_lists` VALUES ('Fire_Pukis',2074,645); -- Body Slam
+INSERT INTO `mob_skill_lists` VALUES ('Fire_Pukis',2074,646); -- Heavy Stomp
+INSERT INTO `mob_skill_lists` VALUES ('Fire_Pukis',2074,647); -- Chaos Blade
+
+INSERT INTO `mob_skill_lists` VALUES ('Poison_Pukis',2075,643); -- Poison Breath
+INSERT INTO `mob_skill_lists` VALUES ('Poison_Pukis',2075,645); -- Body Slam
+INSERT INTO `mob_skill_lists` VALUES ('Poison_Pukis',2075,646); -- Heavy Stomp
+INSERT INTO `mob_skill_lists` VALUES ('Poison_Pukis',2075,647); -- Chaos Blade
+
+INSERT INTO `mob_skill_lists` VALUES ('Wind_Pukis',2076,644); -- Wind Breath
+INSERT INTO `mob_skill_lists` VALUES ('Wind_Pukis',2076,645); -- Body Slam
+INSERT INTO `mob_skill_lists` VALUES ('Wind_Pukis',2076,646); -- Heavy Stomp
+INSERT INTO `mob_skill_lists` VALUES ('Wind_Pukis',2076,647); -- Chaos Blade
+
+INSERT INTO `mob_skill_lists` VALUES ('Petro_Pukis',2077,648); -- Petro Eyes
+INSERT INTO `mob_skill_lists` VALUES ('Petro_Pukis',2077,649); -- Voidsong
+INSERT INTO `mob_skill_lists` VALUES ('Petro_Pukis',2077,650); -- Thornsong
+INSERT INTO `mob_skill_lists` VALUES ('Petro_Pukis',2077,651); -- Lodesong
+
+INSERT INTO `mob_skill_lists` VALUES ('Vanguard_Dragon',2078,645); -- Body Slam
+INSERT INTO `mob_skill_lists` VALUES ('Vanguard_Dragon',2078,646); -- Heavy Stomp
+INSERT INTO `mob_skill_lists` VALUES ('Vanguard_Dragon',2078,647); -- Chaos Blade
+INSERT INTO `mob_skill_lists` VALUES ('Vanguard_Dragon',2078,648); -- Petro Eyes
+
+INSERT INTO `mob_skill_lists` VALUES ('Yang',2079,642); -- Flame Breath
+INSERT INTO `mob_skill_lists` VALUES ('Yang',2079,643); -- Poison Breath
+INSERT INTO `mob_skill_lists` VALUES ('Yang',2079,644); -- Wind Breath
+INSERT INTO `mob_skill_lists` VALUES ('Yang',2079,645); -- Body Slam
+INSERT INTO `mob_skill_lists` VALUES ('Yang',2079,647); -- Chaos Blade
+
+INSERT INTO `mob_skill_lists` VALUES ('Ying',2080,646); -- Heavy Stomp
+INSERT INTO `mob_skill_lists` VALUES ('Ying',2080,648); -- Petro Eyes
+INSERT INTO `mob_skill_lists` VALUES ('Ying',2080,649); -- Voidsong
+INSERT INTO `mob_skill_lists` VALUES ('Ying',2080,650); -- Thornsong
+INSERT INTO `mob_skill_lists` VALUES ('Ying',2080,651); -- Lodesong
+
+INSERT INTO `mob_skill_lists` VALUES ('Alklha',2081,647); -- Chaos Blade
+INSERT INTO `mob_skill_lists` VALUES ('Alklha',2081,648); -- Petro Eyes
+
+INSERT INTO `mob_skill_lists` VALUES ('Aitvaras',2082,649); -- Voidsong
+INSERT INTO `mob_skill_lists` VALUES ('Aitvaras',2082,650); -- Thornsong
+INSERT INTO `mob_skill_lists` VALUES ('Aitvaras',2082,651); -- Lodesong
+
+INSERT INTO `mob_skill_lists` VALUES ('Barong',2083,645); -- Body Slam
+INSERT INTO `mob_skill_lists` VALUES ('Barong',2083,646); -- Heavy Stomp
+
+INSERT INTO `mob_skill_lists` VALUES ('Stihi',2084,642); -- Flame Breath
+INSERT INTO `mob_skill_lists` VALUES ('Stihi',2084,643); -- Poison Breath
+INSERT INTO `mob_skill_lists` VALUES ('Stihi',2084,644); -- Wind Breath
+
+INSERT INTO `mob_skill_lists` VALUES ('Graoully',2085,642); -- Flame Breath
+INSERT INTO `mob_skill_lists` VALUES ('Graoully',2085,649); -- Voidsong
+INSERT INTO `mob_skill_lists` VALUES ('Graoully',2085,1792); -- Nullsong
+
+INSERT INTO `mob_skill_lists` VALUES ('Shadowsoul_Devourer',2086,642); -- Flame Breath
+INSERT INTO `mob_skill_lists` VALUES ('Shadowsoul_Devourer',2086,645); -- Body Slam
+INSERT INTO `mob_skill_lists` VALUES ('Shadowsoul_Devourer',2086,650); -- Thornsong
+INSERT INTO `mob_skill_lists` VALUES ('Shadowsoul_Devourer',2086,1792); -- Nullsong
+
+INSERT INTO `mob_skill_lists` VALUES ('Hraun_Dragon',2087,642); -- Flame Breath
+INSERT INTO `mob_skill_lists` VALUES ('Hraun_Dragon',2087,645); -- Body Slam
+INSERT INTO `mob_skill_lists` VALUES ('Hraun_Dragon',2087,648); -- Petro Eyes
+INSERT INTO `mob_skill_lists` VALUES ('Hraun_Dragon',2087,649); -- Voidsong
+
+INSERT INTO `mob_skill_lists` VALUES ('Shooting_Fish',2088,313); -- Counterspore
+
+INSERT INTO `mob_skill_lists` VALUES ('Bird_Expansion',2089,622);  -- Helldive
+INSERT INTO `mob_skill_lists` VALUES ('Bird_Expansion',2089,623);  -- Wing Cutter
+INSERT INTO `mob_skill_lists` VALUES ('Bird_Expansion',2089,1159); -- Broadside Barrage
+INSERT INTO `mob_skill_lists` VALUES ('Bird_Expansion',2089,1160); -- Blind Side Barrage
+INSERT INTO `mob_skill_lists` VALUES ('Bird_Expansion',2089,1161); -- Damnation Dive
+
+-- Next ID : 2090
 
 -- ------------------------------------------------------------
 -- Start of Ambuscade section

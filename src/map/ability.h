@@ -1,4 +1,4 @@
-﻿/*
+/*
 ===========================================================================
 
   Copyright (c) 2010-2015 Darkstar Dev Teams
@@ -23,12 +23,12 @@
 #define _CABILITY_H
 
 #include "common/cbasetypes.h"
-#include "common/mmo.h"
-#include "packets/action.h"
 
 #include "entities/battleentity.h"
+#include "enums/action/animation.h"
 #include "status_effect.h"
 
+enum class ActionCategory : uint8_t;
 enum ADDTYPE
 {
     ADDTYPE_NORMAL      = 0,
@@ -671,7 +671,6 @@ enum ABILITY
     ABILITY_TORNADO_II        = 968,
     ABILITY_WINDS_BLESSING    = 969,
     ABILITY_HYSTERIC_ASSAULT  = 970
-
 };
 
 #define MAX_ABILITY_ID 971
@@ -705,21 +704,21 @@ public:
     uint16          getMobSkillID() const;
     JOBTYPE         getJob();
     uint8           getLevel() const;
-    uint16          getAnimationID() const;
+    auto            getAnimationID() const -> ActionAnimation;
     timer::duration getAnimationTime();
     timer::duration getCastTime();
     float           getRange() const;
     uint8           getAOE() const;
     uint16          getValidTarget() const;
     uint16          getAddType() const;
-    uint16          getMessage() const;
-    uint16          getAoEMsg() const;
+    auto            getMessage() const -> MSGBASIC_ID;
+    auto            getAoEMsg() const -> MSGBASIC_ID;
     timer::duration getRecastTime() const;
     uint16          getRecastId() const;
     int32           getCE() const;
     int32           getVE() const;
     uint16          getMeritModID() const;
-    ACTIONTYPE      getActionType();
+    auto            getActionType() const -> ActionCategory;
     EFFECT          getPostActionEffectCleanup();
 
     void setID(uint16 id);
@@ -738,7 +737,7 @@ public:
     void setCE(int32 CE);
     void setVE(int32 VE);
     void setMeritModID(uint16 value);
-    void setActionType(ACTIONTYPE type);
+    void setActionType(ActionCategory type);
     void setPostActionEffectCleanup(EFFECT effectToCleanup);
 
     const std::string& getName();
@@ -762,7 +761,7 @@ private:
     int32           m_VE;
     uint16          m_meritModID;
     std::string     m_name;
-    ACTIONTYPE      m_actionType{};
+    ActionCategory  m_actionType{};
     EFFECT          m_cleanupEffect{};
 };
 
@@ -774,16 +773,18 @@ private:
 
 namespace ability
 {
-    void LoadAbilitiesList();
 
-    CAbility* GetAbility(uint16 AbilityID);
+void LoadAbilitiesList();
 
-    CAbility* GetTwoHourAbility(JOBTYPE JobID);
-    bool      CanLearnAbility(CBattleEntity* PUser, uint16 AbilityID);
-    Charge_t* GetCharge(CBattleEntity* PUser, uint16 chargeID);
-    uint32    GetAbsorbMessage(uint32 message);
+CAbility* GetAbility(uint16 AbilityID);
 
-    std::vector<CAbility*> GetAbilities(JOBTYPE JobID);
+CAbility* GetTwoHourAbility(JOBTYPE JobID);
+bool      CanLearnAbility(CBattleEntity* PUser, uint16 AbilityID);
+Charge_t* GetCharge(CBattleEntity* PUser, uint16 chargeID);
+auto      GetAbsorbMessage(MSGBASIC_ID msg) -> MSGBASIC_ID;
+
+std::vector<CAbility*> GetAbilities(JOBTYPE JobID);
+
 }; // namespace ability
 
 #endif

@@ -1,7 +1,7 @@
 -----------------------------------
 -- Copycat
 -- Waughroon Shrine KSNM30, Clotho Orb
--- !additem 1180
+-- !additem 1175
 -----------------------------------
 local waughroonID = zones[xi.zone.WAUGHROON_SHRINE]
 -----------------------------------
@@ -9,17 +9,19 @@ local waughroonID = zones[xi.zone.WAUGHROON_SHRINE]
 local content = Battlefield:new({
     zoneId           = xi.zone.WAUGHROON_SHRINE,
     battlefieldId    = xi.battlefield.id.COPYCAT,
-    maxPlayers       = 18,
+    maxPlayers       = 6,
     timeLimit        = utils.minutes(30),
     index            = 16,
     entryNpc         = 'BC_Entrance',
     exitNpc          = 'Burning_Circle',
     requiredItems    = { xi.item.CLOTHO_ORB, wearMessage = waughroonID.text.A_CRACK_HAS_FORMED, wornMessage = waughroonID.text.ORB_IS_CRACKED },
-
-    experimental = true,
+    armouryCrates    =
+    {
+        waughroonID.mob.OSSCHAART + 1,
+        waughroonID.mob.OSSCHAART + 7,
+        waughroonID.mob.OSSCHAART + 13,
+    },
 })
-
--- TODO get the rest of the pets to work
 
 content.groups =
 {
@@ -27,92 +29,117 @@ content.groups =
         mobIds =
         {
             {
-                17367248,
+                waughroonID.mob.OSSCHAART,
             },
 
             {
-                17367254,
+                waughroonID.mob.OSSCHAART + 6,
             },
 
             {
-                17367260,
+                waughroonID.mob.OSSCHAART + 12,
             },
         },
-
         allDeath = utils.bind(content.handleAllMonstersDefeated, content),
     },
-}
 
-content.armouryCrates =
-{
-    17367249,
-    17367255,
-    17367261,
+    {
+        mobIds =
+        {
+            {
+                waughroonID.mob.OSSCHAART + 2, -- Bat
+                waughroonID.mob.OSSCHAART + 3, -- Wyvern
+                waughroonID.mob.OSSCHAART + 4, -- Avatar
+                waughroonID.mob.OSSCHAART + 5, -- Automaton
+            },
+
+            {
+                waughroonID.mob.OSSCHAART + 8,  -- Bat
+                waughroonID.mob.OSSCHAART + 9,  -- Wyvern
+                waughroonID.mob.OSSCHAART + 10, -- Avatar
+                waughroonID.mob.OSSCHAART + 11, -- Automaton
+            },
+
+            {
+                waughroonID.mob.OSSCHAART + 14, -- Bat
+                waughroonID.mob.OSSCHAART + 15, -- Wyvern
+                waughroonID.mob.OSSCHAART + 16, -- Avatar
+                waughroonID.mob.OSSCHAART + 17, -- Automaton
+            },
+        },
+        spawned = false,
+    },
 }
 
 content.loot =
 {
     {
-        { itemId =   655, weight = 1000 }, -- Adaman Ingot
+        { itemId = xi.item.GIL,                        weight = 1000, amount = 24000 },
     },
+
     {
-        { itemId =  1474, weight = 1000 }, -- Infinity Core (custom drop)
+        { itemId = xi.item.ADAMAN_INGOT,               weight = 1000 },
     },
+
     {
-        { itemId =   557, weight =  250 }, -- Ahriman Lens
-        { itemId =   935, weight =  250 }, -- Ahriman Wing
-        { itemId = 19025, weight =   50 }, -- Pole Grip
-        { itemId = 19024, weight =   15 }, -- Sword Strap
-        { itemId = 19026, weight =  250 }, -- Spear Strap
+        { itemId = xi.item.COFFINMAKER,                weight = 250 },
+        { itemId = xi.item.DESTROYERS,                 weight = 250 },
+        { itemId = xi.item.EXPUNGER,                   weight = 250 },
+        { itemId = xi.item.RETRIBUTOR,                 weight = 250 },
     },
+
     {
-        { itemId = 17275, weight =  250 }, -- Coffinmaker
-        { itemId = 17509, weight =  250 }, -- Destroyers
-        { itemId = 17207, weight =  250 }, -- Expunger
-        { itemId = 17944, weight =  250 }, -- Retributor
+        { itemId = xi.item.AHRIMAN_LENS,               weight = 350 },
+        { itemId = xi.item.AHRIMAN_WING,               weight = 350 },
+        { itemId = xi.item.SWORD_STRAP,                weight = 150 },
+        { itemId = xi.item.POLE_GRIP,                  weight = 100 },
+        { itemId = xi.item.SPEAR_STRAP,                weight = 150 },
     },
+
     {
-        { itemId = 14762, weight =  250 }, -- Atillas Earring
-        { itemId = 17700, weight =  250 }, -- Durandal
-        { itemId = 18006, weight =  250 }, -- Hoplites Harpe
-        { itemId = 17842, weight =  250 }, -- Sorrowful Harpe
+        { itemId = xi.item.ADAMAN_INGOT,               weight = 250 },
+        { itemId = xi.item.ORICHALCUM_INGOT,           weight = 250 },
+        { itemId = xi.item.FUMA_SUNE_ATE,              weight = 500 },
     },
+
     {
-        { itemId = 15327, weight =  550 }, -- Fuma Sune-ate
-        { itemId =   646, weight =  200 }, -- Chunk of Adaman Ore
-        { itemId =   747, weight =  250 }, -- Orichalcum Ingot
+        { itemId = xi.item.DURANDAL,                   weight = 250 },
+        { itemId = xi.item.HOPLITES_HARPE,             weight = 250 },
+        { itemId = xi.item.SORROWFUL_HARP,             weight = 250 },
+        { itemId = xi.item.ATTILAS_EARRING,            weight = 250 },
     },
+
     {
-        { itemId =   887, weight =   50 }, -- Coral Fragment
-        { itemId =   645, weight =   50 }, -- Chunk of Darksteel Ore
-        { itemId =   902, weight =   50 }, -- Demon Horn
-        { itemId =   702, weight =   50 }, -- Ebony Log
-        { itemId =   737, weight =   50 }, -- Chunk of Gold Ore
-        { itemId =   823, weight =   50 }, -- Spool of Gold Thread
-        { itemId =  4173, weight =   50 }, -- Hi-Reraiser
-        { itemId =   738, weight =   50 }, -- Chunk of Platinum Ore
-        { itemId =   700, weight =   50 }, -- Mahogany Log
-        { itemId =   837, weight =   50 }, -- Spool of Malboro Fiber
-        { itemId =   644, weight =   50 }, -- Chunk of Mythril Ore
-        { itemId =   703, weight =   50 }, -- Petrified Log
-        { itemId =   830, weight =   50 }, -- Square of Rainbow Cloth
-        { itemId =   895, weight =   50 }, -- Ram Horn
-        { itemId =  1132, weight =   50 }, -- Square of Raxa
-        { itemId =  4172, weight =   50 }, -- Reraiser
-        { itemId =  4174, weight =   50 }, -- Vile Elixier
-        { itemId =  4175, weight =   50 }, -- Vile Elixir +1
-        { itemId =  2142, weight =   50 }, -- Wailing Ram Horn
-        { itemId =  866,  weight =   50 }, -- Handful of Wyvern Scales
-        { itemId =  942,  weight =   50 }, -- Philosophers Stone
+        { itemId = xi.item.CHUNK_OF_DARKSTEEL_ORE,     weight =  50 },
+        { itemId = xi.item.CHUNK_OF_GOLD_ORE,          weight =  50 },
+        { itemId = xi.item.CHUNK_OF_MYTHRIL_ORE,       weight =  50 },
+        { itemId = xi.item.CHUNK_OF_PLATINUM_ORE,      weight =  50 },
+        { itemId = xi.item.EBONY_LOG,                  weight =  50 },
+        { itemId = xi.item.MAHOGANY_LOG,               weight =  50 },
+        { itemId = xi.item.PETRIFIED_LOG,              weight =  50 },
+        { itemId = xi.item.PHILOSOPHERS_STONE,         weight =  50 },
+        { itemId = xi.item.SPOOL_OF_GOLD_THREAD,       weight =  50 },
+        { itemId = xi.item.SQUARE_OF_RAINBOW_CLOTH,    weight =  50 },
+        { itemId = xi.item.SQUARE_OF_RAXA,             weight =  50 },
+        { itemId = xi.item.CORAL_FRAGMENT,             weight =  50 },
+        { itemId = xi.item.DEMON_HORN,                 weight =  50 },
+        { itemId = xi.item.HANDFUL_OF_WYVERN_SCALES,   weight =  50 },
+        { itemId = xi.item.RAM_HORN,                   weight =  50 },
+        { itemId = xi.item.SLAB_OF_GRANITE,            weight =  50 },
+        { itemId = xi.item.RERAISER,                   weight =  50 },
+        { itemId = xi.item.HI_RERAISER,                weight =  50 },
+        { itemId = xi.item.VILE_ELIXIR,                weight =  50 },
+        { itemId = xi.item.VILE_ELIXIR_P1,             weight =  50 },
     },
+
     {
-        { itemId = 1110,  weight =   50 }, -- Vial of Black Beetle Blood
-        { itemId =  836,  weight =   50 }, -- Square of Damascene Cloth
-        { itemId =  658,  weight =   50 }, -- Damascus Ingot
-        { itemId =  837,  weight =   50 }, -- Spool of Malboro Fiber
-        { itemId =  942,  weight =  300 }, -- Philosophers Stone
-        { itemId =  844,  weight =  300 }, -- Phoenix Feather
-        { itemId =  1132, weight =  200 }, -- Square of Raxa
+        { itemId = xi.item.VIAL_OF_BLACK_BEETLE_BLOOD, weight =  63 },
+        { itemId = xi.item.SQUARE_OF_DAMASCENE_CLOTH,  weight =  62 },
+        { itemId = xi.item.DAMASCUS_INGOT,             weight =  62 },
+        { itemId = xi.item.SPOOL_OF_MALBORO_FIBER,     weight =  63 },
+        { itemId = xi.item.PHILOSOPHERS_STONE,         weight = 200 },
+        { itemId = xi.item.PHOENIX_FEATHER,            weight = 350 },
+        { itemId = xi.item.SQUARE_OF_RAXA,             weight = 200 },
     },
 }
 

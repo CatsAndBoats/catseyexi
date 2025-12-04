@@ -22,11 +22,7 @@
 #include "common/logging.h"
 #include "common/timer.h"
 
-#include "packets/inventory_finish.h"
-#include "packets/inventory_item.h"
-
 #include "entities/charentity.h"
-#include "item_container.h"
 #include "recast_container.h"
 
 CRecastContainer::CRecastContainer(CBattleEntity* PEntity)
@@ -169,9 +165,15 @@ void CRecastContainer::Del(RECASTTYPE type, uint16 id)
     }
     else
     {
-        PRecastList->erase(std::remove_if(PRecastList->begin(), PRecastList->end(), [&id](auto& recast)
-                                          { return recast.ID == id; }),
-                           PRecastList->end());
+        PRecastList->erase(
+            std::remove_if(
+                PRecastList->begin(),
+                PRecastList->end(),
+                [&id](auto& recast)
+                {
+                    return recast.ID == id;
+                }),
+            PRecastList->end());
     }
 }
 

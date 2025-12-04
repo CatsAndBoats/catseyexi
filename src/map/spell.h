@@ -1,4 +1,4 @@
-﻿/*
+/*
 ===========================================================================
 
   Copyright (c) 2010-2015 Darkstar Dev Teams
@@ -26,6 +26,9 @@
 
 #define CANNOT_USE_SPELL 0
 
+enum class ActionAnimation : uint16_t;
+enum class ActionModifier : uint32_t;
+enum class FourCC : uint32_t;
 enum SPELLGROUP
 {
     SPELLGROUP_NONE      = 0,
@@ -1057,9 +1060,9 @@ public:
     timer::duration    getCastTime() const;
     timer::duration    getRecastTime() const;
     uint16             getValidTarget() const;
-    uint16             getAnimationID() const;
+    auto               getAnimationID() const -> ActionAnimation;
     timer::duration    getAnimationTime() const;
-    SPELLGROUP         getSpellGroup();
+    auto               getSpellGroup() const -> SPELLGROUP;
     SPELLFAMILY        getSpellFamily();
     uint8              getSkillType() const;
     uint16             getZoneMisc() const;
@@ -1067,20 +1070,21 @@ public:
     uint16             getBase() const;
     uint16             getElement() const;
     float              getMultiplier() const;
-    uint16             getMessage() const;
+    auto               getMessage() const -> MSGBASIC_ID;
     uint16             getDefaultMessage();
     uint16             getMagicBurstMessage() const;
     int32              getCE() const;
     int32              getVE() const;
     timer::duration    getModifiedRecast() const;
     float              getRadius() const;
-    uint16             getAoEMessage() const; // returns the single target message for AoE moves
+    auto               getAoEMessage() const -> MSGBASIC_ID; // returns the single target message for AoE moves
     uint8              getRequirements() const;
     uint16             getMeritId() const;
     uint8              getFlag() const;
     const std::string& getContentTag();
     float              getRange() const;
     uint32             getPrimaryTargetID() const;
+    auto               getFourCC(bool interrupt = false) const -> FourCC;
     bool               tookEffect() const; // returns true if the spell landed, not resisted or missed
     bool               hasMPCost();        // checks if spell costs mp to use
     bool               isHeal();           // is a heal spell
@@ -1110,8 +1114,8 @@ public:
     void setMultiplier(float multiplier);
     void setMessage(uint16 message);
     void setMagicBurstMessage(uint16 message);
-    auto getModifier() -> MODIFIER;
-    void setModifier(MODIFIER modifier); // set Spell modifier message, MUST reset the modifier on use otherwise it will be stale
+    auto getModifier() const -> ActionModifier;
+    void setModifier(ActionModifier modifier); // set Spell modifier message, MUST reset the modifier on use otherwise it will be stale
     void setPrimaryTargetID(uint32);
 
     void setCE(int32 ce);
@@ -1153,7 +1157,7 @@ private:
     uint16                         m_element{};                       // element of spell
     uint16                         m_message{};                       // message id
     uint16                         m_MagicBurstMessage{};             // Message used for magic bursts.
-    MODIFIER                       m_MessageModifier{};               // Message modifier, "Cover!", "Resist!" or "Immunobreak!"
+    ActionModifier                 m_MessageModifier{};               // Message modifier, "Cover!", "Resist!" or "Immunobreak!"
     int32                          m_CE{};                            // cumulative enmity of spell
     int32                          m_VE{};                            // volatile enmity of spell
     std::string                    m_name;                            // spell name
@@ -1167,12 +1171,14 @@ private:
 // Namespace to work with spells
 namespace spell
 {
-    void LoadSpellList();
 
-    CSpell* GetSpellByMonsterSkillId(uint16 SkillID);
-    CSpell* GetSpell(SpellID SpellID);
-    bool    CanUseSpell(CBattleEntity* PCaster, SpellID SpellID);
-    bool    CanUseSpell(CBattleEntity* PCaster, CSpell* PSpell);
-    bool    CanUseSpellWith(SpellID spellId, JOBTYPE job, uint8 level);
-    float   GetSpellRadius(CSpell* spellId, CBattleEntity* PCaster);
+void LoadSpellList();
+
+CSpell* GetSpellByMonsterSkillId(uint16 SkillID);
+CSpell* GetSpell(SpellID SpellID);
+bool    CanUseSpell(CBattleEntity* PCaster, SpellID SpellID);
+bool    CanUseSpell(CBattleEntity* PCaster, CSpell* PSpell);
+bool    CanUseSpellWith(SpellID spellId, JOBTYPE job, uint8 level);
+float   GetSpellRadius(CSpell* spellId, CBattleEntity* PCaster);
+
 }; // namespace spell
