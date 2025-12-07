@@ -44,7 +44,7 @@ CMobSkill::CMobSkill(uint16 id)
 , m_TP(0)
 , m_HP(0)
 , m_HPP(0)
-, m_knockback(0)
+, m_knockback(Knockback::None)
 , m_primarySkillchain(0)
 , m_secondarySkillchain(0)
 , m_tertiarySkillchain(0)
@@ -342,7 +342,7 @@ int16 CMobSkill::getParam() const
 
 auto CMobSkill::getKnockback() const -> Knockback
 {
-    return static_cast<Knockback>(m_knockback);
+    return m_knockback;
 }
 
 bool CMobSkill::isDamageMsg() const
@@ -361,7 +361,7 @@ void CMobSkill::setParam(int16 value)
     m_Param = value;
 }
 
-void CMobSkill::setKnockback(uint8 knockback)
+void CMobSkill::setKnockback(const Knockback knockback)
 {
     m_knockback = knockback;
 }

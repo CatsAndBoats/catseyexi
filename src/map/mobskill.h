@@ -115,7 +115,7 @@ public:
     void setPrimaryTargetID(uint32 targid);
     void setFinalAnimationSub(uint8 newAnimationSub);
     void setParam(int16 value);
-    void setKnockback(uint8 knockback);
+    void setKnockback(Knockback knockback);
     void setPrimarySkillchain(uint8 skillchain);
     void setSecondarySkillchain(uint8 skillchain);
     void setTertiarySkillchain(uint8 skillchain);
@@ -142,7 +142,7 @@ private:
     int16           m_TP;             // the tp at the time of finish readying (for scripts)
     int32           m_HP;             // HP at the time of using mob skill (for scripts)
     uint8           m_HPP;            // HPP at the time of using mob skill (for scripts)
-    uint8           m_knockback;      // knockback value (0-7)
+    Knockback       m_knockback;      // knockback value (0-7)
     uint8           m_primarySkillchain;
     uint8           m_secondarySkillchain;
     uint8           m_tertiarySkillchain;

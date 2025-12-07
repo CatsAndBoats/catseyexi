@@ -630,23 +630,7 @@ INSERT INTO `mob_spell_lists` VALUES ('Elemental_Light',19,111,66,85);  -- regen
 INSERT INTO `mob_spell_lists` VALUES ('Elemental_Light',19,112,45,255); -- flash (45~255)
 INSERT INTO `mob_spell_lists` VALUES ('Elemental_Light',19,477,86,255); -- regen_iv (86~255)
 
--- Shadow_Lord (20)
-INSERT INTO `mob_spell_lists` VALUES ('Shadow_Lord',20,175,1,255); -- firaga_ii (1~255)
-INSERT INTO `mob_spell_lists` VALUES ('Shadow_Lord',20,180,1,255); -- blizzaga_ii (1~255)
-INSERT INTO `mob_spell_lists` VALUES ('Shadow_Lord',20,185,1,255); -- aeroga_ii (1~255)
-INSERT INTO `mob_spell_lists` VALUES ('Shadow_Lord',20,190,1,255); -- stonega_ii (1~255)
-INSERT INTO `mob_spell_lists` VALUES ('Shadow_Lord',20,195,1,255); -- thundaga_ii (1~255)
-INSERT INTO `mob_spell_lists` VALUES ('Shadow_Lord',20,200,1,255); -- waterga_ii (1~255)
-INSERT INTO `mob_spell_lists` VALUES ('Shadow_Lord',20,235,1,255); -- burn (1~255)
-INSERT INTO `mob_spell_lists` VALUES ('Shadow_Lord',20,236,1,255); -- frost (1~255)
-INSERT INTO `mob_spell_lists` VALUES ('Shadow_Lord',20,237,1,255); -- choke (1~255)
-INSERT INTO `mob_spell_lists` VALUES ('Shadow_Lord',20,238,1,255); -- rasp (1~255)
-INSERT INTO `mob_spell_lists` VALUES ('Shadow_Lord',20,239,1,255); -- shock (1~255)
-INSERT INTO `mob_spell_lists` VALUES ('Shadow_Lord',20,240,1,255); -- drown (1~255)
-INSERT INTO `mob_spell_lists` VALUES ('Shadow_Lord',20,245,1,255); -- drain (1~255)
-INSERT INTO `mob_spell_lists` VALUES ('Shadow_Lord',20,247,1,255); -- aspir (1~255)
-INSERT INTO `mob_spell_lists` VALUES ('Shadow_Lord',20,250,1,255); -- ice_spikes (1~255)
-INSERT INTO `mob_spell_lists` VALUES ('Shadow_Lord',20,254,1,255); -- blind (1~255)
+-- 20 free
 
 -- Kam_Lanaut (21)
 INSERT INTO `mob_spell_lists` VALUES ('Kam_Lanaut',21,356,76,255); -- paralyga (76~255)
@@ -2267,7 +2251,7 @@ INSERT INTO `mob_spell_lists` VALUES ('ThunderSpirit',208,166,66,74);  -- thunde
 INSERT INTO `mob_spell_lists` VALUES ('ThunderSpirit',208,167,75,91);  -- thunder_iv (75~91)
 INSERT INTO `mob_spell_lists` VALUES ('ThunderSpirit',208,168,92,255); -- thunder_v (92~255)
 INSERT INTO `mob_spell_lists` VALUES ('ThunderSpirit',208,212,56,255); -- burst (56~255)
-INSERT INTO `mob_spell_lists` VALUES ('ThunderSpirit',208,239,16,50);  -- shock (16~50)
+INSERT INTO `mob_spell_lists` VALUES ('ThunderSpirit',208,239,16,255);  -- shock (16~255)
 
 -- WaterSpirit (209)
 INSERT INTO `mob_spell_lists` VALUES ('WaterSpirit',209,169,5,29);   -- water (5~29)
@@ -2906,7 +2890,7 @@ INSERT INTO `mob_spell_lists` VALUES ('Nosferatu',293,277,1,255); -- dread_spike
 INSERT INTO `mob_spell_lists` VALUES ('Honor',294,356,1,255); -- paralyga (1~255)
 INSERT INTO `mob_spell_lists` VALUES ('Honor',294,359,1,255); -- silencega (1~255)
 
--- Bomb_Queen (295)
+-- Bomb_Queen / Big Bomb / Friars Lantern (295)
 INSERT INTO `mob_spell_lists` VALUES ('Bomb_Queen',295,100,24,255); -- enfire (24~255)
 INSERT INTO `mob_spell_lists` VALUES ('Bomb_Queen',295,147,73,85);  -- fire_iv (73~85)
 INSERT INTO `mob_spell_lists` VALUES ('Bomb_Queen',295,176,69,255); -- firaga_iii (69~255)

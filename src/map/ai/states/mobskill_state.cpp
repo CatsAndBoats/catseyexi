@@ -177,25 +177,39 @@ bool CMobSkillState::Update(timer::time_point tick)
     }
     if (IsCompleted() && tick > m_finishTime)
     {
-        auto* PTarget = GetTarget();
-        if (PTarget && PTarget->objtype == TYPE_MOB && PTarget != m_PEntity && m_PEntity->allegiance == ALLEGIANCE_TYPE::PLAYER)
+        // Only act if they're able
+        if (!m_PEntity->StatusEffectContainer->HasPreventActionEffect(false))
         {
-            static_cast<CMobEntity*>(PTarget)->PEnmityContainer->UpdateEnmity(m_PEntity, 0, 0);
-        }
-        m_PEntity->PAI->EventHandler.triggerListener("WEAPONSKILL_STATE_EXIT", m_PEntity, m_PSkill->getID());
-
-        if (m_PEntity->objtype == TYPE_PET && m_PEntity->PMaster && m_PEntity->PMaster->objtype == TYPE_PC && (m_PSkill->isBloodPactRage() || m_PSkill->isBloodPactWard()))
-        {
-            CCharEntity* PSummoner = dynamic_cast<CCharEntity*>(m_PEntity->PMaster);
-            if (PSummoner && PSummoner->StatusEffectContainer->HasStatusEffect(EFFECT_AVATARS_FAVOR))
+            auto* PTarget = GetTarget();
+            if (PTarget && PTarget->objtype == TYPE_MOB && PTarget != m_PEntity && m_PEntity->allegiance == ALLEGIANCE_TYPE::PLAYER)
             {
-                auto power = PSummoner->StatusEffectContainer->GetStatusEffect(EFFECT_AVATARS_FAVOR)->GetPower();
-                // Retail: Power is gained for BP use
-                auto levelGained = m_PSkill->isBloodPactRage() ? 3 : 2;
-                power += levelGained;
-                PSummoner->StatusEffectContainer->GetStatusEffect(EFFECT_AVATARS_FAVOR)->SetPower(power > 11 ? power : 11);
+                static_cast<CMobEntity*>(PTarget)->PEnmityContainer->UpdateEnmity(m_PEntity, 0, 0);
             }
+
+            if (m_PEntity->objtype == TYPE_PET && m_PEntity->PMaster && m_PEntity->PMaster->objtype == TYPE_PC && (m_PSkill->isBloodPactRage() || m_PSkill->isBloodPactWard()))
+            {
+                CCharEntity* PSummoner = dynamic_cast<CCharEntity*>(m_PEntity->PMaster);
+                if (PSummoner && PSummoner->StatusEffectContainer->HasStatusEffect(EFFECT_AVATARS_FAVOR))
+                {
+                    auto power = PSummoner->StatusEffectContainer->GetStatusEffect(EFFECT_AVATARS_FAVOR)->GetPower();
+                    // Retail: Power is gained for BP use
+                    auto levelGained = m_PSkill->isBloodPactRage() ? 3 : 2;
+                    power += levelGained;
+                    PSummoner->StatusEffectContainer->GetStatusEffect(EFFECT_AVATARS_FAVOR)->SetPower(power > 11 ? power : 11);
+                }
+            }
+
+            m_PEntity->PAI->EventHandler.triggerListener("WEAPONSKILL_STATE_EXIT", m_PEntity, m_PSkill->getID());
         }
+        else // Switch into inactive state when done
+        {
+            // Exit listener here because changing states will invalidate m_PEntity/m_PSkill
+            m_PEntity->PAI->EventHandler.triggerListener("WEAPONSKILL_STATE_EXIT", m_PEntity, m_PSkill->getID());
+            reduceTpOnInterrupt(); // Cleanup will call this only if IsCompleted is false, which is not the case here
+
+            m_PEntity->PAI->Inactive(0ms, false);
+        }
+
         return true;
     }
     return false;
@@ -206,33 +220,37 @@ void CMobSkillState::Cleanup(timer::time_point tick)
     if (m_PEntity && !IsCompleted())
     {
         ActionInterrupts::AbilityInterrupt(m_PEntity);
-        if (m_PEntity->isAlive())
-        {
-            // On retail testing, mobs lose 33% of their TP at 2900 or higher TP
-            // But lose 25% at < 2900 TP.
-            // Testing was done via charm on a steelshell, methodology was the following on BST/DRK with a scythe
-            // charm -> build tp -> leave -> stun -> interrupt TP move with weapon bash -> charm and check TP. Note that weapon bash incurs damage and thus adds TP.
-            // Note: this is very incomplete. Further testing shows that other statuses also reduce TP but in addition it seems that specific mobskills may reduce TP more or less than these numbers
-            // Thus while incomplete, is better than nothing.
-            if (m_PEntity->StatusEffectContainer &&
-                m_PEntity->StatusEffectContainer->HasStatusEffect({ EFFECT::EFFECT_STUN, EFFECT::EFFECT_TERROR, EFFECT::EFFECT_PETRIFICATION, EFFECT::EFFECT_SLEEP, EFFECT::EFFECT_SLEEP_II, EFFECT::EFFECT_LULLABY }))
-            {
-                int16 tp = m_spentTP;
-                if (tp >= 2900)
-                {
-                    m_PEntity->health.tp = std::floor(std::round(0.333333f * tp));
-                }
-                else
-                {
-                    m_PEntity->health.tp = std::floor(0.25f * tp);
-                }
-            }
-        }
+        reduceTpOnInterrupt();
     }
 
     if (m_PSkill->getFinalAnimationSub().has_value() && m_PEntity && m_PEntity->isAlive())
     {
         m_PEntity->animationsub = m_PSkill->getFinalAnimationSub().value();
         m_PEntity->updatemask |= UPDATE_COMBAT;
+    }
+}
+
+void CMobSkillState::reduceTpOnInterrupt()
+{
+    if (m_PEntity && m_PEntity->isAlive())
+    {
+        // On retail testing, mobs lose 33% of their TP at 2900 or higher TP
+        // But lose 25% at < 2900 TP.
+        // Testing was done via charm on a steelshell, methodology was the following on BST/DRK with a scythe
+        // charm -> build tp -> leave -> stun -> interrupt TP move with weapon bash -> charm and check TP. Note that weapon bash incurs damage and thus adds TP.
+        // Note: this is very incomplete. Further testing shows that other statuses also reduce TP but in addition it seems that specific mobskills may reduce TP more or less than these numbers
+        // Thus while incomplete, is better than nothing.
+        if (m_PEntity->StatusEffectContainer && m_PEntity->StatusEffectContainer->HasPreventActionEffect())
+        {
+            int16 tp = m_spentTP;
+            if (tp >= 2900)
+            {
+                m_PEntity->health.tp = std::floor(std::round(0.333333f * tp));
+            }
+            else
+            {
+                m_PEntity->health.tp = std::floor(0.25f * tp);
+            }
+        }
     }
 }

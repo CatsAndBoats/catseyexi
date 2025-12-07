@@ -50,10 +50,4 @@ if [[ -n "$general_output" ]]; then
     echo
 fi
 
-# If no section was written, emit a success summary
-if ! $any_issues; then
-    echo "## :heavy_check_mark: General Checks Passed"
-    echo
-fi
-
 $any_issues && exit 1 || exit 0
