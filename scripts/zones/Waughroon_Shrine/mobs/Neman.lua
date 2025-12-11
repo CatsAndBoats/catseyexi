@@ -10,7 +10,7 @@ entity.onMobSpawn = function(mob)
     mob:setMobMod(xi.mobMod.CHARMABLE, 1)
 end
 
-entity.onMobWeaponSkillPrepare = function(mob, target)
+entity.onMobMobskillChoose = function(mob, target)
     local skillList =
     {
         xi.mobSkill.HELLDIVE_1,

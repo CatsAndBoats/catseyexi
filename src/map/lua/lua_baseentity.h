@@ -577,7 +577,6 @@ public:
 
     void reloadParty();
     void disableLevelSync();
-    bool isLevelSync();
 
     uint8 checkSoloPartyAlliance(); // Check if Player is in Party or Alliance (0=Solo 1=Party 2=Alliance)
 
@@ -735,7 +734,6 @@ public:
     uint16 getILvlMacc();
     uint16 getILvlSkill();
     uint16 getILvlParry();
-    bool   isSpellAoE(uint16 spellId);
 
     int32 physicalDmgTaken(double damage, sol::variadic_args va);
     int32 rangedDmgTaken(double damage, sol::variadic_args va);
@@ -840,8 +838,10 @@ public:
     bool   isNM();
 
     uint8  getModelSize();
-    float  getMeleeRange();
-    void   setMeleeRange(float range);
+    void   setModelSize(uint8 newSize);
+    float  getHitboxSize();
+    void   setHitboxSize(float newSize);
+    float  getMeleeRange(CLuaBaseEntity* target);
     void   setMobFlags(uint32 flags, const sol::object& mobId); // Used to manipulate the mob's flags, such as changing size.
     uint32 getMobFlags();
 

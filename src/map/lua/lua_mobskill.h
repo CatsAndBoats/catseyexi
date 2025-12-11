@@ -61,6 +61,7 @@ public:
     void   setAttackType(ATTACK_TYPE attackType);
     auto   isCritical() -> bool;
     void   setCritical(bool isCritical);
+    auto   getKnockback() const -> Knockback;
 
     bool operator==(const CLuaMobSkill& other) const
     {

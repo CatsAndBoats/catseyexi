@@ -632,6 +632,34 @@ auto LoadChar(const uint32 charId) -> std::unique_ptr<CCharEntity>
         std::memcpy(&PChar->mainlook, &PChar->look, sizeof(PChar->look));
     }
 
+    // Model size doesn't matter here per caps, only race
+    // From the packets, size is 4/3/8 as integer
+    // For distance purposes, these are divided by 10
+    switch (static_cast<CharRace>(PChar->look.race))
+    {
+        case CharRace::HumeMale:
+        case CharRace::HumeFemale:
+            PChar->modelHitboxSize = 4.0f / 10.0f;
+            break;
+        case CharRace::ElvaanMale:
+        case CharRace::ElvaanFemale:
+            PChar->modelHitboxSize = 4.0f / 10.0f;
+            break;
+        case CharRace::TarutaruMale:
+        case CharRace::TarutaruFemale:
+            PChar->modelHitboxSize = 3.0f / 10.0f;
+            break;
+        case CharRace::Mithra:
+            PChar->modelHitboxSize = 4.0f / 10.0f;
+            break;
+        case CharRace::Galka:
+            PChar->modelHitboxSize = 8.0f / 10.0f;
+            break;
+        default:
+            PChar->modelHitboxSize = 4.0f / 10.0f;
+            break;
+    }
+
     // LoadFromCharStyleSQL
     fmtQuery = "SELECT head, body, hands, legs, feet, main, sub, ranged FROM char_style WHERE charid = ?";
     rset     = db::preparedStmt(fmtQuery, PChar->id);
@@ -949,6 +977,13 @@ void LoadSpells(CCharEntity* PChar)
         }
     }
 
+    std::string condition = "spell_list.content_tag IS NULL";
+
+    if (!enabledExpansions.empty())
+    {
+        condition = fmt::format("spell_list.content_tag IN ({}) OR spell_list.content_tag IS NULL", fmt::join(enabledExpansions, ","));
+    }
+
     // Select all player spells from enabled expansions
     //
     // NOTE: We normally don't want to build a prepared statement with fmt::format,
@@ -957,10 +992,8 @@ void LoadSpells(CCharEntity* PChar)
                              "FROM char_spells "
                              "JOIN spell_list "
                              "ON spell_list.spellid = char_spells.spellid "
-                             "WHERE charid = ? AND "
-                             "(spell_list.content_tag IN ({}) OR "
-                             "spell_list.content_tag IS NULL)",
-                             fmt::join(enabledExpansions, ","));
+                             "WHERE charid = ? AND ({})",
+                             condition);
 
     auto rset = db::preparedStmt(query, PChar->id);
     if (rset && rset->rowsCount())

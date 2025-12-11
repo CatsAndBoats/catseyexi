@@ -160,6 +160,11 @@ void CLuaMobSkill::setCritical(bool isCritical)
     m_PLuaMobSkill->setCritical(isCritical);
 }
 
+auto CLuaMobSkill::getKnockback() const -> Knockback
+{
+    return m_PLuaMobSkill->getKnockback();
+}
+
 //======================================================//
 
 void CLuaMobSkill::Register()
@@ -185,6 +190,7 @@ void CLuaMobSkill::Register()
     SOL_REGISTER("setAttackType", CLuaMobSkill::setAttackType);
     SOL_REGISTER("isCritical", CLuaMobSkill::isCritical);
     SOL_REGISTER("setCritical", CLuaMobSkill::setCritical);
+    SOL_REGISTER("getKnockback", CLuaMobSkill::getKnockback);
 }
 
 std::ostream& operator<<(std::ostream& os, const CLuaMobSkill& mobskill)

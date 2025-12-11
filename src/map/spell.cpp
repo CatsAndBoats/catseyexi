@@ -480,7 +480,7 @@ std::map<uint16, uint16>          PMobSkillToBlueSpell; // maps the skill id (ke
 void LoadSpellList()
 {
     auto rset = db::preparedStmt("SELECT spellid, name, jobs, `group`, family, validTargets, skill, castTime, recastTime, animation, animationTime, mpCost, "
-                                 "AOE, base, element, zonemisc, multiplier, message, magicBurstMessage, CE, VE, requirements, content_tag, spell_range "
+                                 "AOE, base, element, zonemisc, multiplier, message, magicBurstMessage, CE, VE, requirements, content_tag, spell_range, radius "
                                  "FROM spell_list");
     FOR_DB_MULTIPLE_RESULTS(rset)
     {
@@ -528,12 +528,7 @@ void LoadSpellList()
         PSpell->setContentTag(rset->getOrDefault<std::string>("content_tag", ""));
 
         PSpell->setRange(rset->get<float>("spell_range") / 10);
-
-        if (PSpell->getAOE())
-        {
-            // default radius
-            PSpell->setRadius(10);
-        }
+        PSpell->setRadius(rset->get<float>("radius") / 10);
 
         PSpellList[static_cast<uint16>(PSpell->getID())] = PSpell;
 
@@ -863,28 +858,6 @@ bool CanUseSpellWith(SpellID spellId, JOBTYPE job, uint8 level)
         return level > jobMLevel;
     }
     return false;
-}
-
-float GetSpellRadius(CSpell* spell, CBattleEntity* entity)
-{
-    float total = spell->getRadius();
-
-    // brd gets bonus radius from string skill
-    if (spell->getSpellGroup() == SPELLGROUP_SONG && (spell->getValidTarget() & TARGET_SELF))
-    {
-        if (entity->objtype == TYPE_MOB || (entity->GetMJob() == JOB_BRD && entity->objtype == TYPE_PC && ((CCharEntity*)entity)->getEquip(SLOT_RANGED) &&
-                                            ((CItemWeapon*)((CCharEntity*)entity)->getEquip(SLOT_RANGED))->getSkillType() == SKILL_STRING_INSTRUMENT))
-        {
-            total += ((float)entity->GetSkill(SKILL_STRING_INSTRUMENT) / 276) * 10;
-        }
-
-        if (total > 20)
-        {
-            total = 20;
-        }
-    }
-
-    return total;
 }
 
 }; // namespace spell

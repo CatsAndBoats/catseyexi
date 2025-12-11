@@ -103,3 +103,7 @@ end
 ---@return nil
 function CMobSkill:setCritical(isCritical)
 end
+
+---@return xi.action.knockback
+function CMobSkill:getKnockback()
+end

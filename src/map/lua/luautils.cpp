@@ -2825,7 +2825,7 @@ void OnSpellInterrupted(CBattleEntity* PCaster, CSpell* PSpell)
     }
 }
 
-std::optional<SpellID> OnMobMagicPrepare(CBattleEntity* PCaster, CBattleEntity* PTarget, std::optional<SpellID> startingSpellId)
+std::optional<SpellID> OnMobSpellChoose(CBattleEntity* PCaster, CBattleEntity* PTarget, std::optional<SpellID> startingSpellId)
 {
     TracyZoneScoped;
 
@@ -2834,8 +2834,8 @@ std::optional<SpellID> OnMobMagicPrepare(CBattleEntity* PCaster, CBattleEntity* 
         return {};
     }
 
-    sol::function onMobMagicPrepare = getEntityCachedFunction(PCaster, "onMobMagicPrepare");
-    if (!onMobMagicPrepare.valid())
+    sol::function onMobSpellChoose = getEntityCachedFunction(PCaster, "onMobSpellChoose");
+    if (!onMobSpellChoose.valid())
     {
         return {};
     }
@@ -2846,11 +2846,11 @@ std::optional<SpellID> OnMobMagicPrepare(CBattleEntity* PCaster, CBattleEntity* 
         PSpell = spell::GetSpell(startingSpellId.value());
     }
 
-    auto result = onMobMagicPrepare(PCaster, PTarget, PSpell);
+    auto result = onMobSpellChoose(PCaster, PTarget, PSpell);
     if (!result.valid())
     {
         sol::error err = result;
-        ShowError("luautils::OnMobMagicPrepare: %s", err.what());
+        ShowError("luautils::OnMobSpellChoose: %s", err.what());
         ReportErrorToPlayer(PCaster, err.what());
         return {};
     }
@@ -3729,7 +3729,7 @@ std::tuple<int32, uint8, uint8> OnUseWeaponSkill(CBattleEntity* PChar, CBaseEnti
     return std::make_tuple(dmg, tpHitsLanded, extraHitsLanded);
 }
 
-uint16 OnMobWeaponSkillPrepare(CBattleEntity* PMob, CBattleEntity* PTarget)
+uint16 OnMobMobskillChoose(CBattleEntity* PMob, CBattleEntity* PTarget)
 {
     TracyZoneScoped;
 
@@ -3738,17 +3738,17 @@ uint16 OnMobWeaponSkillPrepare(CBattleEntity* PMob, CBattleEntity* PTarget)
         return 0;
     }
 
-    sol::function onMobWeaponSkillPrepare = getEntityCachedFunction(PMob, "onMobWeaponSkillPrepare");
-    if (!onMobWeaponSkillPrepare.valid())
+    sol::function onMobMobskillChoose = getEntityCachedFunction(PMob, "onMobMobskillChoose");
+    if (!onMobMobskillChoose.valid())
     {
         return 0;
     }
 
-    auto result = onMobWeaponSkillPrepare(PMob, PTarget);
+    auto result = onMobMobskillChoose(PMob, PTarget);
     if (!result.valid())
     {
         sol::error err = result;
-        ShowError("luautils::onMobWeaponSkillPrepare: %s", err.what());
+        ShowError("luautils::onMobMobskillChoose: %s", err.what());
         return 0;
     }
 
@@ -3792,7 +3792,7 @@ int32 OnMobWeaponSkill(CBaseEntity* PTarget, CBaseEntity* PMob, CMobSkill* PMobS
         return 0;
     }
 
-    auto result = onMobWeaponSkill(PTarget, PMob, PMobSkill);
+    auto result = onMobWeaponSkill(PTarget, PMob, PMobSkill, action);
     if (!result.valid())
     {
         sol::error err = result;
@@ -5549,6 +5549,18 @@ CBaseEntity* GenerateDynamicEntity(CZone* PZone, CInstance* PInstance, sol::tabl
         if (spawnType > 0)
         {
             PMob->m_SpawnType = (SPAWNTYPE)spawnType;
+        }
+
+        const auto modelSize = table["modelSize"].get_or<uint8>(0);
+        if (modelSize > 0)
+        {
+            PMob->modelSize = std::clamp<uint8>(modelSize, 0, 3);
+        }
+
+        const auto modelHitboxSize = table["modelHitboxSize"].get_or<float>(0);
+        if (modelHitboxSize > 0)
+        {
+            PMob->modelHitboxSize = std::max(modelHitboxSize, 0.0f);
         }
 
         luautils::OnEntityLoad(PMob);
