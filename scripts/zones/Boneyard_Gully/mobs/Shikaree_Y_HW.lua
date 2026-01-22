@@ -9,16 +9,12 @@ local ID = zones[xi.zone.BONEYARD_GULLY]
 ---@type TMobEntity
 local entity = {}
 
-entity.onMobInitialize = function(mob)
+entity.onMobSpawn = function(mob)
     mob:setMod(xi.mod.DARK_SLEEP_RES_RANK, 8)
     mob:setMod(xi.mod.LIGHT_SLEEP_RES_RANK, 8)
     mob:setMod(xi.mod.BIND_RES_RANK, 8)
-    -- TODO: Needs gravity res rank
-end
-
-entity.onMobSpawn = function(mob)
     mob:setMod(xi.mod.REGAIN, 55)
-    mob:setMobMod(xi.mobMod.WEAPON_BONUS, 30)
+    mob:setMobMod(xi.mobMod.BASE_DAMAGE_MULTIPLIER, 150)
     mob:setMobAbilityEnabled(false)
 end
 
@@ -57,7 +53,7 @@ entity.onMobFight = function(mob, target)
     end
 end
 
-entity.onMobMobskillChoose = function(mob, target)
+entity.onMobMobskillChoose = function(mob, target, skillId)
     local tpMoves =
     {
         xi.mobSkill.GUILLOTINE_1,
@@ -76,14 +72,16 @@ entity.onMobWeaponSkill = function(target, mob, skill)
         return
     end
 
-    -- Solo skill message when only one Shikaree is alive (scState 4 = SOLO)
-    if battlefield:getLocalVar('scState') == 4 then
-        mob:messageText(mob, ID.text.SHIKAREE_Y_OFFSET + 4)
-    end
-
     -- 2-Hour message.
     if skillID == xi.mobSkill.BLOOD_WEAPON_1 then
         mob:messageText(mob, ID.text.SHIKAREE_Y_2HR)
+        return
+    end
+
+    -- Solo skill message when only one Shikaree is alive (scState 4 = SOLO)
+    if battlefield:getLocalVar('scState') == 4 then
+        mob:messageText(mob, ID.text.SHIKAREE_Y_OFFSET + 4)
+        return
     end
 
     -- Handle skillchain progression

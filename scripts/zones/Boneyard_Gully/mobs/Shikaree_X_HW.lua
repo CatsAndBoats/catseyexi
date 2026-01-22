@@ -9,17 +9,13 @@ local ID = zones[xi.zone.BONEYARD_GULLY]
 ---@type TMobEntity
 local entity = {}
 
-entity.onMobInitialize = function(mob)
+entity.onMobSpawn = function(mob)
     mob:setMobMod(xi.mobMod.DUAL_WIELD, 1)
+    mob:setMobMod(xi.mobMod.SPECIAL_SKILL, 0)
+    mob:setMobMod(xi.mobMod.BASE_DAMAGE_MULTIPLIER, 150)
     mob:setMod(xi.mod.DARK_SLEEP_RES_RANK, 8)
     mob:setMod(xi.mod.LIGHT_SLEEP_RES_RANK, 8)
     mob:setMod(xi.mod.BIND_RES_RANK, 8)
-    -- TODO: Needs gravity res rank
-end
-
-entity.onMobSpawn = function(mob)
-    mob:setMobMod(xi.mobMod.SPECIAL_SKILL, 0)
-    mob:setMobMod(xi.mobMod.WEAPON_BONUS, 30)
     mob:setMod(xi.mod.REGAIN, 55)
     mob:setMobAbilityEnabled(false)
     xi.mob.callPets(mob, mob:getID() + 2, { inactiveTime = 3000 })
@@ -69,7 +65,7 @@ entity.onMobFight = function(mob, target)
     end
 end
 
-entity.onMobMobskillChoose = function(mob, target)
+entity.onMobMobskillChoose = function(mob, target, skillId)
     local tpMoves =
     {
         xi.mobSkill.DANCING_EDGE,
@@ -85,14 +81,20 @@ entity.onMobWeaponSkill = function(target, mob, skill)
     local skillID     = skill:getID()
     local battlefield = mob:getBattlefield()
 
-    -- Solo skill message when only one Shikaree is alive (scState 4 = SOLO)
-    if battlefield and battlefield:getLocalVar('scState') == 4 then
-        mob:messageText(mob, ID.text.SHIKAREE_X_OFFSET + 4)
+    if not battlefield then
+        return
     end
 
     -- 2-Hour message.
     if skillID == xi.mobSkill.FAMILIAR_1 then
         mob:messageText(mob, ID.text.SHIKAREE_X_2HR)
+        return
+    end
+
+    -- Solo skill message when only one Shikaree is alive (scState 4 = SOLO)
+    if battlefield:getLocalVar('scState') == 4 then
+        mob:messageText(mob, ID.text.SHIKAREE_X_OFFSET + 4)
+        return
     end
 
     -- Handle skillchain progression
@@ -101,7 +103,7 @@ entity.onMobWeaponSkill = function(target, mob, skill)
 
     if skillID == scSkill then
         -- Transition from STARTING to EXECUTING when leader's skill fires
-        if battlefield and battlefield:getLocalVar('scState') == 2 then
+        if battlefield:getLocalVar('scState') == 2 then
             battlefield:setLocalVar('scState', 3)
         end
 

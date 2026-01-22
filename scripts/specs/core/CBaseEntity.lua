@@ -735,7 +735,7 @@ end
 
 ---@nodiscard
 ---@return boolean
-function CBaseEntity:isInMogHouse()
+function CBaseEntity:inMogHouse()
 end
 
 ---@param triggerAreaId integer
@@ -1732,6 +1732,12 @@ end
 ---@param missionStatusPosObj integer?
 ---@return integer
 function CBaseEntity:getMissionStatus(missionLogID, missionStatusPosObj)
+end
+
+---@param missionLogID integer
+---@param completed boolean
+---@return nil
+function CBaseEntity:sendPartialMissionLog(missionLogID, completed)
 end
 
 ---@param recordID integer
@@ -2813,6 +2819,12 @@ end
 function CBaseEntity:resetEnmity(PEntity)
 end
 
+---@param PEntity CBaseEntity
+---@param active boolean
+---@return nil
+function CBaseEntity:setEnmityActive(PEntity, active)
+end
+
 ---@param entity CBaseEntity
 ---@return nil
 function CBaseEntity:updateClaim(entity)
@@ -3651,8 +3663,9 @@ function CBaseEntity:removeAllRunes()
 end
 
 ---@param level integer
+---@param recover boolean?
 ---@return nil
-function CBaseEntity:setMobLevel(level)
+function CBaseEntity:setMobLevel(level, recover)
 end
 
 ---@nodiscard
@@ -3950,7 +3963,7 @@ end
 function CBaseEntity:actionQueueEmpty()
 end
 
----@param spell integer
+---@param spell integer?
 ---@param entity CBaseEntity?
 ---@return nil
 function CBaseEntity:castSpell(spell, entity)

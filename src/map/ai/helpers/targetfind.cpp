@@ -73,7 +73,14 @@ void CTargetFind::reset()
 
 void CTargetFind::findSingleTarget(CBattleEntity* PTarget, uint8 findFlags, uint16 targetFlags)
 {
+    // Ensure caster and target are valid before proceeding.
+    if (m_PBattleEntity == nullptr || PTarget == nullptr)
+    {
+        return;
+    }
+
     m_findFlags     = findFlags;
+    m_targetFlags   = targetFlags;
     m_zone          = m_PBattleEntity->getZone();
     m_PTarget       = nullptr;
     m_PRadiusAround = &PTarget->loc.p;
@@ -83,11 +90,20 @@ void CTargetFind::findSingleTarget(CBattleEntity* PTarget, uint8 findFlags, uint
 
 void CTargetFind::findWithinArea(CBattleEntity* PTarget, AOE_RADIUS radiusType, float radius, uint8 findFlags, uint16 targetFlags)
 {
+    // Ensure caster and target are valid before proceeding.
+    if (m_PBattleEntity == nullptr || PTarget == nullptr)
+    {
+        return;
+    }
+
     TracyZoneScoped;
     m_findFlags   = findFlags;
     m_targetFlags = targetFlags;
     m_radius      = radius;
     m_zone        = m_PBattleEntity->getZone();
+
+    // Always set each time (CTargetFind objects may be reused between actions)
+    m_selfCenteredAoE = false;
 
     if (radiusType == AOE_RADIUS::ATTACKER)
     {
@@ -103,9 +119,15 @@ void CTargetFind::findWithinArea(CBattleEntity* PTarget, AOE_RADIUS radiusType, 
     // get master to properly handle loops
     m_PMasterTarget = findMaster(PTarget);
 
-    // no not include pets if this AoE is a buff spell
-    // this is a buff because i'm targetting my self
+    // do not include pets if this AoE is a buff spell
+    // this is a buff because i'm targetting myself
     bool withPet = PETS_CAN_AOE_BUFF || (m_findFlags & FINDFLAGS_PET) || (m_PMasterTarget->objtype != m_PBattleEntity->objtype);
+
+    // Pets/trusts don't buff other pets with self-centered AoEs
+    if (radiusType == AOE_RADIUS::ATTACKER && m_PBattleEntity->PMaster != nullptr)
+    {
+        withPet = false;
+    }
 
     // add original target first except for self-centered moves
     if (radiusType != AOE_RADIUS::ATTACKER || m_conal)
@@ -124,6 +146,12 @@ void CTargetFind::findWithinArea(CBattleEntity* PTarget, AOE_RADIUS radiusType, 
             // players will never need to add whole alliance
             m_findType = FIND_TYPE::PLAYER_PLAYER;
 
+            // For self-centered AoEs, add caster first
+            if (m_selfCenteredAoE)
+            {
+                addEntity(m_PBattleEntity, false);
+            }
+
             if (m_PMasterTarget->PParty != nullptr)
             {
                 // player -ra spells should never hit whole alliance
@@ -139,18 +167,7 @@ void CTargetFind::findWithinArea(CBattleEntity* PTarget, AOE_RADIUS radiusType, 
             }
             else
             {
-                // For self-centered pet AoEs, add pet first then master (pet is primary target)
-                // For player/master AoEs, add master first then pet (master is primary target)
-                if (m_selfCenteredAoE && m_PBattleEntity->objtype == TYPE_PET)
-                {
-                    addEntity(m_PBattleEntity, false); // Add pet as primary target
-                    addEntity(m_PMasterTarget, false); // Add master as secondary target
-                }
-                else
-                {
-                    // just add myself
-                    addEntity(m_PMasterTarget, withPet);
-                }
+                addEntity(m_PMasterTarget, withPet);
             }
         }
         else
@@ -188,7 +205,15 @@ void CTargetFind::findWithinArea(CBattleEntity* PTarget, AOE_RADIUS radiusType, 
             withPet = PETS_CAN_AOE_BUFF;
         }
 
-        if (m_findFlags & FINDFLAGS_HIT_ALL || (m_findType == FIND_TYPE::MONSTER_PLAYER && ((CMobEntity*)m_PBattleEntity)->GetCallForHelpFlag()))
+        // For self-centered AoEs, add caster first
+        if (m_selfCenteredAoE)
+        {
+            addEntity(m_PBattleEntity, false);
+        }
+
+        if (m_findType == FIND_TYPE::MONSTER_PLAYER &&
+            ((m_PBattleEntity->objtype == TYPE_MOB && static_cast<CMobEntity*>(m_PBattleEntity)->getMobMod(MOBMOD_AOE_HIT_ALL)) ||
+             static_cast<CMobEntity*>(m_PBattleEntity)->GetCallForHelpFlag()))
         {
             addAllInZone(m_PMasterTarget, withPet);
         }
@@ -199,7 +224,11 @@ void CTargetFind::findWithinArea(CBattleEntity* PTarget, AOE_RADIUS radiusType, 
             // Is the monster casting on a player..
             if (m_findType == FIND_TYPE::MONSTER_PLAYER)
             {
-                if (m_PBattleEntity->allegiance == ALLEGIANCE_TYPE::PLAYER || (m_PMasterTarget->objtype == TYPE_MOB && m_PMasterTarget->allegiance == ALLEGIANCE_TYPE::PLAYER))
+                // Treat AoE as player-side if either:
+                // 1) The caster is player-aligned (trust, pet, charmed, etc.), OR
+                // 2) The base target is a player-aligned mob (mission / battlefield allies)
+                if (m_PBattleEntity->allegiance == ALLEGIANCE_TYPE::PLAYER ||
+                    (m_PMasterTarget->objtype == TYPE_MOB && m_PMasterTarget->allegiance == ALLEGIANCE_TYPE::PLAYER))
                 {
                     addAllInZone(m_PMasterTarget, withPet);
                 }
@@ -214,6 +243,12 @@ void CTargetFind::findWithinArea(CBattleEntity* PTarget, AOE_RADIUS radiusType, 
 
 void CTargetFind::findWithinCone(CBattleEntity* PTarget, float distance, float angle, uint8 findFlags, uint16 targetFlags, uint8 aoeType)
 {
+    // Ensure caster and target are valid before proceeding.
+    if (m_PBattleEntity == nullptr || PTarget == nullptr)
+    {
+        return;
+    }
+
     m_findFlags   = findFlags;
     m_targetFlags = targetFlags;
     m_conal       = true;
@@ -237,9 +272,6 @@ void CTargetFind::findWithinCone(CBattleEntity* PTarget, float distance, float a
 
     m_CPoint.x = cosf((2 * (float)M_PI) - leftAngle) * distance + m_APoint->x;
     m_CPoint.z = sinf((2 * (float)M_PI) - leftAngle) * distance + m_APoint->z;
-
-    // ShowDebug("angle %f, left %f, right %f, distance %f, A (%f, %f) B (%f, %f) C (%f, %f)", angle, leftAngle, rightAngle, distance, m_APoint->x,
-    // m_APoint->z, m_BPoint.x, m_BPoint.z, m_CPoint.x, m_CPoint.z); ShowDebug("Target: (%f, %f)", PTarget->loc.p.x, PTarget->loc.p.z);
 
     // precompute for next stage
     m_BPoint.x = m_BPoint.x - m_APoint->x;
@@ -314,7 +346,7 @@ void CTargetFind::addAllInParty(CBattleEntity* PTarget, bool withPet)
     {
         static_cast<CCharEntity*>(PTarget)->ForPartyWithTrusts([this, withPet](CBattleEntity* PMember)
         {
-            if (!PMember->isInMogHouse())
+            if (!PMember->inMogHouse())
             {
                 addEntity(PMember, withPet);
             }
@@ -444,10 +476,15 @@ bool CTargetFind::isMobOwner(CBattleEntity* PTarget)
 
 /*
 validEntity will check if the given entity can be targeted in the AoE.
-
 */
 bool CTargetFind::validEntity(CBattleEntity* PTarget)
 {
+    // Assume entity is valid only need to check target not null
+    if (PTarget == nullptr)
+    {
+        return false;
+    }
+
     // Check if entity is already in list
     // TODO: Does it make sense to use a hashmap here instead?
     if (std::find(m_targets.begin(), m_targets.end(), PTarget) != m_targets.end())
@@ -478,6 +515,21 @@ bool CTargetFind::validEntity(CBattleEntity* PTarget)
         return false;
     }
 
+    // -------------------------------------------------
+    // IMPORTANT: Benediction/self-centered ally-only check
+    // This must run BEFORE the "first target always allowed" short-circuit.
+    // -------------------------------------------------
+    if (m_selfCenteredAoE &&
+        (m_targetFlags & TARGET_ANY_ALLEGIANCE) == 0 &&
+        (m_targetFlags & TARGET_ENEMY) == 0)
+    {
+        CBattleEntity* PCasterMaster = findMaster(m_PBattleEntity);
+        if (PCasterMaster && PCasterMaster->allegiance != PTarget->allegiance)
+        {
+            return false;
+        }
+    }
+
     // this is first target, always add him first
     // Exception: for self-centered AoEs, all targets must pass radius validation
     // Conals always add the main target
@@ -489,15 +541,7 @@ bool CTargetFind::validEntity(CBattleEntity* PTarget)
     // short-circuit allegiance checks for aoe skills/abilities/spells that can hit players and mobs simultaneously
     if (m_targetFlags & TARGET_ANY_ALLEGIANCE)
     {
-        if (m_targetFlags & TARGET_SELF)
-        {
-            if (m_PBattleEntity->allegiance == PTarget->allegiance)
-            {
-                // TARGET_ANY_ALLEGIANCE with TARGET_SELF means it should behave like TARGET_ENEMY
-                return false;
-            }
-        }
-        else if (m_PBattleEntity == PTarget)
+        if (m_PBattleEntity == PTarget)
         {
             // Don't erroneously include self when using TARGET_ANY_ALLEGIANCE
             return false;
@@ -555,7 +599,7 @@ bool CTargetFind::validEntity(CBattleEntity* PTarget)
     }
     else
     {
-        if ((m_findFlags & FINDFLAGS_UNLIMITED) || isWithinArea(&PTarget->loc.p))
+        if (isWithinArea(&PTarget->loc.p))
         {
             return true;
         }

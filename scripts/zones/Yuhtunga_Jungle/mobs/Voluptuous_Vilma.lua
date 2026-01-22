@@ -7,12 +7,30 @@ local ID = zones[xi.zone.YUHTUNGA_JUNGLE]
 ---@type TMobEntity
 local entity = {}
 
+local function updateRegen(mob)
+    local hour = VanadielHour()
+    if hour >= 6 and hour < 18 then
+        mob:setMod(xi.mod.REGEN, 25)
+    else
+        mob:setMod(xi.mod.REGEN, 0)
+    end
+end
+
 entity.onMobInitialize = function(mob)
     mob:setMobMod(xi.mobMod.ADD_EFFECT, 1)
 end
 
 entity.onMobSpawn = function(mob)
-    mob:setMod(xi.mod.REGEN, 25)
+    updateRegen(mob)
+    mob:setMobMod(xi.mobMod.BASE_DAMAGE_MULTIPLIER, 150)
+end
+
+entity.onMobRoam = function(mob)
+    updateRegen(mob)
+end
+
+entity.onMobFight = function(mob)
+    updateRegen(mob)
 end
 
 entity.onAdditionalEffect = function(mob, target, damage)
@@ -27,12 +45,21 @@ entity.onAdditionalEffect = function(mob, target, damage)
         [6] = xi.mob.ae.SLOW,
         [7] = xi.mob.ae.BIND,
     }
-    local random = math.random(1, #effects)
 
-    return xi.mob.onAddEffect(mob, target, damage, effects[random])
-end
+    local chosenEffect = effects[math.random(1, #effects)]
+    if chosenEffect == xi.mob.ae.BLIND then
+        local pTable =
+        {
+            chance   = 25,
+            effectId = xi.effect.BLINDNESS,
+            power    = 20,
+            duration = 60,
+        }
 
-entity.onMobDeath = function(mob, player, optParams)
+        return xi.combat.action.executeAdditionalStatus(mob, target, pTable)
+    end
+
+    return xi.mob.onAddEffect(mob, target, damage, chosenEffect)
 end
 
 entity.onMobDespawn = function(mob)
