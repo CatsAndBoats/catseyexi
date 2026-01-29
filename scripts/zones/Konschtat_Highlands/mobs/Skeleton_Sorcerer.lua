@@ -1,15 +1,12 @@
 -----------------------------------
--- Area: Middle Delkfutt's Tower
---   NM: Scythe_Victim
+-- Area: Konschtat Highlands
+--  Mob: Skeleton Sorcerer
 -----------------------------------
 ---@type TMobEntity
 local entity = {}
 
 entity.onMobInitialize = function(mob)
-    mob:setMobMod(xi.mobMod.IDLE_DESPAWN, 180)
-end
-
-entity.onMobDeath = function(mob, player, optParams)
+    mob:setMobMod(xi.mobMod.NO_STANDBACK, 1)
 end
 
 return entity

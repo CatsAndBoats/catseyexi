@@ -787,6 +787,7 @@ public:
     uint32 getPetID();
     bool   isAutomaton();
     bool   isAvatar();
+    auto   isJugPet() -> bool;
     auto   getMaster() -> CBaseEntity*;
     uint8  getPetElement();
     void   setPet(const sol::object& petObj);

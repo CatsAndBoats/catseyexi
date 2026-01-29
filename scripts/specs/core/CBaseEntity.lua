@@ -3461,6 +3461,11 @@ function CBaseEntity:isAvatar()
 end
 
 ---@nodiscard
+---@return boolean
+function CBaseEntity:isJugPet()
+end
+
+---@nodiscard
 ---@return CBaseEntity?
 function CBaseEntity:getMaster()
 end
