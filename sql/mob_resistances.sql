@@ -529,7 +529,7 @@ INSERT INTO `mob_resistances` VALUES (513,'Pakecet',0,0,0,0,0,0,0,0,0,0,0,0,0,2,
 INSERT INTO `mob_resistances` VALUES (514,'Metus',0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,2,2,2,2,0,11,2,2,2,2,2,0,11,11);
 INSERT INTO `mob_resistances` VALUES (515,'Wyvern - Ajattara',0,0,0,0,0,0,0,0,0,0,0,0,0,3,0,2,0,-1,-1,-1,-2,0,0,2,0,-1,-1,-2,-2);
 INSERT INTO `mob_resistances` VALUES (516,'Gigas - Alkyoneus',0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0);
-INSERT INTO `mob_resistances` VALUES (517,'Gigas - Blizzard',0,0,0,0,0,0,0,0,0,0,0,0,0,-2,4,0,0,0,0,0,0,4,4,0,0,0,0,0,0);
+INSERT INTO `mob_resistances` VALUES (517,'Gigas - Blizzard',0,0,0,0,0,0,0,0,0,0,0,0,0,-2,4,0,0,0,0,0,0,4,4,0,0,0,0,0,0); -- TODO: Verify Resist Values for Ice Gigas and change resistances accordingly
 INSERT INTO `mob_resistances` VALUES (518,'Proto - Omega',0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,0,11,0,0,0,0,0,0,11,11);
 INSERT INTO `mob_resistances` VALUES (519,'Avatar-Carbuncle_Prime_WTB',0,0,0,0,0,0,0,0,0,0,0,0,0,6,6,6,6,6,6,11,0,6,6,6,6,6,11,0,0);
 INSERT INTO `mob_resistances` VALUES (520,'Bronzecap',0,0,0,0,0,0,0,0,0,0,0,0,0,-2,-2,-2,-2,-2,4,-3,4,-2,-2,-2,-2,4,-3,6,6);

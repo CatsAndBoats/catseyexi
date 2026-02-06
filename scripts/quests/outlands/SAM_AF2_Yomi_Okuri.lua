@@ -225,9 +225,11 @@ quest.sections =
                         else
                             return quest:messageSpecial(valkurmID.text.WHAT_DO_YOU_THINK)
                         end
-                    elseif quest:getLocalVar(player, 'valkurmNM') == 1 then
-                        player:delKeyItem(xi.ki.YOMOTSU_HIRASAKA)
-                        return quest:keyItem(xi.ki.FADED_YOMOTSU_HIRASAKA)
+                    elseif
+                        quest:getLocalVar(player, 'valkurmNM') == 1 and
+                        player:hasKeyItem(xi.ki.YOMOTSU_HIRASAKA)
+                    then
+                        return quest:progressEvent(11)
                     end
                 end,
             },
@@ -236,8 +238,23 @@ quest.sections =
             {
                 [10] = function(player, csid, option, npc)
                     if option == 1 then
-                        SpawnMob(valkurmID.mob.DOMAN):updateClaim(player)
-                        SpawnMob(valkurmID.mob.ONRYO):updateClaim(player)
+                        if player:checkDistance(npc) > 2 then
+                            player:messageSpecial(valkurmID.text.MUST_BE_CLOSER, xi.ki.YOMOTSU_HIRASAKA)
+                        elseif
+                            not GetMobByID(valkurmID.mob.ONRYO):isSpawned() and
+                            not GetMobByID(valkurmID.mob.DOMAN):isSpawned()
+                        then
+                            player:messageSpecial(valkurmID.text.SUDDEN_CHILL)
+                            SpawnMob(valkurmID.mob.DOMAN):updateClaim(player)
+                            SpawnMob(valkurmID.mob.ONRYO):updateClaim(player)
+                        end
+                    end
+                end,
+
+                [11] = function(player, csid, option, npc)
+                    if option == 0 then
+                        player:delKeyItem(xi.ki.YOMOTSU_HIRASAKA)
+                        npcUtil.giveKeyItem(player, xi.ki.FADED_YOMOTSU_HIRASAKA)
                     end
                 end,
             },

@@ -25,9 +25,9 @@ abilityObject.onPetAbility = function(target, pet, petskill, summoner, action)
     --note: this formula is only accurate for level 75 - 76+ may have a different intercept and/or slope
     local damage = math.floor(256 + 0.172 * tp + pet:getStat(xi.mod.INT) - target:getStat(xi.mod.INT))
 
-    damage = xi.mobskills.mobMagicalMove(pet, target, petskill, damage, xi.element.THUNDER, 1, xi.mobskills.magicalTpBonus.NO_EFFECT, 0)
-    damage = xi.mobskills.mobAddBonuses(pet, target, damage, xi.element.THUNDER, petskill)
-    damage = xi.summon.avatarFinalAdjustments(damage, pet, petskill, target, xi.attackType.MAGICAL, xi.damageType.THUNDER, 1)
+    local info = xi.mobskills.mobMagicalMove(pet, target, petskill, damage, xi.element.THUNDER, 1, xi.mobskills.magicalTpBonus.NO_EFFECT, 0)
+    info.damage = xi.mobskills.mobAddBonuses(pet, target, info.damage, xi.element.THUNDER, petskill)
+    damage = xi.summon.avatarFinalAdjustments(info, pet, petskill, target, xi.attackType.MAGICAL, xi.damageType.THUNDER, 1)
 
     target:takeDamage(damage, pet, xi.attackType.MAGICAL, xi.damageType.THUNDER)
     target:updateEnmityFromDamage(pet, damage)

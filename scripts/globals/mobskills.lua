@@ -63,7 +63,7 @@ local burstMultipliersByTier =
 
 local function calculateMobMagicBurst(caster, ele, target)
     local burstMultiplier = 1.0
-    local skillchainTier, skillchainCount = xi.magicburst.formMagicBurst(ele, target)
+    local skillchainTier, skillchainCount = xi.magicburst.formMagicBurst(target, ele)
 
     if skillchainTier > 0 then
         burstMultiplier = burstMultipliersByTier[skillchainCount]
@@ -120,7 +120,7 @@ local function handleSinglePhysicalHit(mob, target, hitdamage, hitslanded, final
         params.canCrit or
         params.tpEffect == xi.mobskills.physicalTpBonus.CRIT_VARIES
     then
-        local critRate = xi.combat.physical.calculateSwingCriticalRate(mob, target, mob:getTP(), nil)
+        local critRate = xi.combat.physical.calculateSwingCriticalRate(mob, target, mob:getTP(), xi.slot.MAIN)
         isCritical = math.random(1, 1000) <= critRate * 1000
     end
 
@@ -178,7 +178,7 @@ end
 ---@alias physicalMobSkillParam { canCrit: boolean?, isCannonball: boolean?, isRanged: boolean?}
 
 -- return value of xi.mobskills.mobPhysicalMove
----@alias physicalMobSkillRetVal { dmg: number, hitslanded: number, isCritical: boolean}
+---@alias physicalMobSkillRetVal { damage: number, hitslanded: number, isCritical: boolean}
 
 -- passed to handleSinglePhysicalHit inside xi.mobskills.mobPhysicalMove
 ---@alias physicalMobSkillHitParams { canCrit: boolean, tpEffect: xi.mobskills.physicalTpBonus, weaponType: xi.skill, attMod: number, applyLevelCorrection: boolean, isCannonball: boolean, isRanged: boolean}
@@ -207,7 +207,7 @@ xi.mobskills.mobPhysicalMove = function(mob, target, skill, numHits, accMod, ftp
     params           = params or {}
     local returninfo =
     {
-        dmg = 0,
+        damage = 0,
         hitslanded = 0,
         isCritical = false,
     }
@@ -303,7 +303,7 @@ xi.mobskills.mobPhysicalMove = function(mob, target, skill, numHits, accMod, ftp
         mob:addTP(tpReturn)
     end
 
-    returninfo.dmg        = finaldmg
+    returninfo.damage     = finaldmg
     returninfo.hitslanded = hitslanded
     returninfo.isCritical = hitCrit
 
@@ -334,6 +334,9 @@ end
 -- xi.mobskills.magicalTpBonus.DMG_BONUS and TP = 100, tpvalue = 2, assume V=150  --> damage is now 150*(TP*2) / 100 = 300
 -- xi.mobskills.magicalTpBonus.DMG_BONUS and TP = 200, tpvalue = 2, assume V=150  --> damage is now 150*(TP*2) / 100 = 600
 
+-- return value of xi.mobskills.mobMagicalMove
+---@alias magicalMobSkillRetVal { damage: number }
+
 ---@param actor CBaseEntity
 ---@param target CBaseEntity
 ---@param action CPetSkill|CMobSkill
@@ -342,7 +345,7 @@ end
 ---@param damageModifier number
 ---@param tpEffect xi.mobskills.magicalTpBonus?
 ---@param tpMultiplier number?
----@return number
+---@return magicalMobSkillRetVal
 xi.mobskills.mobMagicalMove = function(actor, target, action, baseDamage, actionElement, damageModifier, tpEffect, tpMultiplier)
     local finalDamage = baseDamage
 
@@ -360,7 +363,7 @@ xi.mobskills.mobMagicalMove = function(actor, target, action, baseDamage, action
             petAccBonus = utils.clamp(master:getSkillLevel(xi.skill.SUMMONING_MAGIC) - master:getMaxSkillLevel(actor:getMainLvl(), xi.job.SMN, xi.skill.SUMMONING_MAGIC), 0, 200)
         end
 
-        local skillchainTier, _ = xi.magicburst.formMagicBurst(actionElement, target)
+        local skillchainTier, _ = xi.magicburst.formMagicBurst(target, actionElement)
         if
             actor:getPetID() > 0 and
             skillchainTier > 0
@@ -389,9 +392,15 @@ xi.mobskills.mobMagicalMove = function(actor, target, action, baseDamage, action
         actor:addTP(tpReturn)
     end
 
-    return finalDamage
+    return { damage = finalDamage }
 end
 
+---@param actor CBaseEntity
+---@param target CBaseEntity
+---@param damage number
+---@param element xi.element
+---@param skill CPetSkill|CMobSkill
+---@return number
 xi.mobskills.mobAddBonuses = function(actor, target, damage, element, skill) -- used for SMN magical bloodpacts, despite the name.
     local burst = calculateMobMagicBurst(actor, element, target)
 
@@ -417,6 +426,13 @@ end
 -- skillParams.mAccuracyBonus    = { #, #, # }   : Accuracy bonus or penalties based on fTP.
 -- skillParams.resistStat        = xi.mod.<Stat> : Determines which base stat attribute is used when calculating resist. (INT, MND, etc.)
 -----------------------------------
+-- return value of xi.mobskills.mobMagicalMove
+
+---@param mob CBaseEntity
+---@param target CBaseEntity
+---@param skill CPetSkill|CMobSkill
+---@param skillParams table
+---@return magicalMobSkillRetVal
 xi.mobskills.mobBreathMove = function(mob, target, skill, skillParams)
     local mobCurrentHP = skill:getMobHP()
 
@@ -454,7 +470,7 @@ xi.mobskills.mobBreathMove = function(mob, target, skill, skillParams)
     damage = math.floor(damage * absorb * nullify)
 
     if damage <= 0 then -- Return early since the rest of the calculations are not needed if we absorbed/nullified.
-        return damage
+        return { damage = damage }
     end
 
     -- The values set for this modifiers are base 10000.
@@ -470,13 +486,24 @@ xi.mobskills.mobBreathMove = function(mob, target, skill, skillParams)
     -- Apply "Damage taken" mods to damage.
     damage = math.floor(damage * combinedDamageTaken)
 
-    return damage
+    return { damage = damage }
 end
 
-xi.mobskills.mobFinalAdjustments = function(damage, mob, skill, target, attackType, damageType, shadowsToRemove, hitsLanded)
+---@param info magicalMobSkillRetVal|physicalMobSkillRetVal
+---@param mob CBaseEntity
+---@param skill CPetSkill|CMobSkill
+---@param target CBaseEntity
+---@param attackType xi.attackType
+---@param damageType xi.damageType
+---@param shadowsToRemove xi.mobskills.shadowBehavior|integer?
+---@param hitsLanded number?
+---@return number
+xi.mobskills.mobFinalAdjustments = function(info, mob, skill, target, attackType, damageType, shadowsToRemove, hitsLanded)
     if hitsLanded == nil then
         hitsLanded = 0
     end
+
+    local damage = info.damage
 
     -- If target has Hysteria, no message skip rest
     -- TODO: Need to also handle in core to interrupt the mobskill. Proper behavior is: Mob will attempt to use a skill but it will not fire off.
@@ -517,6 +544,7 @@ xi.mobskills.mobFinalAdjustments = function(damage, mob, skill, target, attackTy
 
     -- Handle shadows depending on shadow behavior / attackType
     if
+        shadowsToRemove ~= nil and
         shadowsToRemove ~= xi.mobskills.shadowBehavior.WIPE_SHADOWS and
         shadowsToRemove ~= xi.mobskills.shadowBehavior.IGNORE_SHADOWS
     then
@@ -530,13 +558,14 @@ xi.mobskills.mobFinalAdjustments = function(damage, mob, skill, target, attackTy
         end
 
         -- Remove shadows
-        damage = utils.takeShadows(target, damage, shadowsToRemove)
+        local shadowsUsed = 0
+        damage, shadowsUsed = utils.takeShadows(target, damage, shadowsToRemove)
 
         -- Dealt zero damage, so shadows took all hits.
         if damage == 0 then
             skill:setMsg(xi.msg.basic.SHADOW_ABSORB)
 
-            return 0
+            return shadowsUsed
         end
 
     elseif shadowsToRemove == xi.mobskills.shadowBehavior.WIPE_SHADOWS then -- Remove all shadows
@@ -564,6 +593,7 @@ xi.mobskills.mobFinalAdjustments = function(damage, mob, skill, target, attackTy
     utils.handleAutomatonAutoAnalyzer(target, skill, damage)
 
     if attackType == xi.attackType.PHYSICAL then
+        damage = damage * xi.combat.damage.physicalElementSDT(target, damageType)
         damage = target:physicalDmgTaken(damage, damageType)
     elseif attackType == xi.attackType.MAGICAL then
         local element = utils.clamp(damageType - 5, xi.element.NONE, xi.element.DARK) -- Transform damage type to element
@@ -584,6 +614,7 @@ xi.mobskills.mobFinalAdjustments = function(damage, mob, skill, target, attackTy
         damage = math.floor(target:handleSevereDamage(damage, false))
         damage = math.floor(target:checkDamageCap(damage))
     elseif attackType == xi.attackType.RANGED then
+        damage = damage * xi.combat.damage.physicalElementSDT(target, damageType)
         damage = target:rangedDmgTaken(damage)
     end
 

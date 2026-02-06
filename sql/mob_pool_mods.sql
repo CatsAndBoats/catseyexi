@@ -129,9 +129,6 @@ INSERT INTO `mob_pool_mods` VALUES (1306,4,30,1); -- SIGHT_RANGE: 30
 -- Frostmane
 INSERT INTO `mob_pool_mods` VALUES (1429,28,10,1); -- EXP_BONUS: 10
 
--- Gambilox Wanderling
-INSERT INTO `mob_pool_mods` VALUES (1456,368,20,0); -- REGAIN: 20
-
 -- Gargantua
 INSERT INTO `mob_pool_mods` VALUES (1461,4,4,1); -- SIGHT_RANGE: 4
 
@@ -157,9 +154,6 @@ INSERT INTO `mob_pool_mods` VALUES (1750,56,1,1); -- HP_STANDBACK: 1
 
 -- Goliath
 INSERT INTO `mob_pool_mods` VALUES (1754,4,4,1); -- SIGHT_RANGE: 4
-
--- Gration
-INSERT INTO `mob_pool_mods` VALUES (1792,368,70,0); -- REGAIN: 70
 
 -- Greater Manticore
 INSERT INTO `mob_pool_mods` VALUES (1806,28,10,1); -- EXP_BONUS: 10

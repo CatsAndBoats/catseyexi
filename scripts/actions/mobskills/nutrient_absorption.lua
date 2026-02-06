@@ -14,8 +14,8 @@ end
 
 mobskillObject.onMobWeaponSkill = function(target, mob, skill)
     -- Damage is 300 + dINT
-    local damage = xi.mobskills.mobMagicalMove(mob, target, skill, 300, xi.element.DARK, 1, xi.mobskills.magicalTpBonus.NO_EFFECT)
-    damage = xi.mobskills.mobFinalAdjustments(damage, mob, skill, target, xi.attackType.MAGICAL, xi.damageType.DARK, xi.mobskills.shadowBehavior.NUMSHADOWS_1)
+    local info = xi.mobskills.mobMagicalMove(mob, target, skill, 300, xi.element.DARK, 1, xi.mobskills.magicalTpBonus.NO_EFFECT)
+    local damage = xi.mobskills.mobFinalAdjustments(info, mob, skill, target, xi.attackType.MAGICAL, xi.damageType.DARK, xi.mobskills.shadowBehavior.NUMSHADOWS_1)
 
     skill:setMsg(xi.mobskills.mobPhysicalDrainMove(mob, target, skill, xi.mobskills.drainType.HP, damage))
 

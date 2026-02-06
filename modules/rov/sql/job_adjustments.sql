@@ -2,11 +2,10 @@
 -- Rhapsodies of Vana'diel Job SQL Adjustments
 -- This module reverts relevant SQL tables for jobs to their pre-RoV values
 ------------------------------------
--- Source: https://forum.square-enix.com/ffxi/threads/52969
-------------------------------------
 
 ------------------------------------
 -- Monk
+-- Source: https://forum.square-enix.com/ffxi/threads/52969
 ------------------------------------
 
 -- Boost: Revert recast from 60 to 15 seconds
@@ -34,3 +33,16 @@ UPDATE merits SET value = 10 WHERE name = 'chakra_recast';
 UPDATE traits SET level = 35 WHERE name = 'max hp boost' AND job = 2 AND rank = 2;
 UPDATE traits SET level = 55 WHERE name = 'max hp boost' AND job = 2 AND rank = 3;
 UPDATE traits SET level = 70 WHERE name = 'max hp boost' AND job = 2 AND rank = 4;
+
+------------------------------------
+-- Black Mage
+-- Source: https://forum.square-enix.com/ffxi/threads/55525-June.-10-2019-%28JST%29-Version-Update
+------------------------------------
+
+-- Disable OOE BLM Group 2 merits
+UPDATE merits SET upgrade = 0 WHERE name = 'anc_magic_attack_bonus';
+UPDATE merits SET upgrade = 0 WHERE name = 'anc_magic_burst_dmg';
+UPDATE merits SET upgrade = 0 WHERE name = 'ele_magic_acc';
+UPDATE merits SET upgrade = 0 WHERE name = 'ele_magic_debuff_duration';
+UPDATE merits SET upgrade = 0 WHERE name = 'ele_magic_debuff_effect';
+UPDATE merits SET upgrade = 0 WHERE name = 'aspir_absorption_amount';

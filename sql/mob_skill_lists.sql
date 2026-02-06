@@ -480,30 +480,22 @@ INSERT INTO `mob_skill_lists` VALUES ('GiantBird',125,400); -- Triple Attack
 INSERT INTO `mob_skill_lists` VALUES ('GiantBird',125,401); -- Gliding Spike
 INSERT INTO `mob_skill_lists` VALUES ('GiantBird',125,402); -- Feather Barrier
 INSERT INTO `mob_skill_lists` VALUES ('GiantBird',125,403); -- Stormwind
-INSERT INTO `mob_skill_lists` VALUES ('Gigas',126,662);
-INSERT INTO `mob_skill_lists` VALUES ('Gigas',126,663);
-INSERT INTO `mob_skill_lists` VALUES ('Gigas',126,664);
-INSERT INTO `mob_skill_lists` VALUES ('Gigas',126,665);
-INSERT INTO `mob_skill_lists` VALUES ('Gigas',126,666);
-INSERT INTO `mob_skill_lists` VALUES ('Gigas',126,667);
-INSERT INTO `mob_skill_lists` VALUES ('Gigas',127,662);
-INSERT INTO `mob_skill_lists` VALUES ('Gigas',127,663);
-INSERT INTO `mob_skill_lists` VALUES ('Gigas',127,664);
-INSERT INTO `mob_skill_lists` VALUES ('Gigas',127,665);
-INSERT INTO `mob_skill_lists` VALUES ('Gigas',127,666);
-INSERT INTO `mob_skill_lists` VALUES ('Gigas',127,667);
-INSERT INTO `mob_skill_lists` VALUES ('Gigas',128,662);
-INSERT INTO `mob_skill_lists` VALUES ('Gigas',128,663);
-INSERT INTO `mob_skill_lists` VALUES ('Gigas',128,664);
-INSERT INTO `mob_skill_lists` VALUES ('Gigas',128,665);
-INSERT INTO `mob_skill_lists` VALUES ('Gigas',128,666);
-INSERT INTO `mob_skill_lists` VALUES ('Gigas',128,667);
-INSERT INTO `mob_skill_lists` VALUES ('Gigas',129,662);
-INSERT INTO `mob_skill_lists` VALUES ('Gigas',129,663);
-INSERT INTO `mob_skill_lists` VALUES ('Gigas',129,664);
-INSERT INTO `mob_skill_lists` VALUES ('Gigas',129,665);
-INSERT INTO `mob_skill_lists` VALUES ('Gigas',129,666);
-INSERT INTO `mob_skill_lists` VALUES ('Gigas',129,667);
+INSERT INTO `mob_skill_lists` VALUES ('Gigas_Armed_Lightning',126,662); -- Lightning Roar
+INSERT INTO `mob_skill_lists` VALUES ('Gigas_Armed_Lightning',126,664); -- Impact Roar
+INSERT INTO `mob_skill_lists` VALUES ('Gigas_Armed_Lightning',126,665); -- Grand Slam
+INSERT INTO `mob_skill_lists` VALUES ('Gigas_Armed_Lightning',126,667); -- Power Attack (Armed)
+INSERT INTO `mob_skill_lists` VALUES ('Gigas_Unarmed_Lightning',127,662); -- Lightning Roar
+INSERT INTO `mob_skill_lists` VALUES ('Gigas_Unarmed_Lightning',127,664); -- Impact Roar
+INSERT INTO `mob_skill_lists` VALUES ('Gigas_Unarmed_Lightning',127,665); -- Grand Slam
+INSERT INTO `mob_skill_lists` VALUES ('Gigas_Unarmed_Lightning',127,666); -- Power Attack (Unarmed)
+INSERT INTO `mob_skill_lists` VALUES ('Gigas_Armed_Ice',128,663); -- Ice Roar
+INSERT INTO `mob_skill_lists` VALUES ('Gigas_Armed_Ice',128,664); -- Impact Roar
+INSERT INTO `mob_skill_lists` VALUES ('Gigas_Armed_Ice',128,665); -- Grand Slam
+INSERT INTO `mob_skill_lists` VALUES ('Gigas_Armed_Ice',128,667); -- Power Attack (Armed)
+INSERT INTO `mob_skill_lists` VALUES ('Gigas_Unarmed_Ice',129,663); -- Ice Roar
+INSERT INTO `mob_skill_lists` VALUES ('Gigas_Unarmed_Ice',129,664); -- Impact Roar
+INSERT INTO `mob_skill_lists` VALUES ('Gigas_Unarmed_Ice',129,665); -- Grand Slam
+INSERT INTO `mob_skill_lists` VALUES ('Gigas_Unarmed_Ice',129,666); -- Power Attack (Unarmed)
 INSERT INTO `mob_skill_lists` VALUES ('Gigas',130,662);
 INSERT INTO `mob_skill_lists` VALUES ('Gigas',130,663);
 INSERT INTO `mob_skill_lists` VALUES ('Gigas',130,664);

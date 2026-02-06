@@ -283,16 +283,24 @@ xi.data.statusEffect.isEffectNullified = function(target, effectId, effectTier)
         return true
     end
 
+    if effectTier == 0 then
+        return false
+    end
+
+    -- Check if current effect is in place with a higher tier.
+    if target:hasStatusEffect(effectId) then
+        if target:getStatusEffect(effectId):getTier() >= effectTier then
+            return true
+        end
+    end
+
     -- Check effects that can block current effect from being applied, based on tier.
-    local tierToCheck             = utils.defaultIfNil(effectId, 0)
     local tierNullificatingEffect = xi.data.statusEffect.getNullificatingEffectByTier(effectId)
     if
-        tierToCheck > 0 and
         tierNullificatingEffect > 0 and
         target:hasStatusEffect(tierNullificatingEffect)
     then
-        local blockingTier = target:getStatusEffect(tierNullificatingEffect):getTier()
-        if blockingTier > tierToCheck then
+        if target:getStatusEffect(tierNullificatingEffect):getTier() >= effectTier then
             return true
         end
     end

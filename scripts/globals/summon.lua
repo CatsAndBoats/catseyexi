@@ -101,6 +101,18 @@ xi.summon.getSummoningSkillOverCap = function(avatar)
     return math.max(summoningSkill - maxSkill, 0)
 end
 
+---@param avatar CBaseEntity
+---@param target CBaseEntity
+---@param skill CPetSkill|CMobSkill
+---@param numberofhits number
+---@param accmod number
+---@param dmgmod number
+---@param dmgmodsubsequent number
+---@param tpeffect xi.mobskills.magicalTpBonus|xi.mobskills.physicalTpBonus
+---@param mtp100 number
+---@param mtp200 number
+---@param mtp300 number
+---@return physicalMobSkillRetVal
 xi.summon.avatarPhysicalMove = function(avatar, target, skill, numberofhits, accmod, dmgmod, dmgmodsubsequent, tpeffect, mtp100, mtp200, mtp300)
     local returninfo = {}
 
@@ -232,7 +244,7 @@ xi.summon.avatarPhysicalMove = function(avatar, target, skill, numberofhits, acc
         end
     end
 
-    returninfo.dmg        = finaldmg
+    returninfo.damage     = finaldmg
     returninfo.hitslanded = numHitsLanded
 
     skill:setAttackType(xi.attackType.PHYSICAL)
@@ -248,11 +260,21 @@ local attackTypeShields =
     [xi.attackType.MAGICAL ] = xi.effect.MAGIC_SHIELD,
 }
 
-xi.summon.avatarFinalAdjustments = function(dmg, mob, skill, target, skilltype, damagetype, shadowbehav)
+---@param info magicalMobSkillRetVal|physicalMobSkillRetVal
+---@param mob CBaseEntity
+---@param skill CPetSkill|CMobSkill
+---@param target CBaseEntity
+---@param skilltype xi.attackType
+---@param damagetype xi.damageType
+---@param shadowbehav xi.mobskills.shadowBehavior?
+---@return number
+xi.summon.avatarFinalAdjustments = function(info, mob, skill, target, skilltype, damagetype, shadowbehav)
     local missMessage = xi.msg.basic.SKILL_MISS
     if mob:getCurrentAction() == xi.action.category.PET_MOBABILITY_FINISH then
         missMessage = xi.msg.basic.JA_MISS_2
     end
+
+    local dmg = info.damage
 
     -- Physical Attack Missed
     if
@@ -275,7 +297,14 @@ xi.summon.avatarFinalAdjustments = function(dmg, mob, skill, target, skilltype, 
     end
 
     -- Handle shadows depending on shadow behavior / skilltype
-    dmg = utils.takeShadows(target, dmg, shadowbehav)
+    local preShadowDmg = dmg
+    local shadowsUsed  = 0
+    dmg, shadowsUsed = utils.takeShadows(target, dmg, shadowbehav)
+
+    if preShadowDmg > 0 and dmg == 0 then
+        skill:setMsg(xi.msg.basic.SHADOW_ABSORB)
+        return shadowsUsed
+    end
 
     -- handle Third Eye using shadowbehav as a guide
     local teye = target:getStatusEffect(xi.effect.THIRD_EYE)

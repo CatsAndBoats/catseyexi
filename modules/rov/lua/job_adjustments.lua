@@ -6,7 +6,7 @@
 -----------------------------------
 require('modules/module_utils')
 -----------------------------------
-local m = Module:new('job_adjustments')
+local m = Module:new('rov_job_adjustments')
 
 -----------------------------------
 -- Monk
@@ -104,5 +104,22 @@ end)
 --     effect:addMod(xi.mod.STORETP, 180)
 --     effect:addMod(xi.mod.HASTE_MAGIC, -6000)
 -- end)
+
+-----------------------------------
+-- Dark Knight
+-----------------------------------
+
+-- Dread Spikes: Revert duration from 3 minutes to 1 minute.
+-- Source: https://forum.square-enix.com/ffxi/threads/48564-Sep-16-2015-%28JST%29-Version-Update
+m:addOverride('xi.effects.dread_spikes.onEffectGain', function(target, effect)
+    super(target, effect)
+    effect:setDuration(60000)
+end)
+
+-- TODO Absorb-STAT: Add decay tick and set 90 second duration to boost effects
+-- TODO Drain II: Set duration of max HP boost to 60 seconds.
+-- Source:
+--   Decay Removal: http://forum.square-enix.com/ffxi/threads/46531-Mar-26-2015-%28JST%29-Version-Update
+--   Duration Change: https://forum.square-enix.com/ffxi/threads/48564-Sep-16-2015-%28JST%29-Version-Update
 
 return m

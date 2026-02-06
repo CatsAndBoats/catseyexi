@@ -17,8 +17,12 @@ mobskillObject.onMobWeaponSkill = function(target, mob, skill)
         base = 1000
     end
 
-    local damage = base / skill:getTotalTargets()
-    damage = xi.mobskills.mobFinalAdjustments(damage, mob, skill, target, xi.attackType.PHYSICAL, xi.damageType.WATER, xi.mobskills.shadowBehavior.WIPE_SHADOWS)
+    local info =
+    {
+        damage = base / skill:getTotalTargets()
+    }
+
+    local damage = xi.mobskills.mobFinalAdjustments(info, mob, skill, target, xi.attackType.PHYSICAL, xi.damageType.WATER, xi.mobskills.shadowBehavior.WIPE_SHADOWS)
     target:takeDamage(damage, mob, xi.attackType.PHYSICAL, xi.damageType.WATER)
     skill:setMsg(xi.mobskills.mobPhysicalDrainMove(mob, target, skill, xi.mobskills.drainType.HP, damage))
 

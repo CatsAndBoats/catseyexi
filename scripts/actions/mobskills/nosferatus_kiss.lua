@@ -22,8 +22,11 @@ mobskillObject.onMobWeaponSkill = function(target, mob, skill)
     local drainedTp = math.random(mob:getMainLvl() / 2, mob:getMainLvl())
     -- TODO: This needs more captures
     local drainedMp = math.random(mob:getMainLvl() / 3, mob:getMainLvl() / 2)
-
-    drainedHp = xi.mobskills.mobFinalAdjustments(drainedHp, mob, skill, target, xi.attackType.MAGICAL, xi.damageType.DARK, xi.mobskills.shadowBehavior.IGNORE_SHADOWS)
+    local info =
+    {
+        damage = drainedHp
+    }
+    drainedHp = xi.mobskills.mobFinalAdjustments(info, mob, skill, target, xi.attackType.MAGICAL, xi.damageType.DARK, xi.mobskills.shadowBehavior.IGNORE_SHADOWS)
     xi.mobskills.mobPhysicalDrainMove(mob, target, skill, xi.mobskills.drainType.HP, drainedHp)
     xi.mobskills.mobPhysicalDrainMove(mob, target, skill, xi.mobskills.drainType.MP, drainedMp)
     xi.mobskills.mobPhysicalDrainMove(mob, target, skill, xi.mobskills.drainType.TP, drainedTp)

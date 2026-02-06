@@ -6,6 +6,5 @@ return {
     ['_0p3']             = { event = 553 },
     ['_0p4']             = { messageSpecial = ID.text.NOTHING_ELSE_OF_INTEREST },
     ['qm_bloody_coffin'] = { messageSpecial = ID.text.NOTHING_OUT_OF_ORDINARY },
-    ['qm_gration']       = { messageSpecial = ID.text.NOTHING_OUT_OF_ORDINARY },
     ['qm_rov2_20']       = { messageSpecial = ID.text.NOTHING_OUT_OF_ORDINARY },
 }

@@ -397,12 +397,14 @@ auto CMobController::MobSkill(int listId) -> bool
 
     PActionTarget = luautils::OnMobSkillTarget(PActionTarget, PMob, PMobSkill);
 
+    std::optional<timer::duration> mobSkillReadyTime = luautils::OnMobSkillReadyTime(PActionTarget, PMob, PMobSkill);
+
     if (PActionTarget && !PMobSkill->isAstralFlow() && luautils::OnMobSkillCheck(PActionTarget, PMob, PMobSkill) == 0) // A script says that the move in question is valid
     {
         const float currentDistance = distance(PMob->loc.p, PActionTarget->loc.p);
         if (currentDistance <= PMobSkill->getDistance())
         {
-            return MobSkill(PActionTarget->targid, PMobSkill->getID(), std::nullopt);
+            return MobSkill(PActionTarget->targid, PMobSkill->getID(), mobSkillReadyTime);
         }
     }
 

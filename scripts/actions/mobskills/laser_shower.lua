@@ -25,12 +25,12 @@ mobskillObject.onMobWeaponSkill = function(target, mob, skill)
     params.mAccuracyBonus    = { 0, 0, 0 }
     params.resistStat        = xi.mod.INT
 
-    local damage = xi.mobskills.mobBreathMove(mob, target, skill, params)
+    local info = xi.mobskills.mobBreathMove(mob, target, skill, params)
     local dis = ((mob:checkDistance(target) * 2) / 20) -- TODO: Verify this skill has a damage adjustment based on range from mob.
 
-    damage = damage * dis
-    damage = utils.clamp(damage, 50, 1600)
-    damage = xi.mobskills.mobFinalAdjustments(damage, mob, skill, target, xi.attackType.BREATH, xi.damageType.LIGHT, xi.mobskills.shadowBehavior.IGNORE_SHADOWS, 1)
+    info.damage = info.damage * dis
+    info.damage = utils.clamp(info.damage, 50, 1600)
+    local damage = xi.mobskills.mobFinalAdjustments(info, mob, skill, target, xi.attackType.BREATH, xi.damageType.LIGHT, xi.mobskills.shadowBehavior.IGNORE_SHADOWS, 1)
 
     if not xi.mobskills.hasMissMessage(mob, target, skill, damage) then
         target:takeDamage(damage, mob, xi.attackType.BREATH, xi.damageType.LIGHT)

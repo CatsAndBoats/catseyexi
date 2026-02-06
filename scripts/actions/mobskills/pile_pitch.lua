@@ -12,8 +12,11 @@ end
 
 mobskillObject.onMobWeaponSkill = function(target, mob, skill)
     local currentHP = target:getHP()
-    local damage = currentHP * .90
-    local dmg = xi.mobskills.mobFinalAdjustments(damage, mob, skill, target, xi.attackType.MAGICAL, xi.damageType.NONE, xi.mobskills.shadowBehavior.IGNORE_SHADOWS)
+    local info =
+    {
+        damage = currentHP * .90
+    }
+    local dmg = xi.mobskills.mobFinalAdjustments(info, mob, skill, target, xi.attackType.MAGICAL, xi.damageType.NONE, xi.mobskills.shadowBehavior.IGNORE_SHADOWS)
 
     target:takeDamage(dmg, mob, xi.attackType.MAGICAL, xi.damageType.NONE, { breakBind = false })
 

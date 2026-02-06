@@ -21,8 +21,11 @@
 
 #include "0x05c_eventendxzy.h"
 
+#include "ai/ai_container.h"
+#include "enmity_container.h"
 #include "entities/charentity.h"
 #include "lua/luautils.h"
+#include "notoriety_container.h"
 #include "packets/s2c/0x052_eventucoff.h"
 #include "packets/s2c/0x05b_wpos.h"
 #include "packets/s2c/0x065_wpos2.h"
@@ -50,9 +53,11 @@ void GP_CLI_COMMAND_EVENTENDXZY::process(MapSession* PSession, CCharEntity* PCha
 
     PChar->SetLocalVar("noPosUpdate", 0);
 
+    position_t newPos = PChar->loc.p;
+
     if (updatePosition)
     {
-        position_t newPos = {
+        newPos = {
             x,
             y,
             z,
@@ -65,7 +70,34 @@ void GP_CLI_COMMAND_EVENTENDXZY::process(MapSession* PSession, CCharEntity* PCha
     }
     else
     {
-        PChar->pushPacket<GP_SERV_COMMAND_WPOS2>(PChar, PChar->loc.p, POSMODE::CLEAR);
+        PChar->pushPacket<GP_SERV_COMMAND_WPOS2>(PChar, newPos, POSMODE::CLEAR);
+    }
+
+    auto* PPet = PChar->PPet;
+
+    if (PPet && !PPet->isDead())
+    {
+        PPet->loc.p = newPos;
+
+        PPet->PAI->Disengage();
+
+        // clear all enmity towards a charmed mob when it is teleported
+        // use two loops to avoid modifying the container while iterating over it
+        std::list<CMobEntity*> mobsToPacify;
+
+        // first collect the mobs with hate towards the formerly charmed mob
+        for (auto* entityWithEnmity : *PPet->PNotorietyContainer)
+        {
+            if (auto* mobToPacify = dynamic_cast<CMobEntity*>(entityWithEnmity))
+            {
+                mobsToPacify.emplace_back(mobToPacify);
+            }
+        }
+        // then remove the formerly charmed mob from those mobs enmity containers
+        for (const auto* mobToPacify : mobsToPacify)
+        {
+            mobToPacify->PEnmityContainer->Clear(PPet->id);
+        }
     }
 
     PChar->pushPacket<GP_SERV_COMMAND_EVENTUCOFF>(PChar, GP_SERV_COMMAND_EVENTUCOFF_MODE::EventRecvPending);

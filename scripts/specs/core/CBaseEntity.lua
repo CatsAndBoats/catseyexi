@@ -3061,6 +3061,13 @@ end
 function CBaseEntity:getMaxGearMod(modId)
 end
 
+---@nodiscard
+---@param slot xi.slot
+---@param modId integer
+---@return integer
+function CBaseEntity:getGearModFromSlot(slot, modId)
+end
+
 ---@param condID integer
 ---@param conditionValue integer
 ---@param mID integer

@@ -10,13 +10,9 @@ local entity = {}
 
 entity.onMobInitialize = function(mob)
     mob:setMobMod(xi.mobMod.ADD_EFFECT, 1)
-end
-
-entity.onMobSpawn = function(mob)
+    -- TODO - BRD immunities need confirmation.
     -- TODO any dmg absorb like Noble Mold?
     -- Confirmed it takes dmg from blizzard and water
-    -- TODO any other immunities?
-    -- confirmed it is not immune to Blind
     mob:addImmunity(xi.immunity.PARALYZE)
 end
 

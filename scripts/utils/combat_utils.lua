@@ -28,7 +28,8 @@ end
 ---@param actor CBaseEntity
 ---@param damage integer
 ---@param shadowsToRemove integer?
----@return integer
+---@return integer damage
+---@return integer shadowsUsed
 function utils.takeShadows(actor, damage, shadowsToRemove)
     shadowsToRemove = shadowsToRemove or 1
 
@@ -43,7 +44,7 @@ function utils.takeShadows(actor, damage, shadowsToRemove)
 
     -- No shadows, return full damage
     if shadowPower == 0 then
-        return damage
+        return damage, 0
     end
 
     local shadowsRemaining = shadowPower
@@ -67,7 +68,8 @@ function utils.takeShadows(actor, damage, shadowsToRemove)
         -- Handle Utsusemi removal
         if shadowPower >= shadowsToRemove then
             shadowsRemaining = shadowPower - shadowsToRemove
-            damage = 0
+            shadowsUsed      = shadowsToRemove
+            damage           = 0
 
             -- Update remaining Copy Image icon
             if shadowsRemaining > 0 then
@@ -86,7 +88,8 @@ function utils.takeShadows(actor, damage, shadowsToRemove)
             end
         else
             -- Partial shadow consumption, take damage.
-            damage = damage * ((shadowsToRemove - shadowPower) / shadowsToRemove)
+            shadowsUsed      = shadowPower
+            damage           = damage * ((shadowsToRemove - shadowPower) / shadowsToRemove)
             shadowsRemaining = 0
         end
     end
@@ -98,7 +101,7 @@ function utils.takeShadows(actor, damage, shadowsToRemove)
         actor:delStatusEffect(xi.effect.BLINK)
     end
 
-    return damage
+    return damage, shadowsUsed
 end
 
 -- Calculates Phalanx damage reduction.

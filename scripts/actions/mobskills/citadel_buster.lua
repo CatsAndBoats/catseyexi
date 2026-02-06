@@ -29,7 +29,11 @@ mobskillObject.onMobWeaponSkill = function(target, mob, skill)
     end
 
     local damage = basedmg / (1 + (target:getMod(xi.mod.MDEF) / 100))
-    local dmg = xi.mobskills.mobFinalAdjustments(damage, mob, skill, target, xi.attackType.MAGICAL, xi.damageType.LIGHT, xi.mobskills.shadowBehavior.IGNORE_SHADOWS)
+    local info   =
+    {
+        damage = damage
+    }
+    local dmg = xi.mobskills.mobFinalAdjustments(info, mob, skill, target, xi.attackType.MAGICAL, xi.damageType.LIGHT, xi.mobskills.shadowBehavior.IGNORE_SHADOWS)
 
     target:takeDamage(dmg, mob, xi.attackType.MAGICAL, xi.damageType.LIGHT)
     mob:resetEnmity(target)

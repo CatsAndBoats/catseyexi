@@ -43,7 +43,7 @@ describe('TargetFind', function()
         -- Force Flail to always hit
         local m = stub('xi.mobskills.mobPhysicalMove',
             {
-                dmg        = 100,
+                damage     = 100,
                 hitslanded = 3,
                 isCritical = false,
             })
@@ -85,7 +85,7 @@ describe('TargetFind', function()
         -- Force Flail to always hit
         local m = stub('xi.mobskills.mobPhysicalMove',
             {
-                dmg        = 100,
+                damage     = 100,
                 hitslanded = 3,
                 isCritical = false,
             })

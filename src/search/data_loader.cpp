@@ -646,7 +646,7 @@ std::list<SearchEntity*> CDataLoader::GetLinkshellList(uint32 LinkshellID)
                                  "LEFT JOIN char_flags USING(charid) "
                                  "WHERE linkshellid1 = ? OR linkshellid2 = ? "
                                  "ORDER BY charname ASC "
-                                 "LIMIT 18",
+                                 "LIMIT 64",
                                  LinkshellID,
                                  LinkshellID);
     if (rset && rset->rowsCount())

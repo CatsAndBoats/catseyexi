@@ -3908,6 +3908,35 @@ CBattleEntity* OnMobSkillTarget(CBattleEntity* PTarget, CBaseEntity* PMob, CMobS
     return PTarget;
 }
 
+std::optional<timer::duration> OnMobSkillReadyTime(CBattleEntity* PTarget, CBaseEntity* PMob, CMobSkill* PMobSkill)
+{
+    TracyZoneScoped;
+
+    auto zone = PMob->loc.zone->getName();
+    auto name = PMob->getName();
+
+    auto onMobSkillReadyTime = lua["xi"]["zones"][zone]["mobs"][name]["onMobSkillReadyTime"];
+    if (!onMobSkillReadyTime.valid())
+    {
+        return std::nullopt;
+    }
+
+    auto result = onMobSkillReadyTime(PTarget, PMob, PMobSkill);
+    if (!result.valid())
+    {
+        sol::error err = result;
+        ShowError("luautils::onMobSkillReadyTime: %s", err.what());
+        return std::nullopt;
+    }
+
+    if (result.get_type(0) == sol::type::number)
+    {
+        return std::chrono::milliseconds(result.template get<uint16>(0));
+    }
+
+    return std::nullopt;
+}
+
 // onMobSkillFinalize always executes once per uninterrupted mobskill use, independently of any target being found.
 void OnMobSkillFinalize(CBaseEntity* PMob, CMobSkill* PMobSkill)
 {

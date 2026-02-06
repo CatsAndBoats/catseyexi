@@ -177,7 +177,7 @@ xi.mobSkill =
     SUCTORIAL_TENTACLE_1          =  508,
 
     SELF_DESTRUCT_BOMB            =  509,
-
+    BERSERK_BOMB                  =  510,
     SELF_DESTRUCT_BOMB_321        =  511,
 
     SMITE_OF_RAGE                 =  513,
@@ -251,6 +251,10 @@ xi.mobSkill =
 
     CURSED_SPHERE_1               =  659,
     VENOM_1                       =  660,
+
+    GRAND_SLAM_1                  =  665,
+
+    POWER_ATTACK_ARMED_1          =  667,
 
     KICK_BACK                     =  668,
     IMPLOSION                     =  669,

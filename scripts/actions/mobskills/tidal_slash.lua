@@ -19,8 +19,8 @@ end
 mobskillObject.onMobWeaponSkill = function(target, mob, skill)
     local damage = math.floor(mob:getWeaponDmg() * 3.5)
 
-    damage = xi.mobskills.mobMagicalMove(mob, target, skill, damage, xi.element.WATER, 3, xi.mobskills.magicalTpBonus.NO_EFFECT)
-    damage = xi.mobskills.mobFinalAdjustments(damage, mob, skill, target, xi.attackType.MAGICAL, xi.damageType.WATER, xi.mobskills.shadowBehavior.NUMSHADOWS_3)
+    local info = xi.mobskills.mobMagicalMove(mob, target, skill, damage, xi.element.WATER, 3, xi.mobskills.magicalTpBonus.NO_EFFECT)
+    damage = xi.mobskills.mobFinalAdjustments(info, mob, skill, target, xi.attackType.MAGICAL, xi.damageType.WATER, xi.mobskills.shadowBehavior.NUMSHADOWS_3)
 
     target:takeDamage(damage, mob, xi.attackType.MAGICAL, xi.damageType.WATER)
 

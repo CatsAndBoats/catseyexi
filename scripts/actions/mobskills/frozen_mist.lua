@@ -20,8 +20,8 @@ mobskillObject.onMobWeaponSkill = function(target, mob, skill)
     local resistRate = xi.combat.magicHitRate.calculateResistRate(mob, target, 0, 0, 0, xi.element.ICE, xi.mod.INT, xi.effect.TERROR, 0)
     local duration   = math.floor(30 * resistRate)
 
-    damage = xi.mobskills.mobMagicalMove(mob, target, skill, damage, xi.element.ICE, 1.5, xi.mobskills.magicalTpBonus.NO_EFFECT)
-    damage = xi.mobskills.mobFinalAdjustments(damage, mob, skill, target, xi.attackType.MAGICAL, xi.damageType.ICE, xi.mobskills.shadowBehavior.WIPE_SHADOWS)
+    local info = xi.mobskills.mobMagicalMove(mob, target, skill, damage, xi.element.ICE, 1.5, xi.mobskills.magicalTpBonus.NO_EFFECT)
+    damage = xi.mobskills.mobFinalAdjustments(info, mob, skill, target, xi.attackType.MAGICAL, xi.damageType.ICE, xi.mobskills.shadowBehavior.WIPE_SHADOWS)
 
     target:takeDamage(damage, mob, xi.attackType.MAGICAL, xi.damageType.ICE)
     xi.mobskills.mobStatusEffectMove(mob, target, xi.effect.TERROR, 30, 0, duration)

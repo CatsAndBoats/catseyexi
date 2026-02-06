@@ -391,7 +391,7 @@ xi.spells.enfeebling.useEnfeeblingSpell = function(caster, target, spell)
     local spellElement = spell:getElement()
     local skillType    = spell:getSkillType()
     local spellEffect  = pTable[spellId][column.EFFECT_ID]
-    local tier         = pTable[spellId][column.TIER]
+    local tier         = pTable[spellId][column.EFFECT_TIER] or 0
 
     ------------------------------
     -- STEP 1: Check spell nullification.
@@ -504,7 +504,7 @@ xi.spells.enfeebling.useEnfeeblingSpell = function(caster, target, spell)
         end
 
         -- Add "Magic Burst!" message
-        local _, skillchainCount = xi.magicburst.formMagicBurst(spellElement, target) -- External function. Not present in magic.lua.
+        local _, skillchainCount = xi.magicburst.formMagicBurst(target, spellElement) -- External function. Not present in magic.lua.
 
         if skillchainCount > 0 then
             spell:setMsg(xi.msg.basic.MAGIC_BURST_ENFEEB_IS - message * 3)
