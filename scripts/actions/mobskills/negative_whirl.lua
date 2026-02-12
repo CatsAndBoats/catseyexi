@@ -55,8 +55,8 @@ mobskillObject.onMobWeaponSkill = function(target, mob, skill)
         dmgType = elementTable[modelId][animationSub].damageType
     end
 
-    damage = xi.mobskills.mobMagicalMove(mob, target, skill, damage, element, 1, xi.mobskills.magicalTpBonus.NO_EFFECT)
-    damage = xi.mobskills.mobFinalAdjustments(damage, mob, skill, target, xi.attackType.MAGICAL, dmgType, xi.mobskills.shadowBehavior.WIPE_SHADOWS)
+    local info = xi.mobskills.mobMagicalMove(mob, target, skill, damage, element, 1, xi.mobskills.magicalTpBonus.NO_EFFECT)
+    damage = xi.mobskills.mobFinalAdjustments(info, mob, skill, target, xi.attackType.MAGICAL, dmgType, xi.mobskills.shadowBehavior.WIPE_SHADOWS)
 
     target:takeDamage(damage, mob, xi.attackType.MAGICAL, dmgType)
     xi.mobskills.mobStatusEffectMove(mob, target, xi.effect.SLOW, 8500, 0, 60)

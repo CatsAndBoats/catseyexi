@@ -48,7 +48,7 @@ enum MOBMODIFIER : int
     MOBMOD_NO_DESPAWN             = 17, // do not despawn when too far from spawn. Gob Diggers have this.
     MOBMOD_VAR                    = 18, // temp var for whatever. Gets cleared on spawn
     MOBMOD_CAN_SHIELD_BLOCK       = 19, // toggle shield use for mobs without physical shields (trusts)
-    MOBMOD_TP_USE_CHANCE          = 20, // % chance to use tp
+    MOBMOD_NO_H2H_PENALTY         = 20, // Disables H2H penalty in base damage calculation when set to non-zero
     MOBMOD_PET_SPELL_LIST         = 21, // set pet spell list
     MOBMOD_NA_CHANCE              = 22, // % chance to cast -na
     MOBMOD_IMMUNITY               = 23, // immune to set status effects. This only works from the db, not scripts
@@ -120,6 +120,7 @@ enum MOBMODIFIER : int
     MOBMOD_AVATAR_PETID           = 89, // A value from xi.petId to select model/ability from when owner uses astral flow
     MOBMOD_AVATAR_ASTRAL_DELAY    = 90, // Number of milliseconds to delay AF after avatar spawn
     MOBMOD_H2H_SINGLE_SWING       = 91, // Mob will have only one swing per attack even as MNK with H2H skill
+    MOBMOD_AOE_HIT_ALL            = 92, // Mob AoE can hit any player regardless of enmity
 };
 
 #endif

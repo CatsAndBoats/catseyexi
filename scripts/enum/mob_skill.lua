@@ -9,6 +9,14 @@ xi.mobSkill =
     SHARK_BITE                    =   24,
     EVISCERATION                  =   25,
 
+    HARD_SLASH_1                  =   48,
+    POWER_SLASH_1                 =   49,
+    FROSTBITE_1                   =   50,
+    FREEZEBITE_1                  =   51,
+    SHOCKWAVE_1                   =   52,
+    CRESCENT_MOON_1               =   53,
+    SICKLE_MOON_1                 =   54,
+
     VORPAL_SCYTHE                 =  101,
     GUILLOTINE_1                  =  102,
 
@@ -68,6 +76,8 @@ xi.mobSkill =
 
     BAD_BREATH_1                  =  319,
 
+    THOUSAND_NEEDLES_1            =  322,
+
     DRILL_BRANCH                  =  328,
     PINECONE_BOMB                 =  329,
 
@@ -75,6 +85,9 @@ xi.mobSkill =
     ENTANGLE                      =  332,
 
     VELOCIOUS_BLADE               =  347, -- Mammet-800
+
+    WILD_RAGE                     =  354,
+    EARTH_POUNDER                 =  355,
 
     HEAVY_BLOW                    =  357,
     HEAVY_WHISK                   =  358,
@@ -130,15 +143,26 @@ xi.mobSkill =
 
     GRAVITY_WHEEL                 =  457, -- Mammet-800
 
+    CROSS_ATTACK_1                =  460,
+
+    MAELSTROM_1                   =  462,
+
     PSYCHOMANCY                   =  464, -- Mammet-800
 
     MIND_WALL                     =  471, -- Mammet-800
+
+    GRAVE_REEL                    =  472,
 
     PETRIFACTIVE_BREATH           =  480,
 
     CHARGED_WHISKER               =  483,
 
+    WHIP_TONGUE                   =  486,
     TRANSMOGRIFICATION            =  487, -- Mammet-800
+
+    STINKING_GAS                  =  489,
+
+    ABYSS_BLAST                   =  492,
 
     TRICLIP_1                     =  498,
     BACK_SWISH_1                  =  499,
@@ -146,9 +170,14 @@ xi.mobSkill =
     FRIGHTFUL_ROAR_1              =  501,
     MORTAL_RAY_1                  =  502,
     UNBLESSED_ARMOR               =  503,
+    GAS_SHELL_1                   =  504,
+    VENOM_SHELL_1                 =  505,
+    PALSYNYXIS_1                  =  506,
+    PAINFUL_WHIP_1                =  507,
+    SUCTORIAL_TENTACLE_1          =  508,
 
     SELF_DESTRUCT_BOMB            =  509,
-
+    BERSERK_BOMB                  =  510,
     SELF_DESTRUCT_BOMB_321        =  511,
 
     SMITE_OF_RAGE                 =  513,
@@ -159,7 +188,7 @@ xi.mobSkill =
     BLITZSTRAHL                   =  535,
     PANZERFAUST                   =  536,
     BERSERK_DOLL                  =  537,
-
+    PANZERSCHRECK                 =  538,
     TYPHOON                       =  539,
 
     TREMOROUS_TREAD               =  540, -- Mammet-800
@@ -212,10 +241,20 @@ xi.mobSkill =
 
     FINAL_METEOR                  =  634, -- Final Meteor Chlevnik
 
+    RECOIL_DIVE_1                 =  641,
+
+    VOIDSONG_1                    =  649,
+    THORNSONG_1                   =  650,
+    LODESONG_1                    =  651,
+
     CHAOTIC_EYE_1                 =  653,
 
     CURSED_SPHERE_1               =  659,
     VENOM_1                       =  660,
+
+    GRAND_SLAM_1                  =  665,
+
+    POWER_ATTACK_ARMED_1          =  667,
 
     KICK_BACK                     =  668,
     IMPLOSION                     =  669,
@@ -238,8 +277,16 @@ xi.mobSkill =
 
     CHARM                         =  710,
 
+    VENOM_BREATH_1                =  717,
     JUMP_1                        =  718,
+    CRITICAL_BITE                 =  719,
+    VENOM_STING_1                 =  720,
+    STASIS                        =  721,
+    VENOM_STORM_1                 =  722,
+    EARTHBREAKER_1                =  723,
+    EVASION                       =  724,
 
+    DEATH_TRAP                    =  729, -- Lockpicked coffer mimics only
     MEIKYO_SHISUI_1               =  730, -- Tenzen, etc...
     MIJIN_GAKURE_1                =  731, -- Season's Greetings KSNM 30 (Ulagohvsdi Tlugvi)
     CALL_WYVERN                   =  732,
@@ -272,7 +319,13 @@ xi.mobSkill =
     THUNDER_BREATH                =  820,
     RADIANT_BREATH                =  821,
     CHAOS_BREATH                  =  822,
-
+    FIRE_BLADE_1                  =  823,
+    FROST_BLADE_1                 =  824,
+    WIND_BLADE_1                  =  825,
+    EARTH_BLADE_1                 =  826,
+    LIGHTNING_BLADE_1             =  827,
+    WATER_BLADE_1                 =  828,
+    GREAT_WHEEL_1                 =  829,
     LIGHT_BLADE_1                 =  830,
 
     HOWLING_MOON_1                =  838, -- Unknown usage.
@@ -326,6 +379,16 @@ xi.mobSkill =
     TACHI_GEKKO                   =  947, -- Ark Angel GK
     TACHI_KASHA                   =  948, -- Ark Angel GK
 
+    FLAME_BLAST_ATTACK            =  950,
+    HURRICANE_WING_1              =  951,
+    SPIKE_FLAIL_1                 =  952,
+    DRAGON_BREATH_1               =  953,
+    TOUCHDOWN_1                   =  954,
+    FLAME_BLAST_1                 =  955,
+    HURRICANE_WING_FLYING         =  956,
+    ABSOLUTE_TERROR_1             =  957,
+    HORRID_ROAR_1                 =  958,
+
     ARKANGEL_TT_WARP_IN           =  962, -- Ark Angel TT Warp In
 
     TRION_RED_LOTUS_BLADE         =  968, -- Trion Red Lotus Blade
@@ -339,6 +402,9 @@ xi.mobSkill =
     AJIDO_WARP_OUT                =  977, -- Windurst 9-2 Ajido teleport
     AJIDO_WARP_IN                 =  978, -- Windurst 9-2 Ajido teleport
 
+    STELLAR_BURST_1               =  986,
+    VORTEX_1                      =  987,
+
     PHASE_SHIFT_1_EXOPLATES       =  993,
 
     PHASE_SHIFT_2_EXOPLATES       =  997,
@@ -346,6 +412,7 @@ xi.mobSkill =
     PHASE_SHIFT_3_EXOPLATES       = 1001,
     ZEID_SUMMON_SHADOWS_1         = 1002, -- TODO: Investigate why was this in sql, where it came from and why wasnt it actually used in an scripted way.
 
+    OMEGA_JAVELIN_1               = 1006,
     ZEID_SUMMON_SHADOWS_2         = 1007, -- Captured. Bastok mission 9-2 BCNM, phase 2. No actual name in log.
 
     CALL_BEAST                    = 1017, -- "Tango with a Tracker" Shikaree X
@@ -375,6 +442,8 @@ xi.mobSkill =
     DIAMOND_DUST_3                = 1166, -- Confirmed usage: "Trial-Size Trial by Ice" bcnm. (Shiva)
     JUDGMENT_BOLT_3               = 1167, -- Confirmed usage: "Trial-Size Trial by Lightning" bcnm. (Ramuh)
 
+    THORNSONG_2                   = 1176, -- Extremely powerful version of Thornsong
+
     RANGED_ATTACK_4               = 1202,
     RANGED_ATTACK_5               = 1203,
     RANGED_ATTACK_6               = 1204,
@@ -401,6 +470,14 @@ xi.mobSkill =
     MATERIAL_FEND                 = 1233,
     CAROUSEL_1                    = 1234,
 
+    PILE_PITCH                    = 1235,
+    GUIDED_MISSILE                = 1236,
+    HYPER_PULSE                   = 1237,
+    TARGET_ANALYSIS               = 1238,
+    DISCHARGER                    = 1239,
+    ION_EFFLUX                    = 1240,
+    REAR_LASERS                   = 1241,
+
     NEGATIVE_WHIRL_1              = 1243,
     STYGIAN_VAPOR                 = 1244,
     WINDS_OF_PROMYVION_1          = 1245,
@@ -413,23 +490,39 @@ xi.mobSkill =
     TRINARY_TAP                   = 1251,
     SHADOW_SPREAD                 = 1252,
 
+    WIRE_CUTTER                   = 1259,
+    ANTIMATTER                    = 1260,
+    EQUALIZER                     = 1261,
+    FLAME_THROWER                 = 1262,
+    CRYO_JET                      = 1263,
+    TURBOFAN                      = 1264,
+    SMOKE_DISCHARGER              = 1265,
+    HIGH_TENSION_DISCHARGER       = 1266,
+    HYDRO_CANON                   = 1267,
+    NUCLEAR_WASTE                 = 1268,
+    CHEMICAL_BOMB                 = 1269,
+    PARTICLE_SHIELD               = 1270,
+
     EMPTY_CUTTER                  = 1271,
 
     IMPALEMENT                    = 1274,
     EMPTY_THRASH                  = 1275,
     PROMYVION_BRUME_2             = 1276,
 
+    GERJIS_GRIP                   = 1322,
+
     HOOF_VOLLEY                   = 1330,
 
     COUNTERSTANCE                 = 1331, -- The Waughroon Kid
-
+    EXTREMELY_BAD_BREATH_1        = 1332,
     CONTAGION_TRANSFER            = 1333,
     CONTAMINATION                 = 1334,
     TOXIC_PICK                    = 1335,
-
     FRENZIED_RAGE_1               = 1336,
     CHARM_2                       = 1337,
+    INFERNAL_PESTILENCE           = 1338,
 
+    CROSSTHRASH_1                 = 1340,
     KNIFE_EDGE_CIRCLE             = 1341,
     TRAIN_FALL                    = 1342,
 
@@ -456,15 +549,58 @@ xi.mobSkill =
 
     AMATSU_TORIMAI                = 1390,
     AMATSU_KAZAKIRI               = 1391,
-
+    AMATSU_YUKIARASHI             = 1392,
+    AMATSU_TSUKIOBORO             = 1393,
     AMATSU_HANAIKUSA              = 1394,
     AMATSU_TSUKIKAGE              = 1395,
     COSMIC_ELUCIDATION            = 1396,
-
+    OISOYA                        = 1397,
     RANGED_ATTACK_TENZEN_1        = 1398, -- Tenzen Bow High
     RICEBALL_TENZEN               = 1399,
     RANGED_ATTACK_TENZEN_2        = 1400, -- Tenzen Bow Low
     SOUL_ACCRETION                = 1401,
+
+    ACTINIC_BURST                 = 1441,
+
+    HEXIDISCS                     = 1443,
+    VORPAL_BLADE_GHRAH            = 1444,
+    DAMNATION_DIVE_GHRAH          = 1445,
+    SICKLE_SLASH                  = 1446,
+
+    REACTOR_COOL                  = 1463,
+    OPTIC_INDURATION_CHARGE       = 1464,
+    OPTIC_INDURATION              = 1465,
+    STATIC_FILAMENT               = 1466,
+    DECAYED_FILAMENT              = 1467,
+    REACTOR_OVERHEAT              = 1468,
+    REACTOR_OVERLOAD              = 1469,
+
+    HUNDRED_FISTS_PRISHE          = 1485,
+    BENEDICTION_PRISHE            = 1486,
+    ITEM_1_PRISHE                 = 1487,
+    ITEM_2_PRISHE                 = 1488,
+    NULLIFYING_DROPKICK_1         = 1489,
+    AURORAL_UPPERCUT_1            = 1490,
+    CHAINS_OF_APATHY              = 1491,
+    CHAINS_OF_ARROGANCE           = 1492,
+    CHAINS_OF_COWARDICE           = 1493,
+    CHAINS_OF_RAGE                = 1494,
+    CHAINS_OF_ENVY                = 1495,
+    MALEVOLENT_BLESSING_1         = 1496,
+    PESTILENT_PENANCE_1           = 1497,
+    EMPTY_SALVATION_1             = 1498,
+    INFERNAL_DELIVERANCE_1        = 1499,
+    MALEVOLENT_BLESSING_2         = 1500,
+    PESTILENT_PENANCE_2           = 1501,
+    EMPTY_SALVATION_2             = 1502,
+    INFERNAL_DELIVERANCE_2        = 1503,
+    WHEEL_OF_IMPREGNABILITY       = 1504,
+    BASTION_OF_TWILIGHT           = 1505,
+    WINDS_OF_OBLIVION             = 1506,
+    SEAL_OF_QUIESCENCE            = 1507,
+    LUMINOUS_LANCE_1              = 1508,
+    REJUVENATION_1                = 1509,
+    REVELATION_1                  = 1510,
 
     HOWLING_MOON_3                = 1520, -- Unknown usage.
 
@@ -496,6 +632,14 @@ xi.mobSkill =
 
     XENOGLOSSIA                   = 1823, -- Unique entry.
 
+    PYRIC_BLAST                   = 1828,
+    PYRIC_BULWARK                 = 1829,
+    POLAR_BLAST                   = 1830,
+    POLAR_BULWARK                 = 1831,
+    BAROFIELD                     = 1832,
+
+    NERVE_GAS                     = 1836,
+
     SANDBLAST_2                   = 1841,
     SANDPIT_2                     = 1842,
     VENOM_SPRAY_2                 = 1843,
@@ -513,6 +657,8 @@ xi.mobSkill =
     DEATHGNASH                    = 1977, -- Unique entry.
 
     BOREAS_MANTLE                 = 1980, -- Unique entry.
+
+    REWARD                        = 2005,
 
     NOCTURNAL_SERVITUDE           = 2112,
     HELLSNAP                      = 2113,
@@ -554,6 +700,9 @@ xi.mobSkill =
 
     ROAR_3                        = 2406,
 
+    REAVING_WIND                  = 2431,
+    REAVING_WIND_KNOCKBACK        = 2434,
+
     AQUA_BLAST                    = 2437,
 
     HYDRO_WAVE                    = 2439,
@@ -564,6 +713,10 @@ xi.mobSkill =
     DIAMOND_DUST_4                = 2483, -- Unknown usage.
     JUDGMENT_BOLT_4               = 2484, -- Unknown usage.
     AERIAL_BLAST_4                = 2485, -- Unknown usage.
+
+    CYTOKINESIS                   = 2514,
+
+    DISSOLVE                      = 2550,
 
     BOOMING_BOMBINATION           = 2770,
 

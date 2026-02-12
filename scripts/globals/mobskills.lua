@@ -63,25 +63,13 @@ local burstMultipliersByTier =
 
 local function calculateMobMagicBurst(caster, ele, target)
     local burstMultiplier = 1.0
-    local skillchainTier, skillchainCount = xi.magicburst.formMagicBurst(ele, target)
+    local skillchainTier, skillchainCount = xi.magicburst.formMagicBurst(target, ele)
 
     if skillchainTier > 0 then
         burstMultiplier = burstMultipliersByTier[skillchainCount]
     end
 
     return burstMultiplier
-end
-
-local function MobTakeAoEShadow(mob, target, max)
-    -- TODO: Use actual NIN skill, not this function
-    if target:getMainJob() == xi.job.NIN and math.random(1, 100) <= 60 then
-        max = max - 1
-        if max < 1 then
-            max = 1
-        end
-    end
-
-    return math.random(1, max)
 end
 
 local function fTP(tp, ftp1, ftp2, ftp3)
@@ -132,7 +120,7 @@ local function handleSinglePhysicalHit(mob, target, hitdamage, hitslanded, final
         params.canCrit or
         params.tpEffect == xi.mobskills.physicalTpBonus.CRIT_VARIES
     then
-        local critRate = xi.combat.physical.calculateSwingCriticalRate(mob, target, mob:getTP(), nil)
+        local critRate = xi.combat.physical.calculateSwingCriticalRate(mob, target, mob:getTP(), xi.slot.MAIN)
         isCritical = math.random(1, 1000) <= critRate * 1000
     end
 
@@ -190,7 +178,7 @@ end
 ---@alias physicalMobSkillParam { canCrit: boolean?, isCannonball: boolean?, isRanged: boolean?}
 
 -- return value of xi.mobskills.mobPhysicalMove
----@alias physicalMobSkillRetVal { dmg: number, hitslanded: number, isCritical: boolean}
+---@alias physicalMobSkillRetVal { damage: number, hitslanded: number, isCritical: boolean}
 
 -- passed to handleSinglePhysicalHit inside xi.mobskills.mobPhysicalMove
 ---@alias physicalMobSkillHitParams { canCrit: boolean, tpEffect: xi.mobskills.physicalTpBonus, weaponType: xi.skill, attMod: number, applyLevelCorrection: boolean, isCannonball: boolean, isRanged: boolean}
@@ -219,7 +207,7 @@ xi.mobskills.mobPhysicalMove = function(mob, target, skill, numHits, accMod, ftp
     params           = params or {}
     local returninfo =
     {
-        dmg = 0,
+        damage = 0,
         hitslanded = 0,
         isCritical = false,
     }
@@ -310,12 +298,12 @@ xi.mobskills.mobPhysicalMove = function(mob, target, skill, numHits, accMod, ftp
         skill:setMsg(xi.msg.basic.SKILL_MISS)
     -- calculate tp return of mob skill and add if hit primary target
     elseif skill:getPrimaryTargetID() == target:getID() then
-        local tpReturn = xi.combat.tp.getSingleMeleeHitTPReturn(mob, target)
+        local tpReturn = xi.combat.tp.getSingleMeleeHitTPReturn(mob, false)
         tpReturn = tpReturn + 10 * (hitslanded - 1) -- extra hits give 10 TP each
         mob:addTP(tpReturn)
     end
 
-    returninfo.dmg        = finaldmg
+    returninfo.damage     = finaldmg
     returninfo.hitslanded = hitslanded
     returninfo.isCritical = hitCrit
 
@@ -346,6 +334,9 @@ end
 -- xi.mobskills.magicalTpBonus.DMG_BONUS and TP = 100, tpvalue = 2, assume V=150  --> damage is now 150*(TP*2) / 100 = 300
 -- xi.mobskills.magicalTpBonus.DMG_BONUS and TP = 200, tpvalue = 2, assume V=150  --> damage is now 150*(TP*2) / 100 = 600
 
+-- return value of xi.mobskills.mobMagicalMove
+---@alias magicalMobSkillRetVal { damage: number }
+
 ---@param actor CBaseEntity
 ---@param target CBaseEntity
 ---@param action CPetSkill|CMobSkill
@@ -354,7 +345,7 @@ end
 ---@param damageModifier number
 ---@param tpEffect xi.mobskills.magicalTpBonus?
 ---@param tpMultiplier number?
----@return number
+---@return magicalMobSkillRetVal
 xi.mobskills.mobMagicalMove = function(actor, target, action, baseDamage, actionElement, damageModifier, tpEffect, tpMultiplier)
     local finalDamage = baseDamage
 
@@ -372,7 +363,7 @@ xi.mobskills.mobMagicalMove = function(actor, target, action, baseDamage, action
             petAccBonus = utils.clamp(master:getSkillLevel(xi.skill.SUMMONING_MAGIC) - master:getMaxSkillLevel(actor:getMainLvl(), xi.job.SMN, xi.skill.SUMMONING_MAGIC), 0, 200)
         end
 
-        local skillchainTier, _ = xi.magicburst.formMagicBurst(actionElement, target)
+        local skillchainTier, _ = xi.magicburst.formMagicBurst(target, actionElement)
         if
             actor:getPetID() > 0 and
             skillchainTier > 0
@@ -382,7 +373,7 @@ xi.mobskills.mobMagicalMove = function(actor, target, action, baseDamage, action
     end
 
     -- Multipliers.
-    local sdt            = xi.spells.damage.calculateSDT(target, actionElement)
+    local sdt            = xi.combat.damage.magicalElementSDT(target, actionElement)
     local resistRate     = xi.combat.magicHitRate.calculateResistRate(actor, target, 0, 0, 0, actionElement, xi.mod.INT, 0, petAccBonus)
     local dayAndWeather  = xi.spells.damage.calculateDayAndWeather(actor, actionElement, false)
     local magicBonusDiff = xi.spells.damage.calculateMagicBonusDiff(actor, target, 0, 0, actionElement)
@@ -397,13 +388,19 @@ xi.mobskills.mobMagicalMove = function(actor, target, action, baseDamage, action
     -- magical mob skills are single hit so provide single Melee hit TP return if primary target
     -- TODO: This should probably be moved to AFTER all damage is calculated, since this is not the final step.
     if finalDamage > 0 and action:getPrimaryTargetID() == target:getID() then
-        local tpReturn = xi.combat.tp.getSingleMeleeHitTPReturn(actor, target)
+        local tpReturn = xi.combat.tp.getSingleMeleeHitTPReturn(actor, false)
         actor:addTP(tpReturn)
     end
 
-    return finalDamage
+    return { damage = finalDamage }
 end
 
+---@param actor CBaseEntity
+---@param target CBaseEntity
+---@param damage number
+---@param element xi.element
+---@param skill CPetSkill|CMobSkill
+---@return number
 xi.mobskills.mobAddBonuses = function(actor, target, damage, element, skill) -- used for SMN magical bloodpacts, despite the name.
     local burst = calculateMobMagicBurst(actor, element, target)
 
@@ -429,6 +426,13 @@ end
 -- skillParams.mAccuracyBonus    = { #, #, # }   : Accuracy bonus or penalties based on fTP.
 -- skillParams.resistStat        = xi.mod.<Stat> : Determines which base stat attribute is used when calculating resist. (INT, MND, etc.)
 -----------------------------------
+-- return value of xi.mobskills.mobMagicalMove
+
+---@param mob CBaseEntity
+---@param target CBaseEntity
+---@param skill CPetSkill|CMobSkill
+---@param skillParams table
+---@return magicalMobSkillRetVal
 xi.mobskills.mobBreathMove = function(mob, target, skill, skillParams)
     local mobCurrentHP = skill:getMobHP()
 
@@ -452,7 +456,7 @@ xi.mobskills.mobBreathMove = function(mob, target, skill, skillParams)
     mAccuracyBonus = xi.combat.physical.calculateTPfactor(skill:getTP(), mAccuracyBonusfTP)
 
     local systemBonus     = 1 + utils.getEcosystemStrengthBonus(mob:getEcosystem(), target:getEcosystem()) / 4
-    local elementalSDT    = xi.spells.damage.calculateSDT(target, actionElement)
+    local elementalSDT    = xi.combat.damage.magicalElementSDT(target, actionElement)
     local resistRate      = xi.combat.magicHitRate.calculateResistRate(mob, target, 0, 0, xi.skillRank.A_PLUS, actionElement, resistStat, 0, mAccuracyBonus)
     local dayAndWeather   = xi.spells.damage.calculateDayAndWeather(mob, actionElement, false)
     local absorb          = xi.spells.damage.calculateAbsorption(target, actionElement, true)
@@ -466,7 +470,7 @@ xi.mobskills.mobBreathMove = function(mob, target, skill, skillParams)
     damage = math.floor(damage * absorb * nullify)
 
     if damage <= 0 then -- Return early since the rest of the calculations are not needed if we absorbed/nullified.
-        return damage
+        return { damage = damage }
     end
 
     -- The values set for this modifiers are base 10000.
@@ -482,13 +486,24 @@ xi.mobskills.mobBreathMove = function(mob, target, skill, skillParams)
     -- Apply "Damage taken" mods to damage.
     damage = math.floor(damage * combinedDamageTaken)
 
-    return damage
+    return { damage = damage }
 end
 
-xi.mobskills.mobFinalAdjustments = function(damage, mob, skill, target, attackType, damageType, shadowsToRemove, hitsLanded)
+---@param info magicalMobSkillRetVal|physicalMobSkillRetVal
+---@param mob CBaseEntity
+---@param skill CPetSkill|CMobSkill
+---@param target CBaseEntity
+---@param attackType xi.attackType
+---@param damageType xi.damageType
+---@param shadowsToRemove xi.mobskills.shadowBehavior|integer?
+---@param hitsLanded number?
+---@return number
+xi.mobskills.mobFinalAdjustments = function(info, mob, skill, target, attackType, damageType, shadowsToRemove, hitsLanded)
     if hitsLanded == nil then
         hitsLanded = 0
     end
+
+    local damage = info.damage
 
     -- If target has Hysteria, no message skip rest
     -- TODO: Need to also handle in core to interrupt the mobskill. Proper behavior is: Mob will attempt to use a skill but it will not fire off.
@@ -529,6 +544,7 @@ xi.mobskills.mobFinalAdjustments = function(damage, mob, skill, target, attackTy
 
     -- Handle shadows depending on shadow behavior / attackType
     if
+        shadowsToRemove ~= nil and
         shadowsToRemove ~= xi.mobskills.shadowBehavior.WIPE_SHADOWS and
         shadowsToRemove ~= xi.mobskills.shadowBehavior.IGNORE_SHADOWS
     then
@@ -538,17 +554,18 @@ xi.mobskills.mobFinalAdjustments = function(damage, mob, skill, target, attackTy
             skill:isAoE() or
             skill:isConal()
         then
-            shadowsToRemove = MobTakeAoEShadow(mob, target, shadowsToRemove)
+            shadowsToRemove = utils.attemptShadowMitigation(target, shadowsToRemove)
         end
 
         -- Remove shadows
-        damage = utils.takeShadows(target, damage, shadowsToRemove)
+        local shadowsUsed = 0
+        damage, shadowsUsed = utils.takeShadows(target, damage, shadowsToRemove)
 
         -- Dealt zero damage, so shadows took all hits.
         if damage == 0 then
             skill:setMsg(xi.msg.basic.SHADOW_ABSORB)
 
-            return 0
+            return shadowsUsed
         end
 
     elseif shadowsToRemove == xi.mobskills.shadowBehavior.WIPE_SHADOWS then -- Remove all shadows
@@ -568,19 +585,19 @@ xi.mobskills.mobFinalAdjustments = function(damage, mob, skill, target, attackTy
         -- Handle Third Eye using shadowbehav as a guide.
         if xi.combat.physicalHitRate.checkAnticipated(mob, target) then
             skill:setMsg(xi.msg.basic.ANTICIPATE)
-
             return 0
         end
     end
 
     -- Handle Automaton Analyzer which decreases damage from successive special attacks
-    xi.mobskills.handleAutomatonAutoAnalyzer(damage, skill, target)
+    utils.handleAutomatonAutoAnalyzer(target, skill, damage)
 
     if attackType == xi.attackType.PHYSICAL then
+        damage = damage * xi.combat.damage.physicalElementSDT(target, damageType)
         damage = target:physicalDmgTaken(damage, damageType)
     elseif attackType == xi.attackType.MAGICAL then
         local element = utils.clamp(damageType - 5, xi.element.NONE, xi.element.DARK) -- Transform damage type to element
-        damage = math.floor(damage * xi.spells.damage.calculateDamageAdjustment(target, false, true, false, false))
+        damage = math.floor(damage * xi.combat.damage.calculateDamageAdjustment(target, false, true, false, false))
         damage = math.floor(damage * xi.spells.damage.calculateAbsorption(target, element, true))
         damage = math.floor(damage * xi.spells.damage.calculateNullification(target, element, true, false))
         damage = math.floor(target:handleSevereDamage(damage, false))
@@ -597,6 +614,7 @@ xi.mobskills.mobFinalAdjustments = function(damage, mob, skill, target, attackTy
         damage = math.floor(target:handleSevereDamage(damage, false))
         damage = math.floor(target:checkDamageCap(damage))
     elseif attackType == xi.attackType.RANGED then
+        damage = damage * xi.combat.damage.physicalElementSDT(target, damageType)
         damage = target:rangedDmgTaken(damage)
     end
 
@@ -604,20 +622,13 @@ xi.mobskills.mobFinalAdjustments = function(damage, mob, skill, target, attackTy
         return damage
     end
 
-    -- Handle Phalanx
-    if damage > 0 then
-        damage = utils.clamp(damage - target:getMod(xi.mod.PHALANX), 0, 99999)
-    end
+    damage = utils.handlePhalanx(target, damage)
 
     if attackType == xi.attackType.MAGICAL then
-        damage = utils.oneforall(target, damage)
-
-        if damage < 0 then
-            return 0
-        end
+        damage = utils.handleOneForAll(target, damage)
     end
 
-    damage = utils.stoneskin(target, damage)
+    damage = utils.handleStoneskin(target, damage)
 
     if damage > 0 then
         target:updateEnmityFromDamage(mob, damage)
@@ -630,28 +641,6 @@ xi.mobskills.mobFinalAdjustments = function(damage, mob, skill, target, attackTy
     return damage
 end
 
-xi.mobskills.handleAutomatonAutoAnalyzer = function(damage, skill, target)
-    -- TODO: Should this reside in a more universal place for use in other places?
-    -- Handle Automaton Analyzer which decreases damage from successive special attacks
-    if target:getMod(xi.mod.AUTO_ANALYZER) > 0 then
-        local analyzerSkill = target:getLocalVar('analyzer_skill')
-        local analyzerHits = target:getLocalVar('analyzer_hits')
-        if
-            analyzerSkill == skill:getID() and
-            target:getMod(xi.mod.AUTO_ANALYZER) > analyzerHits
-        then
-            -- Successfully mitigating damage at a fixed 40%
-            damage = damage * 0.6
-            analyzerHits = analyzerHits + 1
-        else
-            target:setLocalVar('analyzer_skill', skill:getID())
-            analyzerHits = 0
-        end
-
-        target:setLocalVar('analyzer_hits', analyzerHits)
-    end
-end
-
 xi.mobskills.calculateSkillTPReturn = function(damage, mob, skill, target, attackType, hitsLanded)
         -- Calculate TP return of the mob skill.
     if
@@ -662,8 +651,8 @@ xi.mobskills.calculateSkillTPReturn = function(damage, mob, skill, target, attac
         local targetTPReturn = 0
 
         if attackType == xi.attackType.BREATH then
-            mobTPReturn    = xi.combat.tp.getSingleMeleeHitTPReturn(mob, target)
-            targetTPReturn = xi.combat.tp.calculateTPGainOnPhysicalDamage(damage, mob:getBaseDelay(), mob, target)
+            mobTPReturn    = xi.combat.tp.getSingleMeleeHitTPReturn(mob, false)
+            targetTPReturn = xi.combat.tp.calculateTPGainOnPhysicalDamage(mob, target, damage, mob:getBaseDelay())
             -- TODO: Add TP return for MAGICAL, PHYSICAL, RANGED once added in future PRs.
         end
 
@@ -809,9 +798,18 @@ end
 -- Adds a status effect to a target
 xi.mobskills.mobStatusEffectMove = function(mob, target, typeEffect, power, tick, duration, subType, subPower, tier)
     if target:canGainStatusEffect(typeEffect, power) then
-        local fullResist = xi.data.statusEffect.isTargetResistant(mob, target, typeEffect)
-        if fullResist then
-            return xi.msg.basic.SKILL_MISS -- resist !
+        -- Check immunity. TODO: We dont fetch elements.
+        if xi.data.statusEffect.isTargetImmune(target, typeEffect, xi.element.NONE) then
+            return xi.msg.basic.SKILL_MISS -- <user> uses <skill>, but misses <target>.
+
+        -- Check resist traits. TODO: We do not fetch action objects, so we cannot set action modifiers.
+        elseif xi.data.statusEffect.isTargetResistant(mob, target, typeEffect) then
+            -- action:setModifier(xi.msg.actionModifier.RESIST) -- Resist!
+            return xi.msg.basic.SKILL_MISS                  -- <user> uses <skill>, but misses <target>.
+
+        -- Check effect incompatibilities.
+        elseif xi.data.statusEffect.isEffectNullified(target, typeEffect, 0) then
+            return xi.msg.basic.SKILL_MISS -- <user> uses <skill>, but misses <target>.
         end
 
         local element    = mob:getStatusEffectElement(typeEffect) -- TODO: Do something.

@@ -69,7 +69,7 @@ CInstance* CInstanceLoader::LoadInstance() const
     auto rset = db::preparedStmt("SELECT mobname, mobid, pos_rot, pos_x, pos_y, pos_z, "
                                  "respawntime, spawntype, dropid, mob_groups.HP, mob_groups.MP, minLevel, maxLevel, "
                                  "modelid, mJob, sJob, cmbSkill, cmbDmgMult, cmbDelay, behavior, links, mobType, immunity, "
-                                 "ecosystemID, mobradius, speed, "
+                                 "ecosystemID, speed, "
                                  "STR, DEX, VIT, AGI, `INT`, MND, CHR, EVA, DEF, ATT, ACC, "
                                  "slash_sdt, pierce_sdt, h2h_sdt, impact_sdt, "
                                  "magical_sdt, fire_sdt, ice_sdt, wind_sdt, earth_sdt, lightning_sdt, water_sdt, light_sdt, dark_sdt, "
@@ -78,7 +78,7 @@ CInstance* CInstanceLoader::LoadInstance() const
                                  "Element, mob_pools.familyid, name_prefix, entityFlags, animationsub, "
                                  "(mob_family_system.HP / 100) AS hp_scale, (mob_family_system.MP / 100) AS mp_scale, hasSpellScript, spellList, mob_groups.poolid, "
                                  "allegiance, namevis, aggro, mob_pools.skill_list_id, mob_pools.true_detection, detects, "
-                                 "mob_family_system.charmable "
+                                 "mob_family_system.charmable, mob_pools.modelSize, mob_pools.modelHitboxSize "
                                  "FROM instance_entities INNER JOIN mob_spawn_points ON instance_entities.id = mob_spawn_points.mobid "
                                  "INNER JOIN mob_groups ON mob_groups.groupid = mob_spawn_points.groupid AND mob_groups.zoneid=((mob_spawn_points.mobid>>12)&0xFFF) "
                                  "INNER JOIN mob_pools ON mob_groups.poolid = mob_pools.poolid "
@@ -126,12 +126,11 @@ CInstance* CInstanceLoader::LoadInstance() const
             static_cast<CItemWeapon*>(PMob->m_Weapons[SLOT_MAIN])->setDelay((rset->get<uint16>("cmbDelay") * 1000) / 60);
             static_cast<CItemWeapon*>(PMob->m_Weapons[SLOT_MAIN])->setBaseDelay((rset->get<uint16>("cmbDelay") * 1000) / 60);
 
-            PMob->m_Behavior    = rset->get<uint16>("behavior");
-            PMob->m_Link        = rset->get<uint8>("links");
-            PMob->m_Type        = rset->get<uint8>("mobType");
-            PMob->m_Immunity    = rset->get<IMMUNITY>("immunity");
-            PMob->m_EcoSystem   = rset->get<ECOSYSTEM>("ecosystemID");
-            PMob->m_ModelRadius = rset->get<float>("mobradius");
+            PMob->m_Behavior  = rset->get<uint16>("behavior");
+            PMob->m_Link      = rset->get<uint8>("links");
+            PMob->m_Type      = rset->get<uint8>("mobType");
+            PMob->m_Immunity  = rset->get<IMMUNITY>("immunity");
+            PMob->m_EcoSystem = rset->get<ECOSYSTEM>("ecosystemID");
 
             PMob->baseSpeed      = rset->get<uint8>("speed"); // Overwrites baseentity.cpp's defined baseSpeed
             PMob->animationSpeed = rset->get<uint8>("speed"); // Overwrites baseentity.cpp's defined animationSpeed
@@ -201,10 +200,12 @@ CInstance* CInstanceLoader::LoadInstance() const
 
             PMob->m_Pool = rset->get<uint32>("poolid");
 
-            PMob->allegiance = rset->get<ALLEGIANCE_TYPE>("allegiance");
-            PMob->namevis    = rset->get<uint8>("namevis");
-            const auto aggro = rset->get<uint32>("aggro");
-            PMob->m_Aggro    = aggro;
+            PMob->allegiance      = rset->get<ALLEGIANCE_TYPE>("allegiance");
+            PMob->namevis         = rset->get<uint8>("namevis");
+            PMob->modelHitboxSize = std::max<float>(0.0f, rset->getOrDefault<float>("modelHitboxSize", 0) / 10.f);
+            PMob->modelSize       = rset->getOrDefault<uint8>("modelSize", 0);
+            const auto aggro      = rset->get<uint32>("aggro");
+            PMob->m_Aggro         = aggro;
             // If a special instanced mob aggros, it should always aggro regardless of level.
             if (PMob->m_Type & MOBTYPE_EVENT)
             {

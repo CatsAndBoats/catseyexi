@@ -31,10 +31,11 @@ abilityObject.onAutomatonAbility = function(target, automaton, skill, master, ac
             duration = math.random(70, 75)
         end
 
-        target:addStatusEffect(xi.effect.SLOW, slowPower * 100, 0, duration)
+        target:addStatusEffect(xi.effect.SLOW, slowPower * 100, 0, duration, 0, 0, 3)
     end
 
     -- randomize damage
+    -- TODO: Should this use our newer PDIF calcs located in physical_utilities.lua?
     local ratio = automaton:getStat(xi.mod.ATT) / target:getStat(xi.mod.DEF)
     if ratio > 1.3 then
         ratio = 1.3
@@ -48,7 +49,9 @@ abilityObject.onAutomatonAbility = function(target, automaton, skill, master, ac
 
     damage = damage * (pdif / 1000)
 
-    damage = utils.stoneskin(target, damage)
+    -- TODO: Affected by Phalanx, Physical Damage % modifiers?
+
+    damage = utils.handleStoneskin(target, damage)
     target:takeDamage(damage, automaton, xi.attackType.PHYSICAL, xi.damageType.BLUNT)
     target:updateEnmityFromDamage(automaton, damage)
     target:addEnmity(automaton, 450, 900)

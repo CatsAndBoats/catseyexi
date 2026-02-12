@@ -15,27 +15,35 @@ local forms =
 
 local tpMoves =
 {
-    -- NOTE: Mammets always have access to:
-    -- Transmogrification: Absorbs all physical damage for ~30 seconds
-    -- Tremorous Tread: Low AoE damage with a Stun effect, absorbed by Utsusemi.
-    [0] = { 487, 540 },
-    -- Sword Skills:
-    -- Velocious Blade: 5-hit attack, high da
-    -- Sonic Blade: High AoE damage.
-    -- Scission Thrust: Low conal AoE damage.
-    [1] = { 347, 419, 422 },
-    -- Percussive Foin: Medium directional AoE damage.
-    -- Gravity Wheel: High AoE damage and Gravity.
-    -- Microquake: High single-target damage.
-    [2] = { 441, 447, 457 },
-    -- Psychomancy: AoE Aspir, drains 80+ MP.
-    -- Mind Wall: Gives the Mammet a special Magic Shield effect causing it to absorb offensive magic used against it for ~30 seconds.
-    [3] = { 464, 471 },
+
+    [forms.UNARMED] =
+    {
+        xi.mobSkill.TRANSMOGRIFICATION,
+        xi.mobSkill.TREMOROUS_TREAD,
+    },
+    [forms.SWORD] =
+    {
+        xi.mobSkill.VELOCIOUS_BLADE,
+        xi.mobSkill.SONIC_BLADE,
+        xi.mobSkill.SCISSION_THRUST,
+    },
+    [forms.POLEARM] =
+    {
+        xi.mobSkill.PERCUSSIVE_FOIN,
+        xi.mobSkill.GRAVITY_WHEEL,
+        xi.mobSkill.MICROQUAKE,
+    },
+    [forms.STAFF] =
+    {
+        xi.mobSkill.PSYCHOMANCY,
+        xi.mobSkill.MIND_WALL,
+    },
 }
 
 entity.onMobInitialize = function(mob)
     mob:addImmunity(xi.immunity.DARK_SLEEP)
     mob:addImmunity(xi.immunity.LIGHT_SLEEP)
+    mob:setMobMod(xi.mobMod.SIGHT_RANGE, 20)
 end
 
 entity.onMobSpawn = function(mob)
@@ -43,13 +51,16 @@ entity.onMobSpawn = function(mob)
 end
 
 entity.onMobFight = function(mob, target)
-    -- Chages forms after 30-60 seconds randomly
+    -- Chages forms after 25-60 seconds randomly
     local timeTracker = mob:getLocalVar('formTimeTracker')
     local currentTime = mob:getBattleTime()
     -- NOTE: Yellow Liquid applies xi.effect.FOOD to the Mammets
     local cannotChangeForm = mob:hasStatusEffect(xi.effect.FOOD)
 
-    if currentTime >= timeTracker and not cannotChangeForm then
+    if
+        currentTime >= timeTracker and
+        not cannotChangeForm
+    then
         -- Pick a new form --
         local rand = math.random(0, 3)
         mob:setAnimationSub(rand)
@@ -84,32 +95,11 @@ entity.onMobFight = function(mob, target)
     end
 end
 
-entity.onMobMobskillChoose = function(mob, target)
-    switch (mob:getAnimationSub()): caseof
-    {
-        [forms.UNARMED] = function()
-            local wsChoice = math.random(1, 2)
-            return tpMoves[forms.UNARMED][wsChoice]
-        end,
+entity.onMobMobskillChoose = function(mob, target, skillId)
+    local form  = mob:getAnimationSub()
+    local moves = tpMoves[form]
 
-        [forms.SWORD] = function()
-            local wsChoice = math.random(1, 3)
-            return tpMoves[forms.SWORD][wsChoice]
-        end,
-
-        [forms.POLEARM] = function()
-            local wsChoice = math.random(1, 3)
-            return tpMoves[forms.POLEARM][wsChoice]
-        end,
-
-        [forms.STAFF] = function()
-            local wsChoice = math.random(1, 2)
-            return tpMoves[forms.STAFF][wsChoice]
-        end,
-    }
-end
-
-entity.onMobDeath = function(mob, player, optParams)
+    return moves[math.random(1, #moves)]
 end
 
 return entity

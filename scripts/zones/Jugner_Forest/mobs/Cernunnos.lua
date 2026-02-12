@@ -9,7 +9,7 @@ entity.onMobDeath = function(mob, player, optParams)
     player:setLocalVar('cernunnosDefeated', 1)
 end
 
-entity.onMobMobskillChoose = function(mob, target)
+entity.onMobMobskillChoose = function(mob, target, skillId)
     local tpMoves =
     {
         xi.mobSkill.DRILL_BRANCH_NM,
@@ -30,7 +30,7 @@ entity.onMobSpellChoose = function(mob, target, spellId)
     }
 
     if not mob:hasStatusEffect(xi.effect.STONESKIN) then
-        table.insert(spellList, 1, xi.magic.spell.STONESKIN)
+        table.insert(spellList, xi.magic.spell.STONESKIN)
     end
 
     if not mob:hasStatusEffect(xi.effect.PROTECT) then

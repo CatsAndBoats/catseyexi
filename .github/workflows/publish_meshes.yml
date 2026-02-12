@@ -14,6 +14,9 @@ jobs:
   Meshes_Build:
     name: Build and Publish ximeshes Docker Image
     runs-on: ubuntu-latest
+    env:
+      # Placeholder value. Actual value set in the first step.
+      REPO_OWNER: 'landsandboat'
     steps:
       - name: Lowercase repository owner
         run: |

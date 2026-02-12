@@ -10,7 +10,12 @@ end
 
 mobskillObject.onMobWeaponSkill = function(target, mob, skill)
     local darkpot = 666
-    local dmg     = xi.mobskills.mobFinalAdjustments(darkpot, mob, skill, target, xi.attackType.NONE, xi.damageType.NONE, xi.mobskills.shadowBehavior.IGNORE_SHADOWS)
+    local info    =
+    {
+        damage = darkpot
+    }
+
+    local dmg = xi.mobskills.mobFinalAdjustments(info, mob, skill, target, xi.attackType.NONE, xi.damageType.NONE, xi.mobskills.shadowBehavior.IGNORE_SHADOWS)
 
     target:takeDamage(dmg, mob, xi.attackType.NONE, xi.damageType.NONE)
 

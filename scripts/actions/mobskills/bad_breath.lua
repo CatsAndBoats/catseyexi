@@ -21,8 +21,8 @@ mobskillObject.onMobWeaponSkill = function(target, mob, skill)
     params.resistStat        = xi.mod.INT
     -- TODO: Sources say this skill has a low magic accuracy.
 
-    local damage = xi.mobskills.mobBreathMove(mob, target, skill, params)
-    damage = xi.mobskills.mobFinalAdjustments(damage, mob, skill, target, xi.attackType.BREATH, xi.damageType.EARTH, xi.mobskills.shadowBehavior.IGNORE_SHADOWS, 1)
+    local info = xi.mobskills.mobBreathMove(mob, target, skill, params)
+    local damage = xi.mobskills.mobFinalAdjustments(info, mob, skill, target, xi.attackType.BREATH, xi.damageType.EARTH, xi.mobskills.shadowBehavior.IGNORE_SHADOWS, 1)
 
     if not xi.mobskills.hasMissMessage(mob, target, skill, damage) then
         target:takeDamage(damage, mob, xi.attackType.BREATH, xi.damageType.EARTH, { breakBind = false })

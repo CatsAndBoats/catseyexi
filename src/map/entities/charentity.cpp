@@ -66,6 +66,7 @@
 #include "blue_spell.h"
 #include "conquest_system.h"
 #include "enums/key_items.h"
+#include "enums/recast.h"
 #include "ipc_client.h"
 #include "item_container.h"
 #include "items/item_furnishing.h"
@@ -75,6 +76,7 @@
 #include "latent_effect_container.h"
 #include "linkshell.h"
 #include "mob_modifier.h"
+#include "mobskill.h"
 #include "modifier.h"
 #include "notoriety_container.h"
 #include "packets/s2c/0x028_battle2.h"
@@ -92,6 +94,7 @@
 #include "utils/battleutils.h"
 #include "utils/charutils.h"
 #include "utils/gardenutils.h"
+#include "utils/messageutils.h"
 #include "utils/moduleutils.h"
 #include "utils/petutils.h"
 #include "weapon_skill.h"
@@ -332,7 +335,7 @@ CCharEntity::~CCharEntity()
         StatusEffectContainer->DelStatusEffectSilent(EFFECT_LEVEL_RESTRICTION);
     }
 
-    if (PParty && loc.destination != 0 && m_moghouseID == 0)
+    if (PParty && loc.destination != 0 && !inMogHouse())
     {
         if (PParty->m_PAlliance)
         {
@@ -547,6 +550,18 @@ bool CCharEntity::isAway() const
 bool CCharEntity::hasAutoTargetEnabled() const
 {
     return !playerConfig.AutoTargetOffFlg;
+}
+
+auto CCharEntity::isCrafting() const -> bool
+{
+    return animation == ANIMATION_SYNTH || (CraftContainer && CraftContainer->getItemsCount() > 0);
+}
+
+auto CCharEntity::isFishing() const -> bool
+{
+    return (animation >= ANIMATION_FISHING_FISH && animation <= ANIMATION_FISHING_STOP) ||
+           animation == ANIMATION_FISHING_START_OLD ||
+           animation == ANIMATION_FISHING_START;
 }
 
 void CCharEntity::setPetZoningInfo()
@@ -773,6 +788,11 @@ auto CCharEntity::aman() -> CAMANContainer&
         m_AMAN = CAMANContainer(this);
     }
     return *m_AMAN;
+}
+
+auto CCharEntity::inMogHouse() const -> bool
+{
+    return m_moghouseID != 0;
 }
 
 int8 CCharEntity::getShieldSize()
@@ -1047,9 +1067,9 @@ void CCharEntity::Tick(timer::time_point tick)
         m_deathSyncTime = tick + death_update_frequency;
     }
 
-    if (m_moghouseID != 0)
+    if (inMogHouse())
     {
-        gardenutils::UpdateGardening(this, true);
+        gardenutils::UpdateGardening(this, SendPacket::Yes);
     }
 }
 
@@ -1256,25 +1276,25 @@ bool CCharEntity::CanAttack(CBattleEntity* PTarget, std::unique_ptr<CBasicPacket
 
     if (!IsMobOwner(PTarget))
     {
-        errMsg = std::make_unique<GP_SERV_COMMAND_BATTLE_MESSAGE>(this, PTarget, 0, 0, MSGBASIC_ALREADY_CLAIMED);
+        errMsg = std::make_unique<GP_SERV_COMMAND_BATTLE_MESSAGE>(this, PTarget, 0, 0, MsgBasic::ALREADY_CLAIMED);
 
         PAI->Disengage();
         return false;
     }
     else if (!this->StatusEffectContainer->HasStatusEffect({ EFFECT_CHARM, EFFECT_CHARM_II }) && dist > 30)
     {
-        errMsg = std::make_unique<GP_SERV_COMMAND_BATTLE_MESSAGE>(this, PTarget, 0, 0, MSGBASIC_LOSE_SIGHT);
+        errMsg = std::make_unique<GP_SERV_COMMAND_BATTLE_MESSAGE>(this, PTarget, 0, 0, MsgBasic::LOSE_SIGHT);
         PAI->Disengage();
         return false;
     }
     else if (!facing(this->loc.p, PTarget->loc.p, 64))
     {
-        errMsg = std::make_unique<GP_SERV_COMMAND_BATTLE_MESSAGE>(this, PTarget, 0, 0, MSGBASIC_UNABLE_TO_SEE_TARG);
+        errMsg = std::make_unique<GP_SERV_COMMAND_BATTLE_MESSAGE>(this, PTarget, 0, 0, MsgBasic::UNABLE_TO_SEE_TARG);
         return false;
     }
     else if (dist > GetMeleeRange(PTarget))
     {
-        errMsg = std::make_unique<GP_SERV_COMMAND_BATTLE_MESSAGE>(this, PTarget, 0, 0, MSGBASIC_TARG_OUT_OF_RANGE);
+        errMsg = std::make_unique<GP_SERV_COMMAND_BATTLE_MESSAGE>(this, PTarget, 0, 0, MsgBasic::TARG_OUT_OF_RANGE);
         return false;
     }
     return true;
@@ -1454,7 +1474,7 @@ void CCharEntity::OnCastFinished(CMagicState& state, action_t& action)
     }
 }
 
-void CCharEntity::OnCastInterrupted(CMagicState& state, action_t& action, MSGBASIC_ID msg, bool blockedCast)
+void CCharEntity::OnCastInterrupted(CMagicState& state, action_t& action, MsgBasic msg, bool blockedCast)
 {
     TracyZoneScoped;
     CBattleEntity::OnCastInterrupted(state, action, msg, blockedCast);
@@ -1536,7 +1556,7 @@ void CCharEntity::OnWeaponSkillFinished(CWeaponSkillState& state, action_t& acti
             }
             else
             {
-                actionResult.messageID  = primary ? MSGBASIC_USES_SKILL_RECOVERS_MP : MSGBASIC_TARGET_RECOVERS_MP;
+                actionResult.messageID  = primary ? MsgBasic::USES_SKILL_RECOVERS_MP : MsgBasic::TARGET_RECOVERS_MP;
                 actionResult.resolution = ActionResolution::Hit;
                 damage                  = std::max(damage, 0);
                 actionResult.param      = PTarget->addMP(damage);
@@ -1609,12 +1629,12 @@ void CCharEntity::OnAbility(CAbilityState& state, action_t& action)
     auto* PAbility = state.GetAbility();
     if (this->PRecastContainer->HasRecast(RECAST_ABILITY, PAbility->getRecastId(), PAbility->getRecastTime()))
     {
-        pushPacket<GP_SERV_COMMAND_BATTLE_MESSAGE>(this, this, 0, 0, MSGBASIC_WAIT_LONGER);
+        pushPacket<GP_SERV_COMMAND_BATTLE_MESSAGE>(this, this, 0, 0, MsgBasic::WAIT_LONGER);
         return;
     }
     if (this->StatusEffectContainer->HasStatusEffect(EFFECT_AMNESIA))
     {
-        pushPacket<GP_SERV_COMMAND_BATTLE_MESSAGE>(this, this, 0, 0, MSGBASIC_UNABLE_TO_USE_JA2);
+        pushPacket<GP_SERV_COMMAND_BATTLE_MESSAGE>(this, this, 0, 0, MsgBasic::UNABLE_TO_USE_JA2);
         return;
     }
 
@@ -1647,7 +1667,7 @@ void CCharEntity::OnAbility(CAbilityState& state, action_t& action)
             recastReduction = std::chrono::seconds(PMeritPoints->GetMeritValue((MERIT_TYPE)PAbility->getMeritModID(), this));
         }
 
-        auto* charge         = ability::GetCharge(this, PAbility->getRecastId());
+        auto* charge         = ability::GetCharge(this, static_cast<uint16>(PAbility->getRecastId()));
         auto  baseChargeTime = 0ns; // this can be reduced with merits/job point gifts. NOT the same as Recast- gear (so far...)
 
         if (charge && PAbility->getID() != ABILITY_SIC)
@@ -1655,11 +1675,11 @@ void CCharEntity::OnAbility(CAbilityState& state, action_t& action)
             auto chargesUsed = timer::count_seconds(PAbility->getRecastTime()); // charge cost is stored in the recast...
 
             //  Can't assign merits via ability ID for Sic/Ready due to shenanigans
-            if (PAbility->getRecastId() == 102) // Sic/Ready recast ID
+            if (PAbility->getRecastId() == Recast::Sic) // Sic/Ready recast ID
             {
                 recastReduction = std::chrono::seconds(PMeritPoints->GetMeritValue(MERIT_SIC_RECAST, this));
             }
-            else if (PAbility->getRecastId() == 231) // Stratagems recast ID
+            else if (PAbility->getRecastId() == Recast::Strategems)
             {
                 recastReduction += std::chrono::seconds(this->getMod(Mod::STRATAGEM_RECAST));
             }
@@ -1673,7 +1693,7 @@ void CCharEntity::OnAbility(CAbilityState& state, action_t& action)
             action.recast = PAbility->getRecastTime() - recastReduction;
         }
 
-        if (PAbility->getID() == ABILITY_LIGHT_ARTS || PAbility->getID() == ABILITY_DARK_ARTS || PAbility->getRecastId() == 231) // stratagems
+        if (PAbility->getID() == ABILITY_LIGHT_ARTS || PAbility->getID() == ABILITY_DARK_ARTS || PAbility->getRecastId() == Recast::Strategems)
         {
             if (this->StatusEffectContainer->HasStatusEffect(EFFECT_TABULA_RASA))
             {
@@ -1681,7 +1701,7 @@ void CCharEntity::OnAbility(CAbilityState& state, action_t& action)
                 baseChargeTime = 0s;
             }
         }
-        else if (PAbility->getRecastId() == 173 || PAbility->getRecastId() == 174) // BP rage, BP ward
+        else if (PAbility->getRecastId() == Recast::BloodPactRage || PAbility->getRecastId() == Recast::BloodPactWard)
         {
             uint16 favorReduction          = 0;
             uint16 bloodPact_I_Reduction   = std::min<int16>(getMod(Mod::BP_DELAY), 15);
@@ -1707,8 +1727,9 @@ void CCharEntity::OnAbility(CAbilityState& state, action_t& action)
         // Check paralysis and consume recast for non-SP abilities
         if (battleutils::IsParalyzed(this))
         {
-            // SP abilities (recastId == 0) don't consume recast when paralyzed
-            if (PAbility->getRecastId() != 0)
+            // SP abilities don't consume recast when paralyzed
+            const auto recastId = PAbility->getRecastId();
+            if (recastId != Recast::Special && recastId != Recast::Special2)
             {
                 charutils::ApplyAbilityRecast(this, PAbility, charge, baseChargeTime, action.recast);
             }
@@ -1760,31 +1781,10 @@ void CCharEntity::OnAbility(CAbilityState& state, action_t& action)
         action.actiontype = PAbility->getActionType();
         action.actionid   = PAbility->getID();
 
-        // Normal AoE check,
-        // Special cases go here
-        auto isAbilityAoE = [&]() -> bool
-        {
-            if (this->PParty != nullptr)
-            {
-                if (PAbility->isAoE())
-                {
-                    return true;
-                }
-                else if (PAbility->getID() == ABILITY_LIEMENT && getMod(Mod::LIEMENT_EXTENDS_TO_AREA) > 0)
-                {
-                    return true;
-                }
-                else if (PAbility->getID() == ABILITY_HEALING_WALTZ && StatusEffectContainer->HasStatusEffect(EFFECT_CONTRADANCE))
-                {
-                    // 10.1 = 10' in game. Unsure why 10' means 9.9' works but 10' doesn't... Epsilon check gone wrong?
-                    PAbility->setRange(10.1); // This is playing double duty as both target range and AoE range --
-                                              // by the time this lambda is called the target range has already been checked and can be used normally
-                    return true;
-                }
-            }
-
-            return false;
-        };
+        // Calculate ability AoE type and radius via Lua
+        const auto  aoeResult = luautils::callGlobal<sol::table>("xi.combat.abilityAoE.calculateTypeAndRadius", this, PAbility);
+        const auto  aoeType   = static_cast<AOE_TYPE>(aoeResult.get_or(1, 0));
+        const float aoeRadius = aoeResult.get_or(2, 0.0f);
 
         // TODO: get rid of this to script, too
         if (PAbility->isPetAbility())
@@ -1823,12 +1823,12 @@ void CCharEntity::OnAbility(CAbilityState& state, action_t& action)
             }
         }
         // TODO: make this generic enough to not require an if
-        else if (isAbilityAoE())
+        else if (aoeType != AOE_TYPE::NONE)
         {
             PAI->TargetFind->reset();
-            PAI->TargetFind->findWithinArea(this, AOE_RADIUS::ATTACKER, PAbility->getRadius(), findFlags, PAbility->getValidTarget());
+            PAI->TargetFind->findWithinArea(this, AOE_RADIUS::ATTACKER, aoeRadius, findFlags, PAbility->getValidTarget());
 
-            uint16 prevMsg = 0;
+            auto prevMsg = MsgBasic::NONE;
             for (auto&& PTargetFound : PAI->TargetFind->m_targets)
             {
                 action_target_t& actionTarget = action.addTarget(PTargetFound->id);
@@ -1839,20 +1839,20 @@ void CCharEntity::OnAbility(CAbilityState& state, action_t& action)
 
                 int32 value = luautils::OnUseAbility(this, PTargetFound, PAbility, &action);
 
-                if (prevMsg == 0) // get default message for the first target
+                if (prevMsg == MsgBasic::NONE) // get default message for the first target
                 {
                     actionResult.messageID = PAbility->getMessage();
                 }
-                else // get AoE message for second, if there's a manual override, otherwise return message from PAbility->getMessage().
+                else // get AoE message for secondary targets
                 {
-                    actionResult.messageID = PAbility->getAoEMsg();
+                    actionResult.messageID = messageutils::GetAoEVariant(PAbility->getMessage());
                 }
 
                 actionResult.param = value;
 
                 if (value < 0)
                 {
-                    actionResult.messageID = ability::GetAbsorbMessage(static_cast<MSGBASIC_ID>(actionResult.messageID));
+                    actionResult.messageID = messageutils::GetAbsorbVariant(actionResult.messageID);
                     actionResult.param     = -actionResult.param;
                 }
 
@@ -1867,7 +1867,7 @@ void CCharEntity::OnAbility(CAbilityState& state, action_t& action)
             action_result_t& actionResult = actionTarget.addResult();
             actionResult.resolution       = ActionResolution::Hit;
             actionResult.animation        = PAbility->getAnimationID();
-            uint16 prevMsg                = actionResult.messageID;
+            MsgBasic prevMsg              = actionResult.messageID;
 
             // Check for special situations from Steal (The Tenshodo Showdown quest)
             if (PAbility->getID() == ABILITY_STEAL)
@@ -1884,16 +1884,16 @@ void CCharEntity::OnAbility(CAbilityState& state, action_t& action)
             }
 
             // TODO: Some abilities legitimately have no message (e.g., Full Circle)
-            if (actionResult.messageID == 0)
+            if (actionResult.messageID == MsgBasic::NONE)
             {
-                actionResult.messageID = MSGBASIC_USES_JA;
+                actionResult.messageID = MsgBasic::USES_JA;
             }
 
             actionResult.param = value;
 
             if (value < 0)
             {
-                actionResult.messageID = ability::GetAbsorbMessage(actionResult.messageID);
+                actionResult.messageID = messageutils::GetAbsorbVariant(actionResult.messageID);
                 actionResult.param     = -value;
             }
 
@@ -1942,7 +1942,7 @@ void CCharEntity::OnRangedAttack(CRangeState& state, action_t& action)
     action.actionid               = static_cast<uint32_t>(FourCC::RangedFinish);
     action_target_t& actionTarget = action.addTarget(PTarget->id);
     action_result_t& actionResult = actionTarget.addResult();
-    actionResult.messageID        = MSGBASIC_RANGED_ATTACK_HIT;
+    actionResult.messageID        = MsgBasic::RANGED_ATTACK_HIT;
 
     CItemWeapon* PItem = (CItemWeapon*)this->getEquip(SLOT_RANGED);
     CItemWeapon* PAmmo = (CItemWeapon*)this->getEquip(SLOT_AMMO);
@@ -2003,7 +2003,7 @@ void CCharEntity::OnRangedAttack(CRangeState& state, action_t& action)
                 if (isCritical)
                 {
                     wasCritical            = true;
-                    actionResult.messageID = MSGBASIC_RANGED_ATTACK_CRIT;
+                    actionResult.messageID = MsgBasic::RANGED_ATTACK_CRIT;
                 }
 
                 // at least 1 hit occured
@@ -2030,7 +2030,7 @@ void CCharEntity::OnRangedAttack(CRangeState& state, action_t& action)
         {
             damage                  = 0;
             actionResult.resolution = ActionResolution::Miss;
-            actionResult.messageID  = MSGBASIC_RANGED_ATTACK_MISS;
+            actionResult.messageID  = MsgBasic::RANGED_ATTACK_MISS;
             hitCount                = i; // end barrage, shot missed
         }
 
@@ -2069,7 +2069,7 @@ void CCharEntity::OnRangedAttack(CRangeState& state, action_t& action)
     if (hitOccured)
     {
         // Critical Hits don't get distance messaging
-        if (actionResult.messageID != MSGBASIC_RANGED_ATTACK_CRIT)
+        if (actionResult.messageID != MsgBasic::RANGED_ATTACK_CRIT)
         {
             auto rangedPenaltyFunction = lua["xi"]["combat"]["ranged"]["attackDistancePenalty"];
             auto distancePenaltyResult = rangedPenaltyFunction(this, PTarget);
@@ -2087,15 +2087,15 @@ void CCharEntity::OnRangedAttack(CRangeState& state, action_t& action)
 
             if (distancePenalty == 0)
             {
-                actionResult.messageID = MSGBASIC_RANGED_ATTACK_PUMMELS;
+                actionResult.messageID = MsgBasic::RANGED_ATTACK_PUMMELS;
             }
             else if (distancePenalty <= 15)
             {
-                actionResult.messageID = MSGBASIC_RANGED_ATTACK_SQUARELY;
+                actionResult.messageID = MsgBasic::RANGED_ATTACK_SQUARELY;
             }
             else
             {
-                actionResult.messageID = MSGBASIC_RANGED_ATTACK_HIT;
+                actionResult.messageID = MsgBasic::RANGED_ATTACK_HIT;
             }
         }
 
@@ -2121,7 +2121,7 @@ void CCharEntity::OnRangedAttack(CRangeState& state, action_t& action)
         if (actionResult.param < 0)
         {
             actionResult.param     = -(actionResult.param);
-            actionResult.messageID = MSGBASIC_RANGED_ATTACK_ABSORBS;
+            actionResult.messageID = MsgBasic::RANGED_ATTACK_ABSORBS;
         }
 
         // add additional effects
@@ -2143,7 +2143,7 @@ void CCharEntity::OnRangedAttack(CRangeState& state, action_t& action)
     else if (shadowsTaken > 0)
     {
         // shadows took damage
-        actionResult.messageID  = MSGBASIC_SHADOW_ABSORB;
+        actionResult.messageID  = MsgBasic::SHADOW_ABSORB;
         actionResult.resolution = ActionResolution::Miss;
         actionResult.param      = shadowsTaken;
     }
@@ -2410,7 +2410,7 @@ void CCharEntity::OnItemFinish(CItemState& state, action_t& action)
     if (!PItem->isType(ITEM_EQUIPMENT) && (PItem->getQuantity() < 1 || PItem->getReserve() > 0))
     {
         ShowWarning("OnItemFinish: %s attempted to use reserved/insufficient %s (%u).", this->getName(), PItem->getName(), PItem->getID());
-        this->pushPacket<GP_SERV_COMMAND_BATTLE_MESSAGE>(this, this, PItem->getID(), 0, MSGBASIC_ITEM_FAILS_TO_ACTIVATE);
+        this->pushPacket<GP_SERV_COMMAND_BATTLE_MESSAGE>(this, this, PItem->getID(), 0, MsgBasic::ITEM_FAILS_TO_ACTIVATE);
 
         return;
     }
@@ -2450,7 +2450,7 @@ void CCharEntity::OnItemFinish(CItemState& state, action_t& action)
         // TODO: how to detect if item does damage?
         /*if (value < 0)
         {
-            actionResult.messageID = ability::GetAbsorbMessage(actionResult.messageID);
+            actionResult.messageID = messageutils::GetAbsorbVariant(actionResult.messageID);
             actionResult.param     = -actionResult.param;
         }*/
     };
@@ -2492,7 +2492,7 @@ void CCharEntity::OnItemFinish(CItemState& state, action_t& action)
         if (PItem->getCurrentCharges() != 0)
         {
             // add recast timer to Recast List from any bag
-            this->PRecastContainer->Add(RECAST_ITEM, PItem->getSlotID() << 8 | PItem->getLocationID(), PItem->getReuseTime());
+            this->PRecastContainer->Add(RECAST_ITEM, static_cast<Recast>(PItem->getSlotID() << 8 | PItem->getLocationID()), PItem->getReuseTime());
         }
     }
     else // unlock all items except equipment
@@ -2525,17 +2525,27 @@ CBattleEntity* CCharEntity::IsValidTarget(uint16 targid, uint16 validTargetFlags
             }
             else
             {
-                errMsg = std::make_unique<GP_SERV_COMMAND_BATTLE_MESSAGE>(this, this, 0, 0, MSGBASIC_CANNOT_ON_THAT_TARG);
+                errMsg = std::make_unique<GP_SERV_COMMAND_BATTLE_MESSAGE>(this, this, 0, 0, MsgBasic::CANNOT_ON_THAT_TARG);
             }
         }
         else
         {
-            errMsg = std::make_unique<GP_SERV_COMMAND_BATTLE_MESSAGE>(this, PTarget, 0, 0, MSGBASIC_ALREADY_CLAIMED);
+            errMsg = std::make_unique<GP_SERV_COMMAND_BATTLE_MESSAGE>(this, PTarget, 0, 0, MsgBasic::ALREADY_CLAIMED);
         }
     }
     else
     {
-        errMsg = std::make_unique<GP_SERV_COMMAND_BATTLE_MESSAGE>(this, this, 0, 0, MSGBASIC_CANNOT_ATTACK_TARGET);
+        // Check if target is a BEHAVIOR_NO_ASSIST mob with player allegiance
+        auto* PEntity = GetEntity(targid, TYPE_MOB | TYPE_PC | TYPE_PET | TYPE_TRUST);
+        if (PEntity && PEntity->objtype == TYPE_MOB && static_cast<CMobEntity*>(PEntity)->allegiance == ALLEGIANCE_TYPE::PLAYER &&
+            (static_cast<CMobEntity*>(PEntity)->m_Behavior & BEHAVIOR_NO_ASSIST))
+        {
+            errMsg = std::make_unique<GP_SERV_COMMAND_BATTLE_MESSAGE>(this, this, 0, 0, MsgBasic::CANNOT_ON_THAT_TARG);
+        }
+        else
+        {
+            errMsg = std::make_unique<GP_SERV_COMMAND_BATTLE_MESSAGE>(this, this, 0, 0, MsgBasic::CANNOT_ATTACK_TARGET);
+        }
     }
     return nullptr;
 }
@@ -2546,11 +2556,11 @@ void CCharEntity::Die()
 
     if (PLastAttacker)
     {
-        loc.zone->PushPacket(this, CHAR_INRANGE_SELF, std::make_unique<GP_SERV_COMMAND_BATTLE_MESSAGE>(PLastAttacker, this, 0, 0, MSGBASIC_PLAYER_DEFEATED_BY));
+        loc.zone->PushPacket(this, CHAR_INRANGE_SELF, std::make_unique<GP_SERV_COMMAND_BATTLE_MESSAGE>(PLastAttacker, this, 0, 0, MsgBasic::PLAYER_DEFEATED_BY));
     }
     else
     {
-        loc.zone->PushPacket(this, CHAR_INRANGE_SELF, std::make_unique<GP_SERV_COMMAND_BATTLE_MESSAGE>(this, this, 0, 0, MSGBASIC_FALLS_TO_GROUND));
+        loc.zone->PushPacket(this, CHAR_INRANGE_SELF, std::make_unique<GP_SERV_COMMAND_BATTLE_MESSAGE>(this, this, 0, 0, MsgBasic::FALLS_TO_GROUND));
     }
 
     battleutils::RelinquishClaim(this);
@@ -2785,17 +2795,17 @@ void CCharEntity::UpdateMoghancement()
         uint8 currentTable = m_moghancementID >> 9;
         if (newTable == currentTable)
         {
-            pushPacket<GP_SERV_COMMAND_SCENARIOITEM>(this, static_cast<KEYS_TABLE>(newTable));
+            pushPacket<GP_SERV_COMMAND_SCENARIOITEM>(this, newTable);
         }
         else
         {
             if (newTable != 0)
             {
-                pushPacket<GP_SERV_COMMAND_SCENARIOITEM>(this, static_cast<KEYS_TABLE>(newTable));
+                pushPacket<GP_SERV_COMMAND_SCENARIOITEM>(this, newTable);
             }
             if (currentTable != 0)
             {
-                pushPacket<GP_SERV_COMMAND_SCENARIOITEM>(this, static_cast<KEYS_TABLE>(currentTable));
+                pushPacket<GP_SERV_COMMAND_SCENARIOITEM>(this, currentTable);
             }
         }
         charutils::SaveKeyItems(this);

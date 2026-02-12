@@ -13,7 +13,12 @@ end
 
 mobskillObject.onMobWeaponSkill = function(target, mob, skill)
     local damage = math.floor(target:getHP() * (math.random(45, 55) / 100))
-    damage = xi.mobskills.mobFinalAdjustments(damage, mob, skill, target, xi.attackType.PHYSICAL, xi.damageType.PIERCING, xi.mobskills.shadowBehavior.IGNORE_SHADOWS)
+    local info   =
+    {
+        damage = damage
+    }
+
+    damage = xi.mobskills.mobFinalAdjustments(info, mob, skill, target, xi.attackType.PHYSICAL, xi.damageType.PIERCING, xi.mobskills.shadowBehavior.IGNORE_SHADOWS)
     target:takeDamage(damage, mob, xi.attackType.PHYSICAL, xi.damageType.PIERCING)
     mob:resetEnmity(target)
 

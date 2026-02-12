@@ -66,6 +66,10 @@ entity.onMobInitialize = function(mob)
     mob:setRespawnTime(math.random(900, 10800))
 end
 
+entity.onMobSpawn = function(mob)
+    mob:setMobMod(xi.mobMod.BASE_DAMAGE_MULTIPLIER, 150)
+end
+
 entity.onMobDespawn = function(mob)
     -- Set Marquis_Amon's spawnpoint and respawn time (21-24 hours)
     xi.mob.updateNMSpawnPoint(mob)

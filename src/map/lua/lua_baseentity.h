@@ -196,7 +196,7 @@ public:
     uint32 getPreviousZoneLineID();
     uint8  getCurrentRegion();
     uint8  getContinentID();
-    bool   isInMogHouse();
+    bool   inMogHouse();
 
     bool isPlayerInTriggerArea(uint32 triggerAreaId);
     void onPlayerTriggerAreaEnter(uint32 triggerAreaId);
@@ -417,6 +417,7 @@ public:
 
     void   setMissionStatus(MissionLog logId, const sol::object& arg2Obj, const sol::object& arg3Obj) const;
     uint32 getMissionStatus(MissionLog logId, const sol::object& missionStatusPosObj) const;
+    void   sendPartialMissionLog(MissionLog logId, bool completed) const;
 
     void   setEminenceCompleted(uint16 recordID, const sol::object& arg1, const sol::object& arg2);
     bool   getEminenceCompleted(uint16 recordID);
@@ -552,6 +553,7 @@ public:
     bool   hasSpell(uint16 spellID);
     uint32 canLearnSpell(uint16 spellID);
     void   delSpell(uint16 spellID, const sol::optional<sol::table>& paramTable);
+    auto   getSetBlueSpells() -> sol::table;
 
     void recalculateSkillsTable();
     void recalculateAbilitiesTable();
@@ -667,6 +669,7 @@ public:
     void  updateEnmityFromDamage(CLuaBaseEntity* PEntity, int32 damage); // Adds Enmity to player for specified mob for the damage specified
     void  updateEnmityFromCure(CLuaBaseEntity* PEntity, int32 amount, const sol::object& fixedCE, const sol::object& fixedVE);
     void  resetEnmity(CLuaBaseEntity* PEntity);
+    void  setEnmityActive(CLuaBaseEntity* PEntity, bool active);
     void  updateClaim(const sol::object& entity);
     bool  hasClaim(CLuaBaseEntity* PTarget);
     bool  hasEnmity();
@@ -701,6 +704,7 @@ public:
     void  delMod(uint16 modID, int16 value);
     void  printAllMods();
     int16 getMaxGearMod(Mod modId);
+    int16 getGearModFromSlot(uint8 slot, Mod modId);
 
     void addLatent(uint16 condID, uint16 conditionValue, uint16 mID, int16 modValue);
     bool delLatent(uint16 condID, uint16 conditionValue, uint16 mID, int16 modValue);
@@ -785,6 +789,7 @@ public:
     uint32 getPetID();
     bool   isAutomaton();
     bool   isAvatar();
+    auto   isJugPet() -> bool;
     auto   getMaster() -> CBaseEntity*;
     uint8  getPetElement();
     void   setPet(const sol::object& petObj);
@@ -829,7 +834,7 @@ public:
     void   removeAllRunes();
 
     // Mob Entity-Specific
-    void   setMobLevel(uint8 level);
+    void   setMobLevel(uint8 level, sol::optional<bool> recover);
     uint8  getEcosystem();
     uint16 getSuperFamily();
     uint16 getFamily();
@@ -852,7 +857,7 @@ public:
     auto   getSpawnPos() -> sol::table;
     void   setSpawn(float x, float y, float z, const sol::object& rot);
     uint32 getRespawnTime();
-    void   setRespawnTime(uint32 seconds);
+    void   setRespawnTime(uint32 seconds) const;
 
     void instantiateMob(uint32 groupID);
 

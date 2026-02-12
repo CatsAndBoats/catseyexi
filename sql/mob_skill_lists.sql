@@ -475,35 +475,27 @@ INSERT INTO `mob_skill_lists` VALUES ('Ghrah',123,1445);
 INSERT INTO `mob_skill_lists` VALUES ('Ghrah',123,1446);
 INSERT INTO `mob_skill_lists` VALUES ('Ghrah',124,1441);
 INSERT INTO `mob_skill_lists` VALUES ('Ghrah',124,1444);
-INSERT INTO `mob_skill_lists` VALUES ('GiantBird',125,399); -- Scratch
+INSERT INTO `mob_skill_lists` VALUES ('GiantBird',125,399); -- Blind Vortex
 INSERT INTO `mob_skill_lists` VALUES ('GiantBird',125,400); -- Triple Attack
 INSERT INTO `mob_skill_lists` VALUES ('GiantBird',125,401); -- Gliding Spike
 INSERT INTO `mob_skill_lists` VALUES ('GiantBird',125,402); -- Feather Barrier
 INSERT INTO `mob_skill_lists` VALUES ('GiantBird',125,403); -- Stormwind
-INSERT INTO `mob_skill_lists` VALUES ('Gigas',126,662);
-INSERT INTO `mob_skill_lists` VALUES ('Gigas',126,663);
-INSERT INTO `mob_skill_lists` VALUES ('Gigas',126,664);
-INSERT INTO `mob_skill_lists` VALUES ('Gigas',126,665);
-INSERT INTO `mob_skill_lists` VALUES ('Gigas',126,666);
-INSERT INTO `mob_skill_lists` VALUES ('Gigas',126,667);
-INSERT INTO `mob_skill_lists` VALUES ('Gigas',127,662);
-INSERT INTO `mob_skill_lists` VALUES ('Gigas',127,663);
-INSERT INTO `mob_skill_lists` VALUES ('Gigas',127,664);
-INSERT INTO `mob_skill_lists` VALUES ('Gigas',127,665);
-INSERT INTO `mob_skill_lists` VALUES ('Gigas',127,666);
-INSERT INTO `mob_skill_lists` VALUES ('Gigas',127,667);
-INSERT INTO `mob_skill_lists` VALUES ('Gigas',128,662);
-INSERT INTO `mob_skill_lists` VALUES ('Gigas',128,663);
-INSERT INTO `mob_skill_lists` VALUES ('Gigas',128,664);
-INSERT INTO `mob_skill_lists` VALUES ('Gigas',128,665);
-INSERT INTO `mob_skill_lists` VALUES ('Gigas',128,666);
-INSERT INTO `mob_skill_lists` VALUES ('Gigas',128,667);
-INSERT INTO `mob_skill_lists` VALUES ('Gigas',129,662);
-INSERT INTO `mob_skill_lists` VALUES ('Gigas',129,663);
-INSERT INTO `mob_skill_lists` VALUES ('Gigas',129,664);
-INSERT INTO `mob_skill_lists` VALUES ('Gigas',129,665);
-INSERT INTO `mob_skill_lists` VALUES ('Gigas',129,666);
-INSERT INTO `mob_skill_lists` VALUES ('Gigas',129,667);
+INSERT INTO `mob_skill_lists` VALUES ('Gigas_Armed_Lightning',126,662); -- Lightning Roar
+INSERT INTO `mob_skill_lists` VALUES ('Gigas_Armed_Lightning',126,664); -- Impact Roar
+INSERT INTO `mob_skill_lists` VALUES ('Gigas_Armed_Lightning',126,665); -- Grand Slam
+INSERT INTO `mob_skill_lists` VALUES ('Gigas_Armed_Lightning',126,667); -- Power Attack (Armed)
+INSERT INTO `mob_skill_lists` VALUES ('Gigas_Unarmed_Lightning',127,662); -- Lightning Roar
+INSERT INTO `mob_skill_lists` VALUES ('Gigas_Unarmed_Lightning',127,664); -- Impact Roar
+INSERT INTO `mob_skill_lists` VALUES ('Gigas_Unarmed_Lightning',127,665); -- Grand Slam
+INSERT INTO `mob_skill_lists` VALUES ('Gigas_Unarmed_Lightning',127,666); -- Power Attack (Unarmed)
+INSERT INTO `mob_skill_lists` VALUES ('Gigas_Armed_Ice',128,663); -- Ice Roar
+INSERT INTO `mob_skill_lists` VALUES ('Gigas_Armed_Ice',128,664); -- Impact Roar
+INSERT INTO `mob_skill_lists` VALUES ('Gigas_Armed_Ice',128,665); -- Grand Slam
+INSERT INTO `mob_skill_lists` VALUES ('Gigas_Armed_Ice',128,667); -- Power Attack (Armed)
+INSERT INTO `mob_skill_lists` VALUES ('Gigas_Unarmed_Ice',129,663); -- Ice Roar
+INSERT INTO `mob_skill_lists` VALUES ('Gigas_Unarmed_Ice',129,664); -- Impact Roar
+INSERT INTO `mob_skill_lists` VALUES ('Gigas_Unarmed_Ice',129,665); -- Grand Slam
+INSERT INTO `mob_skill_lists` VALUES ('Gigas_Unarmed_Ice',129,666); -- Power Attack (Unarmed)
 INSERT INTO `mob_skill_lists` VALUES ('Gigas',130,662);
 INSERT INTO `mob_skill_lists` VALUES ('Gigas',130,663);
 INSERT INTO `mob_skill_lists` VALUES ('Gigas',130,664);
@@ -1069,11 +1061,11 @@ INSERT INTO `mob_skill_lists` VALUES ('ArmoredTroll',247,1898);
 INSERT INTO `mob_skill_lists` VALUES ('ArmoredTroll',247,1899);
 INSERT INTO `mob_skill_lists` VALUES ('Pyuu_the_Spatemaker',248,770); -- Jumping Thrust
 INSERT INTO `mob_skill_lists` VALUES ('Bayawak',249,367); -- Fireball
-INSERT INTO `mob_skill_lists` VALUES ('Uragnite_shell',250,1571); -- gas_shell
-INSERT INTO `mob_skill_lists` VALUES ('Uragnite_shell',250,1572); -- venom_shell
-INSERT INTO `mob_skill_lists` VALUES ('Uragnite',251,1573); -- palsynyxis
-INSERT INTO `mob_skill_lists` VALUES ('Uragnite',251,1574); -- painful_whip
-INSERT INTO `mob_skill_lists` VALUES ('Uragnite',251,1575); -- suctorial_tentacle
+INSERT INTO `mob_skill_lists` VALUES ('Uragnite_shell',250,505); -- venom_shell
+INSERT INTO `mob_skill_lists` VALUES ('Uragnite',251,504); -- gas_shell
+INSERT INTO `mob_skill_lists` VALUES ('Uragnite',251,506); -- palsynyxis
+INSERT INTO `mob_skill_lists` VALUES ('Uragnite',251,507); -- painful_whip
+INSERT INTO `mob_skill_lists` VALUES ('Uragnite',251,508); -- suctorial_tentacle
 INSERT INTO `mob_skill_lists` VALUES ('Vampyr',252,2106); -- bloodrake
 INSERT INTO `mob_skill_lists` VALUES ('Vampyr',252,2107); -- decollation
 INSERT INTO `mob_skill_lists` VALUES ('Vampyr',252,2108); -- nosferatus_kiss
@@ -2304,13 +2296,14 @@ INSERT INTO `mob_skill_lists` VALUES ('Demonic_Tiphia',700,334);
 INSERT INTO `mob_skill_lists` VALUES ('Demonic_Tiphia',700,335);
 INSERT INTO `mob_skill_lists` VALUES ('Demonic_Tiphia',700,336);
 INSERT INTO `mob_skill_lists` VALUES ('Fighting_Sheep_Auto_Attack',701,274); -- sheep_charge_hostile_herbivore
-INSERT INTO `mob_skill_lists` VALUES ('Fighting_Sheep',702,264); -- sheep_song
-INSERT INTO `mob_skill_lists` VALUES ('Fighting_Sheep',702,261); -- rage
+INSERT INTO `mob_skill_lists` VALUES ('Fighting_Sheep',702,260); -- Lamb Chop
+INSERT INTO `mob_skill_lists` VALUES ('Fighting_Sheep',702,261); -- Rage
+INSERT INTO `mob_skill_lists` VALUES ('Fighting_Sheep',702,264); -- Sheep Song
 INSERT INTO `mob_skill_lists` VALUES ('Cactrot_Rapido',703,321);
 INSERT INTO `mob_skill_lists` VALUES ('Cactrot_Rapido',703,322);
 INSERT INTO `mob_skill_lists` VALUES ('Cactrot_Rapido',703,324);
 INSERT INTO `mob_skill_lists` VALUES ('Cactrot_Rapido',703,1120);
-INSERT INTO `mob_skill_lists` VALUES ('Fee_special_attack',704,1671); -- ink_jet_alt
+INSERT INTO `mob_skill_lists` VALUES ('Fee_special_attack',704,1328); -- Fee Ink Jet Attack
 INSERT INTO `mob_skill_lists` VALUES ('Effigy_Shield',705,1075);
 INSERT INTO `mob_skill_lists` VALUES ('Effigy_Shield',705,1076);
 INSERT INTO `mob_skill_lists` VALUES ('Effigy_Shield',705,1077);
@@ -3136,7 +3129,7 @@ INSERT INTO `mob_skill_lists` VALUES ('Amarok',930,1789); -- Magma_Hoplon
 -- 931: free
 INSERT INTO `mob_skill_lists` VALUES ('Battlerigged_Chariot',932,2054); -- Diffusion_ray
 INSERT INTO `mob_skill_lists` VALUES ('Battlerigged_Chariot',932,2055); -- Inertia_stream
-INSERT INTO `mob_skill_lists` VALUES ('Bennu',933,399); -- Scratch
+INSERT INTO `mob_skill_lists` VALUES ('Bennu',933,399); -- Blind Vortex
 INSERT INTO `mob_skill_lists` VALUES ('Bennu',933,400); -- Triple_Attack
 INSERT INTO `mob_skill_lists` VALUES ('Bennu',933,401); -- Gliding_Spike
 INSERT INTO `mob_skill_lists` VALUES ('Bennu',933,402); -- Feather_Barrier
@@ -3728,6 +3721,7 @@ INSERT INTO `mob_skill_lists` VALUES ('Galarhigg',1156,625); -- vulture_2
 INSERT INTO `mob_skill_lists` VALUES ('Galarhigg',1156,626); -- vulture_3
 INSERT INTO `mob_skill_lists` VALUES ('Galarhigg',1156,627); -- vulture_4
 
+INSERT INTO `mob_skill_lists` VALUES ('Evil_Oscar',1157,316); -- Impale (Bind effect)
 INSERT INTO `mob_skill_lists` VALUES ('Evil_Oscar',1157,317); -- Vampiric Lash
 INSERT INTO `mob_skill_lists` VALUES ('Evil_Oscar',1157,320); -- Sweet Breath
 

@@ -79,6 +79,7 @@ entity.spawnPoints =
 
 entity.onMobInitialize = function(mob)
     mob:setCarefulPathing(true)
+    mob:setMobMod(xi.mobMod.AOE_HIT_ALL, 1)
     xi.mob.updateNMSpawnPoint(mob)
     mob:setRespawnTime(math.random(144, 240) * 1800) -- 3 to 5 days in 30 minute windows
 end
@@ -179,7 +180,16 @@ entity.onMobWeaponSkill = function(target, mob, skill)
 end
 
 entity.onAdditionalEffect = function(mob, target, damage)
-    return xi.mob.onAddEffect(mob, target, damage, xi.mob.ae.ENDARK, { power = math.random(55, 90), chance = 25 })
+    local pTable =
+    {
+        chance         = 25,
+        attackType     = xi.attackType.MAGICAL,
+        magicalElement = xi.element.DARK,
+        basePower      = math.floor(damage / 2),
+        actorStat      = xi.mod.INT,
+    }
+
+    return xi.combat.action.executeAddEffectDamage(mob, target, pTable)
 end
 
 entity.onMobDisengage = function(mob)

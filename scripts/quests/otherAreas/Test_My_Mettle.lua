@@ -28,11 +28,11 @@ local betAmounts =
 
 local rewardMultiplier =
 {
-    [24] = 3.0,
-    [36] = 2.5,
-    [48] = 2.0,
-    [60] = 1.5,
-    [72] = 1.2,
+    [1] = { 24, 3.0 },
+    [2] = { 36, 2.5 },
+    [3] = { 48, 2.0 },
+    [4] = { 60, 1.5 },
+    [5] = { 72, 1.2 },
 }
 
 -- Event option return is the sum of bet amount and timeframe chosen.
@@ -40,6 +40,18 @@ local function getSelectedOption(option)
     for selectedBet = 1, 4 do
         if option > betAmounts[selectedBet] then
             return betAmounts[selectedBet], option - betAmounts[selectedBet]
+        end
+    end
+end
+
+local function getRewardMultiplier(vanaHoursRemaining)
+    if vanaHoursRemaining > 72 then
+        return 1
+    end
+
+    for i = 1, #rewardMultiplier do
+        if vanaHoursRemaining <= rewardMultiplier[i][1] then
+            return rewardMultiplier[i][2]
         end
     end
 end
@@ -62,21 +74,26 @@ quest.sections =
             onEventFinish =
             {
                 [120] = function(player, csid, option, npc)
+                    if option == 0 then
+                        return
+                    end
+
                     local eventCancelled = bit.rshift(option, 31) == 1 and true or false
+                    if eventCancelled then
+                        return
+                    end
 
-                    if not eventCancelled then
-                        local betAmount, vanaHoursRemaining = getSelectedOption(option)
+                    local betAmount, vanaHoursRemaining = getSelectedOption(option)
 
-                        if player:getGil() >= betAmount then
-                            player:delGil(betAmount)
+                    if player:getGil() >= betAmount then
+                        player:delGil(betAmount)
 
-                            -- One Vana'diel Hour is equal to 2m24s (144s)
-                            quest:setVar(player, 'Timer', GetSystemTime() + vanaHoursRemaining * 144)
-                            quest:setVar(player, 'Reward', betAmount * rewardMultiplier[vanaHoursRemaining])
-                            quest:begin(player)
-                        else
-                            player:messageSpecial(selbinaID.text.DONT_HAVE_ENOUGH_GIL)
-                        end
+                        -- One Vana'diel Hour is equal to 2m24s (144s)
+                        quest:setVar(player, 'Timer', GetSystemTime() + vanaHoursRemaining * 144)
+                        quest:setVar(player, 'Reward', betAmount * getRewardMultiplier(vanaHoursRemaining))
+                        quest:begin(player)
+                    else
+                        player:messageSpecial(selbinaID.text.DONT_HAVE_ENOUGH_GIL)
                     end
                 end,
             },
