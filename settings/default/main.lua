@@ -164,8 +164,8 @@ xi.settings.main =
     -- VIT:DEF ratio. Applies to everything but mobs and charmed mobs. Those are hardcoded to 0.5.
     PLAYER_ALLIES_VIT_DEF_MULTIPLIER = 1.5, -- 1.5: 1 VIT = 1.5 DEF. This has been 0.5 in previous eras.
 
-    USE_ADOULIN_WEAPON_SKILL_CHANGES = true,  -- true/false. Change to toggle new Adoulin weapon skill damage calculations
-    DISABLE_PARTY_EXP_PENALTY        = false, -- true/false.
+    USE_ADOULIN_WEAPON_SKILL_CHANGES = false,  -- true/false. Change to toggle new Adoulin weapon skill damage calculations
+    DISABLE_PARTY_EXP_PENALTY        = true, -- true/false.
     ENABLE_IMMUNOBREAK               = true,  -- true/false. Allow/Disallow immunobreaks to happen.
 
     -- TRUSTS
