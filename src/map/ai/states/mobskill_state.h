@@ -30,7 +30,7 @@ class CBattleEntity;
 class CMobSkillState : public CState
 {
 public:
-    CMobSkillState(CBattleEntity* PEntity, uint16 targid, uint16 wsid, std::optional<timer::duration> castTimeOverride);
+    CMobSkillState(CBattleEntity* PEntity, uint16 targid, uint16 wsid, Maybe<timer::duration> castTimeOverride);
 
     CMobSkill* GetSkill();
 
@@ -62,8 +62,9 @@ private:
     timer::time_point          m_finishTime;
     timer::duration            m_castTime{};
     int16                      m_spentTP;
+    bool                       m_skillSuccess{ false };
 
-    void reduceTpOnInterrupt();
+    void reduceTpOnInterrupt() const;
 };
 
 #endif

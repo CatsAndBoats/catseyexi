@@ -56,9 +56,8 @@ enum SYNTHESIS_RESULT
 };
 
 void LoadSynthRecipes();
-auto startSynth(CCharEntity* PChar) -> int32;
-auto sendSynthDone(CCharEntity* PChar) -> int32;
-void doSynthFail(CCharEntity* PChar);
+void startSynth(CCharEntity* PChar);
+void sendSynthDone(CCharEntity* PChar);
 void doSynthCriticalFail(CCharEntity* PChar);
 
 }; // namespace synthutils

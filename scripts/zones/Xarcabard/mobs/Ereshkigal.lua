@@ -10,18 +10,23 @@ local entity = {}
 
 entity.onMobInitialize = function(mob)
     mob:setMobMod(xi.mobMod.ADD_EFFECT, 1)
-end
-
-entity.onMobSpawn = function(mob)
+    -- TODO - BRD immunities need confirmation.
     -- TODO any dmg absorb like Noble Mold?
     -- Confirmed it takes dmg from blizzard and water
-    -- TODO any other immunities?
-    -- confirmed it is not immune to Blind
     mob:addImmunity(xi.immunity.PARALYZE)
 end
 
 entity.onAdditionalEffect = function(mob, target, damage)
-    return xi.mob.onAddEffect(mob, target, damage, xi.mob.ae.ENDARK)
+    local pTable =
+    {
+        chance         = 100,
+        attackType     = xi.attackType.MAGICAL,
+        magicalElement = xi.element.DARK,
+        basePower      = math.floor(damage / 2),
+        actorStat      = xi.mod.INT,
+    }
+
+    return xi.combat.action.executeAddEffectDamage(mob, target, pTable)
 end
 
 entity.onMobDeath = function(mob, player, optParams)
@@ -32,7 +37,7 @@ entity.onMobDespawn = function(mob)
     local ph = GetMobByID(mob:getID() - 1)
     if ph then
         DisallowRespawn(ph:getID(), false)
-        ph:setRespawnTime(ph:getRespawnTime())
+        ph:setRespawnTime(GetMobRespawnTime(ph:getID()))
     end
 end
 

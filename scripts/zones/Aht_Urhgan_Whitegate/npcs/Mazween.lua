@@ -10,22 +10,22 @@ local entity = {}
 entity.onTrigger = function(player, npc)
     local stock =
     {
-        { 4881, 11200, }, -- Scroll of Sleepga
-        { 4867, 18720, }, -- Scroll of Sleep II
-        { 4829, 25200, }, -- Poison II
-        { 4839, 14000, }, -- Bio II
-        { 4833,  5160, }, -- Poisonga
-        { 4769, 19932, }, -- Stone III
-        { 4779, 22682, }, -- Water III
-        { 4764, 27744, }, -- Aero III
-        { 4754, 33306, }, -- Fire III
-        { 4759, 39368, }, -- Blizzard III
-        { 4774, 45930, }, -- Thunder III
-        { 4883, 27000, }, -- Absorb-TP
-        { 4854, 30780, }, -- Drain II
-        { 4885, 70560, }, -- Dread Spikes
-        { 4886, 44000, }, -- Absorb-ACC
-        { 4856, 79800, }, -- Aspir II
+        { xi.item.SCROLL_OF_SLEEPGA,       11200, },
+        { xi.item.SCROLL_OF_SLEEP_II,      18720, },
+        { xi.item.SCROLL_OF_POISON_II,     25200, },
+        { xi.item.SCROLL_OF_BIO_II,        14000, },
+        { xi.item.SCROLL_OF_POISONGA,       5160, },
+        { xi.item.SCROLL_OF_STONE_III,     19932, },
+        { xi.item.SCROLL_OF_WATER_III,     22682, },
+        { xi.item.SCROLL_OF_AERO_III,      27744, },
+        { xi.item.SCROLL_OF_FIRE_III,      33306, },
+        { xi.item.SCROLL_OF_BLIZZARD_III,  39368, },
+        { xi.item.SCROLL_OF_THUNDER_III,   45930, },
+        { xi.item.SCROLL_OF_ABSORB_TP,     27000, },
+        { xi.item.SCROLL_OF_DRAIN_II,      30780, },
+        { xi.item.SCROLL_OF_DREAD_SPIKES,  70560, },
+        { xi.item.SCROLL_OF_ABSORB_ACC,    44000, },
+        { xi.item.SCROLL_OF_ASPIR_II,      79800, },
     }
 
     player:showText(npc, ID.text.MAZWEEN_SHOP_DIALOG)

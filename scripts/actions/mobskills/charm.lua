@@ -8,7 +8,7 @@ mobskillObject.onMobSkillCheck = function(target, mob, skill)
     return 0
 end
 
-mobskillObject.onMobWeaponSkill = function(target, mob, skill)
+mobskillObject.onMobWeaponSkill = function(mob, target, skill, action)
     local power = 0
     local duration = 180
 
@@ -17,7 +17,7 @@ mobskillObject.onMobWeaponSkill = function(target, mob, skill)
         return xi.effect.CHARM_I
     end
 
-    if mob:getPool() == xi.mobPools.OSSCHAART then
+    if mob:getPool() == xi.mobPool.OSSCHAART then
         duration = 30
     end
 

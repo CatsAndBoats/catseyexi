@@ -64,6 +64,8 @@ set(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/event_info.h
     ${CMAKE_CURRENT_SOURCE_DIR}/fishingcontest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/fishingcontest.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/gmcall_container.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/gmcall_container.h
     ${CMAKE_CURRENT_SOURCE_DIR}/grades.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/grades.h
     ${CMAKE_CURRENT_SOURCE_DIR}/guild.cpp
@@ -74,6 +76,8 @@ set(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/instance.h
     ${CMAKE_CURRENT_SOURCE_DIR}/ipc_client.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ipc_client.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/inventory_sync_state.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/inventory_sync_state.h
     ${CMAKE_CURRENT_SOURCE_DIR}/item_container.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/item_container.h
     ${CMAKE_CURRENT_SOURCE_DIR}/items.h
@@ -114,6 +118,9 @@ set(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/monstrosity.h
     ${CMAKE_CURRENT_SOURCE_DIR}/navmesh.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/navmesh.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/zone_mesh.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/zone_mesh.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/ximesh.h
     ${CMAKE_CURRENT_SOURCE_DIR}/notoriety_container.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/notoriety_container.h
     ${CMAKE_CURRENT_SOURCE_DIR}/packet_guard.cpp
@@ -134,8 +141,10 @@ set(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/status_effect_container.h
     ${CMAKE_CURRENT_SOURCE_DIR}/status_effect.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/status_effect.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/spawn_group.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/spawn_group.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/spawn_handler.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/spawn_handler.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/spawn_slot.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/spawn_slot.h
     ${CMAKE_CURRENT_SOURCE_DIR}/time_server.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/time_server.h
     ${CMAKE_CURRENT_SOURCE_DIR}/timetriggers.cpp

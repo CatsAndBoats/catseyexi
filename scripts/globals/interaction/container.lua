@@ -220,20 +220,20 @@ function Container:unsetVarBit(player, name, bitNum)
     end
 end
 
--- These helper functions will set or get a localVar using varPrefix to determine
+-- These helper functions will set or get a charVar using varPrefix to determine
 -- if zoning/logout is required.  There is no clearing support at this time, outside
 -- of legitimate methods.
 ---@nodiscard
 ---@param player CBaseEntity
 ---@return boolean
 function Container:getMustZone(player)
-    return player:getLocalVar(self.varPrefix .. 'mustZone') == 1 and true or false
+    return player:getCharVar(self.varPrefix .. 'mustZone') ~= 0 and true or false
 end
 
 ---@param player CBaseEntity
 ---@return nil
 function Container:setMustZone(player)
-    player:setLocalVar(self.varPrefix .. 'mustZone', 1)
+    player:setCharVar(self.varPrefix .. 'mustZone', player:getZoneID())
 end
 
 ---@nodiscard

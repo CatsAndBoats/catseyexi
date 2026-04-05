@@ -79,6 +79,7 @@ INSERT INTO `fishing_catch` VALUES (100,1,17);    -- West Ronfaure, Knightwell
 INSERT INTO `fishing_catch` VALUES (101,1,16);    -- East Ronfaure, Whole Zone
 INSERT INTO `fishing_catch` VALUES (102,1,23);    -- La Theine Plateau, Whole Zone
 INSERT INTO `fishing_catch` VALUES (103,1,26);    -- Valkurm Dunes, Whole Zone
+INSERT INTO `fishing_catch` VALUES (103,2,140);   -- Valkurm Dunes, Pirate's Chart Quest
 INSERT INTO `fishing_catch` VALUES (104,1,35);    -- Jugner Forest, Crystalwater Spring
 INSERT INTO `fishing_catch` VALUES (104,2,36);    -- Jugner Forest, Lake Mechieume - Mouth
 INSERT INTO `fishing_catch` VALUES (104,3,37);    -- Jugner Forest, Lake Mechieume - Main

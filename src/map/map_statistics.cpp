@@ -56,8 +56,6 @@ auto MapStatistics::toString(Key key)
             return "Connected Players (Process)";
         case Key::ActiveMobs:
             return "Active Mobs (Process)";
-        case Key::TaskManagerTasks:
-            return "Task Manager Tasks";
         case Key::DynamicTargIdUsagePercent:
             return "Dynamic TargID Usage (%)";
         default:

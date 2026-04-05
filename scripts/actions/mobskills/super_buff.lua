@@ -10,8 +10,8 @@ mobskillObject.onMobSkillCheck = function(target, mob, skill)
     return 0
 end
 
-mobskillObject.onMobWeaponSkill = function(target, mob, skill)
-    target:addStatusEffectEx(xi.effect.SUPER_BUFF, 0, 25, 0, 30)
+mobskillObject.onMobWeaponSkill = function(mob, target, skill, action)
+    target:addStatusEffect(xi.effect.SUPER_BUFF, { power = 25, duration = 30, origin = mob, icon = 0 })
     skill:setMsg(xi.msg.basic.NONE)
     return 0
 end

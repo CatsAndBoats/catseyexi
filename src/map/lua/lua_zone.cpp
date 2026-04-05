@@ -33,6 +33,7 @@
 #include "utils/mobutils.h"
 #include "zone.h"
 #include "zone_entities.h"
+#include "zone_mesh.h"
 
 CLuaZone::CLuaZone(CZone* PZone)
 : m_pLuaZone(PZone)
@@ -45,8 +46,8 @@ CLuaZone::CLuaZone(CZone* PZone)
 
 /************************************************************************
  *  Function: getLocalVar()
- *  Purpose : Returns a variable assigned locally to an entity
- *  Example : if (KingArthro:getLocalVar("[POP]King_Arthro") > 0) then
+ *  Purpose : Returns a variable assigned locally to a zone
+ *  Example : if (zone:getLocalVar("[POP]King_Arthro") > 0) then
  *  Notes   :
  ************************************************************************/
 
@@ -56,9 +57,30 @@ auto CLuaZone::getLocalVar(const char* key)
 }
 
 /************************************************************************
+ *  Function: getLocalVars()
+ *  Purpose : Returns all local variables assigned to the zone as a table
+ *  Example : local vars = zone:getLocalVars()
+ *  Notes   :
+ ************************************************************************/
+auto CLuaZone::getLocalVars() -> sol::table
+{
+    auto  table     = lua.create_table();
+    auto& localVars = m_pLuaZone->GetLocalVars();
+
+    for (const auto& [varName, value] : localVars)
+    {
+        auto subtable       = lua.create_table();
+        subtable["varname"] = varName;
+        subtable["value"]   = value;
+        table.add(subtable);
+    }
+    return table;
+}
+
+/************************************************************************
  *  Function: setLocalVar()
- *  Purpose : Assigns a local variable to an entity
- *  Example : mob:setLocalVar("pop", GetSystemTime() + math.random(1200,7200));
+ *  Purpose : Assigns a local variable to a zone
+ *  Example : zone:setLocalVar("pop", GetSystemTime() + math.random(1200,7200));
  *  Notes   :
  ************************************************************************/
 
@@ -299,6 +321,44 @@ sol::table CLuaZone::queryEntitiesByName(const std::string& name)
     return table;
 }
 
+/************************************************************************
+ *  Function: getTerrainType()
+ *  Purpose : Returns the terrain type at the given position
+ *  Example : zone:getTerrainType(player:getPos())
+ ************************************************************************/
+
+auto CLuaZone::getTerrainType(const sol::table& position) -> TerrainType
+{
+    if (auto mesh = m_pLuaZone->zoneMesh())
+    {
+        return (*mesh)->getTerrainAt(
+            position["x"].get_or<float>(0),
+            position["y"].get_or<float>(0),
+            position["z"].get_or<float>(0));
+    }
+
+    return TerrainType::None;
+}
+
+/************************************************************************
+ *  Function: getFloorId()
+ *  Purpose : Returns the floor ID at the given position
+ *  Example : zone:getFloorId(player:getPos())
+ ************************************************************************/
+
+auto CLuaZone::getFloorId(const sol::table& position) -> uint8
+{
+    if (auto mesh = m_pLuaZone->zoneMesh())
+    {
+        return (*mesh)->getFloorId(
+            position["x"].get_or<float>(0),
+            position["y"].get_or<float>(0),
+            position["z"].get_or<float>(0));
+    }
+
+    return 0;
+}
+
 //======================================================//
 
 void CLuaZone::Register()
@@ -306,6 +366,7 @@ void CLuaZone::Register()
     SOL_USERTYPE("CZone", CLuaZone);
 
     SOL_REGISTER("getLocalVar", CLuaZone::getLocalVar);
+    SOL_REGISTER("getLocalVars", CLuaZone::getLocalVars);
     SOL_REGISTER("setLocalVar", CLuaZone::setLocalVar);
     SOL_REGISTER("resetLocalVars", CLuaZone::resetLocalVars);
 
@@ -326,6 +387,8 @@ void CLuaZone::Register()
     SOL_REGISTER("getUptime", CLuaZone::getUptime);
     SOL_REGISTER("reloadNavmesh", CLuaZone::reloadNavmesh);
     SOL_REGISTER("isNavigablePoint", CLuaZone::isNavigablePoint);
+    SOL_REGISTER("getTerrainType", CLuaZone::getTerrainType);
+    SOL_REGISTER("getFloorId", CLuaZone::getFloorId);
     SOL_REGISTER("insertDynamicEntity", CLuaZone::insertDynamicEntity);
 
     SOL_REGISTER("getSoloBattleMusic", CLuaZone::getSoloBattleMusic);

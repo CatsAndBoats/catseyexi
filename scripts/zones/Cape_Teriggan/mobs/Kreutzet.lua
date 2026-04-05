@@ -60,14 +60,15 @@ entity.spawnPoints =
 }
 
 entity.onMobInitialize = function(mob)
+    mob:addImmunity(xi.immunity.DARK_SLEEP)
+    mob:addImmunity(xi.immunity.TERROR)
     xi.mob.updateNMSpawnPoint(mob)
     mob:setRespawnTime(math.random(32400, 43200)) -- 9 to 12 hours
     DisallowRespawn(mob:getID(), true) -- prevents accidental 'pop' during no wind weather and immediate despawn
 end
 
 entity.onMobSpawn = function(mob)
-    mob:addImmunity(xi.immunity.DARK_SLEEP)
-    mob:addImmunity(xi.immunity.LIGHT_SLEEP)
+    mob:setMobMod(xi.mobMod.BASE_DAMAGE_MULTIPLIER, 150)
 end
 
 entity.onMobRoam = function(mob)
@@ -97,7 +98,7 @@ entity.onMobFight = function(mob, target)
     end
 end
 
-entity.onMobWeaponSkill = function(target, mob, skill)
+entity.onMobWeaponSkill = function(mob, target, skill, action)
     local stormwindCounter = mob:getLocalVar('stormwindCounter')
     if
         skill:getID() == 926 and

@@ -61,7 +61,7 @@ entity.spawnPoints =
 
 local function enterFlight(mob)
     mob:setAnimationSub(1) -- Change to flight.
-    mob:addStatusEffectEx(xi.effect.ALL_MISS, 0, 1, 0, 0)
+    mob:addStatusEffect(xi.effect.ALL_MISS, { power = 1, origin = mob, icon = 0 })
     mob:setMobSkillAttack(730)
     mob:setLocalVar('flightTime', GetSystemTime() + 120)
     mob:setLocalVar('changeHP', mob:getHP() - 10000)
@@ -69,6 +69,7 @@ end
 
 entity.onMobInitialize = function(mob)
     mob:setCarefulPathing(true) -- Used for drawin
+    mob:setMobMod(xi.mobMod.AOE_HIT_ALL, 1)
 
     xi.mob.updateNMSpawnPoint(mob)
     mob:setRespawnTime(math.random(144, 240) * 1800) -- 3 to 5 days in 30 minute windows
@@ -157,7 +158,7 @@ entity.onMobFight = function(mob, target)
         hpp <= 25 and
         not mob:hasStatusEffect(xi.effect.ATTACK_BOOST)
     then
-        mob:addStatusEffect(xi.effect.ATTACK_BOOST, 75, 0, 0)
+        mob:addStatusEffect(xi.effect.ATTACK_BOOST, { power = 75, origin = mob })
         mob:getStatusEffect(xi.effect.ATTACK_BOOST):addEffectFlag(xi.effectFlag.DEATH)
     end
 
@@ -190,8 +191,7 @@ entity.onMobFight = function(mob, target)
         -- Flight mode.
         elseif
             animation == 1 and
-            (GetSystemTime() > flightTime and mob:getHP() < changeHP) and
-            mob:checkDistance(target) <= 6 -- This 2 checks are a hack until we can handle skills targeting a position and not an entity.
+            (GetSystemTime() > flightTime and mob:getHP() < changeHP)
         then
             mob:useMobAbility(1282) -- This ability also handles animation change to 2.
             mob:setBehavior(bit.bor(mob:getBehavior(), xi.behavior.NO_TURN))
@@ -225,13 +225,13 @@ entity.onMobFight = function(mob, target)
     end
 end
 
-entity.onMobMobskillChoose = function(mob, target)
+entity.onMobMobskillChoose = function(mob, target, skillId)
     if mob:getAnimationSub() == 1 then
         mob:setLocalVar('skill_tp', mob:getTP())
     end
 end
 
-entity.onMobWeaponSkill = function(target, mob, skill)
+entity.onMobWeaponSkill = function(mob, target, skill, action)
     -- Don't lose TP from autos during flight
     if skill:getID() == 1278 then
         mob:addTP(64) -- Needs to gain TP from flight auto attacks
@@ -243,7 +243,16 @@ entity.onMobWeaponSkill = function(target, mob, skill)
 end
 
 entity.onAdditionalEffect = function(mob, target, damage)
-    return xi.mob.onAddEffect(mob, target, damage, xi.mob.ae.ENFIRE, { chance = 20, power = 100 })
+    local pTable =
+    {
+        chance         = 20,
+        attackType     = xi.attackType.MAGICAL,
+        magicalElement = xi.element.FIRE,
+        basePower      = math.floor(damage / 2),
+        actorStat      = xi.mod.INT,
+    }
+
+    return xi.combat.action.executeAddEffectDamage(mob, target, pTable)
 end
 
 entity.onMobDisengage = function(mob)
@@ -260,7 +269,9 @@ entity.onMobDisengage = function(mob)
 end
 
 entity.onMobDeath = function(mob, player, optParams)
-    player:addTitle(xi.title.TIAMAT_TROUNCER)
+    if player then
+        player:addTitle(xi.title.TIAMAT_TROUNCER)
+    end
 end
 
 entity.onMobDespawn = function(mob)

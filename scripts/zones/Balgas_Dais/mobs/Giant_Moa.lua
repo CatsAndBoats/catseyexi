@@ -8,8 +8,14 @@ local entity = {}
 
 entity.onMobInitialize = function(mob)
     mob:addImmunity(xi.immunity.PETRIFY)
+    mob:setMobMod(xi.mobMod.BASE_DAMAGE_MULTIPLIER, 150)
     mob:setMobMod(xi.mobMod.ADD_EFFECT, 1)
+end
+
+entity.onMobSpawn = function(mob)
     mob:setMod(xi.mod.DOUBLE_ATTACK, 70)
+    mob:setMod(xi.mod.DARK_SLEEP_RES_RANK, 8)
+    mob:setMod(xi.mod.LIGHT_SLEEP_RES_RANK, 8)
 end
 
 -- Additional effect: TP Drain absorbs all of the targets current TP
@@ -27,7 +33,7 @@ local mobskillTable =
     [4] = { xi.mobSkill.CONTAGION_TRANSFER,      40 },
 }
 
-entity.onMobMobskillChoose = function(mob, target)
+entity.onMobMobskillChoose = function(mob, target, skillId)
     local randomRoll = math.random(1, 100)
     local weightSum  = 0
     for i = 1, #mobskillTable do
@@ -39,7 +45,7 @@ entity.onMobMobskillChoose = function(mob, target)
 end
 
 -- Follows up Contagion Transfer with Contamination to spread all negative ailments to nearby enemies
-entity.onMobWeaponSkill = function(target, mob, skill)
+entity.onMobWeaponSkill = function(mob, target, skill, action)
     if skill:getID() == xi.mobSkill.CONTAGION_TRANSFER then
         mob:useMobAbility(xi.mobSkill.CONTAMINATION)
     end

@@ -30,7 +30,7 @@ entity.onMobSpawn = function(mob)
     despawnDjiggas()
 end
 
-entity.onMobMobskillChoose = function(mob, target)
+entity.onMobMobskillChoose = function(mob, target, skillId)
     local anyAlive = utils.any(DJIGGAS, function(_, mobId)
         local djigga = GetMobByID(mobId)
         if djigga and djigga:isAlive() then
@@ -43,7 +43,7 @@ entity.onMobMobskillChoose = function(mob, target)
     end
 end
 
-entity.onMobWeaponSkill = function(target, mob, skill)
+entity.onMobWeaponSkill = function(mob, target, skill, action)
     local chamberData = xi.einherjar.getChamber(mob:getLocalVar('[ein]chamber'))
 
     local freeIds = utils.filterArray(DJIGGAS, function(_, mobId)

@@ -22,6 +22,7 @@
 #pragma once
 
 #include "common/application.h"
+#include "common/scheduler.h"
 #include "in_memory_sink.h"
 #include "map/map_engine.h"
 #include "mock_manager.h"
@@ -73,20 +74,22 @@ struct HookContext
 class TestEngine final : public Engine
 {
 public:
-    TestEngine(asio::io_context& io_context, TestConfig testConfig);
+    TestEngine(Application& application, TestConfig testConfig, std::unique_ptr<MapEngine> mapEngine, std::unique_ptr<WorldEngine> worldEngine);
     ~TestEngine() override;
 
     DISALLOW_COPY_AND_MOVE(TestEngine);
 
-    auto executeTests() -> bool;
+    auto executeTests() -> Task<bool>;
 
 private:
     auto executeSuite(const TestSuite& suite, HookContext context) -> TestResults;
     void reportSetupTeardownFailure(const TestSuite& suite, const std::string& functionName, const std::string& errorMessage) const;
     auto executeTestCase(const TestCase& testCase, const HookContext& context, const TestSuite& suite) const -> bool;
-    auto runBeforeHooks(const HookContext& context, const std::string& testName) const -> std::optional<std::string>;
+    auto runBeforeHooks(const HookContext& context, const std::string& testName) const -> Maybe<std::string>;
     void runAfterHooks(const HookContext& context, const std::string& testName) const;
 
+    Application&                        application_;
+    Scheduler&                          scheduler_;
     std::unique_ptr<MapEngine>          mapEngine_;
     std::unique_ptr<WorldEngine>        worldEngine_;
     std::unique_ptr<MockManager>        mockManager_;

@@ -15,11 +15,11 @@ abilityObject.onPetAbility = function(target, pet, petskill, summoner, action)
 
     xi.job_utils.summoner.onUseBloodPact(target, petskill, summoner, action)
 
-    local damage = xi.summon.avatarPhysicalMove(pet, target, petskill, numhits, accmod, dmgmod, 0, xi.mobskills.magicalTpBonus.NO_EFFECT, 1, 2, 3)
-    local totaldamage = xi.summon.avatarFinalAdjustments(damage.dmg, pet, petskill, target, xi.attackType.PHYSICAL, xi.damageType.PIERCING, numhits)
+    local info = xi.summon.avatarPhysicalMove(pet, target, petskill, numhits, accmod, dmgmod, 0, xi.mobskills.magicalTpBonus.NO_EFFECT, 1, 2, 3)
+    local totaldamage = xi.summon.avatarFinalAdjustments(info, pet, petskill, target, xi.attackType.PHYSICAL, xi.damageType.PIERCING, numhits)
 
-    if damage.hitslanded > 0 then
-        target:addStatusEffect(xi.effect.PARALYSIS, 22.5, 0, 90)
+    if info.hitslanded > 0 then
+        target:addStatusEffect(xi.effect.PARALYSIS, { power = 22.5, duration = 90, origin = pet })
     end
 
     target:takeDamage(totaldamage, pet, xi.attackType.PHYSICAL, xi.damageType.PIERCING)

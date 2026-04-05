@@ -24,6 +24,7 @@
 
 #include "common/cbasetypes.h"
 #include "common/mmo.h"
+#include "common/scheduler.h"
 #include "common/timer.h"
 #include "spell.h"
 
@@ -38,7 +39,7 @@ public:
     virtual ~CController()
     {
     }
-    virtual void Tick(timer::time_point tick) = 0;
+    virtual auto Tick(timer::time_point tick) -> Task<void> = 0;
     virtual void Despawn();
     virtual void Reset();
     virtual bool Cast(uint16 targid, SpellID spellid);

@@ -9,18 +9,8 @@ local entity = {}
 
 entity.phList =
 {
-    [ID.mob.SABOTENDER_MARIACHI - 9] = ID.mob.SABOTENDER_MARIACHI, -- -17.217 -0.956 -57.647
-    [ID.mob.SABOTENDER_MARIACHI - 6] = ID.mob.SABOTENDER_MARIACHI, -- -41.000 -0.488 -31.000
-    [ID.mob.SABOTENDER_MARIACHI - 5] = ID.mob.SABOTENDER_MARIACHI, -- -33.717 -0.448 -43.478
-    [ID.mob.SABOTENDER_MARIACHI - 3] = ID.mob.SABOTENDER_MARIACHI, -- -41.000 0.088 -3.000
-    [ID.mob.SABOTENDER_MARIACHI - 2] = ID.mob.SABOTENDER_MARIACHI, -- -54.912 0.347 -1.681
-    [ID.mob.SABOTENDER_MARIACHI - 1] = ID.mob.SABOTENDER_MARIACHI, -- -58.807 -0.327 -8.531
-    [ID.mob.SABOTENDER_MARIACHI + 1] = ID.mob.SABOTENDER_MARIACHI, -- -82.074 -0.450 -0.738
-    [ID.mob.SABOTENDER_MARIACHI + 2] = ID.mob.SABOTENDER_MARIACHI, -- -84.721 -0.325 -2.861
-    [ID.mob.SABOTENDER_MARIACHI + 3] = ID.mob.SABOTENDER_MARIACHI, -- -45.000 -0.115 39.000
-    [ID.mob.SABOTENDER_MARIACHI + 4] = ID.mob.SABOTENDER_MARIACHI, -- -38.791 0.230 26.579
-    [ID.mob.SABOTENDER_MARIACHI + 5] = ID.mob.SABOTENDER_MARIACHI, -- -34.263 -0.512 30.437
-    [ID.mob.SABOTENDER_MARIACHI + 7] = ID.mob.SABOTENDER_MARIACHI, -- -23.543 -0.396 59.578
+    [ID.mob.SABOTENDER_MARIACHI - 1] = ID.mob.SABOTENDER_MARIACHI, -- Confirmed on retail
+    [ID.mob.SABOTENDER_MARIACHI + 6] = ID.mob.SABOTENDER_MARIACHI, -- Confirmed on retail
 }
 
 entity.spawnPoints =
@@ -81,20 +71,24 @@ entity.spawnPoints =
 local mobRegen = function(mob)
     local hour = VanadielHour()
     if hour >= 6 and hour < 18 then
-        mob:setMod(xi.mod.REGEN, 80)
+        mob:setMod(xi.mod.REGEN, 50)
     else
         mob:setMod(xi.mod.REGEN, 0)
     end
 end
 
 entity.onMobInitialize = function(mob)
+    xi.mob.updateNMSpawnPoint(mob)
+    mob:addImmunity(xi.immunity.DARK_SLEEP)
+    mob:addImmunity(xi.immunity.LIGHT_SLEEP)
+    mob:addImmunity(xi.immunity.TERROR)
+    mob:addImmunity(xi.immunity.SILENCE)
     mob:setMobMod(xi.mobMod.GIL_MIN, 15000)
     mob:setMobMod(xi.mobMod.GIL_MAX, 15000)
 end
 
 entity.onMobSpawn = function(mob)
-    mob:addImmunity(xi.immunity.DARK_SLEEP)
-    mob:addImmunity(xi.immunity.LIGHT_SLEEP)
+    mob:setMobMod(xi.mobMod.BASE_DAMAGE_MULTIPLIER, 150)
 end
 
 entity.onMobRoam = function(mob)
@@ -107,6 +101,10 @@ end
 
 entity.onMobDeath = function(mob, player, optParams)
     xi.hunts.checkHunt(mob, player, 417)
+end
+
+entity.onMobDespawn = function(mob)
+    xi.mob.updateNMSpawnPoint(mob)
 end
 
 return entity

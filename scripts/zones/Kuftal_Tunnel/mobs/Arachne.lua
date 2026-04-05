@@ -9,10 +9,9 @@ local entity = {}
 
 entity.phList =
 {
-    [ID.mob.ARACHNE + 5] = ID.mob.ARACHNE, -- 19.000 20.000 37.000
-    [ID.mob.ARACHNE + 4] = ID.mob.ARACHNE, -- -10.000 20.000 14.000
-    [ID.mob.ARACHNE + 2] = ID.mob.ARACHNE, -- -20.000 21.000 1.000
-    [ID.mob.ARACHNE + 3] = ID.mob.ARACHNE, -- -20.000 20.000 38.000
+    [ID.mob.ARACHNE - 5] = ID.mob.ARACHNE, -- Confirmed on retail
+    [ID.mob.ARACHNE - 1] = ID.mob.ARACHNE, -- Confirmed on retail
+    [ID.mob.ARACHNE + 3] = ID.mob.ARACHNE, -- Confirmed on retail
 }
 
 entity.spawnPoints =
@@ -70,12 +69,21 @@ entity.spawnPoints =
 }
 
 entity.onMobInitialize = function(mob)
+    xi.mob.updateNMSpawnPoint(mob)
     mob:setMobMod(xi.mobMod.GIL_MIN, 6000)
     mob:setMobMod(xi.mobMod.GIL_MAX, 6000)
 end
 
+entity.onMobSpawn = function(mob)
+    mob:setMobMod(xi.mobMod.BASE_DAMAGE_MULTIPLIER, 150)
+end
+
 entity.onMobDeath = function(mob, player, optParams)
     xi.hunts.checkHunt(mob, player, 420)
+end
+
+entity.onMobDespawn = function(mob)
+    xi.mob.updateNMSpawnPoint(mob)
 end
 
 return entity

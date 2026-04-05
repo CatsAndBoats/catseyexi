@@ -72,10 +72,12 @@ entity.onMobSpawn = function(mob)
     mob:setLocalVar('instance', inst)
     mob:setLocalVar('nightmarePercent', math.random(25, 75))
     mob:setMagicCastingEnabled(false)
+    mob:setMobMod(xi.mobMod.BASE_DAMAGE_MULTIPLIER, 150)
+    mob:setMobMod(xi.mobMod.NO_STANDBACK, 1)
 
-    mob:addListener('WEAPONSKILL_STATE_EXIT', 'DIABOLOS_NIGHTMARE_WS', function(mobArg, skillID)
+    mob:addListener('WEAPONSKILL_STATE_EXIT', 'DIABOLOS_NIGHTMARE_WS', function(mobArg, skillId, wasExecuted)
         if
-            skillID == xi.mobSkill.NIGHTMARE_1 and
+            skillId == xi.mobSkill.NIGHTMARE_1 and
             mobArg:getLocalVar('specialNightmare') == 1
         then
             mobArg:setLocalVar('specialNightmare', 0)
@@ -159,7 +161,7 @@ entity.onMobFight = function(mob, target)
     end
 end
 
-entity.onMobMobskillChoose = function(mob, target)
+entity.onMobMobskillChoose = function(mob, target, skillId)
     local skills =
     {
         { skill = xi.mobSkill.NOCTOSHIELD_1,     weight = 50 },
@@ -180,7 +182,7 @@ entity.onMobMobskillChoose = function(mob, target)
     return xi.mobSkill.NOCTOSHIELD_1
 end
 
-entity.onMobWeaponSkill = function(target, mob, skill)
+entity.onMobWeaponSkill = function(mob, target, skill, action)
     local skillId = skill:getID()
 
     if
@@ -193,17 +195,19 @@ entity.onMobWeaponSkill = function(target, mob, skill)
     end
 end
 
-entity.onMobSpellChoose = function(mob, target)
+entity.onMobSpellChoose = function(mob, target, spellId)
     local spellList =
     {
-        xi.magic.spell.DRAIN,
-        xi.magic.spell.ASPIR,
-        xi.magic.spell.SLEEP_II,
-        xi.magic.spell.SLEEPGA,
-        xi.magic.spell.BLIND,
+        [1] = { xi.magic.spell.DISPEL,   target, false, xi.action.type.DAMAGE_TARGET,     nil,                 0, 100 },
+        [2] = { xi.magic.spell.DRAIN,    target, false, xi.action.type.DRAIN_HP,          nil,                 0, 100 },
+        [3] = { xi.magic.spell.ASPIR,    target, false, xi.action.type.DRAIN_MP,          nil,                 0, 100 },
+        [4] = { xi.magic.spell.BIO_II,   target, false, xi.action.type.ENFEEBLING_TARGET, xi.effect.BIO,       4, 100 },
+        [5] = { xi.magic.spell.BLIND,    target, false, xi.action.type.ENFEEBLING_TARGET, xi.effect.BLINDNESS, 1, 100 },
+        [6] = { xi.magic.spell.SLEEP_II, target, false, xi.action.type.ENFEEBLING_TARGET, xi.effect.SLEEP_I,   2, 100 },
+        [7] = { xi.magic.spell.SLEEPGA,  target, false, xi.action.type.ENFEEBLING_TARGET, xi.effect.SLEEP_I,   1, 100 },
     }
 
-    return spellList[math.random(1, #spellList)]
+    return xi.combat.behavior.chooseAction(mob, target, nil, spellList)
 end
 
 return entity

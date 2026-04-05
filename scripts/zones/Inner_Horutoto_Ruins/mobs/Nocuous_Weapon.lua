@@ -16,9 +16,8 @@ entity.spawnPoints =
 
 entity.phList =
 {
-    [ID.mob.NOCUOUS_WEAPON - 3] = ID.mob.NOCUOUS_WEAPON, -- -236.855 0.476 -51.263
-    [ID.mob.NOCUOUS_WEAPON - 2] = ID.mob.NOCUOUS_WEAPON, -- -237.426 0.5 -23.412
-    [ID.mob.NOCUOUS_WEAPON - 1] = ID.mob.NOCUOUS_WEAPON, -- -230.732 -0.025 -52.324
+    [ID.mob.NOCUOUS_WEAPON - 4] = ID.mob.NOCUOUS_WEAPON, -- Confirmed on retail
+    [ID.mob.NOCUOUS_WEAPON - 2] = ID.mob.NOCUOUS_WEAPON, -- Confirmed on retail
 }
 
 entity.onMobInitialize = function(mob)

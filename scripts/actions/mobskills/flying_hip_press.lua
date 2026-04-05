@@ -1,9 +1,8 @@
 -----------------------------------
---  Flying Hip Press
---  Description: Deals Wind damage to enemies within area of effect.
---  Type: Magical
---  Utsusemi/Blink absorb: Ignores shadows
---  Range: 15' radial
+-- Flying Hip Press
+-- Family: Bugbears
+-- Description: Deals Wind damage to enemies within area of effect.
+-- Note: Mob version of this skill is NOT a HP based breath attack like the BLU spell is.
 -----------------------------------
 ---@type TMobSkill
 local mobskillObject = {}
@@ -12,23 +11,31 @@ mobskillObject.onMobSkillCheck = function(target, mob, skill)
     return 0
 end
 
-mobskillObject.onMobWeaponSkill = function(target, mob, skill)
-    local fTP = 2.0
+mobskillObject.onMobWeaponSkill = function(mob, target, skill, action)
+    local params = {}
 
-    if mob:getPool() == xi.mobPools.BUGBOY then
-        fTP = 7.0
+    params.baseDamage     = mob:getMainLvl() + 2
+    params.fTP            = { 2.0, 2.0, 2.0 }
+    params.element        = xi.element.WIND
+    params.attackType     = xi.attackType.MAGICAL
+    params.damageType     = xi.damageType.WIND
+    params.shadowBehavior = xi.mobskills.shadowBehavior.IGNORE_SHADOWS
+
+    if mob:getPool() == xi.mobPool.BUGBOY then
+        params.fTP = 7.0
     end
 
-    if mob:getPool() == xi.mobPools.BUGBEAR_MATMAN then
-        fTP = 10.0
+    if mob:getPool() == xi.mobPool.BUGBEAR_MATMAN then
+        params.fTP = 10.0
     end
 
-    local damage = xi.mobskills.mobMagicalMove(mob, target, skill, mob:getMainLvl() + 2, xi.element.WIND, fTP, xi.mobskills.magicalTpBonus.NO_EFFECT, 0)
-    damage = xi.mobskills.mobFinalAdjustments(damage, mob, skill, target, xi.attackType.MAGICAL, xi.damageType.WIND, xi.mobskills.shadowBehavior.IGNORE_SHADOWS)
+    local info = xi.mobskills.mobMagicalMove(mob, target, skill, action, params)
 
-    target:takeDamage(damage, mob, xi.attackType.MAGICAL, xi.damageType.WIND)
+    if xi.mobskills.processDamage(mob, target, skill, action, info) then
+        target:takeDamage(info.damage, mob, info.attackType, info.damageType)
+    end
 
-    return damage
+    return info.damage
 end
 
 return mobskillObject

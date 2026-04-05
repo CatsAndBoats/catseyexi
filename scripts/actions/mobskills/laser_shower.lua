@@ -15,31 +15,33 @@ mobskillObject.onMobSkillCheck = function(target, mob, skill)
     return 0
 end
 
-mobskillObject.onMobWeaponSkill = function(target, mob, skill)
+mobskillObject.onMobWeaponSkill = function(mob, target, skill, action)
     local params = {}
 
-    params.percentMultipier  = 0.20 -- TODO: Capture Value
-    params.element           = xi.element.LIGHT
-    params.damageCap         = 1600
-    params.bonusDamage       = 0
-    params.mAccuracyBonus    = { 0, 0, 0 }
-    params.resistStat        = xi.mod.INT
+    params.percentMultipier = 0.20 -- TODO: Capture Value
+    params.damageCap        = 1600
+    params.bonusDamage      = 0
+    params.mAccuracyBonus   = { 0, 0, 0 }
+    params.resistStat       = xi.mod.INT
+    params.element          = xi.element.LIGHT
+    params.attackType       = xi.attackType.BREATH
+    params.damageType       = xi.damageType.LIGHT
+    params.shadowBehavior   = xi.mobskills.shadowBehavior.IGNORE_SHADOWS
 
-    local damage = xi.mobskills.mobBreathMove(mob, target, skill, params)
-    local dis = ((mob:checkDistance(target) * 2) / 20) -- TODO: Verify this skill has a damage adjustment based on range from mob.
+    local info = xi.mobskills.mobBreathMove(mob, target, skill, action, params)
 
-    damage = damage * dis
-    damage = utils.clamp(damage, 50, 1600)
-    damage = xi.mobskills.mobFinalAdjustments(damage, mob, skill, target, xi.attackType.BREATH, xi.damageType.LIGHT, xi.mobskills.shadowBehavior.IGNORE_SHADOWS, 1)
+    local distance = ((mob:checkDistance(target) * 2) / 20) -- TODO: Verify this skill has a damage adjustment based on range from mob.
+    info.damage = info.damage * distance
+    info.damage = utils.clamp(info.damage, 50, 1600)
 
-    if not xi.mobskills.hasMissMessage(mob, target, skill, damage) then
-        target:takeDamage(damage, mob, xi.attackType.BREATH, xi.damageType.LIGHT)
+    if xi.mobskills.processDamage(mob, target, skill, action, info) then
+        target:takeDamage(info.damage, mob, info.attackType, info.damageType)
 
         -- TODO: Capture effect power/duration
-        xi.mobskills.mobPhysicalStatusEffectMove(mob, target, skill, xi.effect.DEFENSE_DOWN, 25, 0, 60)
+        xi.mobskills.mobStatusEffectMove(mob, target, xi.effect.DEFENSE_DOWN, 25, 0, 60)
     end
 
-    return damage
+    return info.damage
 end
 
 return mobskillObject

@@ -25,12 +25,12 @@
 #include "battleentity.h"
 #include <unordered_map>
 
-enum MSGBASIC_ID : uint16_t;
+enum class MsgBasic : uint16_t;
 // forward declaration
 class CMobSpellContainer;
 class CMobSpellList;
 class CEnmityContainer;
-class spawnGroup;
+class SpawnSlot;
 
 enum SPAWNTYPE
 {
@@ -99,7 +99,7 @@ enum BEHAVIOR : uint16
     BEHAVIOR_NO_DESPAWN   = 0x001, // mob does not despawn on death
     BEHAVIOR_STANDBACK    = 0x002, // mob will standback forever
     BEHAVIOR_RAISABLE     = 0x004, // mob can be raised via Raise spells
-    BEHAVIOR_NOHELP       = 0x008, // mob can not be targeted by helpful magic from players (cure, protect, etc)
+    BEHAVIOR_NO_ASSIST    = 0x008, // mob can not be targeted by helpful magic from players (cure, protect, etc)
     BEHAVIOR_AGGRO_AMBUSH = 0x200, // mob aggroes by ambush
     BEHAVIOR_NO_TURN      = 0x400  // mob does not turn to face target
 };
@@ -125,15 +125,19 @@ public:
     bool IsFarFromHome();      // check if mob is too far from spawn
     bool CanBeNeutral() const; // check if mob can have killing pause
 
-    uint16 TPUseChance(); // return % chance to use TP move per 400ms tick
+    bool shouldUseTPMove(uint16 tpThreshold); // return true to use a TP move, checked on on 400ms tick interval
 
     bool              CanDeaggro() const;
     timer::time_point GetDespawnTime();
     void              SetDespawnTime(timer::duration _duration);
-    uint32            GetRandomGil();   // returns a random amount of gil
-    bool              CanRoamHome();    // is it possible for me to walk back?
-    bool              CanRoam();        // check if mob can walk around
-    void              TapDeaggroTime(); // call CMobController->TapDeaggroTime if PAI->GetController() is a CMobController, otherwise do nothing.
+    void              SetSpawnSlot(SpawnSlot* sharedSpawn);
+    SpawnSlot*        GetSpawnSlot();
+    bool              TrySpawn();
+
+    uint32 GetRandomGil();   // returns a random amount of gil
+    bool   CanRoamHome();    // is it possible for me to walk back?
+    bool   CanRoam();        // check if mob can walk around
+    void   TapDeaggroTime(); // call CMobController->TapDeaggroTime if PAI->GetController() is a CMobController, otherwise do nothing.
 
     bool CanLink(position_t* pos, int16 superLink = 0);
     bool ShouldForceLink();
@@ -149,7 +153,6 @@ public:
     void  addMobMod(uint16 type, int16 value);
     void  defaultMobMod(uint16 type, int16 value); // set value if value has not been already set
     void  resetMobMod(uint16 type);                // resets mob mod to original value
-    int32 getBigMobMod(uint16 type);               // multiplies mod by 1000
     void  saveMobModifiers();                      // save current state of modifiers
     void  restoreMobModifiers();                   // restore to saved state
 
@@ -177,19 +180,19 @@ public:
     virtual bool OnAttack(CAttackState&, action_t&) override;
     virtual bool CanAttack(CBattleEntity* PTarget, std::unique_ptr<CBasicPacket>& errMsg) override;
     virtual void OnCastFinished(CMagicState&, action_t&) override;
-    virtual void OnCastInterrupted(CMagicState&, action_t&, MSGBASIC_ID msg, bool blockedCast) override;
+    virtual void OnCastInterrupted(CMagicState&, action_t&, MsgBasic msg, bool blockedCast) override;
 
     virtual void OnDisengage(CAttackState&) override;
     virtual void OnDeathTimer() override;
 
     virtual void OnDespawn(CDespawnState&) override;
 
-    bool         CanSpawnFromGroup();
     virtual void Spawn() override;
     virtual void FadeOut() override;
     virtual bool isWideScannable() override;
 
-    bool            m_AllowRespawn; // if true, allow respawn
+    bool            m_AllowRespawn; // If true, this mob or another mob in the same slot is allowed to spawn
+    bool            m_CanSpawn;     // If true, it can currently spawn (usually based on time of day or weather)
     timer::duration m_RespawnTime;  // respawn time
     timer::duration m_DropItemTime; // time until monster death animation
 
@@ -259,8 +262,6 @@ public:
     uint32 m_flags;       // includes the CFH flag and whether the HP bar should be shown or not (e.g. Yilgeban doesnt)
     uint8  m_name_prefix; // The ding bats VS Ding bats
 
-    spawnGroup* m_spawnGroup; // spawn group this mob Belongs to
-
     uint8 m_unk0; // possibly campaign related (entity 0x24)
     uint8 m_unk1; // (entity_update 0x25)
     uint8 m_unk2; // (entity_update 0x26)
@@ -286,6 +287,7 @@ private:
     std::unordered_map<int, int16> m_mobModStat;
     std::unordered_map<int, int16> m_mobModStatSave;
     static constexpr float         roam_home_distance{ 60.f };
+    SpawnSlot*                     spawnSlot = nullptr;
 };
 
 #endif

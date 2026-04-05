@@ -6,6 +6,7 @@ xi = xi or {}
 ---@enum xi.keyItem
 xi.keyItem =
 {
+    NONE                                     = 0,
     ZERUHN_REPORT                            = 1,
     PALBOROUGH_MINES_LOGS                    = 2,
     BLUE_ACIDITY_TESTER                      = 3,
@@ -3234,6 +3235,7 @@ xi.keyItem =
     -- NULL ENTRY                            = 3358,
     -- NULL ENTRY                            = 3359,
     SHEET_OF_DIVINE_TUNES                    = 3360,
+    CIPHER_BRACELET                          = 3361,
 }
 
 ---@alias xi.ki xi.keyItem

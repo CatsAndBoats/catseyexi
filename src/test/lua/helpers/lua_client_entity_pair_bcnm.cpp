@@ -28,6 +28,7 @@
 #include "lua/lua_simulation.h"
 #include "map/battlefield.h"
 #include "map/entities/mobentity.h"
+#include "map/map_engine.h"
 #include "test_char.h"
 #include "test_common.h"
 
@@ -59,7 +60,7 @@ void CLuaClientEntityPairBCNM::killMobs(const sol::optional<sol::table>& params)
         {
             if (mobEntity && mobEntity->isAlive())
             {
-                CLuaTestEntity mobWrapper(mobEntity);
+                CLuaTestEntity mobWrapper(parent_->engine()->scheduler(), mobEntity);
 
                 const sol::object mobObj = sol::make_object(lua.lua_state(), &mobWrapper);
                 parent_->claimAndKillMob(mobObj, params);

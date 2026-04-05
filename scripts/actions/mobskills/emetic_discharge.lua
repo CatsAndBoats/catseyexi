@@ -12,7 +12,7 @@ mobskillObject.onMobSkillCheck = function(target, mob, skill)
     return 0
 end
 
-mobskillObject.onMobWeaponSkill = function(target, mob, skill)
+mobskillObject.onMobWeaponSkill = function(mob, target, skill, action)
     local removables = { xi.effect.FLASH, xi.effect.BLINDNESS, xi.effect.ELEGY, xi.effect.REQUIEM, xi.effect.PARALYSIS, xi.effect.POISON,
                         xi.effect.CURSE_I, xi.effect.CURSE_II, xi.effect.DISEASE, xi.effect.PLAGUE, xi.effect.WEIGHT, xi.effect.BIND,
                         xi.effect.BIO, xi.effect.DIA, xi.effect.BURN, xi.effect.FROST, xi.effect.CHOKE, xi.effect.RASP, xi.effect.SHOCK, xi.effect.DROWN,
@@ -28,7 +28,7 @@ mobskillObject.onMobWeaponSkill = function(target, mob, skill)
             local statusEffect = mob:getStatusEffect(effect)
 
             if statusEffect then
-                target:addStatusEffect(effect, statusEffect:getPower(), statusEffect:getTick(), statusEffect:getDuration())
+                target:addStatusEffect(effect, { power = statusEffect:getPower(), duration = statusEffect:getDuration(), origin = mob, tick = statusEffect:getTick() })
                 mob:delStatusEffect(effect)
             end
         end

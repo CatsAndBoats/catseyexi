@@ -38,7 +38,7 @@ CWeaponSkillState::CWeaponSkillState(CBattleEntity* PEntity, uint16 targid, uint
     auto* skill = battleutils::GetWeaponSkill(wsid);
     if (!skill)
     {
-        throw CStateInitException(std::make_unique<GP_SERV_COMMAND_BATTLE_MESSAGE>(PEntity, PEntity, 0, 0, MSGBASIC_CANNOT_USE_WS));
+        throw CStateInitException(std::make_unique<GP_SERV_COMMAND_BATTLE_MESSAGE>(PEntity, PEntity, 0, 0, MsgBasic::CannotUseWeaponskill));
     }
 
     auto  target_flags = battleutils::isValidSelfTargetWeaponskill(wsid) ? TARGET_SELF : TARGET_ENEMY;
@@ -58,7 +58,7 @@ CWeaponSkillState::CWeaponSkillState(CBattleEntity* PEntity, uint16 targid, uint
 
     if (!m_PEntity->CanSeeTarget(PTarget, false))
     {
-        throw CStateInitException(std::make_unique<GP_SERV_COMMAND_BATTLE_MESSAGE>(m_PEntity, PTarget, 0, 0, MSGBASIC_CANNOT_PERFORM_ACTION));
+        throw CStateInitException(std::make_unique<GP_SERV_COMMAND_BATTLE_MESSAGE>(m_PEntity, PTarget, 0, 0, MsgBasic::CannotPerformAction));
     }
 
     m_PSkill = std::make_unique<CWeaponSkill>(*skill);
@@ -73,7 +73,7 @@ CWeaponSkillState::CWeaponSkillState(CBattleEntity* PEntity, uint16 targid, uint
                    .results = {
                     {
                            .param     = m_PSkill->getID(),
-                           .messageID = MSGBASIC_READIES_WS,
+                           .messageID = MsgBasic::ReadiesWeaponskill,
                     },
                 },
             },
@@ -120,7 +120,13 @@ void CWeaponSkillState::SpendCost()
 
 bool CWeaponSkillState::Update(timer::time_point tick)
 {
-    if (m_PEntity && m_PEntity->isAlive() && !IsCompleted())
+    if (!m_PEntity)
+    {
+        ShowError("CWeaponSkillState: m_Pentity is nullptr");
+        return false;
+    }
+
+    if (m_PEntity->isAlive() && !IsCompleted())
     {
         CBattleEntity* PTarget = dynamic_cast<CBattleEntity*>(GetTarget());
         action_t       action;
@@ -151,8 +157,8 @@ bool CWeaponSkillState::Update(timer::time_point tick)
                 uint32 weaponskillVar    = PTarget->GetLocalVar("weaponskillHit");
                 uint32 weaponskillDamage = weaponskillVar & 0xFFFFFF;
 
-                m_PEntity->PAI->EventHandler.triggerListener("WEAPONSKILL_USE", m_PEntity, PTarget, m_PSkill->getID(), m_spent, &action, weaponskillDamage);
-                PTarget->PAI->EventHandler.triggerListener("WEAPONSKILL_TAKE", PTarget, m_PEntity, m_PSkill->getID(), m_spent, &action);
+                m_PEntity->PAI->EventHandler.triggerListener("WEAPONSKILL_USE", m_PEntity, PTarget, m_PSkill.get(), m_spent, &action, weaponskillDamage);
+                PTarget->PAI->EventHandler.triggerListener("WEAPONSKILL_TAKE", m_PEntity, PTarget, m_PSkill.get(), m_spent, &action);
 
                 if (m_PEntity->objtype == TYPE_PC)
                 {
@@ -176,7 +182,6 @@ bool CWeaponSkillState::Update(timer::time_point tick)
             CCharEntity* PChar = static_cast<CCharEntity*>(m_PEntity);
             PChar->m_charHistory.wsUsed++;
         }
-        m_PEntity->PAI->EventHandler.triggerListener("WEAPONSKILL_STATE_EXIT", m_PEntity, m_PSkill->getID());
         return true;
     }
     return false;
@@ -184,5 +189,24 @@ bool CWeaponSkillState::Update(timer::time_point tick)
 
 void CWeaponSkillState::Cleanup(timer::time_point tick)
 {
-    // TODO: interrupt an in progress ws
+    if (!m_PEntity)
+    {
+        return;
+    }
+
+    // Interrupted.
+    if (!IsCompleted())
+    {
+    }
+
+    // Not interrupted.
+    else
+    {
+    }
+
+    // Call listener. Feed skill result.
+    if (m_PEntity->isAlive())
+    {
+        m_PEntity->PAI->EventHandler.triggerListener("WEAPONSKILL_STATE_EXIT", m_PEntity, m_PSkill->getID(), IsCompleted());
+    }
 }

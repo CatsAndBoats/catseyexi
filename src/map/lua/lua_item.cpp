@@ -22,10 +22,15 @@
 #include "lua_item.h"
 
 #include "common/logging.h"
+#include "items/exdata.h"
 #include "items/item.h"
 #include "items/item_equipment.h"
+#include "items/item_fish.h"
+#include "items/item_flowerpot.h"
 #include "items/item_furnishing.h"
 #include "items/item_general.h"
+#include "items/item_linkshell.h"
+#include "items/item_usable.h"
 #include "items/item_weapon.h"
 #include "utils/itemutils.h"
 
@@ -346,26 +351,64 @@ bool CLuaItem::isInstalled()
     return PFurnishing->isInstalled();
 }
 
-void CLuaItem::setSoulPlateData(const std::string& name, uint32 interestData, uint8 zeni, uint16 skillIndex, uint8 fp)
+/************************************************************************
+ *  Function: getExData()
+ *  Purpose : Returns the item's extra data as a typed table.
+ *  Example : item:getExData() -- typed table (e.g. ExdataLegionPass)
+ ************************************************************************/
+auto CLuaItem::getExData() const -> sol::table
 {
-    m_PLuaItem->setSoulPlateData(name, interestData, zeni, skillIndex, fp);
-}
-
-auto CLuaItem::getSoulPlateData() -> sol::table
-{
-    auto       data  = m_PLuaItem->getSoulPlateData();
     sol::table table = lua.create_table();
 
-    table["name"]         = std::get<0>(data);
-    table["interestData"] = std::get<1>(data);
-    table["zeni"]         = std::get<2>(data);
-    table["skillIndex"]   = std::get<3>(data);
-    table["fp"]           = std::get<4>(data);
+    if (Exdata::toTable(m_PLuaItem, table))
+    {
+        return table;
+    }
 
+    for (std::size_t idx = 0; idx < m_PLuaItem->extra_size; ++idx)
+    {
+        table[idx] = m_PLuaItem->m_extra[idx];
+    }
     return table;
 }
 
-auto CLuaItem::getExData() -> sol::table
+/************************************************************************
+ *  Function: setExData()
+ *  Purpose : Writes the item's extra data from a typed table.
+ *  Example : item:setExData({ timestamp = t, title = 1 })
+ ************************************************************************/
+void CLuaItem::setExData(const sol::table& data) const
+{
+    if (Exdata::fromTable(m_PLuaItem, data))
+    {
+        m_PLuaItem->setDirty(true);
+        return;
+    }
+
+    for (const auto& [keyObj, valObj] : data)
+    {
+        uint8       key = keyObj.as<uint8>();
+        const uint8 val = valObj.as<uint8>();
+
+        if (key >= CItem::extra_size)
+        {
+            ShowWarning("setExData: key too large for exdata array: %s[%i]", m_PLuaItem->getName(), key);
+            continue;
+        }
+
+        m_PLuaItem->m_extra[key] = val;
+    }
+
+    m_PLuaItem->setDirty(true);
+}
+
+/************************************************************************
+ *  Function: getExDataRaw()
+ *  Purpose : Returns the item's extra data as a 0-indexed byte table.
+ *  Example : item:getExDataRaw()
+ *  Notes   : Keys are 0-indexed to be in line with the underlying C++ data.
+ ************************************************************************/
+auto CLuaItem::getExDataRaw() const -> sol::table
 {
     sol::table table = lua.create_table();
     for (std::size_t idx = 0; idx < m_PLuaItem->extra_size; ++idx)
@@ -375,21 +418,29 @@ auto CLuaItem::getExData() -> sol::table
     return table;
 }
 
-void CLuaItem::setExData(const sol::table& newData)
+/************************************************************************
+ *  Function: setExDataRaw()
+ *  Purpose : Writes the item's extra data from a 0-indexed byte table.
+ *  Example : item:setExDataRaw({ [0] = 5, [1] = 10 })
+ *  Notes   : Keys are 0-indexed byte offsets into m_extra.
+ ************************************************************************/
+void CLuaItem::setExDataRaw(const sol::table& data) const
 {
-    for (const auto& [keyObj, valObj] : newData)
+    for (const auto& [keyObj, valObj] : data)
     {
-        uint8 key = keyObj.as<uint8>();
-        uint8 val = valObj.as<uint8>();
+        uint8       key = keyObj.as<uint8>();
+        const uint8 val = valObj.as<uint8>();
 
         if (key >= CItem::extra_size)
         {
-            ShowWarning("Tried to write to key too large for item exdata array: %s[%i]", m_PLuaItem->getName(), key);
+            ShowWarning("setExDataRaw: key too large for exdata array: %s[%i]", m_PLuaItem->getName(), key);
             continue;
         }
 
         m_PLuaItem->m_extra[key] = val;
     }
+
+    m_PLuaItem->setDirty(true);
 }
 
 //==========================================================//
@@ -433,10 +484,10 @@ void CLuaItem::Register()
     SOL_REGISTER("setAppraisalID", CLuaItem::setAppraisalID);
     SOL_REGISTER("getCurrentCharges", CLuaItem::getCurrentCharges);
     SOL_REGISTER("isInstalled", CLuaItem::isInstalled);
-    SOL_REGISTER("setSoulPlateData", CLuaItem::setSoulPlateData);
-    SOL_REGISTER("getSoulPlateData", CLuaItem::getSoulPlateData);
     SOL_REGISTER("getExData", CLuaItem::getExData);
     SOL_REGISTER("setExData", CLuaItem::setExData);
+    SOL_REGISTER("getExDataRaw", CLuaItem::getExDataRaw);
+    SOL_REGISTER("setExDataRaw", CLuaItem::setExDataRaw);
 }
 
 std::ostream& operator<<(std::ostream& os, const CLuaItem& item)

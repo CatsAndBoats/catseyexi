@@ -10,11 +10,11 @@ local entity = {}
 entity.onTrigger = function(player, npc)
     local stock =
     {
-        { 12466, 20000, }, --Red Cap
-        { 12594, 32500, }, --Gambison
-        { 12722, 16900, }, --Bracers
-        { 12850, 24500, }, --Hose
-        { 12978, 16000, }, --Socks
+        { xi.item.RED_CAP,   20000, },
+        { xi.item.GAMBISON,  32500, },
+        { xi.item.BRACERS,   16900, },
+        { xi.item.HOSE,      24500, },
+        { xi.item.SOCKS,     16000, },
     }
 
     player:showText(npc, ID.text.ALLARD_SHOP_DIALOG)

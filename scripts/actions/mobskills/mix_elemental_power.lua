@@ -9,7 +9,7 @@ mobskillObject.onMobSkillCheck = function(target, mob, skill)
 end
 
 -- TODO: verify no effect messaging
-mobskillObject.onMobWeaponSkill = function(target, mob, skill)
+mobskillObject.onMobWeaponSkill = function(mob, target, skill, action)
     if target:getID() == mob:getID() then
         skill:setMsg(194) -- Monberaux uses Mix: Guard Drink -- Monberaux gains the effect of {ID}
     else
@@ -17,7 +17,7 @@ mobskillObject.onMobWeaponSkill = function(target, mob, skill)
     end
 
     if not target:hasStatusEffect(xi.effect.MAGIC_ATK_BOOST) then
-        target:addStatusEffect(xi.effect.MAGIC_ATK_BOOST, 20, 0, 60)
+        target:addStatusEffect(xi.effect.MAGIC_ATK_BOOST, { power = 20, duration = 60, origin = mob })
         return xi.effect.MAGIC_ATK_BOOST
     end
 

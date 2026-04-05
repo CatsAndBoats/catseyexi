@@ -97,6 +97,18 @@ end
 function CZone:isNavigablePoint(position)
 end
 
+---@nodiscard
+---@param position table
+---@return xi.terrain
+function CZone:getTerrainType(position)
+end
+
+---@nodiscard
+---@param position table
+---@return integer
+function CZone:getFloorId(position)
+end
+
 ---@class dynamicEntityParams
 ---@field objtype? xi.objType            # Entity type. Default: xi.objType.NPC
 ---@field groupId? integer               # Mob group ID (for TYPE_MOB). Default: 0

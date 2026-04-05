@@ -162,6 +162,7 @@ src/common/stamp-h1
 *.sw?
 
 navmeshes/*.nav
+ximeshes/*.ximesh
 tags
 log/**
 !log/.gitkeep
@@ -265,3 +266,6 @@ __pycache__
 sanity_checks_summary.md
 changed-files.txt
 clang_tidy_summary.md
+
+# Claude Code
+.claude

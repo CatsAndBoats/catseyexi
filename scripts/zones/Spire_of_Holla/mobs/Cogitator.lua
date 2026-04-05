@@ -14,7 +14,7 @@ entity.onMobInitialize = function(mob)
     mob:setMod(xi.mod.DOUBLE_ATTACK, 15)
 end
 
-entity.onMobMobskillChoose = function(mob, target)
+entity.onMobMobskillChoose = function(mob, target, skillId)
     local skills =
     {
         xi.mobSkill.NEGATIVE_WHIRL_1,
@@ -31,7 +31,7 @@ entity.onMobMobskillChoose = function(mob, target)
     end
 end
 
-entity.onMobWeaponSkill = function(target, mob, skill)
+entity.onMobWeaponSkill = function(mob, target, skill, action)
     if skill:getID() == xi.mobSkill.TRINARY_TAP then
         mob:useMobAbility(xi.mobSkill.TRINARY_ABSORPTION)
     end

@@ -16,11 +16,24 @@ entity.spawnPoints =
 
 entity.phList =
 {
-    [ID.mob.MOUU_THE_WAVERIDER - 1] = ID.mob.MOUU_THE_WAVERIDER, -- -60.728 19.884 53.966
+    [ID.mob.MOUU_THE_WAVERIDER - 1] = ID.mob.MOUU_THE_WAVERIDER, -- Confirmed on retail
 }
 
 entity.onMobInitialize = function(mob)
     xi.pet.setMobPet(mob, 1, 'Sahagins_Wyvern')
+
+    mob:addImmunity(xi.immunity.SILENCE)
+    mob:addImmunity(xi.immunity.LIGHT_SLEEP)
+    mob:addImmunity(xi.immunity.DARK_SLEEP)
+    mob:addImmunity(xi.immunity.TERROR)
+    mob:addImmunity(xi.immunity.PETRIFY)
+
+    mob:setMobMod(xi.mobMod.GIL_MIN, 3000)
+    mob:setMobMod(xi.mobMod.GIL_MAX, 3000)
+end
+
+entity.onMobSpawn = function(mob)
+    mob:setMobMod(xi.mobMod.BASE_DAMAGE_MULTIPLIER, 150)
 end
 
 entity.onMobDeath = function(mob, player, optParams)

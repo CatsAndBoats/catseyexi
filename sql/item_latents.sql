@@ -68,6 +68,12 @@ INSERT INTO `item_latents` VALUES (10962,75,-5,13,14);   -- CHARMED:MOVE_SPEED_S
 INSERT INTO `item_latents` VALUES (10975,23,13,52,8);   -- DARK WEATHER:ATT
 INSERT INTO `item_latents` VALUES (10975,25,13,52,8);   -- DARK WEATHER:ACC
 
+-- Savants Bracers +2
+INSERT INTO `item_latents` VALUES (11123,175,1000,13,470);  -- EFFECT_IMMANENCE: SKILLCHAINDMG: 10%
+
+-- Savants Bracers +1
+INSERT INTO `item_latents` VALUES (11223,175,500,13,470);  -- EFFECT_IMMANENCE: SKILLCHAINDMG: 5%
+
 -- Eerie cloak +1
 INSERT INTO `item_latents` VALUES (11301,369,1,39,13);    -- Refresh+1 at night when the level of the player's main job is a multiple of 13.
 
@@ -2099,6 +2105,9 @@ INSERT INTO `item_latents` VALUES (16976,23,18,6,1000);  -- Attack+18 while TP <
 INSERT INTO `item_latents` VALUES (16976,25,5,6,1000);   -- Accuracy+5 while TP <100%
 INSERT INTO `item_latents` VALUES (16976,287,6,6,1000);  -- DMG+6 while TP <100%
 
+-- Living Rod
+INSERT INTO `item_latents` VALUES (17070,370,1,52,6);    -- Regen Effect +1/tick in Water weather
+
 -- Mistilteinn
 INSERT INTO `item_latents` VALUES (17073,369,1,7,2);     -- Adds Refresh 1MP per tick
 INSERT INTO `item_latents` VALUES (17073,406,30,7,2);    -- Drains 30TP if TP >= 30
@@ -3580,7 +3589,7 @@ INSERT INTO `item_latents` VALUES (23171,27,-26,13,402); -- EFFECT_ADDENDUM_BLAC
 INSERT INTO `item_latents` VALUES (23197,518,10,13,57);  -- EFFECT_DEFENDER: SHIELDBLOCKRATE: 10
 
 -- Arbatel Bracers +2
-INSERT INTO `item_latents` VALUES (23238,175,12,13,470);  -- EFFECT_IMMANENCE: SKILLCHAINDMG: 12
+INSERT INTO `item_latents` VALUES (23238,175,1200,13,470);  -- EFFECT_IMMANENCE: SKILLCHAINDMG: 12%
 
 -- Kasuga Haidate +2
 INSERT INTO `item_latents` VALUES (23297,384,300,13,353); -- EFFECT_HASSO: HASTE_GEAR: 3%
@@ -3632,6 +3641,9 @@ INSERT INTO `item_latents` VALUES (23456,21,50,9,20); -- Cait Sith (Light)
 -- Agoge Mufflers +3
 INSERT INTO `item_latents` VALUES (23532,518,15,13,57); -- Defender Shield Rate +15
 
+-- Arbatel Bracers +3
+INSERT INTO `item_latents` VALUES (23573,175,1300,13,470);  -- EFFECT_IMMANENCE: SKILLCHAINDMG: 13%
+
 -- Hachiya Kyahan +3
 INSERT INTO `item_latents` VALUES (23655,76,24,26,2);   -- Dusk to dawn: MOVE_SPEED_GEAR_BONUS+25% (retail testing shows +24%)
 
@@ -3677,6 +3689,12 @@ INSERT INTO `item_latents` VALUES (23954,21,50,9,20); -- Cait Sith (Light)
 
 -- Carbie Cap +1
 INSERT INTO `item_latents` VALUES (25633,346,1,9,8);     -- Carbuncle perpetuation -1
+
+-- Arbatel Bracers
+INSERT INTO `item_latents` VALUES (27090,175,1000,13,470);  -- EFFECT_IMMANENCE: SKILLCHAINDMG: 10%
+
+-- Arbatel Bracers +1
+INSERT INTO `item_latents` VALUES (27091,175,1100,13,470);  -- EFFECT_IMMANENCE: SKILLCHAINDMG: 11%
 
 -- Fallen's Sollerets
 INSERT INTO `item_latents` VALUES (27342,63,10,13,64);   -- "Last Resort"+1

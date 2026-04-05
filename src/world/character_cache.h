@@ -21,10 +21,10 @@
 
 #pragma once
 
-#include "common/cbasetypes.h"
-#include "common/ipp.h"
+#include <common/cbasetypes.h>
+#include <common/ipp.h>
+#include <common/types/maybe.h>
 
-#include <optional>
 #include <unordered_map>
 
 class CharacterCache
@@ -37,7 +37,7 @@ public:
     void removeCharacter(uint32 charId);
 
     // TODO: Also handle lookup by name
-    auto getCharacterIPP(uint32 charId) -> std::optional<IPP>;
+    auto getCharacterIPP(uint32 charId) -> Maybe<IPP>;
 
 private:
     std::unordered_map<uint32, IPP> charIdToIPP_;

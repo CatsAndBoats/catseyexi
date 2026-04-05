@@ -32,7 +32,7 @@ public:
     CPlayerCharmController(CCharEntity*);
     virtual ~CPlayerCharmController();
 
-    virtual void Tick(timer::time_point) override;
+    virtual auto Tick(timer::time_point tick) -> Task<void> override;
 
     virtual bool Cast(uint16 targid, SpellID spellid) override
     {

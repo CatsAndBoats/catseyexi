@@ -15,7 +15,7 @@ entity.onMobSpawn = function(mob)
     xi.mix.jobSpecial.config(mob, {
         specials =
         {
-            { id = xi.jsa.CALL_WYVERN, hpp = 100 },
+            { id = xi.mobSkill.CALL_WYVERN_1, hpp = 100 },
         },
     })
 

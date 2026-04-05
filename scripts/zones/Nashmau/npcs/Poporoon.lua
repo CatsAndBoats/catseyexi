@@ -2,21 +2,19 @@
 -- Area: Nashmau
 --  NPC: Poporoon
 -----------------------------------
-local ID = zones[xi.zone.NASHMAU]
------------------------------------
 ---@type TNpcEntity
 local entity = {}
 
 entity.onTrigger = function(player, npc)
     local stock =
     {
-        { 12952,   336, }, -- Leather Highboots
-        { 12953,  3438, }, -- Lizard Ledelsens
-        { 12954, 11172, }, -- Studded Boots
-        { 12955, 20532, }, -- Cuir Highboots
+        { xi.item.LEATHER_HIGHBOOTS,   336 },
+        { xi.item.LIZARD_LEDELSENS,   3438 },
+        { xi.item.STUDDED_BOOTS,     11172 },
+        { xi.item.CUIR_HIGHBOOTS,    20532 },
     }
 
-    player:showText(npc, ID.text.POPOROON_SHOP_DIALOG)
+    player:showText(npc, zones[xi.zone.NASHMAU].text.POPOROON_SHOP_DIALOG)
     xi.shop.general(player, stock)
 end
 

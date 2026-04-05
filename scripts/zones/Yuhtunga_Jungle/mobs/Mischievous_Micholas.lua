@@ -14,12 +14,19 @@ entity.spawnPoints =
 
 entity.phList =
 {
-    [ID.mob.MISCHIEVOUS_MICHOLAS - 1] = ID.mob.MISCHIEVOUS_MICHOLAS, -- -265.616 -0.5 -24.389
+    [ID.mob.MISCHIEVOUS_MICHOLAS - 1] = ID.mob.MISCHIEVOUS_MICHOLAS, -- Confirmed on retail
 }
 
-entity.onMobSpawn = function(mob)
+entity.onMobInitialize = function(mob)
+    mob:addImmunity(xi.immunity.SILENCE)
     mob:addImmunity(xi.immunity.LIGHT_SLEEP)
     mob:addImmunity(xi.immunity.DARK_SLEEP)
+    mob:addImmunity(xi.immunity.TERROR)
+    mob:addImmunity(xi.immunity.PETRIFY)
+end
+
+entity.onMobSpawn = function(mob)
+    mob:setMobMod(xi.mobMod.BASE_DAMAGE_MULTIPLIER, 150)
 end
 
 entity.onMobDeath = function(mob, player, optParams)

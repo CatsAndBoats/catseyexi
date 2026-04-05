@@ -29,6 +29,7 @@
 #include "lua/lua_simulation.h"
 #include "lua/sol_bindings.h"
 #include "map/entities/charentity.h"
+#include "map/map_engine.h"
 #include "map/packets/c2s/0x05b_eventend.h"
 #include "packets/basic.h"
 #include "test_char.h"

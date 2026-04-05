@@ -7,7 +7,7 @@
 ---@type TItem
 local itemObject = {}
 
-itemObject.onItemCheck = function(target)
+itemObject.onItemCheck = function(target, user)
     if target:getStatusEffectBySource(xi.effect.ENFIRE, xi.effectSourceType.EQUIPPED_ITEM, xi.item.KOEN) ~= nil then
         target:delStatusEffect(xi.effect.ENFIRE, nil, xi.effectSourceType.EQUIPPED_ITEM, xi.item.KOEN)
     end
@@ -15,9 +15,13 @@ itemObject.onItemCheck = function(target)
     return 0
 end
 
-itemObject.onItemUse = function(target)
+itemObject.onItemUse = function(target, user)
     if target:hasEquipped(xi.item.KOEN) then
-        local effect = xi.effect.ENFIRE
+        target:addStatusEffect(xi.effect.ENFIRE, { duration = 180, origin = user, sourceType = xi.effectSourceType.EQUIPPED_ITEM, sourceTypeParam = xi.item.KOEN })
+    end
+end
+
+itemObject.onEffectGain = function(target, effect)
         local magicskill = target:getSkillLevel(xi.skill.ENHANCING_MAGIC)
         local potency = 0
 
@@ -28,9 +32,12 @@ itemObject.onItemUse = function(target)
         end
 
         potency = utils.clamp(potency, 3, 25)
+    effect:addMod(xi.mod.ENSPELL, xi.element.FIRE)
+    effect:addMod(xi.mod.ENSPELL_DMG, potency)
+    effect:addMod(xi.mod.ENSPELL_CHANCE, 100)
+end
 
-        target:addStatusEffect(effect, potency, 0, 180, 0, 0, 0, xi.effectSourceType.EQUIPPED_ITEM, xi.item.KOEN)
-    end
+itemObject.onEffectLose = function(target, effect)
 end
 
 return itemObject

@@ -15,21 +15,23 @@ mobskillObject.onMobSkillCheck = function(target, mob, skill)
     end
 end
 
-mobskillObject.onMobWeaponSkill = function(target, mob, skill)
+mobskillObject.onMobWeaponSkill = function(mob, target, skill, action)
     local params = {}
 
-    params.percentMultipier  = 0.01 -- TODO: Capture breath values.
-    params.element           = xi.element.ICE
-    params.damageCap         = 700 -- TODO: Capture cap
-    params.bonusDamage       = 0
-    params.mAccuracyBonus    = { 0, 0, 0 }
-    params.resistStat        = xi.mod.INT
+    params.percentMultipier = 0.01 -- TODO: Capture breath values.
+    params.damageCap        = 700 -- TODO: Capture cap
+    params.bonusDamage      = 0
+    params.mAccuracyBonus   = { 0, 0, 0 }
+    params.resistStat       = xi.mod.INT
+    params.element          = xi.element.ICE
+    params.attackType       = xi.attackType.BREATH
+    params.damageType       = xi.damageType.ICE
+    params.shadowBehavior   = xi.mobskills.shadowBehavior.IGNORE_SHADOWS
 
-    local damage = xi.mobskills.mobBreathMove(mob, target, skill, params)
-    damage = xi.mobskills.mobFinalAdjustments(damage, mob, skill, target, xi.attackType.BREATH, xi.damageType.ICE, xi.mobskills.shadowBehavior.IGNORE_SHADOWS, 1)
+    local info = xi.mobskills.mobBreathMove(mob, target, skill, action, params)
 
-    if not xi.mobskills.hasMissMessage(mob, target, skill, damage) then
-        target:takeDamage(damage, mob, xi.attackType.BREATH, xi.damageType.ICE)
+    if xi.mobskills.processDamage(mob, target, skill, action, info) then
+        target:takeDamage(info.damage, mob, info.attackType, info.damageType)
 
         xi.mobskills.mobStatusEffectMove(mob, target, xi.effect.PARALYSIS, 15, 0, 60) -- TODO: Capture power and duration
     end
@@ -43,7 +45,7 @@ mobskillObject.onMobWeaponSkill = function(target, mob, skill)
         mob:setBehavior(bit.bor(mob:getBehavior(), xi.behavior.NO_TURN))
     end
 
-    return damage
+    return info.damage
 end
 
 return mobskillObject

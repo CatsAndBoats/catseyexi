@@ -19,11 +19,9 @@
 ===========================================================================
 */
 
-#include "common/async.h"
 #include "common/database.h"
 #include "common/logging.h"
 #include "common/mmo.h"
-#include "common/task_manager.h"
 #include "common/timer.h"
 #include "common/utils.h"
 
@@ -110,6 +108,7 @@
 #include "packets/c2s/0x0be_merits.h"
 #include "packets/c2s/0x0bf_job_points_spend.h"
 #include "packets/c2s/0x0c0_job_points_req.h"
+#include "packets/c2s/0x0c1_alter_ego_points.h"
 #include "packets/c2s/0x0c3_group_comlink_make.h"
 #include "packets/c2s/0x0c4_group_comlink_active.h"
 #include "packets/c2s/0x0cb_myroom_is.h"
@@ -326,13 +325,14 @@ void PacketParserInitialize()
     PacketSize[0x0BE] = 0x00; PacketParser[0x0BE] = &ValidatedPacketHandler<GP_CLI_COMMAND_MERITS>;
     PacketSize[0x0BF] = 0x04; PacketParser[0x0BF] = &ValidatedPacketHandler<GP_CLI_COMMAND_JOB_POINTS_SPEND>;
     PacketSize[0x0C0] = 0x00; PacketParser[0x0C0] = &ValidatedPacketHandler<GP_CLI_COMMAND_JOB_POINTS_REQ>;
+    PacketSize[0x0C1] = 0x04; PacketParser[0x0C1] = &ValidatedPacketHandler<GP_CLI_COMMAND_ALTER_EGO_POINTS>;
     PacketSize[0x0C3] = 0x00; PacketParser[0x0C3] = &ValidatedPacketHandler<GP_CLI_COMMAND_GROUP_COMLINK_MAKE>;
     PacketSize[0x0C4] = 0x0E; PacketParser[0x0C4] = &ValidatedPacketHandler<GP_CLI_COMMAND_GROUP_COMLINK_ACTIVE>;
     PacketSize[0x0CB] = 0x04; PacketParser[0x0CB] = &ValidatedPacketHandler<GP_CLI_COMMAND_MYROOM_IS>;
     PacketSize[0x0D2] = 0x04; PacketParser[0x0D2] = &ValidatedPacketHandler<GP_CLI_COMMAND_MAP_GROUP>;
     PacketSize[0x0D3] = 0x00; PacketParser[0x0D3] = &ValidatedPacketHandler<GP_CLI_COMMAND_FAQ_GMCALL>;
     PacketSize[0x0D4] = 0x04; PacketParser[0x0D4] = &ValidatedPacketHandler<GP_CLI_COMMAND_FAQ_GMPARAM>;
-    PacketSize[0x0D5] = 0x08; PacketParser[0x0D5] = &ValidatedPacketHandler<GP_CLI_COMMAND_ACK_GMMSG>;
+    PacketSize[0x0D5] = 0x06; PacketParser[0x0D5] = &ValidatedPacketHandler<GP_CLI_COMMAND_ACK_GMMSG>;
     PacketSize[0x0D8] = 0x00; PacketParser[0x0D8] = &ValidatedPacketHandler<GP_CLI_COMMAND_DUNGEON_PARAM>;
     PacketSize[0x0DB] = 0x00; PacketParser[0x0DB] = &ValidatedPacketHandler<GP_CLI_COMMAND_CONFIG_LANGUAGE>;
     PacketSize[0x0DC] = 0x0A; PacketParser[0x0DC] = &ValidatedPacketHandler<GP_CLI_COMMAND_CONFIG>;

@@ -7,6 +7,8 @@
 -- Phoochuchu      : !pos -4 -4 69 249
 -- _6i8 (Door)     : !pos 70 7 2 234
 -----------------------------------
+local waughroonID = zones[xi.zone.WAUGHROON_SHRINE]
+-----------------------------------
 
 local quest = Quest:new(xi.questLog.OUTLANDS, xi.quest.id.outlands.A_THIEF_IN_NORG)
 
@@ -200,7 +202,8 @@ quest.sections =
 
                 [32001] = function(player, csid, option, npc)
                     if player:getLocalVar('battlefieldWin') == xi.battlefield.id.THIEF_IN_NORG then
-                        npcUtil.giveKeyItem(player, xi.ki.CHARRED_HELM)
+                        player:messageSpecial(waughroonID.text.CHARM_DAMAGED, xi.ki.CHARRED_HELM, xi.item.BANISHING_CHARM)
+                        player:addKeyItem(xi.ki.CHARRED_HELM)
                         quest:setVar(player, 'Prog', 7)
                     end
                 end,

@@ -11,10 +11,17 @@ entity.onMobInitialize = function(mob)
     mob:addImmunity(xi.immunity.LIGHT_SLEEP)
     mob:addImmunity(xi.immunity.PETRIFY)
     mob:addImmunity(xi.immunity.SILENCE)
+    mob:addImmunity(xi.immunity.PLAGUE)
+    mob:addImmunity(xi.immunity.TERROR)
     mob:addMod(xi.mod.REGAIN, 150)
 end
 
-entity.onMobMobskillChoose = function(mob, target)
+entity.onMobSpawn = function(mob)
+    mob:setMod(xi.mod.DARK_RES_RANK, 10)
+    mob:setMobMod(xi.mobMod.BASE_DAMAGE_MULTIPLIER, 150)
+end
+
+entity.onMobMobskillChoose = function(mob, target, skillId)
     local tpMoves =
     {
         xi.mobSkill.BLOOD_DRAIN_1,
@@ -34,7 +41,7 @@ entity.onMobMobskillChoose = function(mob, target)
     return tpMoves[math.random(1, #tpMoves)]
 end
 
-entity.onMobWeaponSkill = function(target, mob, skill)
+entity.onMobWeaponSkill = function(mob, target, skill, action)
     local skillId     = skill:getID()
     local totd        = VanadielTOTD()
     local repeatCount = mob:getLocalVar('repeatSkillCount')

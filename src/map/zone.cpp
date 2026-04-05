@@ -34,7 +34,7 @@ constexpr std::uint16_t WeatherCycle = 2160;
 #include "zone.h"
 
 #include "common/logging.h"
-
+#include "common/settings.h"
 #include "common/timer.h"
 #include "common/utils.h"
 #include "common/vana_time.h"
@@ -42,6 +42,7 @@ constexpr std::uint16_t WeatherCycle = 2160;
 #include <cstring>
 
 #include "battlefield.h"
+#include "enums/loot_recast.h"
 #include "ipc_client.h"
 #include "latent_effect_container.h"
 #include "los/zone_los.h"
@@ -49,9 +50,12 @@ constexpr std::uint16_t WeatherCycle = 2160;
 #include "monstrosity.h"
 #include "navmesh.h"
 #include "party.h"
+#include "recast_container.h"
+#include "spawn_handler.h"
 #include "status_effect_container.h"
 #include "treasure_pool.h"
 #include "zone_entities.h"
+#include "zone_mesh.h"
 
 #include "entities/npcentity.h"
 #include "entities/petentity.h"
@@ -62,8 +66,10 @@ constexpr std::uint16_t WeatherCycle = 2160;
 #include "utils/charutils.h"
 #include "utils/moduleutils.h"
 
-CZone::CZone(ZONEID ZoneID, REGION_TYPE RegionID, CONTINENT_TYPE ContinentID, uint8 levelRestriction)
-: m_zoneID(ZoneID)
+CZone::CZone(Scheduler& scheduler, MapConfig config, ZONEID ZoneID, REGION_TYPE RegionID, CONTINENT_TYPE ContinentID, uint8 levelRestriction)
+: scheduler_(scheduler)
+, config_(config)
+, m_zoneID(ZoneID)
 , m_zoneType(ZONE_TYPE::UNKNOWN)
 , m_regionID(RegionID)
 , m_continentID(ContinentID)
@@ -75,14 +81,12 @@ CZone::CZone(ZONEID ZoneID, REGION_TYPE RegionID, CONTINENT_TYPE ContinentID, ui
     m_useNavMesh = false;
     std::ignore  = m_useNavMesh;
 
-    ZoneTimer             = nullptr;
-    ZoneTimerTriggerAreas = nullptr;
-
     m_TreasurePool       = nullptr;
     m_BattlefieldHandler = nullptr;
     m_Weather            = Weather::None;
-    m_zoneEntities       = new CZoneEntities(this);
+    m_zoneEntities       = new CZoneEntities(scheduler_, config_, this);
     m_CampaignHandler    = new CCampaignHandler(this);
+    m_spawnHandler       = std::make_unique<SpawnHandler>(this);
 
     // settings should load first
     LoadZoneSettings();
@@ -90,7 +94,19 @@ CZone::CZone(ZONEID ZoneID, REGION_TYPE RegionID, CONTINENT_TYPE ContinentID, ui
     LoadZoneLines();
     LoadZoneWeather();
 
-    // NOTE: Heavy resources like Navmesh are now loaded outside of the constructor in zoneutils::LoadZoneList
+    if (config_.isTestServer)
+    {
+        return;
+    }
+
+    // This must run continually, regardless of if the zone is awake
+    spawnHandlerTimerToken_ = scheduler.intervalOnMainThread(
+        kSpawnHandlerInterval,
+        [this]() -> Task<void>
+        {
+            this->spawnHandler()->Tick(timer::now());
+            co_return;
+        });
 }
 
 CZone::~CZone()
@@ -163,6 +179,11 @@ auto CZone::GetWeather() const -> Weather
 auto CZone::GetWeatherChangeTime() const -> uint32
 {
     return m_WeatherChangeTime;
+}
+
+auto CZone::spawnHandler() const -> SpawnHandler*
+{
+    return m_spawnHandler.get();
 }
 
 const std::string& CZone::getName()
@@ -260,17 +281,22 @@ const QueryByNameResult_t& CZone::queryEntitiesByName(const std::string& pattern
 
 uint32 CZone::GetLocalVar(const char* var)
 {
-    return m_LocalVars[var];
+    return localVars_[var];
+}
+
+std::unordered_map<std::string, uint32>& CZone::GetLocalVars()
+{
+    return localVars_;
 }
 
 void CZone::SetLocalVar(const char* var, uint32 val)
 {
-    m_LocalVars[var] = val;
+    localVars_[var] = val;
 }
 
 void CZone::ResetLocalVars()
 {
-    m_LocalVars.clear();
+    localVars_.clear();
 }
 
 bool CZone::CanUseMisc(uint16 misc) const
@@ -287,7 +313,7 @@ zoneLine_t* CZone::GetZoneLine(uint32 zoneLineID)
 {
     for (const auto& zoneLine : m_zoneLineList)
     {
-        if (zoneLine->m_zoneLineID == zoneLineID)
+        if (zoneLine->zoneLineId == zoneLineID)
         {
             return zoneLine;
         }
@@ -295,24 +321,51 @@ zoneLine_t* CZone::GetZoneLine(uint32 zoneLineID)
     return nullptr;
 }
 
+// Spawns players across 8 fixed slots along the target zoneline area.
+// Spacing is calculated from the documented invisible box representing the zoneline
+auto zoneLine_t::nextSpawnPosition() -> position_t
+{
+    const float scale    = std::max(destinationScaleX, destinationScaleZ); // Spawn area length
+    const float spacing  = (scale - 1.0f) / 8.0f;                          // Distance between slots
+    const float offset   = (m_spawnSlot - 4) * spacing;                    // Offset from center (slot 4)
+    const float rotation = rotationToRadian(destinationPos.rotation);      // Direction to apply offset
+
+    m_spawnSlot = (m_spawnSlot + 1) % 8;
+
+    return {
+        destinationPos.x + offset * std::sin(rotation),
+        destinationPos.y,
+        destinationPos.z + offset * std::cos(rotation),
+        0,
+        destinationPos.rotation,
+    };
+}
+
 void CZone::LoadZoneLines()
 {
     TracyZoneScoped;
 
-    const auto rset = db::preparedStmt("SELECT zoneline, tozone, tox, toy, toz, rotation "
+    const auto rset = db::preparedStmt("SELECT zonelineid, from_zone, from_pos_x, from_pos_y, from_pos_z, "
+                                       "to_zone, to_pos_x, to_pos_y, to_pos_z, to_scale_x, to_scale_z, to_rotation "
                                        "FROM zonelines "
-                                       "WHERE fromzone = ?",
+                                       "WHERE from_zone = ?",
                                        m_zoneID);
     FOR_DB_MULTIPLE_RESULTS(rset)
     {
         auto* zl = new zoneLine_t;
 
-        zl->m_zoneLineID     = rset->get<uint32>("zoneline");
-        zl->m_toZone         = rset->get<uint16>("tozone");
-        zl->m_toPos.x        = rset->get<float>("tox");
-        zl->m_toPos.y        = rset->get<float>("toy");
-        zl->m_toPos.z        = rset->get<float>("toz");
-        zl->m_toPos.rotation = rset->get<uint8>("rotation");
+        zl->zoneLineId              = rset->get<uint32>("zonelineid");
+        zl->originZoneId            = rset->get<ZONEID>("from_zone");
+        zl->originPos.x             = rset->get<float>("from_pos_x");
+        zl->originPos.y             = rset->get<float>("from_pos_y");
+        zl->originPos.z             = rset->get<float>("from_pos_z");
+        zl->destinationZoneId       = rset->get<ZONEID>("to_zone");
+        zl->destinationPos.x        = rset->get<float>("to_pos_x");
+        zl->destinationPos.y        = rset->get<float>("to_pos_y");
+        zl->destinationPos.z        = rset->get<float>("to_pos_z");
+        zl->destinationPos.rotation = radianToRotation(rset->get<float>("to_rotation"));
+        zl->destinationScaleX       = rset->get<float>("to_scale_x");
+        zl->destinationScaleZ       = rset->get<float>("to_scale_z");
 
         m_zoneLineList.emplace_back(zl);
     }
@@ -428,6 +481,74 @@ void CZone::LoadNavMesh()
     {
         DebugNavmesh("CZone::LoadNavMesh: Cannot load navmesh file (%s)", file);
         m_navMesh = nullptr;
+    }
+}
+
+auto CZone::zoneMesh() const -> Maybe<CZoneMesh*>
+{
+    if (zoneMesh_ && zoneMesh_->isLoaded())
+    {
+        return zoneMesh_.get();
+    }
+
+    return std::nullopt;
+}
+
+void CZone::LoadZoneMesh()
+{
+    TracyZoneScoped;
+
+    if (zoneMesh_ == nullptr)
+    {
+        zoneMesh_ = std::make_unique<CZoneMesh>();
+    }
+
+    // TODO: Align ximesh filenames with zone_settings names so this isn't needed.
+    auto meshName = std::string(getName());
+
+    // Rala_Waterways_U -> Rala_Waterways_[U]
+    // Yorcia_Weald_U -> Yorcia_Weald_[U]
+    // Cirdas_Caverns_U -> Cirdas_Caverns_[U]
+    if (meshName.size() >= 2 && meshName.substr(meshName.size() - 2) == "_U")
+    {
+        meshName.replace(meshName.size() - 2, 2, "_[U]");
+    }
+
+    // Escha_ZiTah -> Escha-ZiTah
+    // Escha_RuAun -> Escha-RuAun
+    if (meshName.starts_with("Escha_"))
+    {
+        meshName.replace(5, 1, "-");
+    }
+
+    // Desuetia_Empyreal_Paradox -> Desuetia-Empyreal_Paradox
+    if (meshName.starts_with("Desuetia_"))
+    {
+        meshName.replace(8, 1, "-");
+    }
+
+    // Ship_bound_for_Selbina_Pirates -> Ship_bound_for_Selbina_ID-227, Ship_bound_for_Mhaura_Pirates -> Ship_bound_for_Mhaura_ID-228
+    if (meshName == "Ship_bound_for_Selbina_Pirates")
+    {
+        meshName = "Ship_bound_for_Selbina_ID-227";
+    }
+    else if (meshName == "Ship_bound_for_Mhaura_Pirates")
+    {
+        meshName = "Ship_bound_for_Mhaura_ID-228";
+    }
+
+    // Maquette_Abdhaljs-Legion_A -> Maquette_Abdhaljs-Legion
+    // Maquette_Abdhaljs-Legion_B -> Maquette_Abdhaljs-Legion
+    if (meshName.starts_with("Maquette_Abdhaljs-Legion_"))
+    {
+        meshName = "Maquette_Abdhaljs-Legion";
+    }
+
+    const auto file = fmt::format("ximeshes/{}.ximesh", meshName);
+    if (!zoneMesh_->load(file))
+    {
+        DebugNavmesh("CZone::LoadZoneMesh: Cannot load zone mesh (%s)", file.c_str());
+        zoneMesh_ = nullptr;
     }
 }
 
@@ -618,19 +739,15 @@ void CZone::UpdateWeather()
     SetWeather(selectedWeather);
     luautils::OnZoneWeatherChange(GetID(), selectedWeather);
 
-    // clang-format off
-    timer::time_point nextWeatherTick = timer::now() + std::chrono::duration_cast<earth_time::duration>(WeatherNextUpdate);
-    CTaskManager::getInstance()->AddTask("zone_update_weather", nextWeatherTick, this, CTaskManager::TASK_ONCE, 1s,
-    [](timer::time_point tick, CTaskManager::CTask* PTask)
-    {
-        CZone* PZone = std::any_cast<CZone*>(PTask->m_data);
-        if (!PZone->IsWeatherStatic())
+    scheduler_.postToMainThread(
+        [this, duration = std::chrono::duration_cast<earth_time::duration>(WeatherNextUpdate)]() -> Task<void>
         {
-            PZone->UpdateWeather();
-        }
-        return 0;
-    });
-    // clang-format on
+            co_await scheduler_.yieldFor(duration);
+            if (!this->IsWeatherStatic())
+            {
+                this->UpdateWeather();
+            }
+        });
 }
 
 bool CZone::CheckMobsPathedBack()
@@ -708,7 +825,7 @@ void CZone::IncreaseZoneCounter(CCharEntity* PChar)
 
     m_zoneEntities->InsertPC(PChar);
 
-    if (!ZoneTimer && !m_zoneEntities->CharListEmpty())
+    if (!zoneTimerToken_.has_value() && !m_zoneEntities->CharListEmpty())
     {
         createZoneTimers();
     }
@@ -818,25 +935,24 @@ void CZone::WideScan(CCharEntity* PChar, uint16 radius)
  *                                                                       *
  ************************************************************************/
 
-void CZone::ZoneServer(timer::time_point tick)
+auto CZone::ZoneServer(timer::time_point tick) -> Task<void>
 {
     TracyZoneScoped;
 
-    m_zoneEntities->ZoneServer(tick);
+    co_await m_zoneEntities->ZoneServer(tick);
 
     if (m_BattlefieldHandler != nullptr)
     {
         m_BattlefieldHandler->HandleBattlefields(tick);
     }
 
-    if (ZoneTimer && m_zoneEntities->CharListEmpty() && m_timeZoneEmpty + 5s < timer::now() && CheckMobsPathedBack())
+    if (zoneTimerToken_.has_value() && m_zoneEntities->CharListEmpty() && m_timeZoneEmpty + 5s < timer::now() && CheckMobsPathedBack())
     {
-        ZoneTimer->m_type = CTaskManager::TASK_REMOVE;
-        ZoneTimer         = nullptr;
-
-        ZoneTimerTriggerAreas->m_type = CTaskManager::TASK_REMOVE;
-        ZoneTimerTriggerAreas         = nullptr;
+        zoneTimerToken_.reset();
+        zoneTimerTriggerAreasToken_.reset();
     }
+
+    co_return;
 }
 
 void CZone::ForEachChar(const std::function<void(CCharEntity*)>& func)
@@ -927,23 +1043,25 @@ void CZone::createZoneTimers()
 {
     TracyZoneScoped;
 
-    // clang-format off
-    ZoneTimer = CTaskManager::getInstance()->AddTask(m_zoneName, timer::now(), this, CTaskManager::TASK_INTERVAL, kLogicUpdateInterval,
-    [](timer::time_point tick, CTaskManager::CTask* PTask)
+    // We'll manually tick on while testing, don't install the timers
+    if (config_.isTestServer)
     {
-        CZone* PZone = std::any_cast<CZone*>(PTask->m_data);
-        PZone->ZoneServer(tick);
-        return 0;
-    });
+        return;
+    }
 
-    ZoneTimerTriggerAreas = CTaskManager::getInstance()->AddTask(m_zoneName + "TriggerAreas", timer::now(), this, CTaskManager::TASK_INTERVAL, kTriggerAreaInterval,
-    [](timer::time_point tick, CTaskManager::CTask* PTask)
-    {
-        CZone* PZone = std::any_cast<CZone*>(PTask->m_data);
-        PZone->CheckTriggerAreas();
-        return 0;
-    });
-    // clang-format on
+    zoneTimerToken_ = scheduler_.intervalOnMainThread(
+        kLogicUpdateInterval,
+        [this]() -> Task<void>
+        {
+            co_await this->ZoneServer(timer::now());
+        });
+
+    zoneTimerTriggerAreasToken_ = scheduler_.intervalOnMainThread(
+        kTriggerAreaInterval,
+        [this]() -> Task<void>
+        {
+            co_await this->CheckTriggerAreas();
+        });
 }
 
 void CZone::CharZoneIn(CCharEntity* PChar)
@@ -951,7 +1069,6 @@ void CZone::CharZoneIn(CCharEntity* PChar)
     TracyZoneScoped;
 
     PChar->loc.zone        = this;
-    PChar->loc.zoning      = false;
     PChar->loc.destination = 0;
     PChar->clearTriggerAreas();
 
@@ -1054,6 +1171,28 @@ void CZone::CharZoneIn(CCharEntity* PChar)
 
     charutils::ReadHistory(PChar);
 
+    // Restore seal recast timer if enabled
+    if (settings::get<bool>("main.PERSIST_SEAL_TIMERS"))
+    {
+        auto expirationTimestamp = static_cast<uint32>(PChar->getCharVar("SealTimerExpiry"));
+        if (expirationTimestamp > 0)
+        {
+            auto currentTimestamp = earth_time::timestamp();
+            if (expirationTimestamp > currentTimestamp)
+            {
+                auto remainingSeconds = expirationTimestamp - currentTimestamp;
+                // Sanity check: seal timer should never exceed 5 minutes (300 seconds)
+                if (remainingSeconds <= 300)
+                {
+                    PChar->PRecastContainer->AddLootRecast(LootRecastID::Seal, std::chrono::seconds(remainingSeconds));
+                }
+            }
+
+            // Ensure var is wiped after zone in
+            PChar->setCharVar("SealTimerExpiry", 0);
+        }
+    }
+
     moduleutils::OnCharZoneIn(PChar);
 }
 
@@ -1067,6 +1206,23 @@ void CZone::CharZoneOut(CCharEntity* PChar)
         {
             luautils::OnTriggerAreaLeave(PChar, triggerArea);
             break;
+        }
+    }
+
+    // Save seal recast timer if enabled
+    if (settings::get<bool>("main.PERSIST_SEAL_TIMERS"))
+    {
+        auto* recast = PChar->PRecastContainer->GetLootRecast(LootRecastID::Seal);
+        if (recast && recast->RecastTime > 0s)
+        {
+            auto remaining = (recast->TimeStamp + recast->RecastTime) - timer::now();
+            // Don't save if it will expire during zoning process
+            if (remaining > 10s)
+            {
+                auto remainingSeconds    = std::chrono::duration_cast<std::chrono::seconds>(remaining).count();
+                auto expirationTimestamp = earth_time::timestamp() + static_cast<uint32>(remainingSeconds);
+                PChar->setCharVar("SealTimerExpiry", static_cast<int32>(expirationTimestamp));
+            }
         }
     }
 
@@ -1130,7 +1286,7 @@ void CZone::CharZoneOut(CCharEntity* PChar)
 
 bool CZone::IsZoneActive() const
 {
-    return ZoneTimer != nullptr;
+    return zoneTimerToken_.has_value();
 }
 
 CZoneEntities* CZone::GetZoneEntities()
@@ -1138,41 +1294,42 @@ CZoneEntities* CZone::GetZoneEntities()
     return m_zoneEntities;
 }
 
-void CZone::CheckTriggerAreas()
+auto CZone::CheckTriggerAreas() -> Task<void>
 {
     TracyZoneScoped;
 
-    // clang-format off
-    ForEachChar([&](CCharEntity* PChar)
-    {
-        // TODO: When we start to use octrees or spatial hashing to split up zones,
-        //     : use them here to make the search domain smaller.
-
-        // Do not enter trigger areas while loading in. Set in xi.player.onGameIn
-        if (PChar->GetLocalVar("ZoningIn") > 0)
+    ForEachChar(
+        [&](CCharEntity* PChar)
         {
-            return;
-        }
+            // TODO: When we start to use octrees or spatial hashing to split up zones,
+            //     : use them here to make the search domain smaller.
 
-        for (const auto& triggerArea : m_triggerAreaList)
-        {
-            const auto triggerAreaID = triggerArea->getTriggerAreaID();
-            if (triggerArea->isPointInside(PChar->loc.p))
+            // Do not enter trigger areas while loading in. Set in xi.player.onGameIn
+            if (PChar->GetLocalVar("ZoningIn") > 0)
             {
-                if (!PChar->isInTriggerArea(triggerAreaID))
+                return;
+            }
+
+            for (const auto& triggerArea : m_triggerAreaList)
+            {
+                const auto triggerAreaID = triggerArea->getTriggerAreaID();
+                if (triggerArea->isPointInside(PChar->loc.p))
                 {
-                    // Add the TriggerArea to the players cache of current TriggerAreas
-                    PChar->onTriggerAreaEnter(triggerAreaID);
-                    luautils::OnTriggerAreaEnter(PChar, triggerArea);
+                    if (!PChar->isInTriggerArea(triggerAreaID))
+                    {
+                        // Add the TriggerArea to the players cache of current TriggerAreas
+                        PChar->onTriggerAreaEnter(triggerAreaID);
+                        luautils::OnTriggerAreaEnter(PChar, triggerArea);
+                    }
+                }
+                else if (PChar->isInTriggerArea(triggerAreaID))
+                {
+                    // Remove the TriggerArea from the players cache of current TriggerAreas
+                    PChar->onTriggerAreaLeave(triggerAreaID);
+                    luautils::OnTriggerAreaLeave(PChar, triggerArea);
                 }
             }
-            else if (PChar->isInTriggerArea(triggerAreaID))
-            {
-                // Remove the TriggerArea from the players cache of current TriggerAreas
-                PChar->onTriggerAreaLeave(triggerAreaID);
-                luautils::OnTriggerAreaLeave(PChar, triggerArea);
-            }
-        }
-    });
-    // clang-format on
+        });
+
+    co_return;
 }

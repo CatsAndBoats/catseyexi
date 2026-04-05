@@ -8,7 +8,7 @@ mixins = { require('scripts/mixins/rage') }
 local entity = {}
 
 local useMeikyoShisui = function(mob)
-    mob:useMobAbility(xi.jsa.MEIKYO_SHISUI)
+    mob:useMobAbility(xi.mobSkill.MEIKYO_SHISUI_1)
 end
 
 local mercurialEffects =
@@ -43,14 +43,11 @@ entity.onMobFight = function(mob, target)
 
     -- Use Colossal Slam as many times as possible!
     if mob:hasStatusEffect(xi.effect.MEIKYO_SHISUI) then
-        mob:setTP(1000)
-        mob:setMobMod(xi.mobMod.TP_USE_CHANCE, 10000)
-    else
-        mob:setMobMod(xi.mobMod.TP_USE_CHANCE, 200)
+        mob:setTP(3000)
     end
 end
 
-entity.onMobMobskillChoose = function(mob, target)
+entity.onMobMobskillChoose = function(mob, target, skillId)
     local cueMove = mob:getLocalVar('CUE_MOVE')
     mob:setLocalVar('CUE_MOVE', 0)
 
@@ -63,7 +60,9 @@ entity.onMobMobskillChoose = function(mob, target)
 end
 
 entity.onMobDeath = function(mob, player, optParams)
-    player:addTitle(xi.title.BRIAREUS_FELLER)
+    if player then
+        player:addTitle(xi.title.BRIAREUS_FELLER)
+    end
 end
 
 return entity

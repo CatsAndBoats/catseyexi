@@ -32,7 +32,7 @@ for file in "${targets[@]}"; do
         # passByConstRef here, so we can silence this warning.
         # https://quick-bench.com/q/13EX97WSfj9-rY_98opaAwgDOQc
 
-        cppcheck_output=$(cppcheck -v -j 4 --force --quiet --inconclusive --std=c++17 \
+        cppcheck_output=$(cppcheck -v -j 4 --force --quiet --inconclusive --std=c++23 \
         --suppress=passedByValue:src/map/packet_system.cpp \
         --suppress=unmatchedSuppression \
         --suppress=missingIncludeSystem \

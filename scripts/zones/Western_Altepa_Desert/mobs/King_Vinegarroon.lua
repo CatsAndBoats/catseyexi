@@ -63,17 +63,28 @@ local function mobRegen(mob)
     local hour = VanadielHour()
 
     if hour >= 6 and hour <= 20 then
-        mob:setMod(xi.mod.REGEN, 125)
+        mob:setMod(xi.mod.REGEN, 150)
     else
-        mob:setMod(xi.mod.REGEN, 250)
+        mob:setMod(xi.mod.REGEN, 300)
     end
 end
 
 entity.onMobInitialize = function(mob)
     xi.mob.updateNMSpawnPoint(mob)
-    mob:setRespawnTime(math.random(75600, 86400)) -- 21 to 24 hours
+    mob:setRespawnTime(75600) -- Opens 21 hours after being defeated, or despawning.
+
+    mob:addImmunity(xi.immunity.SILENCE)
+    mob:addImmunity(xi.immunity.PETRIFY)
+    mob:addImmunity(xi.immunity.BIND)
+    mob:addImmunity(xi.immunity.LIGHT_SLEEP)
+    mob:addImmunity(xi.immunity.DARK_SLEEP)
 
     mob:setMobMod(xi.mobMod.ADD_EFFECT, 1)
+end
+
+entity.onMobSpawn = function(mob)
+    mob:setMod(xi.mod.REGAIN, 35)
+    mob:setMobMod(xi.mobMod.BASE_DAMAGE_MULTIPLIER, 250)
 end
 
 entity.onAdditionalEffect = function(mob, target, damage)
@@ -117,29 +128,50 @@ entity.onMobFight = function(mob, target)
     mobRegen(mob)
 end
 
+-- Table of single target skills KV will use after an AOE TP Move
+local skillTable =
+{
+    [1] = xi.mobSkill.DEATH_SCISSORS,
+    [2] = xi.mobSkill.CRITICAL_BITE,
+    [3] = xi.mobSkill.VENOM_STING_1,
+}
+
 entity.onMobSkillTarget = function(target, mob, mobskill)
     if mobskill:isAoE() then
         -- Chance for draw in to be single target or alliance
         if math.random(0, 100) >= 50 then
             mob:drawIn()
         else
-            for _, member in ipairs(target:getAlliance()) do
+            -- If target is a pet, get the master for alliance lookup
+            local allianceTarget = target
+            if target:getObjType() ~= xi.objType.PC then
+                local master = target:getMaster()
+                if master and master:getObjType() == xi.objType.PC then
+                    allianceTarget = master
+                else
+                    return
+                end
+            end
+
+            for _, member in ipairs(allianceTarget:getAlliance()) do
                 mob:drawIn(member, 0, 0)
             end
         end
 
         -- KV always does an AOE TP move followed by a single target TP move
-        mob:useMobAbility(({ 353, 350, 719, 720 })[math.random(1, 4)])
+        mob:useMobAbility(skillTable[math.random(1, #skillTable)])
     end
 end
 
 entity.onMobDeath = function(mob, player, optParams)
-    player:addTitle(xi.title.VINEGAR_EVAPORATOR)
+    if player then
+        player:addTitle(xi.title.VINEGAR_EVAPORATOR)
+    end
 end
 
 entity.onMobDespawn = function(mob)
     xi.mob.updateNMSpawnPoint(mob)
-    mob:setRespawnTime(math.random(75600, 86400)) -- 21 to 24 hours
+    mob:setRespawnTime(75600) -- Opens 21 hours after being defeated, or despawning.
 end
 
 return entity

@@ -14,8 +14,8 @@ abilityObject.onPetAbility = function(target, pet, petskill, summoner, action)
     local numhits     = 1
     local accmod      = 1
     local dmgmod      = 5
-    local damage      = xi.summon.avatarPhysicalMove(pet, target, petskill, numhits, accmod, dmgmod, 0, xi.mobskills.magicalTpBonus.NO_EFFECT, 1, 2, 3)
-    local totaldamage = xi.summon.avatarFinalAdjustments(damage.dmg, pet, petskill, target, xi.attackType.PHYSICAL, xi.damageType.PIERCING, numhits)
+    local info        = xi.summon.avatarPhysicalMove(pet, target, petskill, numhits, accmod, dmgmod, 0, xi.mobskills.magicalTpBonus.NO_EFFECT, 1, 2, 3)
+    local totaldamage = xi.summon.avatarFinalAdjustments(info, pet, petskill, target, xi.attackType.PHYSICAL, xi.damageType.PIERCING, numhits)
     local duration    = 120
     local resistRate  = xi.combat.magicHitRate.calculateResistRate(pet, target, 0, 0, 0, xi.element.NONE, xi.mod.INT, xi.effect.WEIGHT, 0)
 
@@ -33,7 +33,7 @@ abilityObject.onPetAbility = function(target, pet, petskill, summoner, action)
         xi.summon.avatarPhysicalHit(petskill, totaldamage) and
         not target:hasStatusEffect(xi.effect.WEIGHT)
     then
-        target:addStatusEffect(xi.effect.WEIGHT, 50, 0, duration)
+        target:addStatusEffect(xi.effect.WEIGHT, { power = 50, duration = duration, origin = pet })
     end
 
     return totaldamage

@@ -3,27 +3,22 @@
 --  Mob: Shikaree Z (Head Wind)
 -- BCNM: Head Wind
 -----------------------------------
-mixins = { require('scripts/mixins/job_special') }
 local ID = zones[xi.zone.BONEYARD_GULLY]
 -----------------------------------
 ---@type TMobEntity
 local entity = {}
 
-entity.onMobInitialize = function(mob)
+entity.onMobSpawn = function(mob)
     mob:setMod(xi.mod.DARK_SLEEP_RES_RANK, 8)
     mob:setMod(xi.mod.LIGHT_SLEEP_RES_RANK, 8)
     mob:setMod(xi.mod.BIND_RES_RANK, 8)
-    -- TODO: Needs gravity res rank
-end
-
-entity.onMobSpawn = function(mob)
     mob:setMod(xi.mod.REGAIN, 55)
     mob:setMod(xi.mobMod.MAGIC_DELAY, 35)
-    mob:setMobMod(xi.mobMod.WEAPON_BONUS, 30)
+    mob:setMobMod(xi.mobMod.BASE_DAMAGE_MULTIPLIER, 150)
     mob:setMobAbilityEnabled(false)
 
-    mob:addListener('WEAPONSKILL_USE', 'SHIKAREE_Z_WS', function(mobArg, targetArg, skillid, spentTP, action)
-        if skillid == xi.mobSkill.JUMP_1 then
+    mob:addListener('WEAPONSKILL_USE', 'SHIKAREE_Z_WS', function(mobArg, targetArg, skill, tp, action, damage)
+        if skill:getID() == xi.mobSkill.JUMP_1 then
             action:setCategory(xi.action.category.WEAPONSKILL_FINISH)
         end
     end)
@@ -64,7 +59,7 @@ entity.onMobFight = function(mob, target)
             end
         end
 
-        -- Shikaree use TP at 1000 when solo
+    -- Shikaree use TP at 1000 when solo
     elseif scState == 4 and mob:getTP() >= 1000 then
         mob:useMobAbility()
     end
@@ -77,7 +72,7 @@ entity.onMobFight = function(mob, target)
     end
 end
 
-entity.onMobMobskillChoose = function(mob, target)
+entity.onMobMobskillChoose = function(mob, target, skillId)
     local tpMoves =
     {
         xi.mobSkill.IMPULSE_DRIVE,
@@ -89,7 +84,7 @@ entity.onMobMobskillChoose = function(mob, target)
     return tpMoves[math.random(1, #tpMoves)]
 end
 
-entity.onMobWeaponSkill = function(target, mob, skill)
+entity.onMobWeaponSkill = function(mob, target, skill, action)
     local skillID     = skill:getID()
     local battlefield = mob:getBattlefield()
 
@@ -100,6 +95,7 @@ entity.onMobWeaponSkill = function(target, mob, skill)
     -- Solo skill message when only one Shikaree is alive (scState 4 = SOLO)
     if battlefield:getLocalVar('scState') == 4 then
         mob:messageText(mob, ID.text.SHIKAREE_Z_OFFSET + 4)
+        return
     end
 
     -- Handle skillchain progression
@@ -130,6 +126,33 @@ entity.onMobWeaponSkill = function(target, mob, skill)
             end
         end
     end
+end
+
+entity.onMobSpellChoose = function(mob, target, spellId)
+    local spellList =
+    {
+        [ 1] = { xi.magic.spell.BANISH,   target, false, xi.action.type.DAMAGE_TARGET,     nil,                 0, 100 },
+        [ 2] = { xi.magic.spell.BANISHGA, target, false, xi.action.type.DAMAGE_TARGET,     nil,                 0, 100 },
+        [ 3] = { xi.magic.spell.DIA,      target, false, xi.action.type.ENFEEBLING_TARGET, xi.effect.DIA,       1, 100 },
+        [ 4] = { xi.magic.spell.DIAGA,    target, false, xi.action.type.ENFEEBLING_TARGET, xi.effect.DIA,       1, 100 },
+        [ 5] = { xi.magic.spell.PARALYZE, target, false, xi.action.type.ENFEEBLING_TARGET, xi.effect.PARALYSIS, 0, 100 },
+        [ 6] = { xi.magic.spell.SLOW,     target, false, xi.action.type.ENFEEBLING_TARGET, xi.effect.SLOW,      3, 100 },
+        [ 7] = { xi.magic.spell.CURE_III, mob,    true,  xi.action.type.HEALING_TARGET,    33,                  0, 100 },
+        [ 8] = { xi.magic.spell.PARALYNA, mob,    true,  xi.action.type.HEALING_EFFECT,    xi.effect.PARALYSIS, 0, 100 },
+        [ 9] = { xi.magic.spell.BLINDNA,  mob,    true,  xi.action.type.HEALING_EFFECT,    xi.effect.BLINDNESS, 0, 100 },
+        [10] = { xi.magic.spell.PROTECT,  mob,    true,  xi.action.type.ENHANCING_TARGET,  xi.effect.PROTECT,   0, 100 },
+        [11] = { xi.magic.spell.SHELL,    mob,    true,  xi.action.type.ENHANCING_TARGET,  xi.effect.SHELL,     0, 100 },
+        [12] = { xi.magic.spell.BLINK,    mob,    false, xi.action.type.ENHANCING_TARGET,  xi.effect.BLINK,     0, 100 },
+        [13] = { xi.magic.spell.AQUAVEIL, mob,    false, xi.action.type.ENHANCING_TARGET,  xi.effect.AQUAVEIL,  0, 100 },
+    }
+
+    local groupTable =
+    {
+        GetMobByID(mob:getID() + 1), -- Shikaree Y
+        GetMobByID(mob:getID() + 2), -- Shikaree X
+    }
+
+    return xi.combat.behavior.chooseAction(mob, target, groupTable, spellList)
 end
 
 entity.onMobDeath = function(mob, player, optParams)

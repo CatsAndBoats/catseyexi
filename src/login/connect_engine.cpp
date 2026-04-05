@@ -40,63 +40,62 @@ auto getZMQRoutingId() -> uint64
 
     return IPP(ip, port).getRawIPP();
 }
+
 constexpr auto kSessionCleanTime = 15min;
 
 } // namespace
 
-ConnectEngine::ConnectEngine(asio::io_context& io_context)
-: zmqDealerWrapper_(getZMQEndpointString(), getZMQRoutingId())
-, m_authHandler(io_context, settings::get<uint32>("network.LOGIN_AUTH_PORT"), zmqDealerWrapper_)
-, m_dataHandler(io_context, settings::get<uint32>("network.LOGIN_DATA_PORT"), zmqDealerWrapper_)
-, m_viewHandler(io_context, settings::get<uint32>("network.LOGIN_VIEW_PORT"), zmqDealerWrapper_)
-, m_sessionCleanupTimer(io_context, kSessionCleanTime)
+ConnectEngine::ConnectEngine(Scheduler& scheduler)
+: scheduler_(scheduler)
+, zmqDealerWrapper_(getZMQEndpointString(), getZMQRoutingId())
+, m_authHandler(scheduler_, settings::get<uint32>("network.LOGIN_AUTH_PORT"), zmqDealerWrapper_)
+, m_dataHandler(scheduler_, settings::get<uint32>("network.LOGIN_DATA_PORT"), zmqDealerWrapper_)
+, m_viewHandler(scheduler_, settings::get<uint32>("network.LOGIN_VIEW_PORT"), zmqDealerWrapper_)
 {
-    m_sessionCleanupTimer.async_wait(std::bind(&ConnectEngine::periodicCleanup, this, std::placeholders::_1));
+    periodicCleanupToken_ = scheduler.intervalOnMainThread(
+        kSessionCleanTime,
+        [this]()
+        {
+            periodicCleanup();
+        });
 }
 
 ConnectEngine::~ConnectEngine()
 {
-    m_sessionCleanupTimer.cancel();
-};
+}
 
-void ConnectEngine::periodicCleanup(const asio::error_code& error)
+void ConnectEngine::periodicCleanup()
 {
-    if (!error)
+    auto& sessions       = loginHelpers::getAuthenticatedSessions();
+    auto  ipAddrIterator = sessions.begin();
+    while (ipAddrIterator != sessions.end())
     {
-        auto& sessions       = loginHelpers::getAuthenticatedSessions();
-        auto  ipAddrIterator = sessions.begin();
-        while (ipAddrIterator != sessions.end())
+        auto sessionIterator = ipAddrIterator->second.begin();
+        while (sessionIterator != ipAddrIterator->second.end())
         {
-            auto sessionIterator = ipAddrIterator->second.begin();
-            while (sessionIterator != ipAddrIterator->second.end())
-            {
-                session_t& session = sessionIterator->second;
+            session_t& session = sessionIterator->second;
 
-                // If it's been 15 minutes, erase it from the session list
-                if (!session.data_session &&
-                    !session.view_session &&
-                    timer::now() > session.authorizedTime + kSessionCleanTime)
-                {
-                    sessionIterator = ipAddrIterator->second.erase(sessionIterator);
-                }
-                else
-                {
-                    ++sessionIterator;
-                }
-            }
-
-            // If this map entry is empty, clean it up
-            if (ipAddrIterator->second.size() == 0)
+            // If it's been 15 minutes, erase it from the session list
+            if (!session.data_session &&
+                !session.view_session &&
+                timer::now() > session.authorizedTime + kSessionCleanTime)
             {
-                ipAddrIterator = sessions.erase(ipAddrIterator);
+                sessionIterator = ipAddrIterator->second.erase(sessionIterator);
             }
             else
             {
-                ++ipAddrIterator;
+                ++sessionIterator;
             }
         }
 
-        m_sessionCleanupTimer.expires_at(m_sessionCleanupTimer.expiry() + kSessionCleanTime);
-        m_sessionCleanupTimer.async_wait(std::bind(&ConnectEngine::periodicCleanup, this, std::placeholders::_1));
+        // If this map entry is empty, clean it up
+        if (ipAddrIterator->second.size() == 0)
+        {
+            ipAddrIterator = sessions.erase(ipAddrIterator);
+        }
+        else
+        {
+            ++ipAddrIterator;
+        }
     }
 }

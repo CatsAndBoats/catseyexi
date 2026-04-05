@@ -39,7 +39,7 @@
 class CZoneEntities
 {
 public:
-    CZoneEntities(CZone*);
+    CZoneEntities(Scheduler& scheduler, MapConfig config, CZone* zone);
     ~CZoneEntities();
 
     void HealAllMobs();
@@ -82,7 +82,7 @@ public:
 
     void PushPacket(CBaseEntity*, GLOBAL_MESSAGE_TYPE, const std::unique_ptr<CBasicPacket>&); // send a global package within the zone
 
-    void ZoneServer(timer::time_point tick);
+    auto ZoneServer(timer::time_point tick) -> Task<void>;
 
     CZone* GetZone();
 
@@ -104,6 +104,16 @@ public:
     auto GetUsedDynamicTargIDsCount() const -> std::size_t;
 
 private:
+    auto mobTick(CMobEntity* PMob, timer::time_point tick) -> Task<void>;
+    auto mobAggroCheck(CMobEntity* PMob, timer::time_point tick) -> Task<void>;
+    auto npcTick(CNpcEntity* PNpc, timer::time_point tick) -> Task<void>;
+    auto petTick(CPetEntity* PPet, timer::time_point tick) -> Task<void>;
+    auto trustTick(CTrustEntity* PTrust, timer::time_point tick) -> Task<void>;
+    auto charTick(CCharEntity* PChar, timer::time_point tick) -> Task<void>;
+
+    Scheduler& scheduler_;
+    MapConfig  config_;
+
     CZone* m_zone;
 
     // NOTE: These are all keyed by targid

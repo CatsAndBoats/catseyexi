@@ -13,7 +13,8 @@ entity.onMobDeath = function(mob, player, optParams)
 end
 
 entity.onMobDespawn = function(mob)
-    xi.mob.phOnDespawn(mob, ID.mob.CHARYBDIS, 10, math.random(28800, 43200)) -- 8 - 12 hours
+    -- TODO: Confirm it actually opens after 8 hours
+    xi.mob.phOnDespawn(mob, ID.mob.CHARYBDIS, 10, 28800) -- 8 hour open
 end
 
 return entity

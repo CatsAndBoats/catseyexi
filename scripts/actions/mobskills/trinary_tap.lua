@@ -11,7 +11,7 @@ local mobskillObject = {}
 
 mobskillObject.onMobSkillCheck = function(target, mob, skill)
     if
-        mob:isMobType(xi.mobType.NOTORIOUS) or
+        mob:isMobType(xi.mobType.NOTORIOUS) or -- TODO: Set Skill lists
         target:hasStatusEffect(xi.effect.BATTLEFIELD)
     then
         return 0
@@ -20,7 +20,7 @@ mobskillObject.onMobSkillCheck = function(target, mob, skill)
     return 1
 end
 
-mobskillObject.onMobWeaponSkill = function(target, mob, skill)
+mobskillObject.onMobWeaponSkill = function(mob, target, skill, action)
     local dispel = nil
     local count = 0
     local msg -- to be set later

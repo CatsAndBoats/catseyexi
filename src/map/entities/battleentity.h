@@ -202,8 +202,8 @@ enum class ATTACK_TYPE : uint8
     PHYSICAL = 1,
     MAGICAL  = 2,
     RANGED   = 3,
-    SPECIAL  = 4,
-    BREATH   = 5,
+    BREATH   = 4,
+    SPECIAL  = 5,
 };
 DECLARE_FORMAT_AS_UNDERLYING(ATTACK_TYPE);
 
@@ -345,21 +345,21 @@ public:
     uint16 RATT(uint16 bonusAtt = 0);
     uint16 RACC(uint16 bonusAcc = 0);
 
-    bool isDead();
+    auto isDead() const -> bool;
     bool isAlive();
     bool isFullyHealed();
     bool isInAdoulin();
     bool isInAssault();
     bool isInDynamis();
     bool isInGarrison();
-    bool isInMogHouse();
+    bool inMogHouse();
     bool hasImmunity(uint32 imID);
     bool isAsleep();
-    bool isMounted();
+    auto isMounted() const -> bool;
     bool isSitting();
 
     JOBTYPE GetMJob() const;
-    JOBTYPE GetSJob() const;
+    JOBTYPE GetSJob(bool ignoreRestriction = false) const;
     uint8   GetMLevel() const;
     uint8   GetSLevel() const;
 
@@ -501,15 +501,13 @@ public:
     virtual void           OnDisengage(CAttackState&);
     /* Casting */
     virtual void OnCastFinished(CMagicState&, action_t&);
-    virtual void OnCastInterrupted(CMagicState&, action_t&, MSGBASIC_ID msg, bool blockedCast);
+    virtual void OnCastInterrupted(CMagicState&, action_t&, MsgBasic msg, bool blockedCast);
     /* Weaponskill */
     virtual void OnWeaponSkillFinished(CWeaponSkillState& state, action_t& action);
     virtual void OnMobSkillFinished(CMobSkillState& state, action_t& action);
     virtual void OnChangeTarget(CBattleEntity* PTarget);
 
-    virtual void OnAbility(CAbilityState&, action_t&)
-    {
-    }
+    virtual void OnAbility(CAbilityState&, action_t&);
     virtual void OnRangedAttack(CRangeState&, action_t&)
     {
     }
@@ -526,7 +524,7 @@ public:
     void   setBattleID(uint16 battleID);
     uint16 getBattleID();
 
-    virtual void Tick(timer::time_point) override;
+    virtual auto Tick(timer::time_point) -> Task<void> override;
     virtual void PostTick() override;
 
     health_t health{}; // hp,mp,tp
@@ -539,7 +537,6 @@ public:
     timer::time_point charmTime; // to hold the time entity is charmed
     bool              isCharmed; // is the battle entity charmed?
 
-    float           m_ModelRadius;  // The radius of the entity model, for calculating the range of a physical attack
     ECOSYSTEM       m_EcoSystem{};  // Entity eco system
     CItemEquipment* m_Weapons[4]{}; // Four main slots used to store weapons (weapons only)
     bool            m_dualWield;    // True/false depending on if the entity is using two weapons
@@ -552,7 +549,7 @@ public:
     CParty*           PParty;
     CBattleEntity*    PPet;
     CBattleEntity*    PMaster; // Owner/owner of the entity (applies to all combat entities)
-    CBattleEntity*    PLastAttacker;
+    EntityID_t        lastAttackerId_{};
     timer::time_point LastAttacked;
     battlehistory_t   BattleHistory{}; // Stores info related to most recent combat actions taken towards this entity.
 

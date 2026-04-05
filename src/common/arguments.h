@@ -21,7 +21,8 @@
 
 #pragma once
 
-#include <optional>
+#include <common/types/maybe.h>
+
 #include <string>
 
 #include <argparse/argparse.hpp>
@@ -51,7 +52,7 @@ public:
     ~Arguments() = default;
 
     template <typename T = std::string>
-    auto present(const std::string_view arg_name) const -> std::optional<T>
+    auto present(const std::string_view arg_name) const -> Maybe<T>
     {
         try
         {

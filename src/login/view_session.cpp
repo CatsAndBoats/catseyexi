@@ -41,7 +41,7 @@ void view_session::read_func()
     session_t& session = loginHelpers::get_authenticated_session(ipAddress, sessionHash);
     if (!session.view_session)
     {
-        session.view_session = std::make_shared<view_session>(std::forward<asio::ssl::stream<asio::ip::tcp::socket>>(socket_));
+        session.view_session = std::make_shared<view_session>(std::forward<asio::ssl::stream<asio::ip::tcp::socket>>(socket_), zmqDealerWrapper_);
     }
     session.view_session->sessionHash = sessionHash;
 
@@ -192,7 +192,7 @@ void view_session::read_func()
                 char CharName[PacketNameLength] = {};
                 std::memcpy(CharName, buffer_.data() + 32, PacketNameLength - 1);
 
-                std::optional<std::string> invalidNameReason = std::nullopt;
+                Maybe<std::string> invalidNameReason = std::nullopt;
 
                 // Sanitize name & check for invalid characters
                 std::string nameStr = CharName;

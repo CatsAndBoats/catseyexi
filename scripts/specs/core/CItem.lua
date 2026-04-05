@@ -180,26 +180,20 @@ end
 function CItem:isInstalled()
 end
 
----@param name string
----@param interestData integer
----@param zeni integer
----@param skillIndex integer
----@param fp integer
----@return nil
-function CItem:setSoulPlateData(name, interestData, zeni, skillIndex, fp)
-end
-
 ---@nodiscard
----@return table
-function CItem:getSoulPlateData()
-end
-
----@nodiscard
----@return table
+---@return Exdata
 function CItem:getExData()
 end
 
----@param newData table
----@return nil
-function CItem:setExData(newData)
+---@param data Exdata
+function CItem:setExData(data)
+end
+
+---@nodiscard
+---@return table<integer, integer> # 0-indexed raw exdata bytes
+function CItem:getExDataRaw()
+end
+
+---@param data table<integer, integer> # 0-indexed raw exdata bytes
+function CItem:setExDataRaw(data)
 end

@@ -30,13 +30,9 @@ mission.sections =
                     local missionStatus = player:getMissionStatus(mission.areaId)
 
                     if missionStatus == 3 then
-                        if xi.settings.main.ENABLE_TRUST_QUESTS == 1 then
-                            local needsHalverTrust = (not player:hasSpell(xi.magic.spell.HALVER) and not player:findItem(xi.item.CIPHER_OF_HALVERS_ALTER_EGO)) and 1 or 0
+                        local needsHalverTrust = (xi.settings.main.ENABLE_TRUST_QUESTS == 1 and not player:hasSpell(xi.magic.spell.HALVER) and not player:findItem(xi.item.CIPHER_OF_HALVERS_ALTER_EGO)) and 1 or 0
 
-                            return mission:progressEvent(501, { [7] = needsHalverTrust })
-                        else
-                            return mission:progressEvent(501)
-                        end
+                        return mission:progressEvent(501, { [7] = needsHalverTrust })
                     elseif missionStatus > 3 then
                         return mission:messageText(chateauID.text.HALVER_OFFSET + 266)
                     end

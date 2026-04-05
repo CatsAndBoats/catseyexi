@@ -364,9 +364,9 @@ uint16 CItemWeapon::getTotalUnlockPointsNeeded() const
  *                                                                       *
  ************************************************************************/
 
-uint16 CItemWeapon::getCurrentUnlockPoints()
+auto CItemWeapon::getCurrentUnlockPoints() -> uint16
 {
-    return ref<uint16>(m_extra, 0);
+    return this->exdata<Exdata::WeaponUnlock>().UnlockPoints;
 }
 
 /************************************************************************
@@ -465,9 +465,10 @@ void CItemWeapon::setTotalUnlockPointsNeeded(uint16 points)
  *                                                                       *
  ************************************************************************/
 
-void CItemWeapon::setCurrentUnlockPoints(uint16 points)
+void CItemWeapon::setCurrentUnlockPoints(const uint16 points)
 {
-    ref<uint16>(m_extra, 0) = points;
+    this->exdata<Exdata::WeaponUnlock>().UnlockPoints = points;
+    setDirty(true);
 }
 
 /************************************************************************

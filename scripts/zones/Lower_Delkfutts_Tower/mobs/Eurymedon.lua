@@ -2,7 +2,7 @@
 -- Area: Lower Delkfutt's Tower
 --   NM: Eurymedon
 -----------------------------------
-mixins = { require('scripts/mixins/job_special') }
+mixins = { require('scripts/mixins/families/gigas_bst_nm') }
 -----------------------------------
 local ID = zones[xi.zone.LOWER_DELKFUTTS_TOWER]
 -----------------------------------
@@ -21,6 +21,10 @@ entity.phList =
 
 entity.onMobInitialize = function(mob)
     xi.pet.setMobPet(mob, 1, 'Gigass_Bat')
+    mob:addImmunity(xi.immunity.SILENCE)
+    mob:addImmunity(xi.immunity.DARK_SLEEP)
+    mob:addImmunity(xi.immunity.LIGHT_SLEEP)
+    mob:addImmunity(xi.immunity.TERROR)
 end
 
 entity.onMobDeath = function(mob, player, optParams)

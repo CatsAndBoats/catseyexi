@@ -28,7 +28,7 @@ entity.onMobSpawn = function(mob)
 
     -- only JoJ pops
     if mob:getID() < ID.mob.JAILER_OF_LOVE then
-        xi.mix.jobSpecial.config(mob, { specials = { { id = xi.jsa.MIJIN_GAKURE, hpp = 20 }, }, })
+        xi.mix.jobSpecial.config(mob, { specials = { { id = xi.mobSkill.MIJIN_GAKURE_1, hpp = 20 }, }, })
     end
 end
 

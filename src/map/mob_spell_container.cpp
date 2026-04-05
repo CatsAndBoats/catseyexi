@@ -126,7 +126,7 @@ void CMobSpellContainer::RemoveSpell(SpellID spellId)
 
 // Used in Gambits to see if the Trust can cast the spell
 // Used in mob/automaton AI to see if the spell is castable
-std::optional<SpellID> CMobSpellContainer::GetAvailable(SpellID spellId)
+Maybe<SpellID> CMobSpellContainer::GetAvailable(SpellID spellId)
 {
     auto* spell    = spell::GetSpell(spellId);
     bool  enoughMP = spell->getMPCost() <= m_PMob->health.mp ||
@@ -137,13 +137,13 @@ std::optional<SpellID> CMobSpellContainer::GetAvailable(SpellID spellId)
                     spell->getSkillType() == SKILL_GEOMANCY ||
                     m_PMob->StatusEffectContainer->HasStatusEffect(EFFECT_MANAFONT);
 
-    bool isNotInRecast = !m_PMob->PRecastContainer->Has(RECAST_MAGIC, static_cast<uint16>(spellId));
+    bool isNotInRecast = !m_PMob->PRecastContainer->Has(RECAST_MAGIC, static_cast<Recast>(spellId));
 
-    return (isNotInRecast && enoughMP) ? std::optional<SpellID>(spellId) : std::nullopt;
+    return (isNotInRecast && enoughMP) ? Maybe<SpellID>(spellId) : std::nullopt;
 }
 
 // Used in Gambits to see if the Trust can cast the spell
-std::optional<SpellID> CMobSpellContainer::GetBestAvailable(SPELLFAMILY family)
+Maybe<SpellID> CMobSpellContainer::GetBestAvailable(SPELLFAMILY family)
 {
     std::vector<SpellID> matches;
     auto                 searchInList = [&](std::vector<SpellID>& list)
@@ -158,7 +158,7 @@ std::optional<SpellID> CMobSpellContainer::GetBestAvailable(SPELLFAMILY family)
                             spell->getSkillType() == SKILL_WIND_INSTRUMENT ||
                             spell->getSkillType() == SKILL_STRING_INSTRUMENT ||
                             spell->getSkillType() == SKILL_GEOMANCY;
-            bool isNotInRecast = !m_PMob->PRecastContainer->Has(RECAST_MAGIC, static_cast<uint16>(id));
+            bool isNotInRecast = !m_PMob->PRecastContainer->Has(RECAST_MAGIC, static_cast<Recast>(id));
             if (sameFamily && enoughMP && isNotInRecast)
             {
                 matches.emplace_back(id);
@@ -184,10 +184,10 @@ std::optional<SpellID> CMobSpellContainer::GetBestAvailable(SPELLFAMILY family)
 
     // Assume the highest ID is the best (back of the vector)
     // TODO: These will need to be organised by family, then merged
-    return (!matches.empty()) ? std::optional<SpellID>{ matches.back() } : std::nullopt;
+    return (!matches.empty()) ? Maybe<SpellID>{ matches.back() } : std::nullopt;
 }
 
-std::optional<SpellID> CMobSpellContainer::GetBestIndiSpell(CBattleEntity* PTarget)
+Maybe<SpellID> CMobSpellContainer::GetBestIndiSpell(CBattleEntity* PTarget)
 {
     auto mJob          = PTarget->GetMJob();
     auto mTarget       = PTarget->GetBattleTarget();
@@ -210,8 +210,8 @@ std::optional<SpellID> CMobSpellContainer::GetBestIndiSpell(CBattleEntity* PTarg
     auto magicHitRate   = float(totalMacc - tMaeva) / 10;
     bool mAccBuffNeeded = magicHitRate < 10 ? true : false;
 
-    std::optional<SpellID> choice    = std::nullopt;
-    std::optional<SpellID> subChoice = SpellID::Indi_Regen;
+    Maybe<SpellID> choice    = std::nullopt;
+    Maybe<SpellID> subChoice = SpellID::Indi_Regen;
 
     switch (mJob)
     {
@@ -291,10 +291,10 @@ std::optional<SpellID> CMobSpellContainer::GetBestIndiSpell(CBattleEntity* PTarg
     return choice;
 }
 
-std::optional<SpellID> CMobSpellContainer::GetBestEntrustedSpell(CBattleEntity* PTarget)
+Maybe<SpellID> CMobSpellContainer::GetBestEntrustedSpell(CBattleEntity* PTarget)
 {
-    auto                   mastersJob = PTarget->GetMJob();
-    std::optional<SpellID> choice     = std::nullopt;
+    auto           mastersJob = PTarget->GetMJob();
+    Maybe<SpellID> choice     = std::nullopt;
 
     switch (mastersJob)
     {
@@ -336,7 +336,7 @@ std::optional<SpellID> CMobSpellContainer::GetBestEntrustedSpell(CBattleEntity* 
     return choice;
 }
 
-std::optional<SpellID> CMobSpellContainer::GetBestAgainstTargetWeakness(CBattleEntity* PTarget, SpellID spellId)
+Maybe<SpellID> CMobSpellContainer::GetBestAgainstTargetWeakness(CBattleEntity* PTarget, SpellID spellId)
 {
     // Look up what the target has the _least resistance to_:
     // clang-format off
@@ -353,9 +353,9 @@ std::optional<SpellID> CMobSpellContainer::GetBestAgainstTargetWeakness(CBattleE
     };
     // clang-format on
 
-    std::size_t            weakestIndex     = std::distance(resistances.begin(), std::min_element(resistances.begin(), resistances.end()));
-    std::optional<SpellID> choice           = std::nullopt;
-    auto                   Weakness_Element = weakestIndex + 1;
+    std::size_t    weakestIndex     = std::distance(resistances.begin(), std::min_element(resistances.begin(), resistances.end()));
+    Maybe<SpellID> choice           = std::nullopt;
+    auto           Weakness_Element = weakestIndex + 1;
     if (spell::GetSpell(spellId) != nullptr)
     {
         auto Spell_Element = spell::GetSpell(spellId)->getElement();
@@ -411,7 +411,7 @@ std::optional<SpellID> CMobSpellContainer::GetBestAgainstTargetWeakness(CBattleE
     return !choice ? GetBestAvailable(SPELLFAMILY_NONE) : choice;
 }
 
-std::optional<SpellID> CMobSpellContainer::EnSpellAgainstTargetWeakness(CBattleEntity* PTarget)
+Maybe<SpellID> CMobSpellContainer::EnSpellAgainstTargetWeakness(CBattleEntity* PTarget)
 {
     // Look up what the target has the _least resistance to_:
     // clang-format off
@@ -431,7 +431,7 @@ std::optional<SpellID> CMobSpellContainer::EnSpellAgainstTargetWeakness(CBattleE
     std::size_t weakestIndex = std::distance(resistances.begin(), std::min_element(resistances.begin(), resistances.end()));
 
     // TODO: Figure this out properly:
-    std::optional<SpellID> choice = std::nullopt;
+    Maybe<SpellID> choice = std::nullopt;
     switch (weakestIndex + 1) // Adjust to ignore ELEMENT_NONE
     {
         case ELEMENT_FIRE:
@@ -468,7 +468,7 @@ std::optional<SpellID> CMobSpellContainer::EnSpellAgainstTargetWeakness(CBattleE
     return choice;
 }
 
-std::optional<SpellID> CMobSpellContainer::StormDayAgainstTargetWeakness(CBattleEntity* PTarget)
+Maybe<SpellID> CMobSpellContainer::StormDayAgainstTargetWeakness(CBattleEntity* PTarget)
 {
     // Look up what the target has the _least resistance to_:
     // clang-format off
@@ -488,7 +488,7 @@ std::optional<SpellID> CMobSpellContainer::StormDayAgainstTargetWeakness(CBattle
     std::size_t weakestIndex = std::distance(resistances.begin(), std::min_element(resistances.begin(), resistances.end()));
 
     // TODO: Figure this out properly:
-    std::optional<SpellID> choice = std::nullopt;
+    Maybe<SpellID> choice = std::nullopt;
     switch (weakestIndex + 1) // Adjust to ignore ELEMENT_NONE
     {
         case ELEMENT_FIRE:
@@ -535,7 +535,7 @@ std::optional<SpellID> CMobSpellContainer::StormDayAgainstTargetWeakness(CBattle
     return choice;
 }
 
-std::optional<SpellID> CMobSpellContainer::HelixAgainstTargetWeakness(CBattleEntity* PTarget)
+Maybe<SpellID> CMobSpellContainer::HelixAgainstTargetWeakness(CBattleEntity* PTarget)
 {
     // Look up what the target has the _least resistance to_:
     // clang-format off
@@ -555,7 +555,7 @@ std::optional<SpellID> CMobSpellContainer::HelixAgainstTargetWeakness(CBattleEnt
     std::size_t weakestIndex = std::distance(resistances.begin(), std::min_element(resistances.begin(), resistances.end()));
 
     // TODO: Figure this out properly:
-    std::optional<SpellID> choice = std::nullopt;
+    Maybe<SpellID> choice = std::nullopt;
     switch (weakestIndex + 1) // Adjust to ignore ELEMENT_NONE
     {
         case ELEMENT_FIRE:
@@ -602,10 +602,10 @@ std::optional<SpellID> CMobSpellContainer::HelixAgainstTargetWeakness(CBattleEnt
     return choice;
 }
 
-std::optional<SpellID> CMobSpellContainer::GetStormDay()
+Maybe<SpellID> CMobSpellContainer::GetStormDay()
 {
-    std::optional<SpellID> choice    = std::nullopt;
-    std::size_t            dotwIndex = battleutils::GetDayElement();
+    Maybe<SpellID> choice    = std::nullopt;
+    std::size_t    dotwIndex = battleutils::GetDayElement();
     switch (dotwIndex)
     {
         case ELEMENT_FIRE:
@@ -652,10 +652,10 @@ std::optional<SpellID> CMobSpellContainer::GetStormDay()
     return choice;
 }
 
-std::optional<SpellID> CMobSpellContainer::GetHelixDay()
+Maybe<SpellID> CMobSpellContainer::GetHelixDay()
 {
-    std::optional<SpellID> choice    = std::nullopt;
-    std::size_t            dotwIndex = battleutils::GetDayElement();
+    Maybe<SpellID> choice    = std::nullopt;
+    std::size_t    dotwIndex = battleutils::GetDayElement();
     switch (dotwIndex)
     {
         case ELEMENT_FIRE:
@@ -728,7 +728,7 @@ bool CMobSpellContainer::HasMPSpells() const
     return false;
 }
 
-std::optional<SpellID> CMobSpellContainer::GetAggroSpell()
+Maybe<SpellID> CMobSpellContainer::GetAggroSpell()
 {
     // high chance to return ga spell
     if (HasGaSpells() && xirand::GetRandomNumber(100) < m_PMob->getMobMod(MOBMOD_GA_CHANCE))
@@ -740,7 +740,7 @@ std::optional<SpellID> CMobSpellContainer::GetAggroSpell()
     return GetDamageSpell();
 }
 
-std::optional<SpellID> CMobSpellContainer::GetSpell()
+Maybe<SpellID> CMobSpellContainer::GetSpell()
 {
     // prioritize curing if health low enough
     if (HasHealSpells() && m_PMob->GetHPP() <= m_PMob->getMobMod(MOBMOD_HP_HEAL_CHANCE) &&
@@ -835,7 +835,7 @@ bool CMobSpellContainer::IsAnySpellAvailable()
     return std::ranges::any_of(allLists, hasAvailableSpell);
 }
 
-std::optional<SpellID> CMobSpellContainer::GetGaSpell()
+Maybe<SpellID> CMobSpellContainer::GetGaSpell()
 {
     if (m_gaList.empty())
     {
@@ -845,7 +845,7 @@ std::optional<SpellID> CMobSpellContainer::GetGaSpell()
     return m_gaList[xirand::GetRandomNumber(m_gaList.size())];
 }
 
-std::optional<SpellID> CMobSpellContainer::GetDamageSpell()
+Maybe<SpellID> CMobSpellContainer::GetDamageSpell()
 {
     if (m_damageList.empty())
     {
@@ -855,7 +855,7 @@ std::optional<SpellID> CMobSpellContainer::GetDamageSpell()
     return m_damageList[xirand::GetRandomNumber(m_damageList.size())];
 }
 
-std::optional<SpellID> CMobSpellContainer::GetBuffSpell()
+Maybe<SpellID> CMobSpellContainer::GetBuffSpell()
 {
     if (m_buffList.empty())
     {
@@ -865,7 +865,7 @@ std::optional<SpellID> CMobSpellContainer::GetBuffSpell()
     return m_buffList[xirand::GetRandomNumber(m_buffList.size())];
 }
 
-std::optional<SpellID> CMobSpellContainer::GetDebuffSpell()
+Maybe<SpellID> CMobSpellContainer::GetDebuffSpell()
 {
     if (m_debuffList.empty())
     {
@@ -875,7 +875,7 @@ std::optional<SpellID> CMobSpellContainer::GetDebuffSpell()
     return m_debuffList[xirand::GetRandomNumber(m_debuffList.size())];
 }
 
-std::optional<SpellID> CMobSpellContainer::GetHealSpell()
+Maybe<SpellID> CMobSpellContainer::GetHealSpell()
 {
     if (m_healList.empty())
     {
@@ -885,7 +885,7 @@ std::optional<SpellID> CMobSpellContainer::GetHealSpell()
     return m_healList[xirand::GetRandomNumber(m_healList.size())];
 }
 
-std::optional<SpellID> CMobSpellContainer::GetNaSpell()
+Maybe<SpellID> CMobSpellContainer::GetNaSpell()
 {
     if (m_naList.empty())
     {
@@ -929,7 +929,7 @@ std::optional<SpellID> CMobSpellContainer::GetNaSpell()
     return {};
 }
 
-std::optional<SpellID> CMobSpellContainer::GetSevereSpell()
+Maybe<SpellID> CMobSpellContainer::GetSevereSpell()
 {
     if (m_severeList.empty())
     {

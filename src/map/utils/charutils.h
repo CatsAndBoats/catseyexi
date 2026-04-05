@@ -27,6 +27,8 @@
 #include "items/item_equipment.h"
 #include "zone.h"
 
+using Recalculate = xi::Flag<struct RecalculateTag>;
+
 struct Charge_t;
 enum class MissionLog : uint8_t;
 enum class QuestLog : uint8_t;
@@ -70,7 +72,8 @@ namespace charutils
 {
 
 void LoadExpTable();
-auto LoadChar(uint32 charId) -> std::unique_ptr<CCharEntity>;
+void SetExpDifficultyCurve(std::vector<std::pair<uint16, EMobDifficulty>>& curve, std::pair<uint16, uint8>& incrediblyEasyPreyData);
+auto LoadChar(Scheduler& scheduler, MapConfig config, uint32 charId) -> std::unique_ptr<CCharEntity>;
 void LoadSpells(CCharEntity* PChar);
 void LoadInventory(CCharEntity* PChar);
 void LoadEquip(CCharEntity* PChar);
@@ -90,9 +93,9 @@ void UpdateSubJob(CCharEntity* PChar);
 
 void SetLevelRestriction(CCharEntity* PChar, uint8 lvl);
 
-EMobDifficulty CheckMob(uint8 charlvl, uint8 moblvl);
+EMobDifficulty CheckMob(uint8 charlvl, CBattleEntity* PMob);
 
-uint32 GetBaseExp(uint8 charlvl, uint8 moblvl);
+uint32 GetBaseExp(uint8 charlvl, int16 moblvl);
 uint32 GetExpNEXTLevel(uint8 charlvl);
 
 void DelExperiencePoints(CCharEntity* PChar, float retainpct, uint16 forcedXpLoss);
@@ -130,8 +133,7 @@ void   CheckEquipLogic(CCharEntity* PChar, SCRIPTTYPE ScriptType, uint32 param);
 void   SaveJobChangeGear(CCharEntity* PChar);
 void   LoadJobChangeGear(CCharEntity* PChar);
 void   EquipItem(CCharEntity* PChar, uint8 slotID, uint8 equipSlotID, uint8 containerID);
-void   UnequipItem(CCharEntity* PChar, uint8 equipSlotID,
-                   bool update = true); // call with update == false to prevent calls to UpdateHealth() - used for correct handling of stats on armor swaps
+void   UnequipItem(CCharEntity* PChar, uint8 equipSlotID, xi::Flag<struct RecalculateTag> recalculate = Recalculate::Yes);
 bool   hasSlotEquipped(CCharEntity* PChar, uint8 equipSlotID);
 void   RemoveSub(CCharEntity* PChar);
 bool   EquipArmor(CCharEntity* PChar, uint8 slotID, uint8 equipSlotID, uint8 containerID);

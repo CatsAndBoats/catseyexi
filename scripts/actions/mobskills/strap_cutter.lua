@@ -9,7 +9,7 @@ mobskillObject.onMobSkillCheck = function(target, mob, skill)
     return 0
 end
 
-mobskillObject.onMobWeaponSkill = function(target, mob, skill)
+mobskillObject.onMobWeaponSkill = function(mob, target, skill, action)
     if not target:isPC() then
         skill:setMsg(xi.msg.basic.SKILL_NO_EFFECT)
         return
@@ -50,7 +50,7 @@ mobskillObject.onMobWeaponSkill = function(target, mob, skill)
         target:delStatusEffectSilent(xi.effect.ENCUMBRANCE_I)
     end
 
-    target:addStatusEffectEx(xi.effect.ENCUMBRANCE_I, xi.effect.ENCUMBRANCE_I, power, 0, 60)
+    target:addStatusEffect(xi.effect.ENCUMBRANCE_I, { power = power, duration = 60, origin = mob })
     skill:setMsg(xi.msg.basic.USES)
 end
 

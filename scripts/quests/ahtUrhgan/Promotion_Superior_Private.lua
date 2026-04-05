@@ -3,6 +3,8 @@
 -- Log ID: 6, Quest ID: 91
 -- Naja Salaheem !pos 26 -8 -45.5 50
 -----------------------------------
+local ahturhganID = zones[xi.zone.AHT_URHGAN_WHITEGATE]
+-----------------------------------
 
 local quest = Quest:new(xi.questLog.AHT_URHGAN, xi.quest.id.ahtUrhgan.PROMOTION_SUPERIOR_PRIVATE)
 
@@ -27,10 +29,12 @@ quest.sections =
             {
                 [5020] = function(player, csid, option, npc)
                     quest:begin(player)
+                    quest:setMustZone(player)
                 end,
             },
         },
     },
+
     {
         check = function(player, status, vars)
             return status == xi.questStatus.QUEST_ACCEPTED and not player:hasKeyItem(xi.ki.DARK_RIDER_HOOFPRINT)
@@ -38,7 +42,16 @@ quest.sections =
 
         [xi.zone.AHT_URHGAN_WHITEGATE] =
         {
-            ['Naja_Salaheem'] = quest:event(5021, { text_table = 0 }),
+            ['Naja_Salaheem'] =
+            {
+                onTrigger = function(player, npc)
+                    if quest:getMustZone(player) then
+                        return quest:event(5021, { [0] = 1, [1] = 1, text_table = 0 }):oncePerZone()
+                    else
+                        return quest:event(5021, { text_table = 0 }):oncePerZone()
+                    end
+                end
+            }
         },
 
         [xi.zone.BHAFLAU_THICKETS] =
@@ -57,8 +70,8 @@ quest.sections =
         {
             ['Warhorse_Hoofprint'] = quest:keyItem(xi.ki.DARK_RIDER_HOOFPRINT)
         },
-
     },
+
     {
         check = function(player, status, vars)
             return status == xi.questStatus.QUEST_ACCEPTED and player:hasKeyItem(xi.ki.DARK_RIDER_HOOFPRINT)
@@ -75,6 +88,7 @@ quest.sections =
                         player:setCharVar('AssaultPromotion', 0)
                         player:delKeyItem(xi.ki.PFC_WILDCAT_BADGE)
                         player:delKeyItem(xi.ki.DARK_RIDER_HOOFPRINT)
+                        player:messageSpecial(ahturhganID.text.SUPERIOR_PRIVATE)
                     end
                 end,
             },

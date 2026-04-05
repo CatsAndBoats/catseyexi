@@ -24,7 +24,9 @@
 #include "common/ipp.h"
 #include <map>
 
+class CZone;
 class CCharEntity;
+class Scheduler;
 struct MapSession;
 
 class MapSessionContainer

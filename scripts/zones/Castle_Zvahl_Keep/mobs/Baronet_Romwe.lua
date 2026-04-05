@@ -11,19 +11,21 @@ local entity = {}
 
 entity.phList =
 {
-    [ID.mob.BARONET_ROMWE - 2] = ID.mob.BARONET_ROMWE, -- -317.070 -52.125 14.052
-    [ID.mob.BARONET_ROMWE - 1] = ID.mob.BARONET_ROMWE, -- -335.444 -52.125 15.148
+    [ID.mob.BARONET_ROMWE - 1] = ID.mob.BARONET_ROMWE, -- Confirmed on retail
 }
 
-entity.onMobSpawn = function(mob)
+entity.onMobInitialize = function(mob)
     mob:addImmunity(xi.immunity.DARK_SLEEP)
     mob:addImmunity(xi.immunity.LIGHT_SLEEP)
+    mob:addImmunity(xi.immunity.SILENCE)
     mob:addImmunity(xi.immunity.TERROR)
 end
 
 entity.onMobDeath = function(mob, player, optParams)
-    xi.hunts.checkHunt(mob, player, 353)
-    player:addTitle(xi.title.HELLSBANE)
+    if player then
+        player:addTitle(xi.title.HELLSBANE)
+        xi.hunts.checkHunt(mob, player, 353)
+    end
 end
 
 return entity

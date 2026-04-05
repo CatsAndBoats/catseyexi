@@ -56,11 +56,12 @@ entity.onTrade = function(player, npc, trade)
     end
 end
 
+entity.onTrigger = function(player, npc)
+    player:messageSpecial(ID.text.FRESH_RABBIT_TRACKS)
+end
+
 local function moveFootprint(npc)
-    -- ffxiclopedia's pages for Black Coney and White Coney say 7 and 5 Earth seconds respectively, in game it is very fast
-    -- https://ffxiclopedia.fandom.com/wiki/Black_Coney
-    -- https://ffxiclopedia.fandom.com/wiki/White_Coney
-    -- BG Wiki has no info. For now, triggers every 3 vana minutes
+    -- Set to move every 5 vana minutes as observed on retail
 
     local currentPoint = npc:getLocalVar('currentPoint')
     local nextPoint = math.random(1, 17)

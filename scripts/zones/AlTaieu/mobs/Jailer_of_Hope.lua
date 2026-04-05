@@ -36,7 +36,7 @@ entity.onMobSpawn = function(mob)
     xi.mix.jobSpecial.config(mob, {
         specials =
         {
-            { id = xi.jsa.MIGHTY_STRIKES, cooldown = 90, hpp = math.random(85, 95) }, -- 'May use Mighty Strikes multiple times.'
+            { id = xi.mobSkill.MIGHTY_STRIKES_1, cooldown = 90, hpp = math.random(85, 95) }, -- 'May use Mighty Strikes multiple times.'
         },
     })
 
@@ -77,7 +77,7 @@ entity.onMobFight = function(mob, target)
     end
 end
 
-entity.onMobWeaponSkill = function(target, mob, skill)
+entity.onMobWeaponSkill = function(mob, target, skill, action)
     local skillId = skill:getID()
     if skillId == xi.mobSkill.PLASMA_CHARGE then -- Set spell list for Burst2/Thundaga3 upon using Plasma Charge. Allow for 60 seconds.
         mob:setSpellList(140)

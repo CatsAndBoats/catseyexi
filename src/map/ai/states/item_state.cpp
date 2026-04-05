@@ -80,7 +80,7 @@ CItemState::CItemState(CCharEntity* PEntity, const uint16 targid, const uint8 lo
 
     if (!m_PItem)
     {
-        throw CStateInitException(std::make_unique<GP_SERV_COMMAND_BATTLE_MESSAGE>(m_PEntity, m_PEntity, 0, 0, MSGBASIC_UNABLE_TO_USE_ITEM));
+        throw CStateInitException(std::make_unique<GP_SERV_COMMAND_BATTLE_MESSAGE>(m_PEntity, m_PEntity, 0, 0, MsgBasic::UnableToUseItem));
     }
 
     UpdateTarget(PEntity->IsValidTarget(targid, m_PItem->getValidTarget(), m_errorMsg));
@@ -111,7 +111,7 @@ CItemState::CItemState(CCharEntity* PEntity, const uint16 targid, const uint8 lo
             {
                 param = m_PItem->getFlag() & ITEM_FLAG_SCROLL ? m_PItem->getSubID() : m_PItem->getID();
             }
-            throw CStateInitException(std::make_unique<GP_SERV_COMMAND_BATTLE_MESSAGE>(m_PEntity, PTarget ? PTarget : m_PEntity, param, value, static_cast<MSGBASIC_ID>(error)));
+            throw CStateInitException(std::make_unique<GP_SERV_COMMAND_BATTLE_MESSAGE>(m_PEntity, PTarget ? PTarget : m_PEntity, param, value, static_cast<MsgBasic>(error)));
         }
     }
 
@@ -132,7 +132,7 @@ CItemState::CItemState(CCharEntity* PEntity, const uint16 targid, const uint8 lo
                    .results = {
                     {
                            .param     = m_PItem->getID(),
-                           .messageID = MSGBASIC_ITEM_USE,
+                           .messageID = MsgBasic::ItemUse,
                     },
                 },
             },
@@ -145,7 +145,7 @@ CItemState::CItemState(CCharEntity* PEntity, const uint16 targid, const uint8 lo
     m_PItem->setSubType(ITEM_LOCKED);
 
     m_PEntity->pushPacket<GP_SERV_COMMAND_ITEM_LIST>(m_PItem, ItemLockFlg::NoSelect);
-    m_PEntity->pushPacket<GP_SERV_COMMAND_ITEM_SAME>();
+    m_PEntity->pushPacket<GP_SERV_COMMAND_ITEM_SAME>(m_PEntity);
 }
 
 void CItemState::UpdateTarget(CBaseEntity* target)
@@ -160,6 +160,11 @@ void CItemState::UpdateTarget(const uint16 targid)
 {
     CState::UpdateTarget(targid);
     CState::SetTarget(targid);
+
+    if (!m_PItem)
+    {
+        return;
+    }
 
     // Special case for Soultrapper usage:
     // Valid to use on mobs that are:
@@ -193,8 +198,14 @@ auto CItemState::Update(const timer::time_point tick) -> bool
 
         if (!m_interrupted)
         {
-            FinishItem(action);
             m_PEntity->PAI->EventHandler.triggerListener("ITEM_USE", m_PEntity, m_PItem, &action);
+
+            bool consumed = FinishItem(action);
+            if (consumed)
+            {
+                m_PItem = nullptr;
+            }
+
             // Only send packet if action was populated (e.g. interrupts return early)
             if (!action.targets.empty())
             {
@@ -225,7 +236,7 @@ void CItemState::Cleanup(timer::time_point tick)
 {
     m_PEntity->UContainer->Clean();
 
-    if ((m_interrupted || !IsCompleted()) && !m_PItem->isType(ITEM_EQUIPMENT))
+    if (m_PItem && (m_interrupted || !IsCompleted()) && !m_PItem->isType(ITEM_EQUIPMENT))
     {
         m_PItem->setSubType(ITEM_UNLOCKED);
     }
@@ -242,7 +253,7 @@ void CItemState::Cleanup(timer::time_point tick)
     }
 
     m_PEntity->pushPacket<GP_SERV_COMMAND_ITEM_ATTR>(m_PItem, static_cast<CONTAINER_ID>(m_location), m_slot);
-    m_PEntity->pushPacket<GP_SERV_COMMAND_ITEM_SAME>();
+    m_PEntity->pushPacket<GP_SERV_COMMAND_ITEM_SAME>(m_PEntity);
 }
 
 auto CItemState::CanChangeState() -> bool
@@ -252,6 +263,11 @@ auto CItemState::CanChangeState() -> bool
 
 void CItemState::TryInterrupt(CBattleEntity* PTarget)
 {
+    if (!m_PItem)
+    {
+        return;
+    }
+
     // todo: interrupt on being hit
 
     if (PTarget)
@@ -263,18 +279,18 @@ void CItemState::TryInterrupt(CBattleEntity* PTarget)
         UpdateTarget(m_PEntity->IsValidTarget(m_targid, m_PItem->getValidTarget(), m_errorMsg));
     }
 
-    uint16 msg = MSGBASIC_CANNOT_USE_ITEMS;
+    auto msg = MsgBasic::CannotUseItems;
 
     if (HasMoved() || m_PEntity->StatusEffectContainer->HasPreventActionEffect())
     {
         ActionInterrupts::ItemInterrupt(m_PEntity);
-        msg           = MSGBASIC_ITEM_FAILS_TO_ACTIVATE;
+        msg           = MsgBasic::ItemFailsToActivate;
         m_interrupted = true;
     }
     else if (battleutils::IsParalyzed(m_PEntity))
     {
         ActionInterrupts::ItemParalyzed(m_PEntity, PTarget);
-        msg           = MSGBASIC_NONE; // The action packet already notifies.
+        msg           = MsgBasic::None; // The action packet already notifies.
         m_interrupted = true;
     }
     else if (!GetTarget())
@@ -284,13 +300,13 @@ void CItemState::TryInterrupt(CBattleEntity* PTarget)
     else if (battleutils::IsIntimidated(m_PEntity, static_cast<CBattleEntity*>(GetTarget())))
     {
         ActionInterrupts::ItemIntimidated(m_PEntity, PTarget);
-        msg           = MSGBASIC_NONE; // The action packet already notifies.
+        msg           = MsgBasic::None; // The action packet already notifies.
         m_interrupted = true;
     }
 
-    if (m_interrupted && !m_errorMsg && msg != MSGBASIC_NONE)
+    if (m_interrupted && !m_errorMsg && msg != MsgBasic::None)
     {
-        m_errorMsg = std::make_unique<GP_SERV_COMMAND_BATTLE_MESSAGE>(m_PEntity, m_PEntity, m_PItem->getID(), 0, static_cast<MSGBASIC_ID>(msg));
+        m_errorMsg = std::make_unique<GP_SERV_COMMAND_BATTLE_MESSAGE>(m_PEntity, m_PEntity, m_PItem->getID(), 0, static_cast<MsgBasic>(msg));
     }
 }
 
@@ -312,9 +328,9 @@ void CItemState::InterruptItem(action_t& action)
     }
 }
 
-void CItemState::FinishItem(action_t& action)
+auto CItemState::FinishItem(action_t& action) -> bool
 {
-    m_PEntity->OnItemFinish(*this, action);
+    return m_PEntity->OnItemFinish(*this, action);
 }
 
 auto CItemState::HasMoved() const -> bool

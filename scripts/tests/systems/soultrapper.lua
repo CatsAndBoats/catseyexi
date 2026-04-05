@@ -62,6 +62,33 @@ describe('Soultrapper', function()
         player.assert.no:hasItem(xi.item.SOUL_PLATE)
     end)
 
+    it('truncates long mob names to match retail encoding', function()
+        -- Thunder_Elemental -> Thunder_Element -> ThunderElement
+        local stormPlayer = xi.test.world:spawnPlayer(
+        {
+            job = xi.job.SMN,
+            level = 75,
+            zone = xi.zone.RUAUN_GARDENS,
+        })
+
+        stormPlayer:addItem(xi.item.SOULTRAPPER_2000)
+        stormPlayer:addItem(xi.item.BLANK_SOUL_PLATE, 1)
+        stormPlayer:equipItem(xi.item.SOULTRAPPER_2000)
+        stormPlayer:equipItem(xi.item.BLANK_SOUL_PLATE)
+
+        local elemental = stormPlayer.entities:moveTo('Thunder_Elemental')
+        xi.test.world:skipTime(31)
+        stormPlayer.actions:useItem(elemental, stormPlayer:findItem(xi.item.SOULTRAPPER_2000):getSlotID())
+        xi.test.world:skipTime(1)
+        xi.test.world:tickEntity(stormPlayer)
+
+        local plate = stormPlayer:findItem(xi.item.SOUL_PLATE)
+        assert(plate)
+
+        local ex = plate:getExData()
+        assert(ex.signature == 'ThunderElement')
+    end)
+
     it('can be reused when cooldown reaches 0', function()
         -- Take first picture
         xi.test.world:skipTime(31)

@@ -29,7 +29,8 @@
 #include "lua_test_entity.h"
 
 #include <memory>
-#include <optional>
+
+#include <common/types/maybe.h>
 
 enum ZONEID : uint16;
 
@@ -45,7 +46,7 @@ public:
     void tick();
     void gotoZone(ZONEID zoneId, sol::optional<sol::table> pos);
     auto isPendingZone() const -> bool;
-    auto getItemInvSlot(uint16 itemId, uint8 quantity) const -> std::optional<uint16>;
+    auto getItemInvSlot(uint16 itemId, uint8 quantity) const -> Maybe<uint16>;
     void claimAndKillMob(const sol::object& mobQuery, sol::optional<sol::table> params);
     void claimAndKillMobs(sol::variadic_args mobQueries);
 
@@ -57,6 +58,8 @@ public:
 
     auto testChar() const -> TestChar*;
     auto simulation() const -> CLuaSimulation*;
+
+    auto engine() -> MapEngine*;
 
     static void Register();
 

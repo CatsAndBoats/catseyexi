@@ -49,16 +49,15 @@ public:
     uint8           getFlag() const;
     timer::duration getAnimationTime() const;
     timer::duration getActivationTime() const;
-    auto            getMsg() const -> MSGBASIC_ID;
+    auto            getMsg() const -> MsgBasic;
     auto            getSkillFinishCategory() const -> ActionCategory;
-    auto            getAoEMsg() const -> MSGBASIC_ID;
     uint16          getValidTargets() const;
     int16           getTP() const;
     auto            getHP() const -> int32;
     uint8           getHPP() const;
     uint16          getTotalTargets() const;
     uint32          getPrimaryTargetID() const;
-    auto            getFinalAnimationSub() -> std::optional<uint8>;
+    auto            getFinalAnimationSub() -> Maybe<uint8>;
     uint16          getMsgForAction() const;
     float           getRadius() const;
     int16           getParam() const;
@@ -80,7 +79,7 @@ public:
     void setFlag(uint8 flag);
     void setAnimationTime(timer::duration AnimationTime);
     void setActivationTime(timer::duration ActivationTime);
-    void setMsg(uint16 msg);
+    void setMsg(MsgBasic msg);
     void setSkillFinishCategory(uint8 category);
     void setValidTargets(uint16 targ);
     void setTP(int16 tp);
@@ -111,7 +110,7 @@ private:
     timer::duration m_AnimationTime;  // how long the tp animation lasts
     timer::duration m_ActivationTime; // how long the pet prepares the tp move for
     uint16          m_ValidTarget;
-    uint16          m_Message; // message param, scripters can edit this depending on self/resist/etc.
+    MsgBasic        m_Message; // message param, scripters can edit this depending on self/resist/etc.
     uint8           m_Flag;
     int16           m_Param;
     uint8           m_SkillFinishCategory;
@@ -128,7 +127,7 @@ private:
     uint16 m_TotalTargets;
     uint32 m_PrimaryTargetID; // primary target ID
 
-    std::optional<uint8> m_FinalAnimationSub; // If non-null, entity will get this new animation sub after state exits
+    Maybe<uint8> m_FinalAnimationSub; // If non-null, entity will get this new animation sub after state exits
 };
 
 #endif

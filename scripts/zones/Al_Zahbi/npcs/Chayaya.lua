@@ -10,23 +10,23 @@ local entity = {}
 entity.onTrigger = function(player, npc)
     local stock =
     {
-        { 17307,    10, }, -- Dart
-        { 17308,    60, }, -- Hawkeye
-        { 17313,  1204, }, -- Grenade
-        { 17320,     8, }, -- Iron Arrow
-        { 5477,  68000, }, -- Warrior Die
-        { 5478,  22400, }, -- Monk Die
-        { 5479,   5000, }, -- White Mage Die
-        { 5480, 108000, }, -- Black Mage Die
-        { 5481,  62000, }, -- Red Mage Die
-        { 5482,  50400, }, -- Thief Die
-        { 5483,  90750, }, -- Paladin Die
-        { 5484,   2205, }, -- Dark Knight Die
-        { 5485,  26600, }, -- Beastmaster Die
-        { 5486,  12780, }, -- Bard Die
-        { 5487,   1300, }, -- Ranger Die
-        { 5495,  63375, }, -- Dancer Die
-        { 5496,  68250, }, -- Scholar Die
+        { xi.item.DART,                10, },
+        { xi.item.HAWKEYE,             60, },
+        { xi.item.GRENADE,           1204, },
+        { xi.item.IRON_ARROW,           8, },
+        { xi.item.WARRIOR_DIE,      68000, },
+        { xi.item.MONK_DIE,         22400, },
+        { xi.item.WHITE_MAGE_DIE,    5000, },
+        { xi.item.BLACK_MAGE_DIE,  108000, },
+        { xi.item.RED_MAGE_DIE,     62000, },
+        { xi.item.THIEF_DIE,        50400, },
+        { xi.item.PALADIN_DIE,      90750, },
+        { xi.item.DARK_KNIGHT_DIE,   2205, },
+        { xi.item.BEASTMASTER_DIE,  26600, },
+        { xi.item.BARD_DIE,         12780, },
+        { xi.item.RANGER_DIE,        1300, },
+        { xi.item.DANCER_DIE,       63375, },
+        { xi.item.SCHOLAR_DIE,      68250, },
     }
 
     player:showText(npc, ID.text.CHAYAYA_SHOP_DIALOG)

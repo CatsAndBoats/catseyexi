@@ -11,11 +11,17 @@ mixins =
 ---@type TMobEntity
 local entity = {}
 
+entity.onMobInitialize = function(mob)
+    mob:setMobMod(xi.mobMod.GIL_MIN, 3000)
+    mob:setMobMod(xi.mobMod.GIL_MAX, 3000)
+end
+
 entity.onMobSpawn = function(mob)
+    mob:setMobMod(xi.mobMod.BASE_DAMAGE_MULTIPLIER, 150)
     xi.mix.jobSpecial.config(mob, {
         specials =
         {
-            { id = xi.jsa.MANAFONT, hpp = math.random(40, 95) },
+            { id = xi.mobSkill.MANAFONT_1, hpp = math.random(40, 95) },
         },
     })
 end

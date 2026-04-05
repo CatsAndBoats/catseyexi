@@ -10,7 +10,7 @@ mobskillObject.onMobSkillCheck = function(target, mob, skill)
     return 0
 end
 
-mobskillObject.onMobWeaponSkill = function(target, mob, skill)
+mobskillObject.onMobWeaponSkill = function(mob, target, skill, action)
     local power = math.floor(mob:getMainLvl() / 4)
     local tick = 10
     local duration = 50
@@ -24,13 +24,13 @@ mobskillObject.onMobWeaponSkill = function(target, mob, skill)
     target:delStatusEffect(xi.effect.MND_BOOST)
     target:delStatusEffect(xi.effect.CHR_BOOST)
 
-    target:addStatusEffect(xi.effect.STR_BOOST, power, tick, duration + bonusTime)
-    target:addStatusEffect(xi.effect.DEX_BOOST, power, tick, duration + bonusTime)
-    target:addStatusEffect(xi.effect.VIT_BOOST, power, tick, duration + bonusTime)
-    target:addStatusEffect(xi.effect.AGI_BOOST, power, tick, duration + bonusTime)
-    target:addStatusEffect(xi.effect.INT_BOOST, power, tick, duration + bonusTime)
-    target:addStatusEffect(xi.effect.MND_BOOST, power, tick, duration + bonusTime)
-    target:addStatusEffect(xi.effect.CHR_BOOST, power, tick, duration + bonusTime)
+    target:addStatusEffect(xi.effect.STR_BOOST, { power = power, duration = duration + bonusTime, origin = mob, tick = tick })
+    target:addStatusEffect(xi.effect.DEX_BOOST, { power = power, duration = duration + bonusTime, origin = mob, tick = tick })
+    target:addStatusEffect(xi.effect.VIT_BOOST, { power = power, duration = duration + bonusTime, origin = mob, tick = tick })
+    target:addStatusEffect(xi.effect.AGI_BOOST, { power = power, duration = duration + bonusTime, origin = mob, tick = tick })
+    target:addStatusEffect(xi.effect.INT_BOOST, { power = power, duration = duration + bonusTime, origin = mob, tick = tick })
+    target:addStatusEffect(xi.effect.MND_BOOST, { power = power, duration = duration + bonusTime, origin = mob, tick = tick })
+    target:addStatusEffect(xi.effect.CHR_BOOST, { power = power, duration = duration + bonusTime, origin = mob, tick = tick })
 
     skill:setMsg(xi.msg.basic.STATUS_BOOST_2)
 

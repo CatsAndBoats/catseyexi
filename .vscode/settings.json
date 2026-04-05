@@ -335,6 +335,7 @@
         "GetSynergyRecipeByID",
         "GetSynergyRecipeByTrade",
         "ReloadSynthRecipes",
+        "LoadExpDifficultyCurves",
     ],
     "Lua.diagnostics.disable": [
         "lowercase-global"

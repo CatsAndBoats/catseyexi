@@ -9,13 +9,18 @@ local entity = {}
 
 entity.onMobInitialize = function(mob)
     mob:setMobMod(xi.mobMod.IDLE_DESPAWN, 300)
+    mob:setMobMod(xi.mobMod.H2H_SINGLE_SWING, 1)
+    mob:setMod(xi.mod.STORETP, 125)
 end
 
 entity.onMobSpawn = function(mob)
-    mob:addMod(xi.mod.REGAIN, 50)
+    mob:setMod(xi.mod.SLOW_RES_RANK, 8)
+    mob:setMod(xi.mod.DARK_SLEEP_RES_RANK, 10)
+    mob:setMobMod(xi.mobMod.NO_H2H_PENALTY, 1)
+    mob:setMobMod(xi.mobMod.BASE_DAMAGE_MULTIPLIER, 150)
 end
 
-entity.onMobMobskillChoose = function(mob, target)
+entity.onMobMobskillChoose = function(mob, target, skillId)
     -- Below 30% Bugbear Matman heavily prefers Heavy Whisk
     if mob:getHPP() <= 30 and math.random(1, 100) <= 60 then
         return 358

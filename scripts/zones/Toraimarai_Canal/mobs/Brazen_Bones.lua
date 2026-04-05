@@ -14,7 +14,7 @@ entity.spawnPoints =
 
 entity.onMobSpawn = function(mob)
     mob:setMobMod(xi.mobMod.AUTO_SPIKES, 1)
-    mob:addStatusEffect(xi.effect.ICE_SPIKES, 50, 0, 0)
+    mob:addStatusEffect(xi.effect.ICE_SPIKES, { power = 50, origin = mob })
     mob:getStatusEffect(xi.effect.ICE_SPIKES):setEffectFlags(xi.effectFlag.DEATH)
     mob:setMobMod(xi.mobMod.ADD_EFFECT, 1)
     mob:setMod(xi.mod.ICE_MEVA, 100)
@@ -41,7 +41,16 @@ entity.onSpikesDamage = function(mob, target, damage)
 end
 
 entity.onAdditionalEffect = function(mob, target, damage)
-    return xi.mob.onAddEffect(mob, target, damage, xi.mob.ae.ENBLIZZARD)
+    local pTable =
+    {
+        chance         = 100,
+        attackType     = xi.attackType.MAGICAL,
+        magicalElement = xi.element.ICE,
+        basePower      = math.floor(damage / 2),
+        actorStat      = xi.mod.INT,
+    }
+
+    return xi.combat.action.executeAddEffectDamage(mob, target, pTable)
 end
 
 entity.onMobFight = function(mob, target)

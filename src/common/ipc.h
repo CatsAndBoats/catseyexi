@@ -22,13 +22,13 @@
 #pragma once
 
 #include <cstdint>
-#include <optional>
 #include <span>
 #include <string>
 #include <type_traits>
 #include <vector>
 
-#include "cbasetypes.h"
+#include <common/cbasetypes.h>
+#include <common/types/maybe.h>
 
 //
 // Forward declarations (before including ipc headers)
@@ -44,10 +44,10 @@ template <typename T>
 auto toBytesWithHeader(const T& object) -> std::vector<uint8>;
 
 template <typename T>
-auto fromBytes(const std::span<const uint8> message) -> std::optional<T>;
+auto fromBytes(const std::span<const uint8> message) -> Maybe<T>;
 
 template <typename T>
-auto fromBytesWithHeader(const std::span<const uint8> message) -> std::optional<T>;
+auto fromBytesWithHeader(const std::span<const uint8> message) -> Maybe<T>;
 
 } // namespace ipc
 
@@ -87,7 +87,7 @@ auto toBytesWithHeader(const T& object) -> std::vector<uint8>
 }
 
 template <typename T>
-auto fromBytes(const std::span<const uint8> message) -> std::optional<T>
+auto fromBytes(const std::span<const uint8> message) -> Maybe<T>
 {
     if (message.empty())
     {
@@ -105,7 +105,7 @@ auto fromBytes(const std::span<const uint8> message) -> std::optional<T>
 }
 
 template <typename T>
-auto fromBytesWithHeader(const std::span<const uint8> message) -> std::optional<T>
+auto fromBytesWithHeader(const std::span<const uint8> message) -> Maybe<T>
 {
     if (message.empty())
     {

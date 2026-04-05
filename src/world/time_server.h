@@ -21,6 +21,8 @@
 
 #pragma once
 
+#include <common/scheduler.h>
+
 class WorldEngine;
 
-void time_server(const WorldEngine* worldServer);
+auto time_server(const WorldEngine* worldServer) -> Task<void>;

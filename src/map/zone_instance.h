@@ -44,8 +44,8 @@ public:
 
     virtual void WideScan(CCharEntity* PChar, uint16 radius) override;
 
-    virtual void DecreaseZoneCounter(CCharEntity* PChar) override; // add a character to the zone
-    virtual void IncreaseZoneCounter(CCharEntity* PChar) override; // remove a character from the zone
+    virtual void DecreaseZoneCounter(CCharEntity* PChar) override; // Remove a character to the zone
+    virtual void IncreaseZoneCounter(CCharEntity* PChar) override; // Add a character from the zone
 
     virtual void InsertNPC(CBaseEntity* PNpc) override;
     virtual void InsertMOB(CBaseEntity* PMob) override;
@@ -62,8 +62,8 @@ public:
 
     virtual void UpdateEntityPacket(CBaseEntity* PEntity, ENTITYUPDATE type, uint8 updatemask, bool alwaysInclude = false) override;
 
-    virtual void ZoneServer(timer::time_point tick) override;
-    virtual void CheckTriggerAreas() override;
+    virtual auto ZoneServer(timer::time_point tick) -> Task<void> override;
+    virtual auto CheckTriggerAreas() -> Task<void> override;
 
     void ForEachChar(const std::function<void(CCharEntity*)>& func) override;
     void ForEachCharInstance(CBaseEntity* PEntity, const std::function<void(CCharEntity*)>& func) override;
@@ -80,7 +80,7 @@ public:
 
     CInstance* CreateInstance(uint32 instanceid);
 
-    CZoneInstance(ZONEID ZoneID, REGION_TYPE RegionID, CONTINENT_TYPE ContinentID, uint8 levelRestriction);
+    CZoneInstance(Scheduler& scheduler, MapConfig config, ZONEID ZoneID, REGION_TYPE RegionID, CONTINENT_TYPE ContinentID, uint8 levelRestriction);
     ~CZoneInstance() override;
 
 private:

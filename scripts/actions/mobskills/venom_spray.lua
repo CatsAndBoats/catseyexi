@@ -10,9 +10,10 @@ mobskillObject.onMobSkillCheck = function(target, mob, skill)
     return 0
 end
 
-mobskillObject.onMobWeaponSkill = function(target, mob, skill)
+mobskillObject.onMobWeaponSkill = function(mob, target, skill, action)
     local power    = 15
     local duration = 120
+
     if mob:isNM() then
         power = 25
     end

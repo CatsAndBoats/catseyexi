@@ -19,13 +19,12 @@
 ===========================================================================
 */
 
-#ifndef _TIMESERVER_H
-#define _TIMESERVER_H
+#pragma once
 
-#include "common/cbasetypes.h"
-#include "common/task_manager.h"
-#include "common/timer.h"
+#include <common/cbasetypes.h>
+#include <common/scheduler.h>
+#include <common/timer.h>
 
-int32 time_server(timer::time_point tick, CTaskManager::CTask*);
+#include "map_config.h"
 
-#endif
+auto time_server(Scheduler& scheduler, MapConfig config) -> Task<void>;

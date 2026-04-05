@@ -21,6 +21,8 @@
 
 #pragma once
 
+#include <common/types/maybe.h>
+
 #include <sol/sol.hpp>
 
 class CLuaBaseEntity;
@@ -32,9 +34,9 @@ public:
     CLuaClientEntityPairEntities(CLuaClientEntityPair* parent);
     ~CLuaClientEntityPairEntities() = default;
 
-    auto get(const sol::object& entityQuery) const -> std::optional<CLuaTestEntity>;
-    auto moveTo(const sol::object& entityQuery) const -> std::optional<CLuaTestEntity>;
-    auto gotoAndTrigger(const sol::object& entityQuery, const sol::optional<sol::table>& expectedEvent) const -> std::optional<CLuaTestEntity>;
+    auto get(const sol::object& entityQuery) const -> Maybe<CLuaTestEntity>;
+    auto moveTo(const sol::object& entityQuery) const -> Maybe<CLuaTestEntity>;
+    auto gotoAndTrigger(const sol::object& entityQuery, const sol::optional<sol::table>& expectedEvent) const -> Maybe<CLuaTestEntity>;
 
     static void Register();
 

@@ -6,14 +6,14 @@
 local mobskillObject = {}
 
 mobskillObject.onMobSkillCheck = function(target, mob, skill)
-    if mob:getPool() == xi.mobPools.QNAERN_RDM and mob:getHPP() <= 70 then
+    if mob:getPool() == xi.mobPool.QNAERN_RDM and mob:getHPP() <= 70 then
         return 0
     else
         return 1
     end
 end
 
-mobskillObject.onMobWeaponSkill = function(target, mob, skill)
+mobskillObject.onMobWeaponSkill = function(mob, target, skill, action)
     xi.mobskills.mobBuffMove(mob, xi.effect.CHAINSPELL, 1, 0, 60)
 
     skill:setMsg(xi.msg.basic.USES)

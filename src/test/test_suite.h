@@ -32,7 +32,7 @@ public:
     explicit TestSuite(const std::string& name, const std::string& fullPath = "", TestSuite* parent = nullptr);
 
     auto addChildSuite(const std::string& name) -> TestSuite&;
-    auto addTestCase(const std::string& name, std::optional<sol::protected_function> func) -> TestCase&;
+    auto addTestCase(const std::string& name, Maybe<sol::protected_function> func) -> TestCase&;
 
     void setSetupFunc(sol::protected_function func);
     void setTeardownFunc(sol::protected_function func);

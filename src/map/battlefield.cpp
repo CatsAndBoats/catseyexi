@@ -166,8 +166,8 @@ timer::duration CBattlefield::GetLastTimeUpdate() const
 
 uint64_t CBattlefield::GetLocalVar(const std::string& name) const
 {
-    auto var = m_LocalVars.find(name);
-    return var != m_LocalVars.end() ? var->second : 0;
+    auto var = localVars_.find(name);
+    return var != localVars_.end() ? var->second : 0;
 }
 
 size_t CBattlefield::GetMaxParticipants() const
@@ -254,7 +254,7 @@ void CBattlefield::SetLevelCap(uint8 cap)
 
 void CBattlefield::SetLocalVar(const std::string& name, uint64_t value)
 {
-    m_LocalVars[name] = value;
+    localVars_[name] = value;
 }
 
 void CBattlefield::SetLastTimeUpdate(timer::duration time)
@@ -541,6 +541,11 @@ bool CBattlefield::RemoveEntity(CBaseEntity* PEntity, uint8 leavecode)
     if (PEntity->objtype == TYPE_PC)
     {
         auto* PChar = dynamic_cast<CCharEntity*>(PEntity);
+        if (!PChar)
+        {
+            return false;
+        }
+
         if (!(m_Rules & BCRULES::RULES_ALLOW_SUBJOBS))
         {
             PChar->StatusEffectContainer->DelStatusEffect(EFFECT_SJ_RESTRICTION);
@@ -550,6 +555,18 @@ bool CBattlefield::RemoveEntity(CBaseEntity* PEntity, uint8 leavecode)
         if (PChar->PPet && PChar->PPet->isCharmed)
         {
             petutils::DetachPet(PChar);
+        }
+
+        // Remove Battlefield effect from Trusts
+        if (!PChar->PTrusts.empty())
+        {
+            for (auto* PTrust : PChar->PTrusts)
+            {
+                if (PTrust && PTrust->StatusEffectContainer)
+                {
+                    PTrust->StatusEffectContainer->DelStatusEffectsByFlag(EFFECTFLAG_CONFRONTATION, EffectNotice::Silent);
+                }
+            }
         }
 
         m_Zone->updateCharLevelRestriction(PChar);
@@ -575,7 +592,7 @@ bool CBattlefield::RemoveEntity(CBaseEntity* PEntity, uint8 leavecode)
             }
         }
 
-        m_EnteredPlayers.erase(m_EnteredPlayers.find(PEntity->id));
+        m_EnteredPlayers.erase(PEntity->id);
 
         if (leavecode != 255)
         {

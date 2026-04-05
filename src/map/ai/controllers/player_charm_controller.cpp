@@ -42,13 +42,14 @@ CPlayerCharmController::~CPlayerCharmController()
     POwner->allegiance = ALLEGIANCE_TYPE::PLAYER;
 }
 
-void CPlayerCharmController::Tick(timer::time_point tick)
+auto CPlayerCharmController::Tick(timer::time_point tick) -> Task<void>
 {
     m_Tick = tick;
+
     if (POwner->PMaster == nullptr || !POwner->PMaster->isAlive())
     {
         POwner->StatusEffectContainer->DelStatusEffect(EFFECT_CHARM);
-        return;
+        co_return;
     }
 
     if (POwner->PAI->IsEngaged())

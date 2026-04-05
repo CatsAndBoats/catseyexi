@@ -6,14 +6,14 @@
 local mobskillObject = {}
 
 mobskillObject.onMobSkillCheck = function(target, mob, skill)
-    if mob:getPool() == xi.mobPools.QNAERN_WHM and mob:getHPP() <= 50 then
+    if mob:getPool() == xi.mobPool.QNAERN_WHM and mob:getHPP() <= 50 then
         return 0
     else
         return 1
     end
 end
 
-mobskillObject.onMobWeaponSkill = function(target, mob, skill)
+mobskillObject.onMobWeaponSkill = function(mob, target, skill, action)
     local maxHeal = target:getMaxHP() - target:getHP()
     target:eraseAllStatusEffect()
     target:addHP(maxHeal)

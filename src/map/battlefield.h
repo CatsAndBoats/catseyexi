@@ -235,7 +235,7 @@ private:
     bool              m_Cleanup        = false;
     bool              m_Attacked       = false;
 
-    std::unordered_map<std::string, uint64_t> m_LocalVars;
+    std::unordered_map<std::string, uint64_t> localVars_;
     std::vector<BattlefieldGroup>             m_groups;
 };
 

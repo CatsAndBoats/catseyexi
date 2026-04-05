@@ -53,6 +53,7 @@ end
 
 entity.onMobSpawn = function(mob)
     mob:setMobMod(xi.mobMod.ALWAYS_AGGRO, 1)
+    mob:setMobMod(xi.mobMod.BASE_DAMAGE_MULTIPLIER, 150)
 end
 
 entity.onMobRoam = function(mob)
@@ -74,7 +75,7 @@ entity.onMobRoam = function(mob)
     end
 end
 
-entity.onMobWeaponSkill = function(target, mob, skill)
+entity.onMobWeaponSkill = function(mob, target, skill, action)
     -- Travel to home after a mob skill (except initial pit ambush skill)
     if skill:getID() ~= xi.mobSkill.PIT_AMBUSH_1 then
         resetEnmity(mob)

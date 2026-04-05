@@ -9,14 +9,14 @@ mobskillObject.onMobSkillCheck = function(target, mob, skill)
     return 0
 end
 
-mobskillObject.onMobWeaponSkill = function(target, mob, skill)
+mobskillObject.onMobWeaponSkill = function(mob, target, skill, action)
     local typeEffect = 0
     local currentMsg = nil
 
     local sleepDuration = 60
     if
-        mob:getPool() == xi.mobPools.WREAKER or
-        mob:getPool() == xi.mobPools.AGONIZER
+        mob:getPool() == xi.mobPool.WREAKER or
+        mob:getPool() == xi.mobPool.AGONIZER
     then
         sleepDuration = 120
     end

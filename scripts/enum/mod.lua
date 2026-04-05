@@ -37,6 +37,8 @@ xi.mod =
     FOOD_HP                         = 1130, -- Food HP (this is added after curse)
     FOOD_MP                         = 1131, -- Food MP (this is added after curse)
 
+    EXP_LVL_MOD                     = 1196, -- Modifies level during /check, exp calculation and certain packets only
+
     TWOHAND_STR                     = 218, -- Same as STR, but only active when using a two handed weapon (e.g. Hasso)
 
     -- Magic Evasion versus elements
@@ -69,6 +71,7 @@ xi.mod =
     LIGHT_SLEEP_RES_RANK            = 1165,
     DARK_SLEEP_RES_RANK             = 1166,
     BLIND_RES_RANK                  = 1167,
+    STUN_RES_RANK                   = 1186,
 
     ATT                             = 23,
     RATT                            = 24,
@@ -136,7 +139,7 @@ xi.mod =
     COMBAT_SKILLUP_RATE             = 64, -- % increase in skillup combat rate
     MAGIC_SKILLUP_RATE              = 65, -- % increase in skillup magic rate
     RATTP                           = 66,
-    EVA                             = 68,
+    EVA                             = 68, -- Evasion stat (Not Combat Skill Evasion)
     RDEF                            = 69,
     REVA                            = 70,
     MPHEAL                          = 71,
@@ -300,12 +303,15 @@ xi.mod =
     FASTCAST                        = 170,
     UFASTCAST                       = 407,
     CURE_CAST_TIME                  = 519,
-    ELEMENTAL_CELERITY              = 901, -- Quickens Elemental Magic Casting
+    ELEMENTAL_CELERITY              = 901,  -- Quickens Elemental Magic Casting
+    HEALING_MAGIC_RECAST            = 1183, -- Recast delay (percent, usually negative)
+    ENFEEBLING_MAGIC_RECAST         = 1184, -- Recast delay (percent, usually negative)
+    ENHANCING_MAGIC_RECAST          = 1185, -- Recast delay (percent, usually negative)
     DELAY                           = 171,
     RANGED_DELAY                    = 172,
     MARTIAL_ARTS                    = 173,
-    SKILLCHAINBONUS                 = 174,
-    SKILLCHAINDMG                   = 175,
+    SKILLCHAINBONUS                 = 174, -- Damage bonus applied to skill chain damage (/100).  Modifier from effects/traits
+    SKILLCHAINDMG                   = 175, -- Damage bonus applied to skill chain damage (/10000).  Modifier from gear (multiplicative after effect/traits)
     MAX_SWINGS                      = 978,
     ADDITIONAL_SWING_CHANCE         = 979,
     FOOD_HPP                        = 176,
@@ -414,6 +420,7 @@ xi.mod =
     BLINK                           = 299,
     STONESKIN                       = 300,
     PHALANX                         = 301,
+    PHALANX_RECEIVED                = 1182, -- Phalanx +N when Phalanx is received (cast on self or from other player)
     TRIPLE_ATTACK                   = 302,
     TRIPLE_ATTACK_DMG               = 1039, -- Increases "Triple Attack" damage/"Triple Attack" damage + (in percents, e.g. +20 = +20% damage)
     TREASURE_HUNTER                 = 303,
@@ -474,6 +481,8 @@ xi.mod =
     SPIKES                          = 342,
     ENSPELL_DMG                     = 343,
     ENSPELL_CHANCE                  = 856,
+    ENSPELL_DMG_BONUS               = 432, -- Adds to the base damage of the enspell before bonuses and reductions
+    ENSPELL_DMG_PCT                 = 1195, -- Adds to the multiplier applied to enspell damage after base damage is calculated, before day and weather bonuses and reductions
     SPIKES_DMG                      = 344,
     TP_BONUS                        = 345,
     SPIKES_DMG_BONUS                = 1079, -- Increases Blaze/Ice/Shock spikes damage by percentage (e.g. mod value 50 = +50% spikes damage)
@@ -518,7 +527,10 @@ xi.mod =
     SHIELD_BARRIER                  = 1082, -- Grants a bonus to Protect spells cast by self while a shield is equipped.
 
     -- Ranger
-    BOUNTY_SHOT_TH_BONUS            = 826, -- Boosts base TH level of bounty shot
+    BOUNTY_SHOT_TH_BONUS            = 826,  -- Boosts base TH level of bounty shot
+    RETAIN_CAMOUFLAGE               = 1189, -- Camouflage may be retained after ranged attacks
+    RETAIN_UNLIMITED_SHOT           = 1190, -- Unlimited Shot is retained if the ranged attack misses
+    RA_IGNORE_LVL_DIFF              = 1191, -- Ranged attacks ignore pDIF level correction penalty
 
     -- Dark Knight
     ARCANE_CIRCLE_DURATION          = 858,  -- Arcane Circle extended duration in seconds
@@ -550,13 +562,18 @@ xi.mod =
     SENGIKORI_SC_DMG_DEBUFF         = 1088, -- % Increase to closing skillchain damage. Applied to defender.
     SENGIKORI_MB_DMG_DEBUFF         = 1089, -- % Increase to magic burst damage. Applied to defender.
     SENGIKORI_BONUS                 = 1090, -- additive % increase to Sengikori
+    HASSO_ZANSHIN_BONUS             = 1187, -- Enables Hasso to occasionally trigger Zanshin after landing normal attacks
+    SEIGAN_COUNTER_BONUS            = 1188, -- Enables Seigan counter bonus based on Zanshin rate
 
     -- Ninja
     ENHANCES_SANGE                  = 1091, -- 1 = +1 attack for Daken during Sange per Sange merit (i.e. 20 with 5 merits = +100 attack during Sange)
     ENHANCES_FUTAE                  = 1148, -- Adds to the +50% bonus damage to elemental ninjutsu provided by Futae (percent)
+    YONIN_UTSUSEMI_ENMITY           = 1192, -- Enables extra enmity from Utsusemi spells while under Yonin
+    SANGE_MULTI_HIT                 = 1193, -- Sange uses shadow-based multi-hit ranged attack instead of Daken boost
 
     -- Dragoon
     WYVERN_LVL_BONUS                = 1043, -- Wyvern: Lv.+ (Increases wyvern's base level above 99)
+    WYVERN_SHOW_READYING            = 1195, -- Pet shows readying animation instead of suppressing it (e.g., wyvern breath)
 
     -- Summoner
     AVATAR_LVL_BONUS                = 1040, -- Avatar: Lv. ###/+ (Increases all avatar's base level above 99)
@@ -746,8 +763,6 @@ xi.mod =
     QUICK_DRAW_MACC                 = 191, -- Quick draw magic accuracy
     QUAD_ATTACK                     = 430, -- Quadruple attack chance.
 
-    ENSPELL_DMG_BONUS               = 432,
-
     ABSORB_DMG_TO_MP                = 516, -- Unlike PLD gear mod, works on all damage types (Ethereal Earring)
 
     WARCRY_DURATION                 = 483, -- Warcy duration bonus from gear
@@ -762,17 +777,19 @@ xi.mod =
     RERAISE_II                      = 457, -- Reraise II.
     RERAISE_III                     = 458, -- Reraise III.
 
-    ITEM_ADDEFFECT_LVADJUST = 278, -- level correction factor to use, if any
-    ITEM_ADDEFFECT_PLACEHLD = 279, -- placeholder, want to keep these together and 99% sure we'll use this
-    ITEM_ADDEFFECT_DSTAT    = 280, -- value = attacker modifier to use as bonus dmg (mnd, int, etc)
-    ITEM_ADDEFFECT_TYPE     = 431, -- see procType table in scripts\globals\additional_effects.lua
-    ITEM_SUBEFFECT          = 499, -- Animation ID of Spikes and Additional Effects
-    ITEM_ADDEFFECT_DMG      = 500, -- Damage of an items Additional Effect or Spikes
-    ITEM_ADDEFFECT_CHANCE   = 501, -- Chance of an items Additional Effect or Spikes
-    ITEM_ADDEFFECT_ELEMENT  = 950, -- Element of the Additional Effect or Spikes, for resist purposes
-    ITEM_ADDEFFECT_STATUS   = 951, -- Status Effect ID to try to apply via Additional Effect or Spikes
-    ITEM_ADDEFFECT_POWER    = 952, -- Base Power for effect in MOD_ITEM_ADDEFFECT_STATUS
-    ITEM_ADDEFFECT_DURATION = 953, -- Base Duration for effect in MOD_ITEM_ADDEFFECT_STATUS
+    ITEM_ADDEFFECT_LVADJUST = 278,  -- level correction factor to use, if any
+    ITEM_ADDEFFECT_PLACEHLD = 279,  -- placeholder, want to keep these together and 99% sure we'll use this
+    ITEM_ADDEFFECT_DSTAT    = 280,  -- value = attacker modifier to use as bonus dmg (mnd, int, etc)
+    ITEM_ADDEFFECT_TYPE     = 431,  -- see procType table in scripts\globals\additional_effects.lua
+    ITEM_SUBEFFECT          = 499,  -- Animation ID of Spikes and Additional Effects
+    ITEM_ADDEFFECT_DMG      = 500,  -- Damage of an items Additional Effect or Spikes
+    ITEM_ADDEFFECT_CHANCE   = 501,  -- Chance of an items Additional Effect or Spikes
+    ITEM_ADDEFFECT_ELEMENT  = 950,  -- Element of the Additional Effect or Spikes, for resist purposes
+    ITEM_ADDEFFECT_STATUS   = 951,  -- Status Effect ID to try to apply via Additional Effect or Spikes
+    ITEM_ADDEFFECT_POWER    = 952,  -- Base Power for effect in MOD_ITEM_ADDEFFECT_STATUS
+    ITEM_ADDEFFECT_DURATION = 953,  -- Base Duration for effect in MOD_ITEM_ADDEFFECT_STATUS
+    ITEM_ADDEFFECT_PRIORITY = 1180, -- Set to 1 to check add effect anyway even if enspells etc have already occured
+    ITEM_ADDEFFECT_SCRIPTED = 1181, -- Set to 1 to run item script directly instead of through scripts\globals\additional_effects.lua
 
     FERAL_HOWL_DURATION             = 503, -- +20% duration per merit when wearing augmented Monster Jackcoat +2
     MANEUVER_BONUS                  = 504, -- Maneuver Stat Bonus
@@ -835,30 +852,31 @@ xi.mod =
     PHANTOM_DURATION                = 882, -- Phantom Roll Duration +.
     PHANTOM_RECAST                  = 1076, -- Phantom Roll Recast -.
 
-    ENHANCES_REFRESH                = 529, -- "Enhances Refresh" adds +1 per modifier to spell's tick result.
-    NO_SPELL_MP_DEPLETION           = 530, -- % to not deplete MP on spellcast.
-    STONESKIN_BONUS_HP              = 539, -- Bonus "HP" granted to Stoneskin spell.
-    ENHANCES_ELEMENTAL_SIPHON       = 540, -- Bonus Base MP added to Elemental Siphon skill.
-    BP_DELAY_II                     = 541, -- Blood Pact Delay Reduction II
-    JOB_BONUS_CHANCE                = 542, -- Chance to apply job bonus to COR roll without having the job in the party.
-    DAY_NUKE_BONUS                  = 565, -- Bonus damage from "Elemental magic affected by day" (Sorc. Tonban)
-    IRIDESCENCE                     = 566, -- Iridescence trait (additional weather damage/penalty)
-    BARSPELL_AMOUNT                 = 567, -- Additional elemental resistance granted by bar- spells
-    RANDOM_DEAL_BONUS               = 220, -- % chance to reset 2 abilities
-    BARSPELL_MDEF_BONUS             = 827, -- Extra magic defense bonus granted to the bar- spell effect
-    RAPTURE_AMOUNT                  = 568, -- Bonus amount added to Rapture effect
-    EBULLIENCE_AMOUNT               = 569, -- Bonus amount added to Ebullience effect
-    WYVERN_EFFECTIVE_BREATH         = 829, -- Increases the threshold for triggering healing breath
-    ENHANCE_DEEP_BREATHING          = 283, -- Add 5/256 to deep breathing bonus per merit level when calculating healing breath
-    AQUAVEIL_COUNT                  = 832, -- Modifies the amount of hits that Aquaveil absorbs before being removed
-    SONG_RECAST_DELAY               = 833, -- Reduces song recast time in seconds.
-    ENH_MAGIC_DURATION              = 890, -- Enhancing Magic Duration increase %
-    ENHANCES_COURSERS_ROLL          = 891, -- Courser's Roll Bonus % chance
-    ENHANCES_CASTERS_ROLL           = 892, -- Caster's Roll Bonus % chance
-    ENHANCES_BLITZERS_ROLL          = 893, -- Blitzer's Roll Bonus % chance
-    ENHANCES_ALLIES_ROLL            = 894, -- Allies' Roll Bonus % chance
-    ENHANCES_TACTICIANS_ROLL        = 895, -- Tactician's Roll Bonus % chance
-    OCCULT_ACUMEN                   = 902, -- Grants bonus TP when dealing damage with elemental or dark magic
+    ENHANCES_REFRESH                = 529,  -- "Enhances Refresh" adds +1 per modifier to spell's tick result.
+    NO_SPELL_MP_DEPLETION           = 530,  -- % to not deplete MP on spellcast.
+    STONESKIN_BONUS_HP              = 539,  -- Bonus "HP" granted to Stoneskin spell.
+    ENHANCES_ELEMENTAL_SIPHON       = 540,  -- Bonus Base MP added to Elemental Siphon skill.
+    BP_DELAY_II                     = 541,  -- Blood Pact Delay Reduction II
+    JOB_BONUS_CHANCE                = 542,  -- Chance to apply job bonus to COR roll without having the job in the party.
+    DAY_NUKE_BONUS                  = 565,  -- Bonus damage from "Elemental magic affected by day" (Sorc. Tonban)
+    DAY_WEATHER_PROC_BONUS          = 1194, -- Bonus damage from Twilight cape which works with both day OR weather procs.
+    IRIDESCENCE                     = 566,  -- Iridescence trait (additional weather damage/penalty)
+    BARSPELL_AMOUNT                 = 567,  -- Additional elemental resistance granted by bar- spells
+    RANDOM_DEAL_BONUS               = 220,  -- % chance to reset 2 abilities
+    BARSPELL_MDEF_BONUS             = 827,  -- Extra magic defense bonus granted to the bar- spell effect
+    RAPTURE_AMOUNT                  = 568,  -- Bonus amount added to Rapture effect
+    EBULLIENCE_AMOUNT               = 569,  -- Bonus amount added to Ebullience effect
+    WYVERN_EFFECTIVE_BREATH         = 829,  -- Increases the threshold for triggering healing breath
+    ENHANCE_DEEP_BREATHING          = 283,  -- Add 5/256 to deep breathing bonus per merit level when calculating healing breath
+    AQUAVEIL_COUNT                  = 832,  -- Modifies the amount of hits that Aquaveil absorbs before being removed
+    SONG_RECAST_DELAY               = 833,  -- Reduces song recast time in seconds.
+    ENH_MAGIC_DURATION              = 890,  -- Enhancing Magic Duration increase %
+    ENHANCES_COURSERS_ROLL          = 891,  -- Courser's Roll Bonus % chance
+    ENHANCES_CASTERS_ROLL           = 892,  -- Caster's Roll Bonus % chance
+    ENHANCES_BLITZERS_ROLL          = 893,  -- Blitzer's Roll Bonus % chance
+    ENHANCES_ALLIES_ROLL            = 894,  -- Allies' Roll Bonus % chance
+    ENHANCES_TACTICIANS_ROLL        = 895,  -- Tactician's Roll Bonus % chance
+    OCCULT_ACUMEN                   = 902,  -- Grants bonus TP when dealing damage with elemental or dark magic
 
     QUICK_MAGIC                     = 909, -- Percent chance spells cast instantly (also reduces recast to 0, similar to Chainspell)
 

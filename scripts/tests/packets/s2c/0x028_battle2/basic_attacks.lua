@@ -135,10 +135,14 @@ local packets =
             player:equipItem(xi.item.BRONZE_DAGGER, nil, xi.slot.MAIN)
             local warMob = player.entities:moveTo('Vanguard_Footsoldier')
             player.actions:engage(warMob)
+            warMob:updateEnmity(player)
+
             for i = 1, 20 do
                 xi.test.world:tickEntity(player)
                 xi.test.world:skipTime(10)
             end
+
+            warMob:disengage()
         end,
 
         expected =

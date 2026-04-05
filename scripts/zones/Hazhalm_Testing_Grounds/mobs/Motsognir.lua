@@ -90,7 +90,7 @@ entity.onMobFight = function(mob, target)
     end
 end
 
-entity.onMobMobskillChoose = function(mob, target)
+entity.onMobMobskillChoose = function(mob, target, skillId)
     -- Motsognir gains access to more TP moves as its HP goes down
     local mobskillList =
     {
@@ -117,7 +117,7 @@ entity.onMobMobskillChoose = function(mob, target)
     return mobskillList[math.random(1, #mobskillList)]
 end
 
-entity.onMobWeaponSkill = function(target, mob, skill)
+entity.onMobWeaponSkill = function(mob, target, skill, action)
     -- Wake all demons on Hellsnap, no known range limit
     if skill:getID() == xi.mobSkill.HELLSNAP then
         for i = ID.mob.HERVARTH, ID.mob.HADDING_THE_YOUNGER do

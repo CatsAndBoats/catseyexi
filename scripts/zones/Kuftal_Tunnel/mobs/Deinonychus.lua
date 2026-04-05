@@ -15,7 +15,7 @@ end
 
 entity.onMobDespawn = function(mob)
     local params = {}
-    xi.mob.phOnDespawn(mob, ID.mob.YOWIE, 5, 7200, params) -- 2 hours
+    xi.mob.phOnDespawn(mob, ID.mob.YOWIE, 5, 3600, params) -- 1 hour -> Confirmed on retail popped 1PH after 1 hour
 end
 
 return entity

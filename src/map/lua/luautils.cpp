@@ -21,15 +21,16 @@
 
 #include "luautils.h"
 
-#include "common/application.h"
-#include "common/filewatcher.h"
-#include "common/ipc.h"
-#include "common/logging.h"
-#include "common/settings.h"
-#include "common/timer.h"
-#include "common/utils.h"
-#include "common/vana_time.h"
-#include "common/version.h"
+#include <common/application.h>
+#include <common/filewatcher.h>
+#include <common/ipc.h>
+#include <common/logging.h>
+#include <common/settings.h>
+#include <common/timer.h>
+#include <common/types/maybe.h>
+#include <common/utils.h>
+#include <common/vana_time.h>
+#include <common/version.h>
 
 #include "lua_action.h"
 #include "lua_battlefield.h"
@@ -43,6 +44,7 @@
 #include "lua_trade_container.h"
 #include "lua_treasure_pool.h"
 #include "lua_trigger_area.h"
+#include "lua_weaponskill.h"
 #include "lua_zone.h"
 
 #include "ai/ai_container.h"
@@ -97,7 +99,6 @@
 #include <array>
 #include <filesystem>
 #include <numeric>
-#include <optional>
 #include <string>
 #include <unordered_map>
 
@@ -317,6 +318,7 @@ void init(IPP mapIPP, bool isRunningInCI)
     lua.set_function("GetSynergyRecipeByID", &luautils::GetSynergyRecipeByID);
     lua.set_function("GetSynergyRecipeByTrade", &luautils::GetSynergyRecipeByTrade);
     lua.set_function("ReloadSynthRecipes", &synthutils::LoadSynthRecipes);
+    lua.set_function("LoadExpDifficultyCurves", &luautils::LoadExpDifficultyCurves);
 
     // Fishing Contest Functions
     lua.set_function("GetFishingContest", &luautils::GetFishingContest);
@@ -350,6 +352,7 @@ void init(IPP mapIPP, bool isRunningInCI)
         CLuaLootContainer::Register();
         CLuaMobSkill::Register();
         CLuaPetSkill::Register();
+        CLuaWeaponSkill::Register();
         CLuaTriggerArea::Register();
         CLuaSpell::Register();
         CLuaStatusEffect::Register();
@@ -1000,6 +1003,32 @@ void OnEntityLoad(CBaseEntity* PEntity)
     }
 }
 
+void LoadExpDifficultyCurves(const sol::table& expToDifficultyTable, const uint8 incrediblyEasyPreyLevel, const uint16 incrediblyEasyPreyMinExp)
+{
+    std::vector<std::pair<uint16, EMobDifficulty>> expDifficultyTable;
+
+    for (auto& [expObj, difficultyObj] : expToDifficultyTable)
+    {
+        uint16         exp        = expObj.as<uint16>();
+        EMobDifficulty difficulty = static_cast<EMobDifficulty>(difficultyObj.as<uint8>());
+
+        expDifficultyTable.emplace_back(exp, difficulty);
+    }
+
+    // Sort highest to lowest
+    std::sort(
+        expDifficultyTable.begin(),
+        expDifficultyTable.end(),
+        [](std::pair<uint16, EMobDifficulty> const& a, std::pair<uint16, EMobDifficulty> const& b)
+        {
+            return a.first > b.first;
+        });
+
+    std::pair<uint16, uint8> iep = { incrediblyEasyPreyMinExp, incrediblyEasyPreyLevel };
+
+    charutils::SetExpDifficultyCurve(expDifficultyTable, iep);
+}
+
 void PopulateIDLookups(uint16 zoneId, const std::string& zoneName)
 {
     TracyZoneScoped;
@@ -1047,7 +1076,7 @@ void PopulateIDLookups(uint16 zoneId, const std::string& zoneName)
 
     // Update GetFirstID to use this new lookup
     // clang-format off
-        lua.set_function("GetFirstID", [&](std::string const& name) -> std::optional<uint32>
+        lua.set_function("GetFirstID", [&](std::string const& name) -> Maybe<uint32>
         {
             if (lookup.find(name) != lookup.end())
             {
@@ -1125,7 +1154,7 @@ void PopulateIDLookups(uint16 zoneId, const std::string& zoneName)
             ShowWarning("GetFirstID is designed to be used at load/reload-time only!");
         });
 
-        lua.set_function("GetTableOfIDs", [&](std::string const& name, std::optional<int> optRange) -> void
+        lua.set_function("GetTableOfIDs", [&](std::string const& name, Maybe<int> optRange) -> void
         {
             ShowWarning("GetTableOfIDs is designed to be used at load/reload-time only!");
         });
@@ -1135,7 +1164,7 @@ void PopulateIDLookups(uint16 zoneId, const std::string& zoneName)
     lua["package"]["loaded"][fmt::format("scripts/zones/{}/IDs", zoneName)] = lua["zones"][zoneId];
 }
 
-void PopulateIDLookupsByFilename(std::optional<std::string> maybeFilename)
+void PopulateIDLookupsByFilename(Maybe<std::string> maybeFilename)
 {
     TracyZoneScoped;
 
@@ -1184,7 +1213,7 @@ void PopulateIDLookupsByFilename(std::optional<std::string> maybeFilename)
     // clang-format on
 }
 
-void PopulateIDLookupsByZone(std::optional<uint16> maybeZoneId)
+void PopulateIDLookupsByZone(Maybe<uint16> maybeZoneId)
 {
     TracyZoneScoped;
 
@@ -1949,9 +1978,12 @@ void OnZoneIn(CCharEntity* PChar)
     TracyZoneScoped;
 
     CZone* destinationZone = zoneutils::GetZone(PChar->loc.destination);
-    if (!PChar->m_moghouseID && destinationZone == nullptr)
+    if (!destinationZone)
     {
-        ShowWarning("Attempt to Zone In player to invalid/disabled zone %d.", PChar->loc.destination);
+        if (!PChar->inMogHouse())
+        {
+            ShowWarning("Attempt to Zone In player to invalid/disabled zone %d.", PChar->loc.destination);
+        }
         return;
     }
 
@@ -2351,7 +2383,7 @@ void OnAdditionalEffect(CBattleEntity* PAttacker, CBattleEntity* PDefender, acti
     }
 
     Action->additionalEffect = result.get_type(0) == sol::type::number ? result.get<ActionProcAddEffect>(0) : ActionProcAddEffect::None;
-    Action->addEffectMessage = result.get_type(1) == sol::type::number ? result.get<MSGBASIC_ID>(1) : MSGBASIC_NONE;
+    Action->addEffectMessage = result.get_type(1) == sol::type::number ? result.get<MsgBasic>(1) : MsgBasic::None;
     Action->addEffectParam   = result.get_type(2) == sol::type::number ? result.get<int32>(2) : 0;
 }
 
@@ -2378,7 +2410,7 @@ void OnSpikesDamage(CBattleEntity* PDefender, CBattleEntity* PAttacker, action_r
     }
 
     Action->spikesEffect  = result.get_type(0) == sol::type::number ? result.get<ActionReactKind>(0) : ActionReactKind::None;
-    Action->spikesMessage = result.get_type(1) == sol::type::number ? result.get<MSGBASIC_ID>(1) : MSGBASIC_NONE;
+    Action->spikesMessage = result.get_type(1) == sol::type::number ? result.get<MsgBasic>(1) : MsgBasic::None;
     Action->spikesParam   = result.get_type(2) == sol::type::number ? result.get<int32>(2) : 0;
 }
 
@@ -2407,7 +2439,36 @@ int32 additionalEffectAttack(CBattleEntity* PAttacker, CBattleEntity* PDefender,
     }
 
     Action->additionalEffect = result.get_type(0) == sol::type::number ? result.get<ActionProcAddEffect>(0) : ActionProcAddEffect::None;
-    Action->addEffectMessage = result.get_type(1) == sol::type::number ? result.get<MSGBASIC_ID>(1) : MSGBASIC_NONE;
+    Action->addEffectMessage = result.get_type(1) == sol::type::number ? result.get<MsgBasic>(1) : MsgBasic::None;
+    Action->addEffectParam   = result.get_type(2) == sol::type::number ? result.get<int32>(2) : 0;
+
+    return 0;
+}
+
+// Scripted additional effects
+int32 OnItemAdditionalEffect(CBattleEntity* PAttacker, CBattleEntity* PDefender, CItemWeapon* PItem, action_result_t* Action, int32 baseAttackDamage)
+{
+    TracyZoneScoped;
+
+    std::string filename = fmt::format("./scripts/items/{}.lua", PItem->getName());
+
+    sol::function onItemAdditionalEffect = GetCacheEntryFromFilename(filename)["onItemAdditionalEffect"].get<sol::function>();
+    if (!onItemAdditionalEffect.valid())
+    {
+        return -1;
+    }
+
+    auto result = onItemAdditionalEffect(PAttacker, PDefender, baseAttackDamage, PItem);
+    if (!result.valid())
+    {
+        sol::error err = result;
+        ShowError("luautils::onItemAdditionalEffect: %s", err.what());
+        ReportErrorToPlayer(PAttacker, err.what());
+        return -1;
+    }
+
+    Action->additionalEffect = result.get_type(0) == sol::type::number ? result.get<ActionProcAddEffect>(0) : ActionProcAddEffect::None;
+    Action->addEffectMessage = result.get_type(1) == sol::type::number ? result.get<MsgBasic>(1) : MsgBasic::None;
     Action->addEffectParam   = result.get_type(2) == sol::type::number ? result.get<int32>(2) : 0;
 
     return 0;
@@ -2434,7 +2495,7 @@ void additionalEffectSpikes(CBattleEntity* PDefender, CBattleEntity* PAttacker, 
     }
 
     Action->spikesEffect  = result.get_type(0) == sol::type::number ? result.get<ActionReactKind>(0) : ActionReactKind::None;
-    Action->spikesMessage = result.get_type(1) == sol::type::number ? result.get<MSGBASIC_ID>(1) : MSGBASIC_NONE;
+    Action->spikesMessage = result.get_type(1) == sol::type::number ? result.get<MsgBasic>(1) : MsgBasic::None;
     Action->spikesParam   = result.get_type(2) == sol::type::number ? result.get<int32>(2) : 0;
 }
 
@@ -2781,7 +2842,7 @@ void OnSpellPrecast(CBattleEntity* PCaster, CSpell* PSpell)
 {
     TracyZoneScoped;
 
-    if (PCaster->objtype != TYPE_MOB)
+    if (PCaster->objtype == TYPE_PC)
     {
         return;
     }
@@ -2797,6 +2858,30 @@ void OnSpellPrecast(CBattleEntity* PCaster, CSpell* PSpell)
     {
         sol::error err = result;
         ShowError("luautils::onSpellPrecast: %s", err.what());
+        ReportErrorToPlayer(PCaster, err.what());
+    }
+}
+
+void OnSpellCastStart(CBattleEntity* PCaster, CBattleEntity* PTarget, CSpell* PSpell)
+{
+    TracyZoneScoped;
+
+    if (PCaster->objtype == TYPE_PC)
+    {
+        return;
+    }
+
+    sol::function onSpellInterrupted = getEntityCachedFunction(PCaster, "onSpellCastStart");
+    if (!onSpellInterrupted.valid())
+    {
+        return;
+    }
+
+    auto result = onSpellInterrupted(PCaster, PSpell);
+    if (!result.valid())
+    {
+        sol::error err = result;
+        ShowError("luautils::onSpellCastStart: %s", err.what());
         ReportErrorToPlayer(PCaster, err.what());
     }
 }
@@ -2825,7 +2910,7 @@ void OnSpellInterrupted(CBattleEntity* PCaster, CSpell* PSpell)
     }
 }
 
-std::optional<SpellID> OnMobSpellChoose(CBattleEntity* PCaster, CBattleEntity* PTarget, std::optional<SpellID> startingSpellId)
+std::tuple<Maybe<SpellID>, Maybe<CBattleEntity*>> OnMobSpellChoose(CBattleEntity* PCaster, CBattleEntity* PTarget, Maybe<SpellID> startingSpellId)
 {
     TracyZoneScoped;
 
@@ -2855,13 +2940,35 @@ std::optional<SpellID> OnMobSpellChoose(CBattleEntity* PCaster, CBattleEntity* P
         return {};
     }
 
-    uint32 retVal = result.get_type(0) == sol::type::number ? result.get<int32>(0) : 0;
-    if (retVal > 0)
+    CBattleEntity* newTarget = nullptr;
+    // change target
+    if (result.get_type(1) == sol::type::userdata)
     {
-        return static_cast<SpellID>(retVal);
+        CLuaBaseEntity* PLuaBaseEntity = result.get<CLuaBaseEntity*>(1);
+        if (PLuaBaseEntity)
+        {
+            if (auto* PBattle = dynamic_cast<CBattleEntity*>(PLuaBaseEntity->GetBaseEntity()); PBattle)
+            {
+                newTarget = PBattle;
+            }
+        }
     }
 
-    return {};
+    uint32 newSpellId = result.get_type(0) == sol::type::number ? result.get<int32>(0) : 0;
+
+    std::tuple<Maybe<SpellID>, Maybe<CBattleEntity*>> retVal = {};
+
+    if (newSpellId > 0)
+    {
+        std::get<0>(retVal) = static_cast<SpellID>(newSpellId);
+    }
+
+    if (newTarget)
+    {
+        std::get<1>(retVal) = newTarget;
+    }
+
+    return retVal;
 }
 
 // Called when mob is targeted by a spell.
@@ -3729,7 +3836,7 @@ std::tuple<int32, uint8, uint8> OnUseWeaponSkill(CBattleEntity* PChar, CBaseEnti
     return std::make_tuple(dmg, tpHitsLanded, extraHitsLanded);
 }
 
-uint16 OnMobMobskillChoose(CBattleEntity* PMob, CBattleEntity* PTarget)
+uint16 OnMobMobskillChoose(CBattleEntity* PMob, CBattleEntity* PTarget, uint16 chosenSkillId)
 {
     TracyZoneScoped;
 
@@ -3744,7 +3851,7 @@ uint16 OnMobMobskillChoose(CBattleEntity* PMob, CBattleEntity* PTarget)
         return 0;
     }
 
-    auto result = onMobMobskillChoose(PMob, PTarget);
+    auto result = onMobMobskillChoose(PMob, PTarget, chosenSkillId);
     if (!result.valid())
     {
         sol::error err = result;
@@ -3752,7 +3859,7 @@ uint16 OnMobMobskillChoose(CBattleEntity* PMob, CBattleEntity* PTarget)
         return 0;
     }
 
-    uint16 retVal = result.get_type(0) == sol::type::number ? result.get<uint16>(0) : 0;
+    uint16 retVal = result.get_type(0) == sol::type::number ? result.template get<uint16>(0) : 0;
     if (retVal > 0)
     {
         return retVal;
@@ -3761,7 +3868,7 @@ uint16 OnMobMobskillChoose(CBattleEntity* PMob, CBattleEntity* PTarget)
     return 0;
 }
 
-int32 OnMobWeaponSkill(CBaseEntity* PTarget, CBaseEntity* PMob, CMobSkill* PMobSkill, action_t* action)
+int32 OnMobWeaponSkill(CBaseEntity* PMob, CBaseEntity* PTarget, CMobSkill* PMobSkill, action_t* action)
 {
     TracyZoneScoped;
 
@@ -3773,7 +3880,7 @@ int32 OnMobWeaponSkill(CBaseEntity* PTarget, CBaseEntity* PMob, CMobSkill* PMobS
         auto onMobWeaponSkill = lua["xi"]["zones"][zone]["mobs"][name]["onMobWeaponSkill"];
         if (onMobWeaponSkill.valid())
         {
-            auto result = onMobWeaponSkill(PTarget, PMob, PMobSkill, action);
+            auto result = onMobWeaponSkill(PMob, PTarget, PMobSkill, action);
             if (!result.valid())
             {
                 sol::error err = result;
@@ -3792,7 +3899,7 @@ int32 OnMobWeaponSkill(CBaseEntity* PTarget, CBaseEntity* PMob, CMobSkill* PMobS
         return 0;
     }
 
-    auto result = onMobWeaponSkill(PTarget, PMob, PMobSkill, action);
+    auto result = onMobWeaponSkill(PMob, PTarget, PMobSkill, action);
     if (!result.valid())
     {
         sol::error err = result;
@@ -3855,6 +3962,55 @@ CBattleEntity* OnMobSkillTarget(CBattleEntity* PTarget, CBaseEntity* PMob, CMobS
     }
 
     return PTarget;
+}
+
+Maybe<timer::duration> OnMobSkillReadyTime(CBattleEntity* PTarget, CBaseEntity* PMob, CMobSkill* PMobSkill)
+{
+    TracyZoneScoped;
+
+    auto zone = PMob->loc.zone->getName();
+    auto name = PMob->getName();
+
+    auto onMobSkillReadyTime = lua["xi"]["zones"][zone]["mobs"][name]["onMobSkillReadyTime"];
+    if (!onMobSkillReadyTime.valid())
+    {
+        return std::nullopt;
+    }
+
+    auto result = onMobSkillReadyTime(PTarget, PMob, PMobSkill);
+    if (!result.valid())
+    {
+        sol::error err = result;
+        ShowError("luautils::onMobSkillReadyTime: %s", err.what());
+        return std::nullopt;
+    }
+
+    if (result.get_type(0) == sol::type::number)
+    {
+        return std::chrono::milliseconds(result.template get<uint16>(0));
+    }
+
+    return std::nullopt;
+}
+
+// onMobSkillFinalize always executes once per uninterrupted mobskill use, independently of any target being found.
+void OnMobSkillFinalize(CBaseEntity* PMob, CMobSkill* PMobSkill)
+{
+    TracyZoneScoped;
+
+    auto name = PMobSkill->getName();
+
+    auto onMobSkillFinalize = lua["xi"]["actions"]["mobskills"][name]["onMobSkillFinalize"];
+    if (!onMobSkillFinalize.valid())
+    {
+        return;
+    }
+
+    if (const auto result = onMobSkillFinalize(PMob, PMobSkill); !result.valid())
+    {
+        const sol::error err = result;
+        ShowError("luautils::onMobSkillFinalize: %s", err.what());
+    }
 }
 
 int32 OnAutomatonAbilityCheck(CBaseEntity* PTarget, CAutomatonEntity* PAutomaton, CMobSkill* PMobSkill)
@@ -5508,11 +5664,23 @@ CBaseEntity* GenerateDynamicEntity(CZone* PZone, CInstance* PInstance, sol::tabl
         {
             PMob->m_minLevel = minLevel;
         }
+        else
+        {
+            // If there is no level set default to 255
+            ShowError("luautils::GenerateDynamicEntity: No minLevel set for mob %s in zone %s. Defaulting to 255.", PMob->name.c_str(), PZone->getName().c_str());
+            PMob->m_minLevel = 255;
+        }
 
         const auto maxLevel = table["maxLevel"].get_or<uint8>(0);
         if (maxLevel > 0)
         {
             PMob->m_maxLevel = maxLevel;
+        }
+        else
+        {
+            // If there is no level set default to 255
+            ShowError("luautils::GenerateDynamicEntity: No maxLevel set for mob %s in zone %s. Defaulting to 255.", PMob->name.c_str(), PZone->getName().c_str());
+            PMob->m_maxLevel = 255;
         }
 
         const auto dropId = table["dropId"].get_or<uint16>(0);

@@ -29,7 +29,6 @@
 
 #include "entities/mobentity.h"
 #include "spell.h"
-#include <optional>
 
 class CMobSpellContainer
 {
@@ -37,15 +36,15 @@ public:
     CMobSpellContainer(CMobEntity* PMob);
 
     // These methods return a random spell
-    std::optional<SpellID> GetAggroSpell();  // -ga spell, dia, bio, paralyze, silence, blind
-    std::optional<SpellID> GetGaSpell();     // AoE damage spells, stonega, diaga
-    std::optional<SpellID> GetDamageSpell(); // Single target damage spells, stone
-    std::optional<SpellID> GetBuffSpell();   // stoneskin, utsusemi, blink
-    std::optional<SpellID> GetDebuffSpell();
-    std::optional<SpellID> GetHealSpell();   // cures, regen, armys paeon
-    std::optional<SpellID> GetNaSpell();     // silena, blindna etc
-    std::optional<SpellID> GetSevereSpell(); // select spells like death, impact, meteor
-    std::optional<SpellID> GetSpell();       // return a random spell
+    Maybe<SpellID> GetAggroSpell();  // -ga spell, dia, bio, paralyze, silence, blind
+    Maybe<SpellID> GetGaSpell();     // AoE damage spells, stonega, diaga
+    Maybe<SpellID> GetDamageSpell(); // Single target damage spells, stone
+    Maybe<SpellID> GetBuffSpell();   // stoneskin, utsusemi, blink
+    Maybe<SpellID> GetDebuffSpell();
+    Maybe<SpellID> GetHealSpell();   // cures, regen, armys paeon
+    Maybe<SpellID> GetNaSpell();     // silena, blindna etc
+    Maybe<SpellID> GetSevereSpell(); // select spells like death, impact, meteor
+    Maybe<SpellID> GetSpell();       // return a random spell
 
     bool IsAnySpellAvailable();
 
@@ -65,16 +64,16 @@ public:
     void AddSpell(SpellID spellId);
     void RemoveSpell(SpellID spellId);
 
-    std::optional<SpellID> GetAvailable(SpellID spellId);
-    std::optional<SpellID> GetBestAvailable(SPELLFAMILY family);
-    std::optional<SpellID> GetBestIndiSpell(CBattleEntity* PMaster);
-    std::optional<SpellID> GetBestEntrustedSpell(CBattleEntity* PMaster);
-    std::optional<SpellID> GetBestAgainstTargetWeakness(CBattleEntity* PTarget, SpellID spellId);
-    std::optional<SpellID> EnSpellAgainstTargetWeakness(CBattleEntity* PTarget);
-    std::optional<SpellID> StormDayAgainstTargetWeakness(CBattleEntity* PTarget);
-    std::optional<SpellID> HelixAgainstTargetWeakness(CBattleEntity* PTarget);
-    std::optional<SpellID> GetStormDay();
-    std::optional<SpellID> GetHelixDay();
+    Maybe<SpellID> GetAvailable(SpellID spellId);
+    Maybe<SpellID> GetBestAvailable(SPELLFAMILY family);
+    Maybe<SpellID> GetBestIndiSpell(CBattleEntity* PMaster);
+    Maybe<SpellID> GetBestEntrustedSpell(CBattleEntity* PMaster);
+    Maybe<SpellID> GetBestAgainstTargetWeakness(CBattleEntity* PTarget, SpellID spellId);
+    Maybe<SpellID> EnSpellAgainstTargetWeakness(CBattleEntity* PTarget);
+    Maybe<SpellID> StormDayAgainstTargetWeakness(CBattleEntity* PTarget);
+    Maybe<SpellID> HelixAgainstTargetWeakness(CBattleEntity* PTarget);
+    Maybe<SpellID> GetStormDay();
+    Maybe<SpellID> GetHelixDay();
 
     std::vector<SpellID> m_gaList;
     std::vector<SpellID> m_damageList;

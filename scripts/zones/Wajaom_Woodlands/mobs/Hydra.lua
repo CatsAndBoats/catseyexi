@@ -13,6 +13,7 @@ local entity = {}
 
 entity.onMobSpawn = function(mob)
     mob:setMobMod(xi.mobMod.NO_MOVE, 0)
+    mob:setMobMod(xi.mobMod.AOE_HIT_ALL, 1)
 end
 
 entity.onMobRoam = function(mob)
@@ -53,7 +54,9 @@ entity.onMobFight = function(mob, target)
 end
 
 entity.onMobDeath = function(mob, player, optParams)
-    player:addTitle(xi.title.HYDRA_HEADHUNTER)
+    if player then
+        player:addTitle(xi.title.HYDRA_HEADHUNTER)
+    end
 end
 
 entity.onMobDespawn = function(mob)

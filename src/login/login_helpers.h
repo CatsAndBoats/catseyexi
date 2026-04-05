@@ -25,6 +25,7 @@
 
 #include <common/md52.h>
 #include <common/mmo.h>
+#include <common/types/maybe.h>
 #include <common/utils.h>
 #include <common/xirand.h>
 
@@ -111,7 +112,7 @@ template <typename T>
 inline constexpr bool always_false_v = always_false<T>::value;
 
 template <typename T>
-inline std::optional<T> jsonGet(const json& jsonInput, std::string key)
+inline Maybe<T> jsonGet(const json& jsonInput, std::string key)
 {
     if (!jsonInput.contains(key))
     {
@@ -164,7 +165,7 @@ inline std::optional<T> jsonGet(const json& jsonInput, std::string key)
 
 // Supposedly, there is template magic to do this inside the template above, but VC++ doesn't support it yet?
 template <typename T, uint32_t size>
-inline typename std::optional<std::array<T, size>> jsonGet(const json& jsonInput, std::string key)
+inline Maybe<std::array<T, size>> jsonGet(const json& jsonInput, std::string key)
 {
     if (!jsonInput.contains(key))
     {

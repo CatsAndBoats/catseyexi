@@ -1,28 +1,34 @@
 -----------------------------------
---  Reactor Overload
---  Zedi, while in Animation form 3 (Rings)
---  Blinkable 1-3 hit, addtional effect Silence on hit.
+-- Reactor Overload
+-- Family: Zedi, while in Animation form 3 (Rings)
+-- Description: Deals Wind damage to targets around mob. Addtional Effect: Silence
 -----------------------------------
 ---@type TMobSkill
 local mobskillObject = {}
 
 mobskillObject.onMobSkillCheck = function(target, mob, skill)
-    if mob:getAnimationSub() ~= 3 then
-        return 1
-    end
-
     return 0
 end
 
-mobskillObject.onMobWeaponSkill = function(target, mob, skill)
-    local damage = xi.mobskills.mobMagicalMove(mob, target, skill, mob:getMainLvl() + 2, xi.element.WIND, math.random(1, 2), xi.mobskills.magicalTpBonus.MAB_BONUS, 1)
-    damage = xi.mobskills.mobFinalAdjustments(damage, mob, skill, target, xi.attackType.MAGICAL, xi.damageType.WIND, xi.mobskills.shadowBehavior.NUMSHADOWS_3)
+mobskillObject.onMobWeaponSkill = function(mob, target, skill, action)
+    local params = {}
 
-    target:takeDamage(damage, mob, xi.attackType.MAGICAL, xi.damageType.WIND)
+    params.baseDamage     = mob:getMainLvl() + 2
+    params.fTP            = { 1.0, 1.5, 2.0 }
+    params.element        = xi.element.WIND
+    params.attackType     = xi.attackType.MAGICAL
+    params.damageType     = xi.damageType.WIND
+    params.shadowBehavior = xi.mobskills.shadowBehavior.IGNORE_SHADOWS
 
-    xi.mobskills.mobStatusEffectMove(mob, target, xi.effect.SILENCE, 1, 0, math.random(15, 60))
+    local info = xi.mobskills.mobMagicalMove(mob, target, skill, action, params)
 
-    return damage
+    if xi.mobskills.processDamage(mob, target, skill, action, info) then
+        target:takeDamage(info.damage, mob, info.attackType, info.damageType)
+
+        xi.mobskills.mobPhysicalStatusEffectMove(mob, target, skill, xi.effect.SILENCE, 1, 0, math.random(15, 60))
+    end
+
+    return info.damage
 end
 
 return mobskillObject

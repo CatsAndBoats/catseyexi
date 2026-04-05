@@ -6,12 +6,34 @@
 ---@type TMobEntity
 local entity = {}
 
+-- Magma seems to do 1 for 1 with its Self-Destruct, and appears to also be Breath damage from Siknoz's testing.
+-- It likely only blows up below 10%, considering it is stun immune.
+
 entity.onMobInitialize = function(mob)
     mob:addImmunity(xi.immunity.SILENCE)
     mob:addImmunity(xi.immunity.PETRIFY)
+    mob:addImmunity(xi.immunity.TERROR)
+    mob:addImmunity(xi.immunity.STUN)
     mob:addImmunity(xi.immunity.LIGHT_SLEEP)
     mob:addImmunity(xi.immunity.DARK_SLEEP)
     mob:setMobMod(xi.mobMod.IDLE_DESPAWN, 180)
+end
+
+entity.onMobSpawn = function(mob)
+    mob:setMobMod(xi.mobMod.BASE_DAMAGE_MULTIPLIER, 200)
+end
+
+entity.onMobMobskillChoose = function(mob, target, skillId)
+    local skillList =
+    {
+        xi.mobSkill.BERSERK_BOMB,
+    }
+
+    if mob:getHPP() < 10 then
+        table.insert(skillList, xi.mobSkill.SELF_DESTRUCT_BOMB)
+    end
+
+    return skillList[math.random(1, #skillList)]
 end
 
 return entity

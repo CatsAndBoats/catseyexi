@@ -19,8 +19,6 @@
 ===========================================================================
 */
 
-#include "common/async.h"
-
 #include "dboxutils.h"
 
 #include "common/database.h"
@@ -124,9 +122,9 @@ void dboxutils::AddItemsToBeSent(CCharEntity* PChar, GP_CLI_COMMAND_PBX_BOXNO Bo
         return;
     }
 
-    if (PItem->getQuantity() < ItemStacks || PItem->getReserve() > 0)
+    if (PItem->getQuantity() < ItemStacks || PItem->getReserve() > 0 || PItem->isSubType(ITEM_LOCKED))
     {
-        ShowWarningFmt("DBOX: {} attempted to send insufficient/reserved {}: {} ({})", PChar->getName(), ItemStacks, PItem->getName(), PItem->getID());
+        ShowWarningFmt("DBOX: {} attempted to send insufficient/reserved/locked {}: {} ({})", PChar->getName(), ItemStacks, PItem->getName(), PItem->getID());
         return;
     }
 
@@ -181,7 +179,7 @@ void dboxutils::AddItemsToBeSent(CCharEntity* PChar, GP_CLI_COMMAND_PBX_BOXNO Bo
             {
                 PChar->UContainer->SetItem(PostWorkNo, PUBoxItem);
                 PChar->pushPacket<GP_SERV_COMMAND_PBX_RESULT>(GP_CLI_COMMAND_PBX_COMMAND::Set, BoxNo, PUBoxItem, PostWorkNo, PChar->UContainer->GetItemsCount(), 1);
-                PChar->pushPacket<GP_SERV_COMMAND_ITEM_SAME>();
+                PChar->pushPacket<GP_SERV_COMMAND_ITEM_SAME>(PChar);
             }
             else
             {
@@ -364,7 +362,7 @@ void dboxutils::SendClientNewItemCount(CCharEntity* PChar, GP_CLI_COMMAND_PBX_BO
     PChar->pushPacket<GP_SERV_COMMAND_PBX_RESULT>(GP_CLI_COMMAND_PBX_COMMAND::Check, BoxNo, received_items, 0x01);
 }
 
-void dboxutils::SendNewItems(CCharEntity* PChar, GP_CLI_COMMAND_PBX_BOXNO BoxNo, int8_t PostWorkNo)
+void dboxutils::SendNewItems(Scheduler& scheduler, CCharEntity* PChar, GP_CLI_COMMAND_PBX_BOXNO BoxNo, int8_t PostWorkNo)
 {
     DebugDeliveryBoxFmt("DBOX: SendNewItems: player: {} ({}), BoxNo: {}, PostWorkNo: {}", PChar->name, PChar->id, static_cast<int8_t>(BoxNo), PostWorkNo);
 
@@ -403,7 +401,7 @@ void dboxutils::SendNewItems(CCharEntity* PChar, GP_CLI_COMMAND_PBX_BOXNO BoxNo,
 
                         if (settings::get<bool>("map.AUDIT_PLAYER_DBOX"))
                         {
-                            Async::getInstance()->submit(
+                            scheduler.postToWorkerThread(
                                 [itemid        = PItem->getID(),
                                  quantity      = PItem->getQuantity(),
                                  sender        = senderID,
@@ -651,7 +649,7 @@ void dboxutils::TakeItemFromCell(CCharEntity* PChar, GP_CLI_COMMAND_PBX_BOXNO Bo
                                 PChar->getName(), PChar->id, PItem->getName(), PItem->getID(), PostWorkNo);
 
             PChar->pushPacket<GP_SERV_COMMAND_PBX_RESULT>(GP_CLI_COMMAND_PBX_COMMAND::Get, BoxNo, PItem, PostWorkNo, PChar->UContainer->GetItemsCount(), 1);
-            PChar->pushPacket<GP_SERV_COMMAND_ITEM_SAME>();
+            PChar->pushPacket<GP_SERV_COMMAND_ITEM_SAME>(PChar);
             PChar->UContainer->SetItem(PostWorkNo, nullptr);
             destroy(PItem);
         }

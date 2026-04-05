@@ -69,19 +69,18 @@ entity.spawnPoints =
 }
 
 entity.onMobInitialize = function(mob)
+    xi.mob.updateNMSpawnPoint(mob)
     mob:setMobMod(xi.mobMod.GIL_MIN, 20000)
-    mob:setMobMod(xi.mobMod.GIL_MAX, 24000)
-end
+    mob:setMobMod(xi.mobMod.GIL_MAX, 20000)
 
-entity.onMobSpawn = function(mob)
-    mob:setMobMod(xi.mobMod.NO_MOVE, 0)
     mob:addImmunity(xi.immunity.DARK_SLEEP)
     mob:addImmunity(xi.immunity.LIGHT_SLEEP)
     mob:addImmunity(xi.immunity.PARALYZE)
 end
 
-entity.onMobRoam = function(mob)
+entity.onMobSpawn = function(mob)
     mob:setMobMod(xi.mobMod.NO_MOVE, 0)
+    mob:setMobMod(xi.mobMod.BASE_DAMAGE_MULTIPLIER, 150)
 end
 
 entity.onMobFight = function(mob, target)
@@ -103,8 +102,18 @@ entity.onMobFight = function(mob, target)
     end
 end
 
+entity.onMobDisengage = function(mob)
+    mob:setMobMod(xi.mobMod.NO_MOVE, 0)
+end
+
 entity.onMobDeath = function(mob, player, optParams)
-    player:addTitle(xi.title.THE_VIVISECTOR)
+    if player then
+        player:addTitle(xi.title.THE_VIVISECTOR)
+    end
+end
+
+entity.onMobDespawn = function(mob)
+    xi.mob.updateNMSpawnPoint(mob)
 end
 
 return entity

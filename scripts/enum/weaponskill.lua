@@ -331,5 +331,3 @@ xi.weaponskill =
     VULCAN_SHOT         = 254,
     DIMENSIONAL_DEATH   = 255,
 }
-
-xi.ws = xi.weaponskill

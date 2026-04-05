@@ -1,8 +1,8 @@
 -----------------------------------
 -- Turbofan
---  Description:
---  Type: Magical
---  additional effect : Silence.
+-- Family: Ultima
+-- Description: Deals Wind damage to targets in front of mob. Additional Effect: Silence
+-- TODO: Figure out damage values for Ultima/Omega Master Trial
 -----------------------------------
 ---@type TMobSkill
 local mobskillObject = {}
@@ -11,22 +11,32 @@ mobskillObject.onMobSkillCheck = function(target, mob, skill)
     return 0
 end
 
-mobskillObject.onMobWeaponSkill = function(target, mob, skill)
-    local damage = mob:getWeaponDmg() * 3
+mobskillObject.onMobWeaponSkill = function(mob, target, skill, action)
+    local params = {}
 
-    damage = xi.mobskills.mobMagicalMove(mob, target, skill, damage, xi.element.WIND, 2, xi.mobskills.magicalTpBonus.MAB_BONUS, 1)
-    damage = xi.mobskills.mobFinalAdjustments(damage, mob, skill, target, xi.attackType.MAGICAL, xi.damageType.WIND, xi.mobskills.shadowBehavior.IGNORE_SHADOWS)
+    params.percentMultipier = 0.05
+    params.damageCap        = mob:getMainLvl() < 65 and 490 or 750
+    params.bonusDamage      = 0
+    params.mAccuracyBonus   = { 0, 0, 0 }
+    params.resistStat       = xi.mod.INT
+    params.element          = xi.element.WIND
+    params.attackType       = xi.attackType.BREATH
+    params.damageType       = xi.damageType.WIND
+    params.shadowBehavior   = xi.mobskills.shadowBehavior.IGNORE_SHADOWS
 
-    target:takeDamage(damage, mob, xi.attackType.MAGICAL, xi.damageType.WIND)
-    xi.mobskills.mobPhysicalStatusEffectMove(mob, target, skill, xi.effect.SILENCE, 1, 3, 30)
+    local info = xi.mobskills.mobBreathMove(mob, target, skill, action, params)
 
-    if target:hasStatusEffect(xi.effect.ELEMENTALRES_DOWN) then
-        target:delStatusEffectSilent(xi.effect.ELEMENTALRES_DOWN)
+    if xi.mobskills.processDamage(mob, target, skill, action, info) then
+        target:takeDamage(info.damage, mob, info.attackType, info.damageType)
+        xi.mobskills.mobStatusEffectMove(mob, target, xi.effect.SILENCE, 1, 3, 30)
+        if target:hasStatusEffect(xi.effect.ELEMENTALRES_DOWN) then
+            target:delStatusEffectSilent(xi.effect.ELEMENTALRES_DOWN)
+        end
     end
 
-    mob:setLocalVar('nuclearWaste', 0)
+    mob:setLocalVar('nuclearWaste', 0) -- TODO: Migrate to mob script
 
-    return damage
+    return info.damage
 end
 
 return mobskillObject

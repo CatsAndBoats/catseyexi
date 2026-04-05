@@ -9,9 +9,20 @@ local entity = {}
 
 local function releaseLamp(player)
     local tradeContainer = player:getTrade()
-    if tradeContainer then
-        tradeContainer:clean()
+    if not tradeContainer then
+        return
     end
+
+    local item = tradeContainer:getItem()
+    local itemId = item and item:getID()
+    if
+        itemId == xi.item.GLOWING_LAMP or
+        itemId == xi.item.SMOLDERING_LAMP
+    then
+        item:setReservedValue(0)
+    end
+
+    tradeContainer:clean()
 end
 
 entity.onTrade = function(player, npc, trade)
@@ -43,7 +54,7 @@ entity.onTrade = function(player, npc, trade)
         local lampData = xi.einherjar.decypherLamp(lampObj)
 
         releaseLamp(player)
-        local chamberData = xi.einherjar.getChamber(lampData.chamber)
+        local chamberData = xi.einherjar.getChamber(lampData.chamberId)
 
         if not chamberData then
             xi.einherjar.voidLamp(player, lampObj)
@@ -51,15 +62,15 @@ entity.onTrade = function(player, npc, trade)
             return
         end
 
-        if not xi.einherjar.meetsRequirementsForEntry(player, lampData.chamber) then
+        if not xi.einherjar.meetsRequirementsForEntry(player, lampData.chamberId) then
             return
         end
 
-        player:setLocalVar('[ein]requestedChamber', lampData.chamber)
+        player:setLocalVar('[ein]requestedChamber', lampData.chamberId)
         player:setLocalVar('[ein]requestedStart', lampData.startTime)
 
         player:startEvent(3,
-                0x1D + lampData.chamber,
+                0x1D + lampData.chamberId,
                 xi.besieged.getMercenaryRank(player),
                 xi.einherjar.settings.EINHERJAR_KO_EXPEL_TIME,
                 xi.einherjar.settings.EINHERJAR_REENTRY_TIME,
@@ -100,8 +111,8 @@ entity.onEventUpdate = function(player, csid, option, npc)
 
         player:updateEvent(0,
             10,
-            xi.settings.main.EINHERJAR_KO_EXPEL_TIME,
-            xi.settings.main.EINHERJAR_REENTRY_TIME,
+            xi.einherjar.settings.EINHERJAR_KO_EXPEL_TIME,
+            xi.einherjar.settings.EINHERJAR_REENTRY_TIME,
             0,
             xi.einherjar.getChambersMenu(player),
             xi.item.SMOLDERING_LAMP,
@@ -147,7 +158,13 @@ entity.onEventFinish = function(player, csid, option)
         else -- event cancelled
             releaseLamp(player)
         end
-    elseif csid == 3 and option == 1 then -- player requested entry into chamber
+    elseif csid == 3 then
+        releaseLamp(player)
+
+        if option ~= 1 then
+            return
+        end
+
         local requestedChamber = player:getLocalVar('[ein]requestedChamber')
         local requestedStart = player:getLocalVar('[ein]requestedStart')
         player:setLocalVar('[ein]requestedChamber', 0)

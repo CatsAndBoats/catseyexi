@@ -10,7 +10,7 @@ params is a table that can contain the following keys:
     chance     : Percent chance that a mob will use a special at all during engagement. (0 to 100)
     delay      : Grace period at start of fight, during which a mob not use any special, regardless of HPP. Min-clamped at 2 to avoid insta-flow. (2 to any)
     specials   : Table of job specials, with each entry a table that can contain the following keys:
-      id       : the job ability ID (see xi.jobSpecialAbility definition in scripts/enum/jobSpecialAbility.lua). Required.
+      id       : the job ability ID (see xi.mobSkill definition in scripts/enum/mob_skill.lua). Required.
       cooldown : cooldown in seconds for this special. Optional. Default 7200.
       duration : duration in seconds for specials that apply a status effect for a non-standard number of seconds.  Optional.  No default. (1 to any)
       hpp      : mob must be below this HP percent to use this special.  Optional.  Default random 40 to 60. (0 to 100)
@@ -29,7 +29,7 @@ xi.mix.jobSpecial.config(mob, {
 xi.mix.jobSpecial.config(mob, {
     specials =
     {
-        { id = xi.jsa.MEIKYO_SHISUI, cooldown = 60, hpp = 100 },
+        { id = xi.mobSkill.MEIKYO_SHISUI_1, cooldown = 60, hpp = 100 },
     },
 })
 
@@ -37,7 +37,7 @@ xi.mix.jobSpecial.config(mob, {
 xi.mix.jobSpecial.config(mob, {
     specials =
     {
-        { id = xi.jsa.MIGHTY_STRIKES, duration = 10, hpp = 100 },
+        { id = xi.mobSkill.MIGHTY_STRIKES_1, duration = 10, hpp = 100 },
     },
 })
 
@@ -50,8 +50,8 @@ xi.mix.jobSpecial.config(mob, {
     chance = 50,
     specials =
     {
-        { id = xi.jsa.MANAFONT, hpp = 75 },
-        { id = xi.jsa.CHAINSPELL, hpp = 25 },
+        { id = xi.mobSkill.MANAFONT_1, hpp = 75 },
+        { id = xi.mobSkill.CHAINSPELL_1, hpp = 25 },
     },
 })
 
@@ -60,9 +60,9 @@ xi.mix.jobSpecial.config(mob, {
     between = 20,
     specials =
     {
-        { id = xi.jsa.MANAFONT, cooldown = 0, hpp = 100 },
-        { id = xi.jsa.CHAINSPELL, cooldown = 0, hpp = 100 },
-        { id = xi.jsa.BENEDICTION, cooldown = 0, hpp = 100 },
+        { id = xi.mobSkill.MANAFONT_1, cooldown = 0, hpp = 100 },
+        { id = xi.mobSkill.CHAINSPELL_1, cooldown = 0, hpp = 100 },
+        { id = xi.mobSkill.BENEDICTION_1, cooldown = 0, hpp = 100 },
     },
 })
 
@@ -71,7 +71,7 @@ xi.mix.jobSpecial.config(mob, {
     specials =
     {
         {
-            id = xi.jsa.PERFECT_DODGE,
+            id = xi.mobSkill.PERFECT_DODGE_1,
             hpp = 30,
             begCode = function(mob)
                 mob:messageText(mob, ID.text.HOW_CAN_YOU_EXPECT_TO_KILL_ME)
@@ -94,79 +94,79 @@ g_mixins = g_mixins or {}
 
 local job2hr =
 {
-    [xi.job.WAR] = xi.jsa.MIGHTY_STRIKES,
-    [xi.job.MNK] = xi.jsa.HUNDRED_FISTS,
-    [xi.job.WHM] = xi.jsa.BENEDICTION,
-    [xi.job.BLM] = xi.jsa.MANAFONT,
-    [xi.job.RDM] = xi.jsa.CHAINSPELL,
-    [xi.job.THF] = xi.jsa.PERFECT_DODGE,
-    [xi.job.PLD] = xi.jsa.INVINCIBLE,
-    [xi.job.DRK] = xi.jsa.BLOOD_WEAPON,
-    [xi.job.BST] = xi.jsa.FAMILIAR,
-    [xi.job.BRD] = xi.jsa.SOUL_VOICE,
-    [xi.job.SAM] = xi.jsa.MEIKYO_SHISUI,
-    [xi.job.NIN] = xi.jsa.MIJIN_GAKURE,
-    [xi.job.DRG] = xi.jsa.CALL_WYVERN,
-    [xi.job.SMN] = xi.jsa.ASTRAL_FLOW,
-    [xi.job.BLU] = xi.jsa.AZURE_LORE,
+    [xi.job.WAR] = xi.mobSkill.MIGHTY_STRIKES_1,
+    [xi.job.MNK] = xi.mobSkill.HUNDRED_FISTS_1,
+    [xi.job.WHM] = xi.mobSkill.BENEDICTION_1,
+    [xi.job.BLM] = xi.mobSkill.MANAFONT_1,
+    [xi.job.RDM] = xi.mobSkill.CHAINSPELL_1,
+    [xi.job.THF] = xi.mobSkill.PERFECT_DODGE_1,
+    [xi.job.PLD] = xi.mobSkill.INVINCIBLE_1,
+    [xi.job.DRK] = xi.mobSkill.BLOOD_WEAPON_1,
+    [xi.job.BST] = xi.mobSkill.FAMILIAR_1,
+    [xi.job.BRD] = xi.mobSkill.SOUL_VOICE_1,
+    [xi.job.SAM] = xi.mobSkill.MEIKYO_SHISUI_1,
+    [xi.job.NIN] = xi.mobSkill.MIJIN_GAKURE_1,
+    [xi.job.DRG] = xi.mobSkill.CALL_WYVERN_1,
+    [xi.job.SMN] = xi.mobSkill.ASTRAL_FLOW_1,
+    [xi.job.BLU] = xi.mobSkill.AZURE_LORE,
 
--- following abilities are not yet defined on xi.jsa:
---  [xi.job.COR] = xi.jsa.WILD_CARD,
---  [xi.job.PUP] = xi.jsa.OVERDRIVE,
---  [xi.job.DNC] = xi.jsa.TRANCE,
---  [xi.job.SCH] = xi.jsa.TABULA_RASA,
---  [xi.job.GEO] = xi.jsa.BOLSTER,
---  [xi.job.RUN] = xi.jsa.ELEMENTAL_SFORZO,
+-- following abilities are not yet defined on xi.mobSkill:
+--  [xi.job.COR] = xi.mobSkill.WILD_CARD,
+--  [xi.job.PUP] = xi.mobSkill.OVERDRIVE,
+--  [xi.job.DNC] = xi.mobSkill.TRANCE,
+--  [xi.job.SCH] = xi.mobSkill.TABULA_RASA,
+--  [xi.job.GEO] = xi.mobSkill.BOLSTER,
+--  [xi.job.RUN] = xi.mobSkill.ELEMENTAL_SFORZO,
 }
 
 -- eagle eye shot ability IDs by mob family
 local familyEES =
 {
-    [  3] = xi.jsa.EES_AERN,    -- Aern
-    [ 25] = xi.jsa.EES_ANTICA,  -- Antica
-    [115] = xi.jsa.EES_SHADE,   -- Fomor
-    [126] = xi.jsa.EES_GIGA,    -- Gigas
-    [133] = xi.jsa.EES_GOBLIN,  -- Goblin
-    [169] = xi.jsa.EES_KINDRED, -- Kindred
-    [171] = xi.jsa.EES_LAMIA,   -- Lamiae
-    [182] = xi.jsa.EES_MERROW,  -- Merrow
-    [184] = xi.jsa.EES_GOBLIN,  -- Moblin
-    [189] = xi.jsa.EES_ORC,     -- Orc
-    [202] = xi.jsa.EES_QUADAV,  -- Quadav
-    [221] = xi.jsa.EES_SHADE,   -- Shadow
-    [246] = xi.jsa.EES_TROLL,   -- Troll
-    [270] = xi.jsa.EES_YAGUDO,  -- Yagudo
-    [327] = xi.jsa.EES_GOBLIN,  -- Goblin
-    [328] = xi.jsa.EES_GIGA,    -- Gigas
-    [335] = xi.jsa.EES_MAAT,    -- Maat
-    [358] = xi.jsa.EES_KINDRED, -- Kindred
-    [359] = xi.jsa.EES_SHADE,   -- Fomor
-    [373] = xi.jsa.EES_GOBLIN,  -- Goblin_Armored
+    [  3] = xi.mobSkill.EES_AERN,    -- Aern
+    [ 25] = xi.mobSkill.EES_ANTICA,  -- Antica
+    [115] = xi.mobSkill.EES_SHADE,   -- Fomor
+    [126] = xi.mobSkill.EES_GIGAS,   -- Gigas
+    [133] = xi.mobSkill.EES_GOBLIN,  -- Goblin
+    [169] = xi.mobSkill.EES_KINDRED, -- Kindred
+    [171] = xi.mobSkill.EES_LAMIA,   -- Lamiae
+    [182] = xi.mobSkill.EES_MERROW,  -- Merrow
+    [184] = xi.mobSkill.EES_GOBLIN,  -- Moblin
+    [189] = xi.mobSkill.EES_ORC,     -- Orc
+    [202] = xi.mobSkill.EES_QUADAV,  -- Quadav
+    [221] = xi.mobSkill.EES_SHADE,   -- Shadow
+    [246] = xi.mobSkill.EES_TROLL,   -- Troll
+    [270] = xi.mobSkill.EES_YAGUDO,  -- Yagudo
+    [327] = xi.mobSkill.EES_GOBLIN,  -- Goblin
+    [328] = xi.mobSkill.EES_GIGAS,   -- Gigas
+    [335] = xi.mobSkill.EES_MAAT,    -- Maat
+    [358] = xi.mobSkill.EES_KINDRED, -- Kindred
+    [359] = xi.mobSkill.EES_SHADE,   -- Fomor
+    [373] = xi.mobSkill.EES_GOBLIN,  -- Goblin_Armored
 }
 
 local effectByAbility =
 {
-    [xi.jsa.MIGHTY_STRIKES] = xi.effect.MIGHTY_STRIKES,
-    [xi.jsa.HUNDRED_FISTS]  = xi.effect.HUNDRED_FISTS,
-    [xi.jsa.MANAFONT]       = xi.effect.MANAFONT,
-    [xi.jsa.CHAINSPELL]     = xi.effect.CHAINSPELL,
-    [xi.jsa.PERFECT_DODGE]  = xi.effect.PERFECT_DODGE,
-    [xi.jsa.INVINCIBLE]     = xi.effect.INVINCIBLE,
-    [xi.jsa.BLOOD_WEAPON]   = xi.effect.BLOOD_WEAPON,
-    [xi.jsa.SOUL_VOICE]     = xi.effect.SOUL_VOICE,
-    [xi.jsa.AZURE_LORE]     = xi.effect.AZURE_LORE,
+    [xi.mobSkill.MIGHTY_STRIKES_1] = xi.effect.MIGHTY_STRIKES,
+    [xi.mobSkill.HUNDRED_FISTS_1 ] = xi.effect.HUNDRED_FISTS,
+    [xi.mobSkill.MANAFONT_1      ] = xi.effect.MANAFONT,
+    [xi.mobSkill.CHAINSPELL_1    ] = xi.effect.CHAINSPELL,
+    [xi.mobSkill.PERFECT_DODGE_1 ] = xi.effect.PERFECT_DODGE,
+    [xi.mobSkill.INVINCIBLE_1    ] = xi.effect.INVINCIBLE,
+    [xi.mobSkill.BLOOD_WEAPON_1  ] = xi.effect.BLOOD_WEAPON,
+    [xi.mobSkill.SOUL_VOICE_1    ] = xi.effect.SOUL_VOICE,
+    [xi.mobSkill.AZURE_LORE      ] = xi.effect.AZURE_LORE,
 
--- following abilities are not yet defined on xi.jsa, and/or do not have effect luas:
--- [xi.jsa.OVERDRIVE]        = xi.effect.OVERDRIVE,
--- [xi.jsa.TRANCE]           = xi.effect.TRANCE,
--- [xi.jsa.TABULA_RASA]      = xi.effect.TABULA_RASA,
--- [xi.jsa.BOLSTER]          = xi.effect.BOLSTER,
--- [xi.jsa.ELEMENTAL_SFORZO] = xi.effect.ELEMENTAL_SFORZO,
+-- following abilities are not yet defined on xi.mobSkill, and/or do not have effect luas:
+-- [xi.mobSkill.OVERDRIVE]        = xi.effect.OVERDRIVE,
+-- [xi.mobSkill.TRANCE]           = xi.effect.TRANCE,
+-- [xi.mobSkill.TABULA_RASA]      = xi.effect.TABULA_RASA,
+-- [xi.mobSkill.BOLSTER]          = xi.effect.BOLSTER,
+-- [xi.mobSkill.ELEMENTAL_SFORZO] = xi.effect.ELEMENTAL_SFORZO,
 }
 
 xi.mix.jobSpecial.config = function(mob, params)
     if params.between and type(params.between) == 'number' then
-        mob:setLocalVar('[jobSpecial]between', utils.clamp(params.between, 0))
+        mob:setLocalVar('[jobSpecial]between', utils.clamp(params.between, 0, math.abs(params.between)))
     end
 
     if params.chance and type(params.chance) == 'number' then
@@ -174,7 +174,7 @@ xi.mix.jobSpecial.config = function(mob, params)
     end
 
     if params.delay and type(params.delay) == 'number' then
-        mob:setLocalVar('[jobSpecial]delayInitial', utils.clamp(params.delay, 2))
+        mob:setLocalVar('[jobSpecial]delayInitial', utils.clamp(params.delay, 2, math.abs(params.delay)))
     end
 
     if params.specials and type(params.specials) == 'table' then
@@ -187,13 +187,13 @@ xi.mix.jobSpecial.config = function(mob, params)
                 mob:setLocalVar('[jobSpecial]ability_' .. i, v.id)
 
                 if v.cooldown and type(v.cooldown) == 'number' then
-                    mob:setLocalVar('[jobSpecial]between_' .. i, utils.clamp(v.cooldown, 0))
+                    mob:setLocalVar('[jobSpecial]between_' .. i, utils.clamp(v.cooldown, 0, math.abs(v.cooldown)))
                 else
                     mob:setLocalVar('[jobSpecial]between_' .. i, 7200)
                 end
 
                 if v.duration and type(v.duration) == 'number' then
-                    mob:setLocalVar('[jobSpecial]duration_' .. i, utils.clamp(v.duration, 1))
+                    mob:setLocalVar('[jobSpecial]duration_' .. i, utils.clamp(v.duration, 1, math.abs(v.duration)))
                 end
 
                 if v.hpp and type(v.hpp) == 'number' then
@@ -264,7 +264,7 @@ g_mixins.job_special = function(jobSpecialMob)
         if mJob == xi.job.RNG then
             ability = familyEES[mob:getFamily()]
         elseif mJob == xi.job.SMN and mob:isInDynamis() then
-            ability = xi.jsa.ASTRAL_FLOW_MAAT
+            ability = xi.mobSkill.ASTRAL_FLOW_MAAT
         end
 
         if ability then
@@ -276,6 +276,7 @@ g_mixins.job_special = function(jobSpecialMob)
 
         mob:setLocalVar('[jobSpecial]chance', 100)     -- chance that mob will use any special at all during engagement
         mob:setLocalVar('[jobSpecial]delayInitial', 2) -- default wait until mob can use its first special (prevents insta-flow)
+        mob:setLocalVar('[jobSpecial]readyInitial', 0) -- reset from previous spawn
     end)
 
     jobSpecialMob:addListener('ENGAGE', 'JOB_SPECIAL_ENGAGE', function(mob)

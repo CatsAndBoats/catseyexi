@@ -1,14 +1,7 @@
 -----------------------------------
 -- Freezebite
--- Great Sword weapon skill
--- Skill Level: 100
--- Delivers an ice elemental attack. Damage varies with TP.
--- Aligned with the Snow Gorget & Breeze Gorget.
--- Aligned with the Snow Belt & Breeze Belt.
--- Element: Ice
--- Modifiers: STR:30%  INT:20%
--- 100%TP    200%TP    300%TP
--- 1.00      1.50      3.00
+-- Family: Humanoid Greatsword Weaponskill
+-- Description: Delivers an Ice elemental attack.
 -----------------------------------
 ---@type TMobSkill
 local mobskillObject = {}
@@ -17,15 +10,23 @@ mobskillObject.onMobSkillCheck = function(target, mob, skill)
     return 0
 end
 
-mobskillObject.onMobWeaponSkill = function(target, mob, skill)
+mobskillObject.onMobWeaponSkill = function(mob, target, skill, action)
     local params = {}
-    params.numHits = 1
-    params.ftpMod = { 1.0, 1.5, 3.0 }
-    params.str_wsc = 0.3 params.int_wsc = 0.2
-    local damage, _, _, _ = xi.weaponskills.doPhysicalWeaponskill(mob, target, 0, params, 0, nil, true, nil)
 
-    target:takeDamage(damage, mob, xi.attackType.MAGICAL, xi.damageType.ICE)
-    return damage
+    params.baseDamage     = mob:getMainLvl() + 2
+    params.fTP            = { 4, 4, 4 } -- TODO: Capture fTP Scalings
+    params.element        = xi.element.ICE
+    params.attackType     = xi.attackType.MAGICAL
+    params.damageType     = xi.damageType.ICE
+    params.shadowBehavior = xi.mobskills.shadowBehavior.WIPE_SHADOWS -- TODO: Capture shadowBehavior
+
+    local info = xi.mobskills.mobMagicalMove(mob, target, skill, action, params)
+
+    if xi.mobskills.processDamage(mob, target, skill, action, info) then
+        target:takeDamage(info.damage, mob, info.attackType, info.damageType)
+    end
+
+    return info.damage
 end
 
 return mobskillObject

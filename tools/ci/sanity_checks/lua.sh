@@ -100,6 +100,7 @@ global_objects=(
 
     GetFirstID
 
+    LoadExpDifficultyCurves
     ReloadSynthRecipes
 
     after_each

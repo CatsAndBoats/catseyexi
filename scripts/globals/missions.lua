@@ -830,9 +830,9 @@ xi.mission.setLocalVar = function(player, areaId, missionId, name, value)
 end
 
 xi.mission.getMustZone = function(player, areaId, missionId)
-    return player:getLocalVar(getVarPrefix(areaId, missionId) .. 'mustZone') == 1 and true or false
+    return player:getCharVar(getVarPrefix(areaId, missionId) .. 'mustZone') ~= 0 and true or false
 end
 
 xi.mission.setMustZone = function(player, areaId, missionId)
-    player:setLocalVar(getVarPrefix(areaId, missionId) .. 'mustZone', 1)
+    player:setCharVar(getVarPrefix(areaId, missionId) .. 'mustZone', player:getZoneID())
 end

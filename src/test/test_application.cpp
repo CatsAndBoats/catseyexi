@@ -97,37 +97,89 @@ TestApplication::~TestApplication() = default;
 
 auto TestApplication::createEngine() -> std::unique_ptr<Engine>
 {
-    TestConfig config{
-        .loggerSink = sink_,
-        .verbose    = args().get<bool>("--verbose"),
-        .output     = args().present<std::string>("--output").value_or(""),
-        .keepGoing  = args().get<bool>("--keep-going"),
-        .watch      = args().get<bool>("--watch"),
-        .filters    = {
-               .includePatterns = args().get<std::vector<std::string>>("--file"),
-               .excludePatterns = args().get<std::vector<std::string>>("--no-file"),
-               .includeFilters  = args().get<std::vector<std::string>>("--filter"),
-               .excludeFilters  = args().get<std::vector<std::string>>("--no-filter"),
-               .includeTags     = args().get<std::vector<std::string>>("--tag"),
-               .excludeTags     = args().get<std::vector<std::string>>("--no-tag"),
-        },
-    };
-
-    return std::make_unique<TestEngine>(ioContext(), config);
+    // Required by Application, but initialized manually in run()
+    return nullptr;
 }
 
 void TestApplication::run()
 {
     TracyZoneScoped;
 
-    engine_ = createEngine();
-    markLoaded();
-    //  From this point, every logging statements end up in the in-memory sink
-    //  Print to stderr directly if needed
-    captureLogger();
+    scheduler_.postToMainThread(
+        [&]() -> Task<void>
+        {
+            //
+            // Prepare MapEngine
+            //
 
-    if (const auto testEngine = static_cast<TestEngine*>(engine_.get()); !testEngine->executeTests())
+            // Without a world server actively pumping the queues,
+            // the embedded map server deadlocks on exit
+            //
+            // We will need this to work to support multiprocess tests and validating systems that rely on world server.
+            // However, that requires deeper rework to the IPP logic so we can smartly route messages during tests.
+            MapConfig mapConfig{
+                .isTestServer      = true,
+                .lazyZones         = true,
+                .controlledWeather = true,
+            };
+            auto mapEngine = std::make_unique<MapEngine>(*this, mapConfig);
+
+            // We must ensure that mapEngine->init() is complete before we
+            // try and construct TestEngine or run the tests
+            scheduler_.blockOnMainThread(mapEngine->init());
+
+            mapEngine->onInitialize();
+
+            //
+            // Prepare WorldEngine
+            //
+
+            auto worldEngine = std::make_unique<WorldEngine>(scheduler_, WorldEngine::EnableHTTPServer::No);
+
+            worldEngine->onInitialize();
+
+            //
+            // Prepare TestEngine with MapEngine and WorldEngine
+            //
+
+            TestConfig testConfig{
+                .loggerSink = sink_,
+                .verbose    = args().get<bool>("--verbose"),
+                .output     = args().present<std::string>("--output").value_or(""),
+                .keepGoing  = args().get<bool>("--keep-going"),
+                .watch      = args().get<bool>("--watch"),
+                .filters    = {
+                       .includePatterns = args().get<std::vector<std::string>>("--file"),
+                       .excludePatterns = args().get<std::vector<std::string>>("--no-file"),
+                       .includeFilters  = args().get<std::vector<std::string>>("--filter"),
+                       .excludeFilters  = args().get<std::vector<std::string>>("--no-filter"),
+                       .includeTags     = args().get<std::vector<std::string>>("--tag"),
+                       .excludeTags     = args().get<std::vector<std::string>>("--no-tag"),
+                },
+            };
+
+            engine_ = std::make_unique<TestEngine>(*this, std::move(testConfig), std::move(mapEngine), std::move(worldEngine));
+
+            // From this point, every logging statements end up in the in-memory sink
+            // Print to stderr directly if needed
+            captureLogger();
+
+            auto success = co_await static_cast<TestEngine*>(engine_.get())->executeTests();
+            if (!success)
+            {
+                std::exit(EXIT_FAILURE);
+            }
+
+            this->requestExit();
+        });
+
+    try
     {
+        scheduler_.run(); // blocks
+    }
+    catch (const std::exception& e)
+    {
+        ShowCriticalFmt("Fatal Exception: {}", e.what());
         std::exit(EXIT_FAILURE);
     }
 }

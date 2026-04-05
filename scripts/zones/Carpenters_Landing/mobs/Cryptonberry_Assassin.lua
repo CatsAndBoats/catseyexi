@@ -10,9 +10,9 @@ local entity = {}
 
 local cryptonberrySpecials =
 {
-    [xi.job.SMN] = xi.jsa.ASTRAL_FLOW,
-    [xi.job.BLM] = xi.jsa.MANAFONT,
-    [xi.job.THF] = xi.jsa.PERFECT_DODGE,
+    [xi.job.SMN] = xi.mobSkill.ASTRAL_FLOW_1,
+    [xi.job.BLM] = xi.mobSkill.MANAFONT_1,
+    [xi.job.THF] = xi.mobSkill.PERFECT_DODGE_1,
 }
 
 entity.onMobInitialize = function(mob)

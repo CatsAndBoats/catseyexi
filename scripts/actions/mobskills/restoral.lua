@@ -9,14 +9,14 @@ mobskillObject.onMobSkillCheck = function(target, mob, skill)
     return 0
 end
 
-mobskillObject.onMobWeaponSkill = function(target, mob, skill)
+mobskillObject.onMobWeaponSkill = function(mob, target, skill, action)
     --[[
     The only calculations available on the net are for the players blue magic version,
     which does not seem to fit with retail in game observations on the mobskill version..
     So math.random() for now!
     ]]
     local heal = math.random(900, 1400)
-    if mob:getPool() == xi.mobPools.ARMED_GEARS then
+    if mob:getPool() == xi.mobPool.ARMED_GEARS then
         heal = heal * 2.5
     end
 

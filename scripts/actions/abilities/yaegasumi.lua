@@ -9,13 +9,11 @@
 local abilityObject = {}
 
 abilityObject.onAbilityCheck = function(player, target, ability)
-    ability:setRecast(math.max(0, ability:getRecast() - player:getMod(xi.mod.ONE_HOUR_RECAST) * 60))
-
-    return 0, 0
+    return xi.job_utils.samurai.checkYaegasumi(player, target, ability)
 end
 
 abilityObject.onUseAbility = function(player, target, ability)
-    player:addStatusEffect(xi.effect.YAEGASUMI, 12, 0, 45)
+    return xi.job_utils.samurai.useYaegasumi(player, target, ability)
 end
 
 return abilityObject

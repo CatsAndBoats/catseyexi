@@ -13,16 +13,7 @@ abilityObject.onAbilityCheck = function(player, target, ability)
 end
 
 abilityObject.onUseAbility = function(player, target, ability)
-    local duration = 180 + player:getMod(xi.mod.WARDING_CIRCLE_DURATION)
-    local power    = 5
-
-    if player:getMainJob() == xi.job.SAM then
-        power = 15
-    end
-
-    power = power + player:getMod(xi.mod.WARDING_CIRCLE_POTENCY)
-
-    target:addStatusEffect(xi.effect.WARDING_CIRCLE, power, 0, duration)
+    return xi.job_utils.samurai.useWardingCircle(player, target, ability)
 end
 
 return abilityObject

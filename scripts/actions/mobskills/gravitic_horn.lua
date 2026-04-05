@@ -16,7 +16,7 @@ mobskillObject.onMobSkillCheck = function(target, mob, skill)
     return 0
 end
 
-mobskillObject.onMobWeaponSkill = function(target, mob, skill)
+mobskillObject.onMobWeaponSkill = function(mob, target, skill, action)
     local damage = target:getHP()
 
     -- estimation based on "Throat Stab-like damage"
@@ -24,8 +24,11 @@ mobskillObject.onMobWeaponSkill = function(target, mob, skill)
         damage = math.floor(damage * 0.95)
     end
 
-    damage = math.floor(damage * xi.spells.damage.calculateSDT(target, xi.element.WIND))
-    damage = xi.mobskills.mobFinalAdjustments(damage, mob, skill, target, xi.attackType.MAGICAL, xi.damageType.WIND, xi.mobskills.shadowBehavior.WIPE_SHADOWS)
+    local info =
+    {
+        damage = math.floor(damage * xi.combat.damage.magicalElementSDT(target, xi.element.WIND))
+    }
+    damage = xi.mobskills.mobFinalAdjustments(info, mob, skill, target, xi.attackType.MAGICAL, xi.damageType.WIND, xi.mobskills.shadowBehavior.WIPE_SHADOWS)
 
     target:takeDamage(damage, mob, xi.attackType.MAGICAL, xi.damageType.WIND)
     mob:resetEnmity(target)

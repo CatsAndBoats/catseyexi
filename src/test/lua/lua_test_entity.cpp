@@ -30,8 +30,9 @@
 #include "test_common.h"
 
 // Thin wrapper over CBaseEntity with assertions and some helpers.
-CLuaTestEntity::CLuaTestEntity(CBaseEntity* entity)
+CLuaTestEntity::CLuaTestEntity(Scheduler& scheduler, CBaseEntity* entity)
 : CLuaBaseEntity(entity)
+, scheduler_(scheduler)
 {
 }
 
@@ -74,7 +75,9 @@ void CLuaTestEntity::despawn() const
     // Full despawn is about 20s
     for (uint32 i = 0; i <= 20; ++i)
     {
-        mob->PAI->Tick(timer::now() + std::chrono::seconds(i));
+        // We cannot co_await within a Lua binding - the suspension will obliterate the Lua stack.
+        scheduler_.blockOnMainThread(
+            mob->PAI->Tick(timer::now() + std::chrono::seconds(i)));
     }
 }
 

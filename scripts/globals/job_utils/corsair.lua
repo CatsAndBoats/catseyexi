@@ -117,7 +117,7 @@ local function corsairSetup(caster, ability, action, effect, job)
     local roll = math.random(1, 6)
 
     caster:delStatusEffectSilent(xi.effect.DOUBLE_UP_CHANCE)
-    caster:addStatusEffectEx(xi.effect.DOUBLE_UP_CHANCE, xi.effect.DOUBLE_UP_CHANCE, roll, 0, 45, 0, effect, job, 0, xi.effectSourceType.CORSAIR_ROLL, ability:getID(), caster:getID(), true)
+    caster:addStatusEffect(xi.effect.DOUBLE_UP_CHANCE, { power = roll, duration = 45, origin = caster, subPower = effect, tier = job, sourceType = xi.effectSourceType.CORSAIR_ROLL, sourceTypeParam = ability:getID(), silent = true })
     caster:setLocalVar('corsairRollTotal', roll)
     caster:setLocalVar('corsairDuEffect', effect)
     action:info(caster:getID(), roll)
@@ -298,8 +298,6 @@ xi.job_utils.corsair.onRollAbilityCheck = function(player, target, ability)
     local abilityId = ability:getID()
     local effectId  = corsairRollMods[abilityId][4]
 
-    ability:setRange(ability:getRange() + player:getMod(xi.mod.ROLL_RANGE))
-
     if player:hasStatusEffect(effectId) then
         return xi.msg.basic.ROLL_ALREADY_ACTIVE, 0
     elseif atMaxCorsairBusts(player) then
@@ -326,8 +324,6 @@ end
 
 -- Called by Double Up ability onAbilityCheck
 xi.job_utils.corsair.onDoubleUpAbilityCheck = function(player, target, ability)
-    ability:setRange(ability:getRange() + player:getMod(xi.mod.ROLL_RANGE))
-
     if not player:hasStatusEffect(xi.effect.DOUBLE_UP_CHANCE) then
         return xi.msg.basic.NO_ELIGIBLE_ROLL, 0
     else

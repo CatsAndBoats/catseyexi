@@ -31,12 +31,12 @@ entity.onMobSpawn = function(mob)
     mob:setLocalVar('nextMove', xi.mobSkill.GIGA_SCREAM_1)
 end
 
-entity.onMobMobskillChoose = function(mob, target)
+entity.onMobMobskillChoose = function(mob, target, skillId)
     return mob:getLocalVar('nextMove')
 end
 
 -- Alternates between Giga Scream and Dread Dive
-entity.onMobWeaponSkill = function(target, mob, skill)
+entity.onMobWeaponSkill = function(mob, target, skill, action)
     local skillId = skill:getID()
 
     if skillId == xi.mobSkill.GIGA_SCREAM_1 then

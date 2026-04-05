@@ -12,9 +12,9 @@ local entity = {}
 entity.onTrigger = function(player, npc)
     local stock =
     {
-        { 4410,  344, }, -- Roast Mushroom
-        { 5598, 2000, }, -- Sis Kebabi (Requires Astral Candescence)
-        { 5600, 3000, }, -- Balik Sis (Requires Astral Candescence)
+        { xi.item.ROAST_MUSHROOM,  344, },
+        { xi.item.SIS_KEBABI,     2000, }, -- (Requires Astral Candescence)
+        { xi.item.BALIK_SIS,      3000, }, -- (Requires Astral Candescence)
     }
 
     player:showText(npc, ID.text.MULNITH_SHOP_DIALOG)

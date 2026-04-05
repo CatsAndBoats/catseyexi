@@ -31,7 +31,7 @@ end
 
 local function fly(mob)
     mob:setAnimationSub(allFlightPhaseAnimationSub)
-    mob:addStatusEffectEx(xi.effect.ALL_MISS, 0, 1, 0, 0)
+    mob:addStatusEffect(xi.effect.ALL_MISS, { power = 1, origin = mob, icon = 0 })
     mob:setMobSkillAttack(731)
     setNextPhaseTriggers(mob, subsequentPhaseDuration)
 end
@@ -51,43 +51,42 @@ local function landWithoutTouchdown(mob)
     mob:setLocalVar('mistmeltUsed', 0)
 end
 
-entity.onMobSpawn = function(mob)
-    mob:setMobMod(xi.mobMod.ADD_EFFECT, 1)
-    mob:setMobMod(xi.mobMod.NO_STANDBACK, 1)
-    -- resetting so it doesn't respawn in flight mode
-    mob:setMobSkillAttack(0)
-    -- subanim 0 is only used when it spawns until first flight
-    mob:setAnimationSub(initialGroundPhaseAnimationSub)
-    if mob:hasStatusEffect(xi.effect.ALL_MISS) then
-        mob:delStatusEffect(xi.effect.ALL_MISS)
-    end
-
-    -- Level 90 + 2 + 53 = 145 Base Weapon Damage
-    mob:setMobMod(xi.mobMod.WEAPON_BONUS, 53)
-    mob:setMod(xi.mod.UDMGRANGE, -5000)
-    mob:setMod(xi.mod.UDMGMAGIC, -5000)
-    mob:setMod(xi.mod.UDMGBREATH, -5000)
+entity.onMobInitialize = function(mob)
     mob:addImmunity(xi.immunity.SLOW)
     mob:addImmunity(xi.immunity.TERROR)
     mob:addImmunity(xi.immunity.STUN)
     mob:addImmunity(xi.immunity.PLAGUE)
     mob:addImmunity(xi.immunity.ELEGY)
     mob:addImmunity(xi.immunity.PETRIFY)
+end
+
+entity.onMobSpawn = function(mob)
+    -- resetting so it doesn't respawn in flight mode
+    mob:setMobSkillAttack(0)
+    mob:setSpellList(548)
+    mob:setAnimationSub(initialGroundPhaseAnimationSub)
+    mob:delStatusEffect(xi.effect.ALL_MISS)
+
+    -- Level 90 + 2 + 53 = 145 Base Weapon Damage
+    mob:setMod(xi.mod.UDMGRANGE, -5000)
+    mob:setMod(xi.mod.UDMGMAGIC, -5000)
+    mob:setMod(xi.mod.UDMGBREATH, -5000)
     mob:setMod(xi.mod.UFASTCAST, 90)
+    mob:setMod(xi.mod.DOUBLE_ATTACK, 10)
+    mob:setMod(xi.mod.REFRESH, 200)
+    mob:setMobMod(xi.mobMod.WEAPON_BONUS, 53)
     mob:setMobMod(xi.mobMod.DETECTION, bit.bor(xi.detects.SIGHT, xi.detects.HEARING))
     mob:setMobMod(xi.mobMod.SIGHT_RANGE, 20)
     mob:setMobMod(xi.mobMod.SOUND_RANGE, 15)
-    -- consider making new mob group so spell list can be set there
-    mob:setSpellList(548)
     mob:setMobMod(xi.mobMod.MAGIC_COOL, 60)
-    mob:setMod(xi.mod.DOUBLE_ATTACK, 10)
-    mob:setMod(xi.mod.REFRESH, 200)
+    mob:setMobMod(xi.mobMod.ADD_EFFECT, 1)
+    mob:setMobMod(xi.mobMod.NO_STANDBACK, 1)
 
     -- can use invincible on ground or air
     xi.mix.jobSpecial.config(mob, {
         specials =
         {
-            { id = xi.jsa.INVINCIBLE, hpp = math.random(50, 85) },
+            { id = xi.mobSkill.INVINCIBLE_1, hpp = math.random(50, 85) },
         },
     })
 
@@ -170,7 +169,7 @@ entity.onMobFight = function(mob, target)
     end
 end
 
-entity.onMobWeaponSkill = function(target, mob, skill)
+entity.onMobWeaponSkill = function(mob, target, skill, action)
     -- only reset change vars if actually perform touchdown mobskill
     if skill:getID() == 1302 then
         setNextPhaseTriggers(mob, subsequentPhaseDuration)
@@ -195,11 +194,29 @@ entity.onMobDisengage = function(mob)
 end
 
 entity.onAdditionalEffect = function(mob, target, damage)
-    return xi.mob.onAddEffect(mob, target, damage, xi.mob.ae.ENSTONE, { damage = math.random(89, 111), chance = 10 })
+    local pTable =
+    {
+        chance         = 10,
+        attackType     = xi.attackType.MAGICAL,
+        magicalElement = xi.element.EARTH,
+        basePower      = math.floor(damage / 2),
+        actorStat      = xi.mod.INT,
+    }
+
+    return xi.combat.action.executeAddEffectDamage(mob, target, pTable)
 end
 
 entity.onMobDeath = function(mob, player, optParams)
-    player:addTitle(xi.title.OURYU_OVERWHELMER)
+    if player then
+        player:addTitle(xi.title.OURYU_OVERWHELMER)
+    end
+
+    if optParams.isKiller or optParams.noKiller then
+        local battlefield = mob:getBattlefield()
+        if battlefield then
+            battlefield:setStatus(xi.battlefield.status.WON)
+        end
+    end
 end
 
 return entity

@@ -15,7 +15,7 @@ end
 -- https://docs.google.com/spreadsheets/d/1YBoveP-weMdidrirY-vPDzHyxbEI2ryECINlfCnFkLI/edit?gid=57955395#gid=57955395
 -- TODO: what's the boosted para rate for NMs? needs research
 -- Cyranuce M Cutauleon has a very strong paralyze from this
-mobskillObject.onMobWeaponSkill = function(target, mob, skill)
+mobskillObject.onMobWeaponSkill = function(mob, target, skill, action)
     local power = math.random(40, 50)
 
     if mob:isNM() then
@@ -23,7 +23,7 @@ mobskillObject.onMobWeaponSkill = function(target, mob, skill)
     end
 
     -- Cyranuce M Cutauleon
-    if mob:getPool() == xi.mobPools.CYRANUCE_M_CUTAULEON then
+    if mob:getPool() == xi.mobPool.CYRANUCE_M_CUTAULEON then
         power = 100 -- yes, really
     end
 

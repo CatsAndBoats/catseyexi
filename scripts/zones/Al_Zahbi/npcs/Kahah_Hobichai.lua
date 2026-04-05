@@ -12,12 +12,12 @@ local entity = {}
 entity.onTrigger = function(player, npc)
     local stock =
     {
-        { 90,     200, }, -- Rusty Bucket
-        { 605,    200, }, -- Pickaxe (Requires Astral Candescence)
-        { 1020,   300, }, -- Sickle (Requires Astral Candescence)
-        { 1021,   500, }, -- Hatchet (Requires Astral Candescence)
-        { 16465,  164, }, -- Bronze Knife
-        { 16466, 2425, }, -- Knife
+        { xi.item.RUSTY_BUCKET,  200, },
+        { xi.item.PICKAXE,       200, }, -- (Requires Astral Candescence)
+        { xi.item.SICKLE,        300, }, -- (Requires Astral Candescence)
+        { xi.item.HATCHET,       500, }, -- (Requires Astral Candescence)
+        { xi.item.BRONZE_KNIFE,  164, },
+        { xi.item.KNIFE,        2425, },
     }
 
     player:showText(npc, ID.text.KAHAHHOBICHAI_SHOP_DIALOG)

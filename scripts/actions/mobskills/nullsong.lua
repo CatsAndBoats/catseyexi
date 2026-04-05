@@ -20,7 +20,7 @@ mobskillObject.onMobSkillCheck = function(target, mob, skill)
     return 0
 end
 
-mobskillObject.onMobWeaponSkill = function(target, mob, skill)
+mobskillObject.onMobWeaponSkill = function(mob, target, skill, action)
     local count = target:dispelAllStatusEffect(xi.effectFlag.DISPELABLE)
 
     if count == 0 then
@@ -28,7 +28,12 @@ mobskillObject.onMobWeaponSkill = function(target, mob, skill)
         return count
     end
 
-    local damage = xi.mobskills.mobFinalAdjustments(117 * count, mob, skill, target, xi.attackType.SPECIAL, xi.damageType.ELEMENTAL, xi.mobskills.shadowBehavior.WIPE_SHADOWS)
+    local info =
+    {
+        damage = 117 * count
+    }
+
+    local damage = xi.mobskills.mobFinalAdjustments(info, mob, skill, target, xi.attackType.SPECIAL, xi.damageType.ELEMENTAL, xi.mobskills.shadowBehavior.WIPE_SHADOWS)
     target:takeDamage(damage, mob, xi.attackType.SPECIAL, xi.damageType.ELEMENTAL)
 
     return damage

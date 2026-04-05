@@ -75,7 +75,7 @@ g_mixins.families.avatar = function(avatarMob)
         end
 
         -- avatar dies as soon as AF ability completes
-        mob:addListener('WEAPONSKILL_STATE_EXIT', 'AVATAR_MOBSKILL_FINISHED', function(mobArg)
+        mob:addListener('WEAPONSKILL_STATE_EXIT', 'AVATAR_MOBSKILL_FINISHED', function(mobArg, skillId, wasExecuted)
             mobArg:setUnkillable(false)
             mobArg:setHP(0)
         end)
@@ -98,7 +98,7 @@ g_mixins.families.avatar = function(avatarMob)
         if abilityId > 0 then
             mob:timer(astralDelayMs, function(mobArg)
                 if mobArg:isAlive() then
-                    mobArg:useMobAbility(abilityId)
+                    mobArg:useMobAbility(abilityId, target)
                 end
             end)
         end

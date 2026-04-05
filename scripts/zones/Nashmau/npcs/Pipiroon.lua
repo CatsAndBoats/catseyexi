@@ -2,21 +2,19 @@
 -- Area: Nashmau
 --  NPC: Pipiroon
 -----------------------------------
-local ID = zones[xi.zone.NASHMAU]
------------------------------------
 ---@type TNpcEntity
 local entity = {}
 
 entity.onTrigger = function(player, npc)
     local stock =
     {
-        { 17313, 1204, }, -- Grenade
-        { 17315, 6000, }, -- Riot Grenade
-        { 928,    515, }, -- Bomb Ash
-        { 2873, 10000, }, -- Nashmau Waystone
+        { xi.item.GRENADE,            1204 },
+        { xi.item.RIOT_GRENADE,       6000 },
+        { xi.item.PINCH_OF_BOMB_ASH,   515 },
+        { xi.item.NASHMAU_WAYSTONE,  10000 },
     }
 
-    player:showText(npc, ID.text.PIPIROON_SHOP_DIALOG)
+    player:showText(npc, zones[xi.zone.NASHMAU].text.PIPIROON_SHOP_DIALOG)
     xi.shop.general(player, stock)
 end
 

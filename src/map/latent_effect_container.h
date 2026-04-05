@@ -23,7 +23,6 @@
 #define _LATENTEFFECTCONTAINER_H
 
 #include "common/cbasetypes.h"
-#include "common/task_manager.h"
 
 #include "entities/petentity.h"
 #include "enums/weather.h"

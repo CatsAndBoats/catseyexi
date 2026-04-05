@@ -423,6 +423,13 @@ end
 function RoeParseTimed(timedSchedule)
 end
 
+---@param expToDifficultyTable table
+---@param incrediblyEasyPreyLevel integer
+---@param incrediblyEasyPreyMinExp integer
+---@return nil
+function LoadExpDifficultyCurves(expToDifficultyTable, incrediblyEasyPreyLevel, incrediblyEasyPreyMinExp)
+end
+
 --@return table
 function GetFishingContest()
 end

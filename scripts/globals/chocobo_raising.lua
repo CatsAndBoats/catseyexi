@@ -542,59 +542,6 @@ local stage =
     ADULT_4    = 7, -- Retired?
 }
 
-local color =
-{
-    YELLOW = 0,
-    BLACK  = 1,
-    BLUE   = 2,
-    RED    = 3,
-    GREEN  = 4,
-}
-
-local sex =
-{
-    MALE   = 0,
-    FEMALE = 1,
-}
-utils.unused(sex)
-
-local abilities =
-{
-    NONE            = 0,
-    GALLOP          = 1,
-    CANTER          = 2,
-    BURROW          = 3,
-    BORE            = 4,
-    AUTO_REGEN      = 5,
-    TREASURE_FINDER = 6,
-}
-utils.unused(abilities)
-
-local personality =
-{
-    EASYGOING    = 0,
-    ILL_TEMPERED = 1,
-    PATIENT      = 2,
-    SENSITIVE    = 3,
-    ENIGMATIC    = 4,
-}
-utils.unused(personality)
-
--- NOTE: Dislikes are just the next weather in the cycle after the likes
-local weather =
-{
-    CLEAR_DAYS = 0,
-    HOT_DAYS   = 1,
-    RAINY_DAYS = 2,
-    SANDSTORMS = 3,
-    WINDY      = 4,
-    SNOW       = 5,
-    THUNDER    = 6,
-    AURORAS    = 7,
-    DARK       = 8,
-}
-utils.unused(weather)
-
 local affectionRank =
 {
     DOESNT_CARE       = 0,
@@ -606,7 +553,6 @@ local affectionRank =
     ALL_THE_TIME      = 6,
     PARENT            = 7,
 }
-utils.unused(affectionRank)
 
 local hunger =
 {
@@ -742,7 +688,7 @@ xi.chocoboRaising.newChocobo = function(player, egg)
     newChoco.recessive_gene = 0 -- TODO
 
     -- TODO: Pick various stats based on genetics
-    newChoco.color             = color.YELLOW
+    newChoco.color              = xi.chocoboRaising.color.YELLOW
     newChoco.strength           = 0
     newChoco.endurance          = 0
     newChoco.discernment        = 0

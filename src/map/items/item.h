@@ -121,14 +121,29 @@ public:
     virtual const std::string getSignature();
     virtual void              setSignature(const std::string& signature);
 
+    auto isDirty() const -> bool;
+    void setDirty(bool dirty);
+
     bool isSoultrapper() const;
-    void setSoulPlateData(const std::string& name, uint32 interestData, uint8 zeni, uint16 skillIndex, uint8 fp);
-    auto getSoulPlateData() -> std::tuple<std::string, uint32, uint8, uint16, uint8>;
 
     bool isMannequin() const;
 
     static constexpr uint32_t extra_size = 0x18;
-    uint8                     m_extra[extra_size]{}; // any extra data pertaining to item (augments, furniture location, etc)
+    uint8                     m_extra[extra_size]{};
+
+    template <typename T>
+    auto exdata() -> T&
+    {
+        static_assert(sizeof(T) == extra_size, "Exdata struct must be 24 bytes");
+        return *reinterpret_cast<T*>(m_extra);
+    }
+
+    template <typename T>
+    auto exdata() const -> const T&
+    {
+        static_assert(sizeof(T) == extra_size, "Exdata struct must be 24 bytes");
+        return *reinterpret_cast<const T*>(m_extra);
+    }
 
 protected:
     void setType(uint8);
@@ -150,6 +165,7 @@ private:
     uint8 m_locationID; // storage number
 
     bool m_sent;
+    bool dirty_{};
 
     std::string m_name;
     std::string m_send;

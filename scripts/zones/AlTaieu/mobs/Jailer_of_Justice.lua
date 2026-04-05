@@ -41,7 +41,7 @@ end
 
 entity.onMobSpawn = function(mob)
     mob:setMobMod(xi.mobMod.SPECIAL_SKILL, 0)
-    xi.mix.jobSpecial.config(mob, { specials = { { id = xi.jsa.FAMILIAR, hpp = 50, cooldown = 210 }, }, })
+    xi.mix.jobSpecial.config(mob, { specials = { { id = xi.mobSkill.FAMILIAR_1, hpp = 50, cooldown = 210 }, }, })
 end
 
 entity.onMobEngage = function(mob, target)
@@ -67,7 +67,7 @@ entity.onMobFight = function(mob, target)
     end
 end
 
-entity.onMobWeaponSkill = function(target, mob, skill)
+entity.onMobWeaponSkill = function(mob, target, skill, action)
     -- Manually apply Familiar to all pets except first one
     if skill:getID() == xi.mobSkill.FAMILIAR_1 then
         for _, petId in ipairs(pets) do

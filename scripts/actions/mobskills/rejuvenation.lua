@@ -5,10 +5,10 @@
 local mobskillObject = {}
 
 mobskillObject.onMobSkillCheck = function(target, mob, skill)
-    return 1
+    return 0
 end
 
-mobskillObject.onMobWeaponSkill = function(target, mob, skill)
+mobskillObject.onMobWeaponSkill = function(mob, target, skill, action)
     local hp = target:getMaxHP() - target:getHP()
     target:addHP(hp)
     target:addMP(target:getMaxMP() - target:getMP())

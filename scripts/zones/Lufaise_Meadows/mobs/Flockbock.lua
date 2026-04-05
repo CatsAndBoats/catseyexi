@@ -14,14 +14,13 @@ entity.onMobInitialize = function(mob)
     -- TODO: Exact STP value needs to be researched further
     mob:setMod(xi.mod.DOUBLE_ATTACK, 50)
     mob:addMod(xi.mod.STORETP,       25)
+    mob:setRespawnTime(math.random(3600, 7200))
 end
 
 entity.onMobSpawn = function(mob)
-    local petribreath = 269
-
     -- Petribreath resets hate on use
-    mob:addListener('WEAPONSKILL_USE', 'PETRIBREATH_HATE_RESET', function(mobArg, target, wsid, tp, action)
-        if wsid == petribreath then
+    mob:addListener('WEAPONSKILL_USE', 'PETRIBREATH_HATE_RESET', function(mobArg, target, skill, tp, action, damage)
+        if skill:getID() == 269 then
             mob:resetEnmity(target)
         end
     end)

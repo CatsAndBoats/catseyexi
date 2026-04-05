@@ -95,7 +95,7 @@ void CLuaAction::param(const uint32 actionTargetId, const int32 param) const
     }
 }
 
-void CLuaAction::messageId(const uint32 actionTargetId, const MSGBASIC_ID messageId) const
+void CLuaAction::messageId(const uint32 actionTargetId, const MsgBasic messageId) const
 {
     for (auto&& actionTarget : m_PLuaAction->targets)
     {
@@ -107,7 +107,7 @@ void CLuaAction::messageId(const uint32 actionTargetId, const MSGBASIC_ID messag
     }
 }
 
-auto CLuaAction::getMsg(const uint32 actionTargetId) const -> std::optional<uint16>
+auto CLuaAction::getMsg(const uint32 actionTargetId) const -> Maybe<MsgBasic>
 {
     for (auto&& actionTarget : m_PLuaAction->targets)
     {
@@ -120,7 +120,7 @@ auto CLuaAction::getMsg(const uint32 actionTargetId) const -> std::optional<uint
     return std::nullopt;
 }
 
-auto CLuaAction::getAnimation(const uint32 actionTargetId) const -> std::optional<ActionAnimation>
+auto CLuaAction::getAnimation(const uint32 actionTargetId) const -> Maybe<ActionAnimation>
 {
     for (auto&& actionTarget : m_PLuaAction->targets)
     {
@@ -203,7 +203,7 @@ void CLuaAction::knockback(const uint32 actionTargetId, const Knockback knockbac
     }
 }
 
-void CLuaAction::recordDamage(const CLuaBaseEntity* PLuaTarget, const ATTACK_TYPE atkType, const int32 damage, const std::optional<bool> isCritical) const
+void CLuaAction::recordDamage(const CLuaBaseEntity* PLuaTarget, const ATTACK_TYPE atkType, const int32 damage, const Maybe<bool> isCritical) const
 {
     if (auto* PTarget = dynamic_cast<CBattleEntity*>(PLuaTarget->GetBaseEntity()))
     {
@@ -260,7 +260,7 @@ void CLuaAction::addEffectParam(const uint32 actionTargetId, const int32 addEffe
     }
 }
 
-void CLuaAction::addEffectMessage(const uint32 actionTargetId, const MSGBASIC_ID addEffectMessage) const
+void CLuaAction::addEffectMessage(const uint32 actionTargetId, const MsgBasic addEffectMessage) const
 {
     for (auto&& actionTarget : m_PLuaAction->targets)
     {

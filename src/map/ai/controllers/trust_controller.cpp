@@ -85,7 +85,7 @@ void CTrustController::Despawn()
     CMobController::Despawn();
 }
 
-void CTrustController::Tick(timer::time_point tick)
+auto CTrustController::Tick(timer::time_point tick) -> Task<void>
 {
     TracyZoneScoped;
     TracyZoneString(POwner->getName());
@@ -94,7 +94,7 @@ void CTrustController::Tick(timer::time_point tick)
 
     if (!POwner->PMaster)
     {
-        return;
+        co_return;
     }
 
     if (POwner->PMaster->isCharmed)
@@ -104,54 +104,75 @@ void CTrustController::Tick(timer::time_point tick)
 
     if (POwner->PAI->IsEngaged())
     {
-        DoCombatTick(tick);
+        co_await DoCombatTick(tick);
     }
     else if (!POwner->isDead())
     {
-        DoRoamTick(tick);
+        co_await DoRoamTick(tick);
     }
 }
 
-void CTrustController::DoCombatTick(timer::time_point tick)
+auto CTrustController::DoCombatTick(timer::time_point tick) -> Task<void>
 {
     TracyZoneScoped;
 
-    if (!POwner->PMaster->PAI->IsEngaged())
+    CTrustEntity* PTrust  = static_cast<CTrustEntity*>(POwner);
+    CCharEntity*  PMaster = static_cast<CCharEntity*>(POwner->PMaster);
+    CMobEntity*   PMob    = dynamic_cast<CMobEntity*>(PMaster->GetBattleTarget());
+    PTarget               = POwner->GetBattleTarget();
+
+    if (!PMaster->PAI->IsEngaged())
     {
-        POwner->PAI->Internal_Disengage();
+        PTrust->PAI->Internal_Disengage();
         m_LastTopEnmity = nullptr;
         m_CombatEndTime = m_Tick;
     }
 
-    if (POwner->PMaster->GetBattleTargetID() != POwner->GetBattleTargetID())
+    if (PMaster && PMob && PTrust->GetBattleTargetID() != PMaster->GetBattleTargetID())
     {
-        POwner->PAI->Internal_ChangeTarget(POwner->PMaster->GetBattleTargetID());
-        m_LastTopEnmity = nullptr;
+        auto  masterID   = PMaster->id;
+        auto* enmityList = PMob->PEnmityContainer->GetEnmityList();
+        bool  hasEnmity  = false;
+
+        if (auto it = enmityList->find(masterID); it != enmityList->end())
+        {
+            const EnmityObject_t& entry = it->second;
+            // Only treat as "has enmity" if:
+            // the entry is active,
+            // the CE+VE is positive,
+            // and the master is within enmity range (same checks used when adding enmity).
+            if (entry.active && (entry.CE + entry.VE) > 0)
+            {
+                hasEnmity = true;
+            }
+        }
+
+        if (hasEnmity)
+        {
+            PTrust->PAI->Internal_ChangeTarget(PMaster->GetBattleTargetID());
+            m_LastTopEnmity = nullptr;
+        }
     }
 
     // If busy, don't run around!
-    if (POwner->PAI->IsCurrentState<CMagicState>() || POwner->PAI->IsCurrentState<CRangeState>())
+    if (PTrust->PAI->IsCurrentState<CMagicState>() || PTrust->PAI->IsCurrentState<CRangeState>())
     {
-        return;
+        co_return;
     }
-
-    CTrustEntity* PTrust  = static_cast<CTrustEntity*>(POwner);
-    CCharEntity*  PMaster = static_cast<CCharEntity*>(POwner->PMaster);
-    PTarget               = POwner->GetBattleTarget();
 
     if (PTarget)
     {
-        if (POwner->PAI->CanFollowPath() && POwner->GetSpeed() > 0)
+        if (PTrust->PAI->CanFollowPath() && PTrust->GetSpeed() > 0)
         {
-            float currentDistanceToTarget = distance(POwner->loc.p, PTarget->loc.p);
-            float currentDistanceToMaster = distance(POwner->loc.p, PMaster->loc.p);
+            float currentDistanceToTarget = distance(PTrust->loc.p, PTarget->loc.p);
+            float currentDistanceToMaster = distance(PTrust->loc.p, PMaster->loc.p);
 
             if (currentDistanceToTarget > WarpDistance)
             {
-                POwner->PAI->PathFind->WarpTo(PTarget->loc.p);
+                PTrust->PAI->PathFind->WarpTo(PTarget->loc.p);
             }
 
-            POwner->PAI->PathFind->LookAt(PTarget->loc.p);
+            PTrust->PAI->PathFind->LookAt(PTarget->loc.p);
 
             int16 movementDistance = PTrust->getMobMod(MOBMOD_TRUST_DISTANCE);
 
@@ -172,18 +193,18 @@ void CTrustController::DoCombatTick(timer::time_point tick)
                 case TRUST_MOVEMENT_TYPE::MELEE:
                 {
                     std::unique_ptr<CBasicPacket> err;
-                    if (!POwner->CanAttack(PTarget, err) && POwner->GetSpeed() > 0)
+                    if (!PTrust->CanAttack(PTarget, err) && PTrust->GetSpeed() > 0)
                     {
                         if (currentDistanceToTarget > RoamDistance)
                         {
                             if (currentDistanceToTarget < RoamDistance * 3.0f &&
-                                POwner->PAI->PathFind->PathAround(PTarget->loc.p, RoamDistance, PATHFLAG_RUN | PATHFLAG_WALLHACK))
+                                PTrust->PAI->PathFind->PathAround(PTarget->loc.p, RoamDistance, PATHFLAG_RUN | PATHFLAG_WALLHACK))
                             {
-                                POwner->PAI->PathFind->FollowPath(m_Tick);
+                                PTrust->PAI->PathFind->FollowPath(m_Tick);
                             }
-                            else if (POwner->GetSpeed() > 0)
+                            else if (PTrust->GetSpeed() > 0)
                             {
-                                POwner->PAI->PathFind->StepTo(PTarget->loc.p, true);
+                                PTrust->PAI->PathFind->StepTo(PTarget->loc.p, true);
                             }
                         }
                     }
@@ -200,7 +221,7 @@ void CTrustController::DoCombatTick(timer::time_point tick)
                 }
             }
 
-            if (!POwner->PAI->PathFind->IsFollowingPath())
+            if (!PTrust->PAI->PathFind->IsFollowingPath())
             {
                 Declump(PMaster, PTarget);
             }
@@ -208,16 +229,16 @@ void CTrustController::DoCombatTick(timer::time_point tick)
 
         if (!m_InTransit)
         {
-            POwner->PAI->PathFind->FollowPath(m_Tick);
+            PTrust->PAI->PathFind->FollowPath(m_Tick);
         }
 
-        m_GambitsContainer->Tick(tick);
+        co_await m_GambitsContainer->Tick(tick);
 
-        POwner->PAI->EventHandler.triggerListener("COMBAT_TICK", POwner, POwner->PMaster, PTarget);
+        PTrust->PAI->EventHandler.triggerListener("COMBAT_TICK", PTrust, PMaster, PTarget);
     }
 }
 
-void CTrustController::DoRoamTick(timer::time_point tick)
+auto CTrustController::DoRoamTick(timer::time_point tick) -> Task<void>
 {
     TracyZoneScoped;
 
@@ -310,6 +331,8 @@ void CTrustController::DoRoamTick(timer::time_point tick)
             m_NumHealingTicks = std::clamp(m_NumHealingTicks + 1, static_cast<std::size_t>(0U), m_tickDelays.size() - 1U);
         }
     }
+
+    co_return;
 }
 
 void CTrustController::Declump(CCharEntity* PMaster, CBattleEntity* PTarget)
@@ -409,7 +432,7 @@ bool CTrustController::Ability(uint16 targid, uint16 abilityid)
 {
     TracyZoneScoped;
 
-    if (static_cast<CMobEntity*>(POwner)->PRecastContainer->HasRecast(RECAST_ABILITY, abilityid, 0s))
+    if (static_cast<CMobEntity*>(POwner)->PRecastContainer->HasRecast(RECAST_ABILITY, static_cast<Recast>(abilityid), 0s))
     {
         return false;
     }
@@ -450,7 +473,7 @@ bool CTrustController::Cast(uint16 targid, SpellID spellid)
 
     FaceTarget(targid);
 
-    if (static_cast<CMobEntity*>(POwner)->PRecastContainer->Has(RECAST_MAGIC, static_cast<uint16>(spellid)))
+    if (static_cast<CMobEntity*>(POwner)->PRecastContainer->Has(RECAST_MAGIC, static_cast<Recast>(spellid)))
     {
         return false;
     }

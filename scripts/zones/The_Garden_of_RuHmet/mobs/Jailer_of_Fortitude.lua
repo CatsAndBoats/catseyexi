@@ -24,7 +24,7 @@ entity.onMobSpawn = function(mob)
     xi.mix.jobSpecial.config(mob, {
         specials =
         {
-            { id = xi.jsa.INVINCIBLE, cooldown = 180, hpp = 50 }, -- "Has access to Invincible, which it may use several times."
+            { id = xi.mobSkill.INVINCIBLE_1, cooldown = 180, hpp = 50 }, -- "Has access to Invincible, which it may use several times."
         },
     })
 

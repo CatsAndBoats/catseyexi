@@ -46,7 +46,7 @@ SearchApplication::~SearchApplication() = default;
 
 auto SearchApplication::createEngine() -> std::unique_ptr<Engine>
 {
-    return std::make_unique<SearchEngine>(ioContext());
+    return std::make_unique<SearchEngine>(scheduler_);
 }
 
 void SearchApplication::registerCommands(ConsoleService& console)
@@ -61,10 +61,4 @@ void SearchApplication::registerCommands(ConsoleService& console)
     console.registerCommand("expire_all",
                             "Force-expire all items on the AH, returning to sender",
                             std::bind(&SearchEngine::onExpireAll, searchEngine, std::placeholders::_1));
-}
-
-void SearchApplication::requestExit()
-{
-    Application::requestExit();
-    io_context_.stop();
 }

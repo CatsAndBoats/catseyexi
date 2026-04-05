@@ -23,9 +23,12 @@
 
 #include "test_matcher.h"
 #include "test_suite.h"
-#include <filesystem>
-#include <optional>
+
 #include <sol/sol.hpp>
+
+#include <common/types/maybe.h>
+
+#include <filesystem>
 #include <string>
 #include <vector>
 
@@ -48,12 +51,12 @@ private:
     void countTestsAndSuites();
     void countSuite(const TestSuite& suite, int depth);
 
-    TestSuite                       rootSuite_;
-    TestSuite*                      currentSuite_;
-    TestMatcher                     matcher_;
-    ReporterContainer&              reporters_;
-    std::string                     currentFile_;
-    std::optional<sol::environment> currentEnvironment_;
-    size_t                          totalTests_{ 0 };
-    size_t                          totalSuites_{ 0 };
+    TestSuite               rootSuite_;
+    TestSuite*              currentSuite_;
+    TestMatcher             matcher_;
+    ReporterContainer&      reporters_;
+    std::string             currentFile_;
+    Maybe<sol::environment> currentEnvironment_;
+    size_t                  totalTests_{ 0 };
+    size_t                  totalSuites_{ 0 };
 };

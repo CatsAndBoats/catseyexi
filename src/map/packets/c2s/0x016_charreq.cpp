@@ -33,60 +33,57 @@ auto GP_CLI_COMMAND_CHARREQ::validate(MapSession* PSession, const CCharEntity* P
 
 void GP_CLI_COMMAND_CHARREQ::process(MapSession* PSession, CCharEntity* PChar) const
 {
+    // Requesting self-update
     if (ActIndex == PChar->targid)
     {
         PChar->updateEntityPacket(PChar, ENTITY_SPAWN, UPDATE_ALL_CHAR);
         PChar->pushPacket<CCharStatusPacket>(PChar);
+        return;
     }
-    else
+
+    CBaseEntity* PEntity = PChar->GetEntity(ActIndex, TYPE_NPC | TYPE_PC);
+    if (!PEntity)
     {
-        CBaseEntity* PEntity = PChar->GetEntity(ActIndex, TYPE_NPC | TYPE_PC);
+        const auto fullId = ((4096 + PChar->getZone()) << 12) + ActIndex;
+        ShowWarningFmt("Could not look up entity <{}, {}> in zone <{} ({})>",
+                       ActIndex,
+                       fullId,
+                       zoneutils::GetZone(PChar->getZone())->getName(),
+                       PChar->getZone());
+        return;
+    }
 
-        if (PEntity && PEntity->objtype == TYPE_PC)
+    if (PEntity->objtype == TYPE_PC)
+    {
+        // Char we want an update for
+        if (auto* PCharEntity = dynamic_cast<CCharEntity*>(PEntity))
         {
-            // Char we want an update for
-            if (auto* PCharEntity = dynamic_cast<CCharEntity*>(PEntity))
+            if (PCharEntity->m_isGMHidden)
             {
-                if (!PCharEntity->m_isGMHidden)
-                {
-                    PChar->updateEntityPacket(PCharEntity, ENTITY_SPAWN, UPDATE_ALL_CHAR);
-                }
-                else
-                {
-                    ShowError(fmt::format("Player {} requested information about a hidden GM ({}) using targid {}", PChar->getName(), PCharEntity->getName(), ActIndex));
-                }
+                ShowErrorFmt("Player {} requested information about a hidden GM ({}) using targid {}", PChar->getName(), PCharEntity->getName(), ActIndex);
+                return;
             }
+
+            PChar->updateEntityPacket(PCharEntity, ENTITY_SPAWN, UPDATE_ALL_CHAR);
         }
-        else
+    }
+    else // TYPE_NPC
+    {
+        // Special case for onZoneIn cutscenes in Mog House
+        // TODO: Verify this condition when Mog House sharing is implemented.
+        if (PChar->m_moghouseID == PChar->id &&
+            PEntity->status == STATUS_TYPE::DISAPPEAR &&
+            PEntity->loc.p.z == 1.5 &&
+            PEntity->look.face == 0x52)
         {
-            if (!PEntity)
-            {
-                PEntity = zoneutils::GetTrigger(ActIndex, PChar->getZone());
-
-                // PEntity->id will now be the full id of the entity we could not find
-                ShowWarning(fmt::format("Server missing npc_list.sql entry <{}> in zone <{} ({})>",
-                                        PEntity->id,
-                                        zoneutils::GetZone(PChar->getZone())->getName(),
-                                        PChar->getZone()));
-            }
-
-            // Special case for onZoneIn cutscenes in Mog House
-            // TODO: Verify this condition when Mog House sharing is implemented.
-            if (PChar->m_moghouseID == PChar->id &&
-                PEntity->status == STATUS_TYPE::DISAPPEAR &&
-                PEntity->loc.p.z == 1.5 &&
-                PEntity->look.face == 0x52)
-            {
-                // Using the same logic as in ZoneEntities::SpawnConditionalNPCs:
-                // Change the status of the entity, send the packet, change it back to disappear
-                PEntity->status = STATUS_TYPE::NORMAL;
-                PChar->updateEntityPacket(PEntity, ENTITY_SPAWN, UPDATE_ALL_MOB);
-                PEntity->status = STATUS_TYPE::DISAPPEAR;
-            }
-            else
-            {
-                PChar->updateEntityPacket(PEntity, ENTITY_SPAWN, UPDATE_ALL_MOB);
-            }
+            // Using the same logic as in ZoneEntities::SpawnConditionalNPCs:
+            // Change the status of the entity, send the packet, change it back to disappear
+            PEntity->status = STATUS_TYPE::NORMAL;
+            PChar->updateEntityPacket(PEntity, ENTITY_SPAWN, UPDATE_ALL_MOB);
+            PEntity->status = STATUS_TYPE::DISAPPEAR;
+            return;
         }
+
+        PChar->updateEntityPacket(PEntity, ENTITY_SPAWN, UPDATE_ALL_MOB);
     }
 }

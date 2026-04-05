@@ -22,10 +22,9 @@
 #ifndef _LOS_COMMON_H
 #define _LOS_COMMON_H
 
-#include "common/cbasetypes.h"
-#include "common/logging.h"
-
-#include <optional>
+#include <common/cbasetypes.h>
+#include <common/logging.h>
+#include <common/types/maybe.h>
 
 enum class Axis : uint8
 {
@@ -190,7 +189,7 @@ struct Triangle
     }
 
     // Taken from: https://en.wikipedia.org/wiki/M%C3%B6ller%E2%80%93Trumbore_intersection_algorithm#C++_implementation
-    std::optional<Vector3D> doesRayIntersect(Vector3D rayOrigin, Vector3D rayVector)
+    Maybe<Vector3D> doesRayIntersect(Vector3D rayOrigin, Vector3D rayVector)
     {
         constexpr float EPSILON = 0.0000001f;
 

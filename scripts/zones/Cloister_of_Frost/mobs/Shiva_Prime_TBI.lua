@@ -8,6 +8,19 @@ mixins = { require('scripts/mixins/job_special') }
 ---@type TMobEntity
 local entity = {}
 
+entity.onMobInitialize = function(mob)
+    mob:addImmunity(xi.immunity.BLIND)
+    mob:addImmunity(xi.immunity.SLOW)
+    mob:addImmunity(xi.immunity.ELEGY)
+    mob:addImmunity(xi.immunity.PARALYZE)
+    mob:addImmunity(xi.immunity.GRAVITY)
+    mob:addImmunity(xi.immunity.BIND)
+    mob:addImmunity(xi.immunity.SILENCE)
+    mob:addImmunity(xi.immunity.LIGHT_SLEEP)
+    mob:addImmunity(xi.immunity.DARK_SLEEP)
+    mob:addImmunity(xi.immunity.TERROR)
+end
+
 entity.onMobSpawn = function(mob)
     xi.mix.jobSpecial.config(mob, {
         specials =
@@ -26,19 +39,20 @@ entity.onMobSpawn = function(mob)
     mob:setMod(xi.mod.UDMGPHYS, -6000)
     mob:setMod(xi.mod.UDMGRANGE, -6000)
 
-    mob:addImmunity(xi.immunity.BLIND)
-    mob:addImmunity(xi.immunity.SLOW)
-    mob:addImmunity(xi.immunity.PARALYZE)
-    mob:addImmunity(xi.immunity.GRAVITY)
-    mob:addImmunity(xi.immunity.BIND)
-    mob:addImmunity(xi.immunity.SILENCE)
-    mob:addImmunity(xi.immunity.LIGHT_SLEEP)
-    mob:addImmunity(xi.immunity.DARK_SLEEP)
-    mob:addImmunity(xi.immunity.TERROR)
+    mob:setMobMod(xi.mobMod.BASE_DAMAGE_MULTIPLIER, 150)
 end
 
 entity.onAdditionalEffect = function(mob, target, damage)
-    return xi.mob.onAddEffect(mob, target, damage, xi.mob.ae.ENBLIZZARD, { chance = 100, power = math.random(20, 40) })
+    local pTable =
+    {
+        chance         = 100,
+        attackType     = xi.attackType.MAGICAL,
+        magicalElement = xi.element.ICE,
+        basePower      = math.floor(damage / 2),
+        actorStat      = xi.mod.INT,
+    }
+
+    return xi.combat.action.executeAddEffectDamage(mob, target, pTable)
 end
 
 entity.onMobFight = function(mob, target)

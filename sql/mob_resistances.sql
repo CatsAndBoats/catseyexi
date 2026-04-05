@@ -450,7 +450,8 @@ INSERT INTO `mob_resistances` VALUES (408,'Quadav-Seed',0,2500,0,0,0,0,0,0,0,0,0
 INSERT INTO `mob_resistances` VALUES (409,'Yagudo-Seed',0,0,0,0,0,0,0,0,0,0,0,0,0,-2,-3,0,0,-2,-2,-2,-2,-3,-3,0,0,-2,-2,-2,-2);
 INSERT INTO `mob_resistances` VALUES (410,'Goblin-Seed',0,0,0,0,0,0,0,0,0,0,0,0,0,-2,-2,-2,-2,-2,-2,-3,0,-2,-2,-2,-2,-2,-3,0,0);
 INSERT INTO `mob_resistances` VALUES (411,'Pet-Siren',0,0,0,0,0,0,0,0,0,0,0,0,0,4,2,11,11,4,4,11,2,2,2,11,11,4,11,2,2);
--- 412 to 434 free
+INSERT INTO `mob_resistances` VALUES (412,'Pet-Atomos',0,0,0,0,0,0,0,0,0,0,0,0,0,5,7,5,7,5,7,4,11,7,7,5,7,7,4,11,11);
+-- 413 to 434 free
 INSERT INTO `mob_resistances` VALUES (435,'Giant_Gnat',0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,3,0,0,0,-2,4,0,0,3,0,0,-2,4,4);
 INSERT INTO `mob_resistances` VALUES (436,'Gnat-Bloodlapper',0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,3,0,0,0,-2,4,0,0,3,0,0,-2,4,4);
 INSERT INTO `mob_resistances` VALUES (437,'Sapling-Ghillie_Dhu',0,0,0,0,0,0,0,0,0,0,0,0,0,-3,-2,-2,0,-2,0,0,-3,-2,-2,-2,0,0,0,-3,-3);
@@ -529,7 +530,7 @@ INSERT INTO `mob_resistances` VALUES (513,'Pakecet',0,0,0,0,0,0,0,0,0,0,0,0,0,2,
 INSERT INTO `mob_resistances` VALUES (514,'Metus',0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,2,2,2,2,0,11,2,2,2,2,2,0,11,11);
 INSERT INTO `mob_resistances` VALUES (515,'Wyvern - Ajattara',0,0,0,0,0,0,0,0,0,0,0,0,0,3,0,2,0,-1,-1,-1,-2,0,0,2,0,-1,-1,-2,-2);
 INSERT INTO `mob_resistances` VALUES (516,'Gigas - Alkyoneus',0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0);
-INSERT INTO `mob_resistances` VALUES (517,'Gigas - Blizzard',0,0,0,0,0,0,0,0,0,0,0,0,0,-2,4,0,0,0,0,0,0,4,4,0,0,0,0,0,0);
+INSERT INTO `mob_resistances` VALUES (517,'Gigas - Blizzard',0,0,0,0,0,0,0,0,0,0,0,0,0,-2,4,0,0,0,0,0,0,4,4,0,0,0,0,0,0); -- TODO: Verify Resist Values for Ice Gigas and change resistances accordingly
 INSERT INTO `mob_resistances` VALUES (518,'Proto - Omega',0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,0,11,0,0,0,0,0,0,11,11);
 INSERT INTO `mob_resistances` VALUES (519,'Avatar-Carbuncle_Prime_WTB',0,0,0,0,0,0,0,0,0,0,0,0,0,6,6,6,6,6,6,11,0,6,6,6,6,6,11,0,0);
 INSERT INTO `mob_resistances` VALUES (520,'Bronzecap',0,0,0,0,0,0,0,0,0,0,0,0,0,-2,-2,-2,-2,-2,4,-3,4,-2,-2,-2,-2,4,-3,6,6);

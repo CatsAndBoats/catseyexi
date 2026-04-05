@@ -10,22 +10,24 @@ mobskillObject.onMobSkillCheck = function(target, mob, skill)
     return 0
 end
 
-mobskillObject.onMobWeaponSkill = function(target, mob, skill)
+mobskillObject.onMobWeaponSkill = function(mob, target, skill, action)
     local params = {}
 
-    params.percentMultipier  = 0.12
-    params.element           = xi.element.EARTH
-    params.damageCap         = 500 -- TODO: Capture cap
-    params.bonusDamage       = 0
-    params.mAccuracyBonus    = { 0, 0, 0 }
-    params.resistStat        = xi.mod.INT
+    params.percentMultipier = 0.12
+    params.damageCap        = 500 -- TODO: Capture cap
+    params.bonusDamage      = 0
     -- TODO: Sources say this skill has a low magic accuracy.
+    params.mAccuracyBonus   = { 0, 0, 0 }
+    params.resistStat       = xi.mod.INT
+    params.element          = xi.element.EARTH
+    params.attackType       = xi.attackType.BREATH
+    params.damageType       = xi.damageType.EARTH
+    params.shadowBehavior   = xi.mobskills.shadowBehavior.IGNORE_SHADOWS
 
-    local damage = xi.mobskills.mobBreathMove(mob, target, skill, params)
-    damage = xi.mobskills.mobFinalAdjustments(damage, mob, skill, target, xi.attackType.BREATH, xi.damageType.EARTH, xi.mobskills.shadowBehavior.IGNORE_SHADOWS, 1)
+    local info = xi.mobskills.mobBreathMove(mob, target, skill, action, params)
 
-    if not xi.mobskills.hasMissMessage(mob, target, skill, damage) then
-        target:takeDamage(damage, mob, xi.attackType.BREATH, xi.damageType.EARTH, { breakBind = false })
+    if xi.mobskills.processDamage(mob, target, skill, action, info) then
+        target:takeDamage(info.damage, mob, info.attackType, info.damageType, { breakBind = false })
 
         -- TODO: Capture power/durations of various effects.
         xi.mobskills.mobStatusEffectMove(mob, target, xi.effect.SLOW, 1250, 0, 60)
@@ -37,7 +39,7 @@ mobskillObject.onMobWeaponSkill = function(target, mob, skill)
         xi.mobskills.mobStatusEffectMove(mob, target, xi.effect.WEIGHT, 50, 0, 60)
     end
 
-    return damage
+    return info.damage
 end
 
 return mobskillObject

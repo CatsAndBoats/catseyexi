@@ -9,11 +9,14 @@ mixins = { require('scripts/mixins/job_special') }
 ---@type TMobEntity
 local entity = {}
 
-entity.onMobInitialize = function(mob)
+entity.onMobSpawn = function(mob)
     mob:setMobMod(xi.mobMod.ADD_EFFECT, 1)
-    mob:setMod(xi.mod.SLEEP_MEVA, 90)
-    mob:setMod(xi.mod.PARALYZE_MEVA, 75)
-    mob:setMod(xi.mod.SILENCE_MEVA, 75)
+    mob:setMod(xi.mod.DARK_SLEEP_RES_RANK, 11)
+    mob:setMod(xi.mod.LIGHT_SLEEP_RES_RANK, 11)
+    mob:setMod(xi.mod.PARALYZE_RES_RANK, 8)
+    mob:setMod(xi.mod.SLOW_RES_RANK, 8)
+    mob:setMod(xi.mod.SILENCE_RES_RANK, 11)
+    mob:setMobMod(xi.mobMod.BASE_DAMAGE_MULTIPLIER, 200)
 end
 
 entity.onMobEngage = function(mob, target)
@@ -25,8 +28,11 @@ entity.onAdditionalEffect = function(mob, target, damage)
 end
 
 entity.onMobDeath = function(mob, player, optParams)
-    player:addTitle(xi.title.OVERLORD_OVERTHROWER)
-    if optParams.isKiller then
+    if player then
+        player:addTitle(xi.title.OVERLORD_OVERTHROWER)
+    end
+
+    if optParams.isKiller or optParams.noKiller then
         mob:showText(mob, ID.text.ORC_KING_DEATH)
     end
 end

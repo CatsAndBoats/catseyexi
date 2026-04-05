@@ -60,14 +60,15 @@ entity.onMobSpawn = function(mob)
 end
 
 entity.onAdditionalEffect = function(mob, target, damage)
-    if mob:hasStatusEffect(xi.effect.ENWATER) then
-        return 0, 0, 0
-    else
-        return xi.mob.onAddEffect(mob, target, damage, xi.mob.ae.PARALYZE)
-    end
-end
+    local pTable =
+    {
+        chance   = 25,
+        effectId = xi.effect.PARALYSIS,
+        power    = 20,
+        duration = 60,
+    }
 
-entity.onMobDeath = function(mob, player, optParams)
+    return xi.combat.action.executeAddEffectEnfeeblement(mob, target, pTable)
 end
 
 entity.onMobDespawn = function(mob)

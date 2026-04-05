@@ -43,7 +43,7 @@
 // A test player that combines client and player entity functionality
 // Common test patterns are exposed as properties
 CLuaClientEntityPair::CLuaClientEntityPair(std::unique_ptr<TestChar> testChar, CLuaSimulation* simulation, MapEngine* mapServer)
-: CLuaTestEntity(testChar->entity())
+: CLuaTestEntity(mapServer->scheduler(), testChar->entity())
 , testChar_(std::move(testChar))
 , simulation_(simulation)
 , engine_(mapServer)
@@ -151,7 +151,7 @@ auto CLuaClientEntityPair::isPendingZone() const -> bool
  *  Notes   : Only for LOC_INVENTORY, player-specific
  ************************************************************************/
 
-auto CLuaClientEntityPair::getItemInvSlot(const uint16 itemId, const uint8 quantity) const -> std::optional<uint16>
+auto CLuaClientEntityPair::getItemInvSlot(const uint16 itemId, const uint8 quantity) const -> Maybe<uint16>
 {
     uint8       slotId = 0;
     const auto* PChar  = testChar_->entity();
@@ -331,6 +331,11 @@ auto CLuaClientEntityPair::testChar() const -> TestChar*
 auto CLuaClientEntityPair::simulation() const -> CLuaSimulation*
 {
     return simulation_;
+}
+
+auto CLuaClientEntityPair::engine() -> MapEngine*
+{
+    return engine_;
 }
 
 void CLuaClientEntityPair::Register()

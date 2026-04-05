@@ -9,9 +9,7 @@ local entity = {}
 
 entity.phList =
 {
-    [ID.mob.CRYPT_GHOST - 3] = ID.mob.CRYPT_GHOST,
-    [ID.mob.CRYPT_GHOST - 2] = ID.mob.CRYPT_GHOST,
-    [ID.mob.CRYPT_GHOST - 1] = ID.mob.CRYPT_GHOST,
+    [ID.mob.CRYPT_GHOST - 1] = ID.mob.CRYPT_GHOST, -- Confirmed on retail
 }
 
 entity.onMobDeath = function(mob, player, optParams)

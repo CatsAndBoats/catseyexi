@@ -55,7 +55,7 @@ entity.onMobSpawn = function(mob)
     {
         specials =
         {
-            { id = xi.jsa.PERFECT_DODGE },
+            { id = xi.mobSkill.PERFECT_DODGE_1 },
         },
     })
 end

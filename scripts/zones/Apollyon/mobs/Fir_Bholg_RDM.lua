@@ -11,7 +11,7 @@ entity.onMobSpawn = function(mob)
     xi.mix.jobSpecial.config(mob, {
         specials =
         {
-            { id = xi.jsa.CHAINSPELL, hpp = math.random(50, 60) },
+            { id = xi.mobSkill.CHAINSPELL_1, hpp = math.random(50, 60) },
         },
     })
 end

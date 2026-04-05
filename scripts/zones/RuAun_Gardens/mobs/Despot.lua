@@ -45,48 +45,28 @@ entity.onMobInitialize = function(mob)
     mob:addImmunity(xi.immunity.PETRIFY)
     mob:addImmunity(xi.immunity.TERROR)
     mob:addImmunity(xi.immunity.PLAGUE)
-end
 
-entity.onMobSpawn = function(mob)
-    local zone = mob:getZone()
-
-    if zone then
-        local ph = GetMobByID(zone:getLocalVar('DespotPlaceholderID'))
-        if ph then
-            local pos      = ph:getPos()
-            local killerId = ph:getLocalVar('killer')
-
-            mob:setPos(pos.x, pos.y, pos.z, pos.r)
-
-            if killerId ~= 0 then
-                local killer = GetPlayerByID(killerId)
-
-                if
-                    killer and
-                    not killer:isEngaged() and
-                    killer:checkDistance(mob) <= 50
-                then
-                    mob:updateClaim(killer)
-                end
-            end
-        end
-    end
-
-    mob:addListener('WEAPONSKILL_STATE_EXIT', 'PH_VAR', function(mobArg, skillID)
+    mob:addListener('WEAPONSKILL_STATE_EXIT', 'PH_VAR', function(mobArg, skillId, wasExecuted)
         -- Despot rapidly uses several Panzerfaust in a row
-        local counter = mob:getLocalVar('panzerfaustCounter')
+        local counter  = mob:getLocalVar('panzerfaustCounter')
         local maxCount = mob:getLocalVar('panzerfaustMax')
-        mob:setLocalVar('panzerfaustCounter', counter + 1)
 
-        -- Initialize on first use
-        if maxCount == 0 then
-            maxCount = math.random(2, 5)
-            mob:setAutoAttackEnabled(false)
-            mob:setLocalVar('panzerfaustMax', maxCount)
+        if wasExecuted then
+            counter = counter + 1
+            mob:setLocalVar('panzerfaustCounter', counter)
         end
 
-        -- Reset for next sequence
-        if counter >= maxCount then
+        -- Continue sequence.
+        local target = mob:getTarget()
+        if
+            target and
+            target:isAlive() and
+            counter < maxCount
+        then
+            mob:useMobAbility(xi.mobSkill.PANZERFAUST, target, 0)
+
+        -- Break sequence.
+        else
             mob:setAutoAttackEnabled(true)
             mob:setLocalVar('panzerfaustCounter', 0)
             mob:setLocalVar('panzerfaustMax', 0)
@@ -94,27 +74,63 @@ entity.onMobSpawn = function(mob)
     end)
 end
 
-entity.onMobFight = function(mob, target)
-    local counter = mob:getLocalVar('panzerfaustCounter')
-    local maxCount = mob:getLocalVar('panzerfaustMax')
+entity.onMobSpawn = function(mob)
+    mob:setMobMod(xi.mobMod.BASE_DAMAGE_MULTIPLIER, 150)
+
+    -- Ensure default state.
+    mob:setAutoAttackEnabled(true)
+    mob:setLocalVar('panzerfaustCounter', 0)
+    mob:setLocalVar('panzerfaustMax', 0)
+
+    -- Early return: No zone object.
+    local zone = mob:getZone()
+    if not zone then
+        return
+    end
+
+    -- Early return: No placeholder ID.
+    local ph = GetMobByID(zone:getLocalVar('DespotPlaceholderID'))
+    if not ph then
+        return
+    end
+
+    -- Handle position.
+    local pos = ph:getPos()
+    mob:setPos(pos.x, pos.y, pos.z, pos.r)
+
+    -- Handle enmity/claim.
+    local killerId = ph:getLocalVar('killer')
+    if killerId == 0 then
+        return
+    end
+
+    local killer = GetPlayerByID(killerId)
+    if not killer then
+        return
+    end
 
     if
-        counter > 0 and
-        counter <= maxCount and
-        not xi.combat.behavior.isEntityBusy(mob)
+        not killer:isEngaged() and
+        killer:checkDistance(mob) <= 50
     then
-        mob:useMobAbility(xi.mobSkill.PANZERFAUST, nil, 0)
+        mob:updateClaim(killer)
     end
 end
 
-entity.onMobWeaponSkill = function(target, mob, skill)
+entity.onMobMobskillChoose = function(mob, target)
+    local maxCount = mob:getLocalVar('panzerfaustMax')
+
+    -- Initialize sequence.
+    if maxCount == 0 then
+        mob:setAutoAttackEnabled(false)
+        mob:setLocalVar('panzerfaustMax', math.random(2, 5))
+    end
+
+    return xi.mobSkill.PANZERFAUST
+end
+
+entity.onMobWeaponSkill = function(mob, target, skill, action)
     skill:setAnimationTime(0)
-end
-
-entity.onMobDeath = function(mob, player, optParams)
-end
-
-entity.onMobDespawn = function(mob)
 end
 
 return entity

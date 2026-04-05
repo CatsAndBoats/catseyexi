@@ -26,7 +26,7 @@ end
 
 local function fly(mob)
     mob:setAnimationSub(allFlightPhaseAnimationSub)
-    mob:addStatusEffectEx(xi.effect.ALL_MISS, 0, 1, 0, 0)
+    mob:addStatusEffect(xi.effect.ALL_MISS, { power = 1, origin = mob, icon = 0 })
     mob:setMobSkillAttack(731)
     setNextPhaseTriggers(mob, subsequentPhaseDuration)
 end
@@ -67,7 +67,7 @@ entity.onMobSpawn = function(mob)
     xi.mix.jobSpecial.config(mob, {
         specials =
         {
-            { id = xi.jsa.INVINCIBLE, hpp = math.random(50, 85) },
+            { id = xi.mobSkill.INVINCIBLE_1, hpp = math.random(50, 85) },
         },
     })
 
@@ -140,7 +140,7 @@ entity.onMobFight = function(mob, target)
     end
 end
 
-entity.onMobWeaponSkill = function(target, mob, skill)
+entity.onMobWeaponSkill = function(mob, target, skill, action)
     -- only reset change vars if actually perform touchdown mobskill
     if skill:getID() == 1302 then
         setNextPhaseTriggers(mob, subsequentPhaseDuration)
@@ -150,7 +150,16 @@ entity.onMobWeaponSkill = function(target, mob, skill)
 end
 
 entity.onAdditionalEffect = function(mob, target, damage)
-    return xi.mob.onAddEffect(mob, target, damage, xi.mob.ae.ENSTONE, { chance = 15 })
+    local pTable =
+    {
+        chance         = 15,
+        attackType     = xi.attackType.MAGICAL,
+        magicalElement = xi.element.EARTH,
+        basePower      = math.floor(damage / 2),
+        actorStat      = xi.mod.INT,
+    }
+
+    return xi.combat.action.executeAddEffectDamage(mob, target, pTable)
 end
 
 entity.onMobDisengage = function(mob)

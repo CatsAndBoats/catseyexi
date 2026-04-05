@@ -43,7 +43,7 @@ auto TestSuite::addChildSuite(const std::string& name) -> TestSuite&
 }
 
 // Add a test case to this suite
-auto TestSuite::addTestCase(const std::string& name, std::optional<sol::protected_function> func) -> TestCase&
+auto TestSuite::addTestCase(const std::string& name, Maybe<sol::protected_function> func) -> TestCase&
 {
     testCases_.emplace_back(name, std::move(func), fullPath_);
     return testCases_.back();

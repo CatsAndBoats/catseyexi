@@ -13,9 +13,7 @@ abilityObject.onAbilityCheck = function(player, target, ability)
 end
 
 abilityObject.onUseAbility = function(player, target, ability)
-    local jpValue = target:getJobPointLevel(xi.jp.HAMANOHA_DURATION)
-
-    target:addStatusEffect(xi.effect.HAMANOHA, 12, 0, 180 + jpValue)
+    return xi.job_utils.samurai.useHamanoha(player, target, ability)
 end
 
 return abilityObject

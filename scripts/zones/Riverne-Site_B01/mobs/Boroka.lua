@@ -14,7 +14,7 @@ entity.onMobInitialize = function(mob)
 end
 
 entity.onMobSpawn = function(mob)
-    xi.mix.jobSpecial.config(mob, { specials = { { id = xi.jsa.SOUL_VOICE, hpp = 99, cooldown = 300 } } })
+    xi.mix.jobSpecial.config(mob, { specials = { { id = xi.mobSkill.SOUL_VOICE_1, hpp = 99, cooldown = 300 } } })
 end
 
 entity.onMobFight = function(mob, target)
@@ -29,7 +29,7 @@ entity.onAdditionalEffect = function(mob, target, damage)
     return xi.mob.onAddEffect(mob, target, damage, xi.mob.ae.WEIGHT, { power = 50 })
 end
 
-entity.onMobMobskillChoose = function(mob, target)
+entity.onMobMobskillChoose = function(mob, target, skillId)
     local tpList =
     {
         xi.mobSkill.BACK_HEEL_1,
@@ -69,14 +69,17 @@ entity.onMobSpellChoose = function(mob, target, spellId)
 end
 
 -- Follows up every weapon skill with Hoof Volley
-entity.onMobWeaponSkill = function(mob, target, skill)
+entity.onMobWeaponSkill = function(mob, target, skill, action)
     if skill:getID() ~= xi.mobSkill.HOOF_VOLLEY then
         mob:setLocalVar('hoofVolley', 1)
     end
 end
 
 entity.onMobDeath = function(mob, player, optParams)
-    player:addTitle(xi.title.BOROKA_BELEAGUERER)
+    if player then
+        player:addTitle(xi.title.BOROKA_BELEAGUERER)
+    end
+
     mob:setRespawnTime(math.random(75600, 86400)) -- 21-24 hour respawn
 end
 

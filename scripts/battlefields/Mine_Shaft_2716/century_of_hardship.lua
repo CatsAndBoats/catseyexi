@@ -135,7 +135,7 @@ local function handleMoblinCommand(moblin, bugbear, offset)
         -- Command Type 3: Tell Bugbear to use Mighty Strikes
         [3] = function()
             bugbear:timer(2000, function(bugArg)
-                bugArg:useMobAbility(xi.jsa.MIGHTY_STRIKES)
+                bugArg:useMobAbility(xi.mobSkill.MIGHTY_STRIKES_1)
                 bugArg:setLocalVar('usedMightyStrikes', 1)
             end)
         end,

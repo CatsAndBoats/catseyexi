@@ -21,9 +21,10 @@
 
 #pragma once
 
-#include "common/blowfish.h"
-#include "common/cbasetypes.h"
-#include "common/ipp.h"
+#include <common/blowfish.h>
+#include <common/cbasetypes.h>
+#include <common/ipp.h>
+#include <common/scheduler.h>
 
 #include "map_constants.h"
 
@@ -35,25 +36,21 @@
 class MapSocket
 {
 public:
-    using ReceiveFn = std::function<void(const std::error_code&, std::span<uint8>, IPP)>;
+    using ReceiveFn = std::function<void(ByteSpan, const IPP&)>;
 
-    MapSocket(asio::io_context& io_context, uint16 port, ReceiveFn onReceiveFn); // TODO: Move passing in onReceiveFn to recvFor
+    MapSocket(Scheduler& scheduler, uint16 port, ReceiveFn onReceiveFn);
     ~MapSocket();
 
-    void recvFor(timer::duration duration);
-    void send(const IPP& ipp, std::span<uint8> buffer);
-
-    void requestExit();
+    void send(const IPP& ipp, ByteSpan buffer);
 
 private:
-    void startReceive();
+    void receive();
 
+    Scheduler&              scheduler_;
     uint16                  port_;
-    asio::io_context&       io_context_;
     asio::ip::udp::socket   socket_;
     NetworkBuffer           buffer_; // TODO: Pass in the global buffer, or only use this one
-    asio::ip::udp::endpoint remote_endpoint_;
-    bool                    isRunning;
+    asio::ip::udp::endpoint remoteEndpoint_;
 
     ReceiveFn onReceiveFn_;
 };

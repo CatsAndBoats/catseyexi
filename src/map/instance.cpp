@@ -30,8 +30,8 @@
 
 #include "common/timer.h"
 
-CInstance::CInstance(CZone* zone, uint32 instanceid)
-: CZoneEntities(zone)
+CInstance::CInstance(Scheduler& scheduler, MapConfig config, CZone* zone, uint32 instanceid)
+: CZoneEntities(scheduler, config, zone)
 , m_instanceid(instanceid)
 , m_zone(zone)
 , m_startTime(timer::now())
@@ -101,10 +101,10 @@ void CInstance::LoadInstance()
         m_entryloc.y                      = rset->get<float>("start_y");
         m_entryloc.z                      = rset->get<float>("start_z");
         m_entryloc.rotation               = rset->get<uint8>("start_rot");
-        m_zone_music_override.m_songDay   = !rset->isNull("music_day") ? xi::optional(rset->get<uint16>("music_day")) : std::nullopt;
-        m_zone_music_override.m_songNight = !rset->isNull("music_night") ? xi::optional(rset->get<uint16>("music_night")) : std::nullopt;
-        m_zone_music_override.m_bSongS    = !rset->isNull("battlesolo") ? xi::optional(rset->get<uint16>("battlesolo")) : std::nullopt;
-        m_zone_music_override.m_bSongM    = !rset->isNull("battlemulti") ? xi::optional(rset->get<uint16>("battlemulti")) : std::nullopt;
+        m_zone_music_override.m_songDay   = !rset->isNull("music_day") ? Maybe<uint16>(rset->get<uint16>("music_day")) : std::nullopt;
+        m_zone_music_override.m_songNight = !rset->isNull("music_night") ? Maybe<uint16>(rset->get<uint16>("music_night")) : std::nullopt;
+        m_zone_music_override.m_bSongS    = !rset->isNull("battlesolo") ? Maybe<uint16>(rset->get<uint16>("battlesolo")) : std::nullopt;
+        m_zone_music_override.m_bSongM    = !rset->isNull("battlemulti") ? Maybe<uint16>(rset->get<uint16>("battlemulti")) : std::nullopt;
 
         // Add to Lua cache
         // TODO: This will happen more often than needed, but not so often that it's a performance concern
@@ -178,8 +178,8 @@ timer::duration CInstance::GetElapsedTime(timer::time_point tick)
 
 uint64_t CInstance::GetLocalVar(const std::string& name) const
 {
-    auto var = m_LocalVars.find(name);
-    return var != m_LocalVars.end() ? var->second : 0;
+    auto var = localVars_.find(name);
+    return var != localVars_.end() ? var->second : 0;
 }
 
 void CInstance::SetLevelCap(uint8 cap)
@@ -218,7 +218,7 @@ void CInstance::SetWipeTime(timer::duration time)
 
 void CInstance::SetLocalVar(const std::string& name, uint64_t value)
 {
-    m_LocalVars[name] = value;
+    localVars_[name] = value;
 }
 
 /************************************************************************

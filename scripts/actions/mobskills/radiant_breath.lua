@@ -10,21 +10,23 @@ mobskillObject.onMobSkillCheck = function(target, mob, skill)
     return 0
 end
 
-mobskillObject.onMobWeaponSkill = function(target, mob, skill)
+mobskillObject.onMobWeaponSkill = function(mob, target, skill, action)
     local params = {}
 
-    params.percentMultipier  = 0.125
-    params.element           = xi.element.LIGHT
-    params.damageCap         = 700
-    params.bonusDamage       = (mob:getMainLvl() + 2) * 2
-    params.mAccuracyBonus    = { 0, 0, 0 }
-    params.resistStat        = xi.mod.INT -- TODO: Light based skills are often MND, need captures.
+    params.percentMultipier = 0.125
+    params.damageCap        = 700
+    params.bonusDamage      = (mob:getMainLvl() + 2) * 2
+    params.mAccuracyBonus   = { 0, 0, 0 }
+    params.resistStat       = xi.mod.INT -- TODO: Light based skills are often MND, need captures.
+    params.element          = xi.element.LIGHT
+    params.attackType       = xi.attackType.BREATH
+    params.damageType       = xi.damageType.LIGHT
+    params.shadowBehavior   = xi.mobskills.shadowBehavior.IGNORE_SHADOWS
 
-    local damage = xi.mobskills.mobBreathMove(mob, target, skill, params)
-    damage = xi.mobskills.mobFinalAdjustments(damage, mob, skill, target, xi.attackType.BREATH, xi.damageType.LIGHT, xi.mobskills.shadowBehavior.IGNORE_SHADOWS, 1)
+    local info = xi.mobskills.mobBreathMove(mob, target, skill, action, params)
 
-    if not xi.mobskills.hasMissMessage(mob, target, skill, damage) then
-        target:takeDamage(damage, mob, xi.attackType.BREATH, xi.damageType.LIGHT)
+    if xi.mobskills.processDamage(mob, target, skill, action, info) then
+        target:takeDamage(info.damage, mob, info.attackType, info.damageType)
 
          -- TODO: Function name is duration. We might want to rename to something more universal.
         local power = xi.mobskills.calculateDuration(skill:getTP(), 1250, 1250) -- TODO: Capture power values
@@ -33,7 +35,7 @@ mobskillObject.onMobWeaponSkill = function(target, mob, skill)
         xi.mobskills.mobStatusEffectMove(mob, target, xi.effect.SILENCE, 1, 0, 120)
     end
 
-    return damage
+    return info.damage
 end
 
 return mobskillObject

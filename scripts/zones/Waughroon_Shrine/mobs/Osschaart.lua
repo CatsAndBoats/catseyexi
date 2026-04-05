@@ -40,26 +40,26 @@ local entity = {}
 
 local twoHourAbilities =
 {
-    [xi.job.WAR] = { name = 'Mighty Strikes',  abilityId = xi.jobSpecialAbility.MIGHTY_STRIKES },
-    [xi.job.MNK] = { name = 'Hundred Fists',   abilityId = xi.jobSpecialAbility.HUNDRED_FISTS  },
-    [xi.job.WHM] = { name = 'Benediction',     abilityId = xi.jobSpecialAbility.BENEDICTION    },
-    [xi.job.BLM] = { name = 'Manafont',        abilityId = xi.jobSpecialAbility.MANAFONT       },
-    [xi.job.RDM] = { name = 'Chainspell',      abilityId = xi.jobSpecialAbility.CHAINSPELL     },
-    [xi.job.THF] = { name = 'Perfect Dodge',   abilityId = xi.jobSpecialAbility.PERFECT_DODGE  },
-    [xi.job.PLD] = { name = 'Invincible',      abilityId = xi.jobSpecialAbility.INVINCIBLE     },
-    [xi.job.DRK] = { name = 'Blood Weapon',    abilityId = xi.jobSpecialAbility.BLOOD_WEAPON   },
-    [xi.job.BST] = { name = 'Familiar',        abilityId = xi.jobSpecialAbility.FAMILIAR       },
-    [xi.job.BRD] = { name = 'Soul Voice',      abilityId = xi.jobSpecialAbility.SOUL_VOICE     },
-    [xi.job.RNG] = { name = 'Eagle Eye Shot',  abilityId = xi.jobSpecialAbility.EES_KINDRED    },
-    [xi.job.SAM] = { name = 'Meikyo Shisui',   abilityId = xi.jobSpecialAbility.MEIKYO_SHISUI  },
-    [xi.job.NIN] = { name = 'Mijin Gakure',    abilityId = xi.jobSpecialAbility.MIJIN_GAKURE   },
-    [xi.job.DRG] = { name = 'Call Wyvern',     abilityId = xi.jobSpecialAbility.CALL_WYVERN    },
-    [xi.job.SMN] = { name = 'Astral Flow',     abilityId = xi.jobSpecialAbility.ASTRAL_FLOW    },
-    [xi.job.BLU] = { name = 'Azure Lore',      abilityId = xi.jobSpecialAbility.AZURE_LORE     },
-    [xi.job.COR] = { name = 'Wild Card',       abilityId = xi.jobSpecialAbility.WILD_CARD      },
-    [xi.job.PUP] = { name = 'Overdrive',       abilityId = xi.jobSpecialAbility.OVERDRIVE      },
-    [xi.job.DNC] = { name = 'Trance',          abilityId = xi.jobSpecialAbility.TRANCE         },
-    [xi.job.SCH] = { name = 'Tabula Rasa',     abilityId = xi.jobSpecialAbility.TABULA_RASA    }
+    [xi.job.WAR] = { name = 'Mighty Strikes', abilityId = xi.mobSkill.MIGHTY_STRIKES_1 },
+    [xi.job.MNK] = { name = 'Hundred Fists',  abilityId = xi.mobSkill.HUNDRED_FISTS_1  },
+    [xi.job.WHM] = { name = 'Benediction',    abilityId = xi.mobSkill.BENEDICTION_1    },
+    [xi.job.BLM] = { name = 'Manafont',       abilityId = xi.mobSkill.MANAFONT_1       },
+    [xi.job.RDM] = { name = 'Chainspell',     abilityId = xi.mobSkill.CHAINSPELL_1     },
+    [xi.job.THF] = { name = 'Perfect Dodge',  abilityId = xi.mobSkill.PERFECT_DODGE_1  },
+    [xi.job.PLD] = { name = 'Invincible',     abilityId = xi.mobSkill.INVINCIBLE_1     },
+    [xi.job.DRK] = { name = 'Blood Weapon',   abilityId = xi.mobSkill.BLOOD_WEAPON_1   },
+    [xi.job.BST] = { name = 'Familiar',       abilityId = xi.mobSkill.FAMILIAR_1       },
+    [xi.job.BRD] = { name = 'Soul Voice',     abilityId = xi.mobSkill.SOUL_VOICE_1     },
+    [xi.job.RNG] = { name = 'Eagle Eye Shot', abilityId = xi.mobSkill.EES_KINDRED      },
+    [xi.job.SAM] = { name = 'Meikyo Shisui',  abilityId = xi.mobSkill.MEIKYO_SHISUI_1  },
+    [xi.job.NIN] = { name = 'Mijin Gakure',   abilityId = xi.mobSkill.MIJIN_GAKURE_1   },
+    [xi.job.DRG] = { name = 'Call Wyvern',    abilityId = xi.mobSkill.CALL_WYVERN_1    },
+    [xi.job.SMN] = { name = 'Astral Flow',    abilityId = xi.mobSkill.ASTRAL_FLOW_1    },
+    [xi.job.BLU] = { name = 'Azure Lore',     abilityId = xi.mobSkill.AZURE_LORE       },
+    [xi.job.COR] = { name = 'Wild Card',      abilityId = xi.mobSkill.WILD_CARD        },
+    [xi.job.PUP] = { name = 'Overdrive',      abilityId = xi.mobSkill.OVERDRIVE        },
+    [xi.job.DNC] = { name = 'Trance',         abilityId = xi.mobSkill.TRANCE           },
+    [xi.job.SCH] = { name = 'Tabula Rasa',    abilityId = xi.mobSkill.TABULA_RASA      },
 }
 
 local pets =
@@ -193,6 +193,7 @@ end
 entity.onMobInitialize = function(mob)
     mob:setMobMod(xi.mobMod.ASTRAL_PET_OFFSET, 4) -- Sets Avatar at offset +4, so it can be called properly for Astral Flow
     mob:setMobMod(xi.mobMod.MAGIC_COOL, 25)
+    mob:setMobMod(xi.mobMod.BASE_DAMAGE_MULTIPLIER, 150)
     mob:setMod(xi.mod.DOUBLE_ATTACK, 15)
     mob:setMod(xi.mod.WIND_RES_RANK, 8) -- Should be extremely hard to silence, but possible with high enough accuracy or elemental seal
 end

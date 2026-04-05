@@ -8,21 +8,16 @@ local ID = zones[xi.zone.ULEGUERAND_RANGE]
 ---@type TMobEntity
 local entity = {}
 
---https://ffxiclopedia.fandom.com/wiki/Talk:White_Coney#Testimonials
---just a note on wild carrot beeing TP move, once when I popped I immediatly chi-blasted (w/ penance) it to lower tp gain
---but after a few hit and before pennance wore off, it used wild carrot, so:
---it pops with tp
---it uses wild carrot also start at less than 300%
---wild carrot is not tp move
---it has some kind of meditate -.-
---(based on above, going to assume it has regain...)
-
-entity.onMobSpawn = function(mob)
-    mob:setMod(xi.mod.REGAIN, 30) -- unassisted by combat TP, will give a base of 1 wild carrot move approx every 100 sec while above 25% hp
-    mob:setMod(xi.mod.ICE_MEVA, 150) -- Todo: Move to mob_resists.sql
+entity.onMobInitialize = function(mob)
+    mob:setMobMod(xi.mobMod.IDLE_DESPAWN, 180)
 end
 
-entity.onMobDeath = function(mob, player, optParams)
+entity.onMobSpawn = function(mob)
+    mob:setMod(xi.mod.DOUBLE_ATTACK, 33)
+    mob:setMod(xi.mod.STORETP, 30)
+    mob:setMod(xi.mod.ICE_RES_RANK, 4)
+    mob:setMod(xi.mod.PARALYZE_RES_RANK, 4)
+    mob:setMod(xi.mod.BIND_RES_RANK, 4)
 end
 
 entity.onMobDespawn = function(mob)

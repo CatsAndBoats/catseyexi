@@ -8,12 +8,46 @@ local commandObj = {}
 commandObj.cmdprops =
 {
     permission = 1,
-    parameters = 's'
+    parameters = 's',
+}
+
+local terrainNames =
+{
+    [xi.terrain.OBJECT]        = 'Object',
+    [xi.terrain.PATH]          = 'Path',
+    [xi.terrain.GRASS]         = 'Grass',
+    [xi.terrain.SAND]          = 'Sand',
+    [xi.terrain.SNOW]          = 'Snow',
+    [xi.terrain.STONE]         = 'Stone',
+    [xi.terrain.METAL]         = 'Metal',
+    [xi.terrain.WOOD]          = 'Wood',
+    [xi.terrain.SHALLOW_WATER] = 'Shallow Water',
+    [xi.terrain.DEEP_WATER]    = 'Deep Water',
+    [xi.terrain.UNKNOWN]       = 'Unknown',
+    [xi.terrain.NONE]          = 'None',
 }
 
 local function error(player, msg)
     player:printToPlayer(msg)
     player:printToPlayer('!pos (x) (y) (z) (zone ID) (player)')
+end
+
+local function printPosition(player, targ)
+    local zone        = targ:getZone()
+    local pos         = targ:getPos()
+    local terrainType = zone:getTerrainType(pos)
+    local terrainName = terrainNames[terrainType] or string.format('Unknown (%d)', terrainType)
+
+    player:printToPlayer(string.format('%s: X %.4f  Y %.4f  Z %.4f  Rot %i  Zone %i  Floor %i  Terrain: %s',
+        targ:getName(),
+        targ:getXPos(),
+        targ:getYPos(),
+        targ:getZPos(),
+        targ:getRotPos(),
+        targ:getZoneID(),
+        zone:getFloorId(pos),
+        terrainName
+    ), xi.msg.channel.SYSTEM_3)
 end
 
 commandObj.onTrigger = function(player, arg)
@@ -25,7 +59,7 @@ commandObj.onTrigger = function(player, arg)
     local targ
 
     if arg == nil then
-        player:printToPlayer(string.format('%s\'s position: X %.4f  Y %.4f  Z %.4f  Rot %i  (Zone: %i)', player:getName(), player:getXPos(), player:getYPos(), player:getZPos(), player:getRotPos(), player:getZoneID()), xi.msg.channel.SYSTEM_3)
+        printPosition(player, player)
         return
     end
 
@@ -77,7 +111,7 @@ commandObj.onTrigger = function(player, arg)
 
     -- report or move position
     if x == nil or y == nil or z == nil then
-        player:printToPlayer(string.format('%s\'s position: X %.4f  Y %.4f  Z %.4f  Rot %i  (Zone: %i)', targ:getName(), targ:getXPos(), targ:getYPos(), targ:getZPos(), targ:getRotPos(), targ:getZoneID()), xi.msg.channel.SYSTEM_3)
+        printPosition(player, targ)
     else
         if zoneId == nil then
             zoneId = targ:getZoneID()

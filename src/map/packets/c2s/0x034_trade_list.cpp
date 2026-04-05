@@ -21,7 +21,6 @@
 
 #include "0x034_trade_list.h"
 
-#include "common/async.h"
 #include "entities/charentity.h"
 #include "enums/msg_std.h"
 #include "items/item_linkshell.h"
@@ -32,11 +31,11 @@
 namespace
 {
 
-const auto auditTrade = [](CCharEntity* PChar, CCharEntity* PTarget, const CItem* PItem, uint32_t ItemNum)
+const auto auditTrade = [](Scheduler& scheduler, CCharEntity* PChar, CCharEntity* PTarget, const CItem* PItem, uint32_t ItemNum)
 {
     if (settings::get<bool>("map.AUDIT_PLAYER_TRADES"))
     {
-        Async::getInstance()->submit(
+        scheduler.postToWorkerThread(
             [itemID        = PItem->getID(),
              quantity      = ItemNum,
              sender        = PChar->id,
@@ -70,7 +69,7 @@ void GP_CLI_COMMAND_TRADE_LIST::process(MapSession* PSession, CCharEntity* PChar
 
     if (!PTarget ||
         PTarget->id != PChar->TradePending.id ||
-        PChar->TradePending.id != PTarget->id)
+        PChar->id != PTarget->TradePending.id)
     {
         ShowWarningFmt("GP_CLI_COMMAND_TRADE_LIST: Could not find trade targets.");
         return;
@@ -142,7 +141,8 @@ void GP_CLI_COMMAND_TRADE_LIST::process(MapSession* PSession, CCharEntity* PChar
         PChar->UContainer->SetItem(TradeIndex, PItem);
     }
 
-    auditTrade(PChar, PTarget, PItem, ItemNum);
+    // TODO: Don't pass around Scheduler& through PSession
+    auditTrade(*PSession->scheduler, PChar, PTarget, PItem, ItemNum);
 
     ShowDebug("GP_CLI_COMMAND_TRADE_LIST: %s->%s trade pushing packet to %s", PChar->getName(), PTarget->getName(), PChar->getName());
     PChar->pushPacket<GP_SERV_COMMAND_ITEM_TRADE_MYLIST>(PItem, TradeIndex);

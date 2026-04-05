@@ -47,14 +47,13 @@ spellObject.onMobSpawn = function(mob)
 
     mob:addGambit(ai.t.PARTY_DEAD, { ai.c.ALWAYS, 0 }, { ai.r.MA, ai.s.HIGHEST, xi.magic.spellFamily.RAISE })
 
-    mob:addListener('WEAPONSKILL_USE', 'FERREOUS_COFFIN_WEAPONSKILL_USE', function(mobArg, target, wsid, tp, action)
-        if wsid == 170 then -- Randgrith
-        -- Return to the dust whence you came! Randgrith!!!
+    mob:addListener('WEAPONSKILL_USE', 'FERREOUS_COFFIN_WEAPONSKILL_USE', function(mobArg, target, skill, tp, action, damage)
+        if skill:getID() == xi.mobSkill.RANDGRITH_1 then
             if math.random(1, 100) <= 66 then
-                xi.trust.message(mobArg, xi.trust.messageOffset.SPECIAL_MOVE_1)
+                xi.trust.message(mobArg, xi.trust.messageOffset.SPECIAL_MOVE_1) -- Return to the dust whence you came! Randgrith!!!
             end
 
-            mob:addStatusEffect(xi.effect.ACCURACY_BOOST, 20, 0, 20) -- Cheat in Relic AM ACC
+            mob:addStatusEffect(xi.effect.ACCURACY_BOOST, { power = 20, duration = 20, origin = mob }) -- Cheat in Relic AM ACC
             -- TODO: Expand Relic (Mjollnir) Handling (Occ. Double Damage, etc)
         end
     end)

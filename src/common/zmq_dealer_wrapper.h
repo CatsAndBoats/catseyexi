@@ -21,8 +21,8 @@
 
 #pragma once
 
-#include "common/ipp.h"
-#include "common/logging.h"
+#include <common/ipp.h>
+#include <common/logging.h>
 
 #include <atomic>
 #include <memory>
@@ -74,8 +74,6 @@ class ZMQDealerWrapper final
         {
             while (!requestExit_)
             {
-                TracyZoneScoped;
-
                 zmq::message_t msg;
                 try
                 {
@@ -121,6 +119,7 @@ public:
     , thread_(
           [this, endpoint, routingId]()
           {
+              TracySetThreadName("ZMQ Dealer");
               ZMQWorker worker(requestExit_, incomingQueue_, outgoingQueue_, endpoint, routingId);
           })
     {

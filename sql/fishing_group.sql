@@ -309,6 +309,10 @@ INSERT INTO `fishing_group` VALUES (26,13456,300,275,6);   -- Silver Ring
 INSERT INTO `fishing_group` VALUES (26,14117,500,300,9);   -- Rusty Leggings
 INSERT INTO `fishing_group` VALUES (26,14242,500,300,9);   -- Rusty Subligar
 
+-- Valkurm Dunes, Pirate's Chart mini-quest
+INSERT INTO `fishing_group` VALUES (140,5329,500,300,9);   -- Tarutaru Snare
+INSERT INTO `fishing_group` VALUES (140,5330,500,300,9);   -- Mithra Snare
+
 -- Batallia Downs, North Seaside / Batallia Downs, South Seaside
 
 INSERT INTO `fishing_group` VALUES (27,4360,1000,500,15);  -- Bastore Sardine

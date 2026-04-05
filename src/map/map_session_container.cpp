@@ -240,7 +240,7 @@ void MapSessionContainer::cleanupSessions(IPP mapIPP)
 
                 if (PChar != nullptr)
                 {
-                    ShowDebug(fmt::format("Clearing map server session for player: '{}' in zone: '{}' (On other map server = {})", PChar->name, PChar->loc.zone ? PChar->loc.zone->getName() : "None", otherMap ? "Yes" : "No"));
+                    ShowDebugFmt("Clearing map server session for player: '{}' in zone: '{}' (On other map server = {})", PChar->name, PChar->loc.zone ? PChar->loc.zone->getName() : "None", otherMap ? "Yes" : "No");
 
                     // Player session is attached to this map process and has stopped responding.
                     if (!otherMap)
@@ -309,7 +309,7 @@ void MapSessionContainer::cleanupSessions(IPP mapIPP)
 
             if (now > map_session_data->last_update + std::chrono::seconds(timeoutSetting))
             {
-                ShowDebug(fmt::format("Clearing map server pending session for pending char ID: '{}'", map_session_data->charID));
+                ShowDebugFmt("Clearing map server pending session for pending char ID: '{}'", map_session_data->charID);
 
                 db::preparedStmt("DELETE FROM accounts_sessions WHERE charid = ?", map_session_data->charID);
 

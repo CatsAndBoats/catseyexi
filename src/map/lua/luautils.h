@@ -22,10 +22,8 @@
 #ifndef _LUAUTILS_H
 #define _LUAUTILS_H
 
-#include <optional>
-
-#include "common/cbasetypes.h"
-#include "common/task_manager.h"
+#include <common/cbasetypes.h>
+#include <common/types/maybe.h>
 
 #include "common/lua.h"
 extern sol::state lua;
@@ -210,8 +208,10 @@ void CacheLuaObjectFromFile(const std::string& filename, bool overwriteCurrentEn
 auto GetCacheEntryFromFilename(const std::string& filename) -> sol::table;
 void OnEntityLoad(CBaseEntity* PEntity);
 
-void PopulateIDLookupsByFilename(std::optional<std::string> maybeFilename = std::nullopt);
-void PopulateIDLookupsByZone(std::optional<uint16> maybeZoneId = std::nullopt);
+void LoadExpDifficultyCurves(const sol::table& expToDifficultyTable, const uint8 incrediblyEasyPreyLevel, const uint16 incrediblyEasyPreyMinExp);
+
+void PopulateIDLookupsByFilename(Maybe<std::string> maybeFilename = std::nullopt);
+void PopulateIDLookupsByZone(Maybe<uint16> maybeZoneId = std::nullopt);
 
 void SendEntityVisualPacket(uint32 npcId, const char* command);
 void InitInteractionGlobal();
@@ -339,8 +339,9 @@ void  CheckForGearSet(CBaseEntity* PTarget);
 int32 OnMagicCastingCheck(CBaseEntity* PChar, CBaseEntity* PTarget, CSpell* PSpell);
 int32 OnSpellCast(CBattleEntity* PCaster, CBattleEntity* PTarget, CSpell* PSpell);
 void  OnSpellPrecast(CBattleEntity* PCaster, CSpell* PSpell);
+void  OnSpellCastStart(CBattleEntity* PCaster, CBattleEntity* PTarget, CSpell* PSpell);
 void  OnSpellInterrupted(CBattleEntity* PCaster, CSpell* PSpell);
-auto  OnMobSpellChoose(CBattleEntity* PCaster, CBattleEntity* PTarget, std::optional<SpellID> startingSpellId) -> std::optional<SpellID>;
+auto  OnMobSpellChoose(CBattleEntity* PCaster, CBattleEntity* PTarget, Maybe<SpellID> startingSpellId) -> std::tuple<Maybe<SpellID>, Maybe<CBattleEntity*>>;
 void  OnMagicHit(CBattleEntity* PCaster, CBattleEntity* PTarget, CSpell* PSpell);
 void  OnWeaponskillHit(CBattleEntity* PMob, CBaseEntity* PAttacker, uint16 PWeaponskill);
 bool  OnTrustSpellCastCheckBattlefieldTrusts(CBattleEntity* PCaster); // Triggered if spell is a trust spell during onCast to determine to interrupt spell or not
@@ -381,10 +382,12 @@ void OnBattlefieldKick(CCharEntity* PChar);
 void OnBattlefieldRegister(CCharEntity* PChar, CBattlefield* PBattlefield);
 void OnBattlefieldDestroy(CBattlefield* PBattlefield);
 
-uint16 OnMobMobskillChoose(CBattleEntity* PMob, CBattleEntity* PTarget);
-int32  OnMobWeaponSkill(CBaseEntity* PChar, CBaseEntity* PMob, CMobSkill* PMobSkill, action_t* action);
+uint16 OnMobMobskillChoose(CBattleEntity* PMob, CBattleEntity* PTarget, uint16 chosenSkillId);
+int32  OnMobWeaponSkill(CBaseEntity* PMob, CBaseEntity* PTarget, CMobSkill* PMobSkill, action_t* action);
 int32  OnMobSkillCheck(CBaseEntity* PChar, CBaseEntity* PMob, CMobSkill* PMobSkill); // triggers before mob weapon skill is used, returns 0 if the move is valid
 auto   OnMobSkillTarget(CBattleEntity* PTarget, CBaseEntity* PMob, CMobSkill* PMobSkill) -> CBattleEntity*;
+auto   OnMobSkillReadyTime(CBattleEntity* PTarget, CBaseEntity* PMob, CMobSkill* PMobSkill) -> Maybe<timer::duration>;
+void   OnMobSkillFinalize(CBaseEntity* PMob, CMobSkill* PMobSkill); // triggers when mob skill state cleanup runs
 int32  OnAutomatonAbilityCheck(CBaseEntity* PChar, CAutomatonEntity* PAutomaton, CMobSkill* PMobSkill);
 int32  OnAutomatonAbility(CBaseEntity* PTarget, CBaseEntity* PMob, CMobSkill* PMobSkill, CBaseEntity* PMobMaster, action_t* action);
 
@@ -423,6 +426,7 @@ auto        GetRecentFishers(uint16 minutes) -> sol::table; // returns a list of
 
 void  OnAdditionalEffect(CBattleEntity* PAttacker, CBattleEntity* PDefender, action_result_t* Action, int32 damage);                                      // for mobs with additional effects
 void  OnSpikesDamage(CBattleEntity* PDefender, CBattleEntity* PAttacker, action_result_t* Action, int32 damage);                                          // for mobs with spikes
+int32 OnItemAdditionalEffect(CBattleEntity* PAttacker, CBattleEntity* PDefender, CItemWeapon* PItem, action_result_t* Action, int32 baseAttackDamage);    // for items with additional effects defined in a script
 int32 additionalEffectAttack(CBattleEntity* PAttacker, CBattleEntity* PDefender, CItemWeapon* PItem, action_result_t* Action, int32 baseAttackDamage);    // for items with additional effects
 void  additionalEffectSpikes(CBattleEntity* PDefender, CBattleEntity* PAttacker, CItemEquipment* PItem, action_result_t* Action, int32 baseAttackDamage); // for armor with spikes
 

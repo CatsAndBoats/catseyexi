@@ -49,21 +49,21 @@ g_mixins.families.maat = function(maatMob)
     maatMob:addListener('COMBAT_TICK', 'MAAT_CTICK', function(mob)
         local defaultAbility =
         {
-            [xi.job.WAR] = xi.jsa.MIGHTY_STRIKES_MAAT,
-            [xi.job.MNK] = xi.jsa.HUNDRED_FISTS_MAAT,
-            [xi.job.WHM] = xi.jsa.BENEDICTION_MAAT,
-            [xi.job.BLM] = xi.jsa.MANAFONT_MAAT,
-            [xi.job.RDM] = xi.jsa.CHAINSPELL_MAAT,
-            [xi.job.THF] = xi.jsa.PERFECT_DODGE_MAAT,
-            [xi.job.PLD] = xi.jsa.INVINCIBLE_MAAT,
-            [xi.job.DRK] = xi.jsa.BLOOD_WEAPON_MAAT,
-            [xi.job.BST] = xi.jsa.FAMILIAR_MAAT,
-            [xi.job.BRD] = xi.jsa.SOUL_VOICE_MAAT,
-            [xi.job.RNG] = xi.jsa.EES_MAAT,
-            [xi.job.SAM] = xi.jsa.MEIKYO_SHISUI_MAAT,
-            [xi.job.NIN] = xi.jsa.MIJIN_GAKURE_MAAT,
-            [xi.job.DRG] = xi.jsa.CALL_WYVERN_MAAT,
-            [xi.job.SMN] = xi.jsa.ASTRAL_FLOW_MAAT,
+            [xi.job.WAR] = xi.mobSkill.MIGHTY_STRIKES_MAAT,
+            [xi.job.MNK] = xi.mobSkill.HUNDRED_FISTS_MAAT,
+            [xi.job.WHM] = xi.mobSkill.BENEDICTION_MAAT,
+            [xi.job.BLM] = xi.mobSkill.MANAFONT_MAAT,
+            [xi.job.RDM] = xi.mobSkill.CHAINSPELL_MAAT,
+            [xi.job.THF] = xi.mobSkill.PERFECT_DODGE_MAAT,
+            [xi.job.PLD] = xi.mobSkill.INVINCIBLE_MAAT,
+            [xi.job.DRK] = xi.mobSkill.BLOOD_WEAPON_MAAT,
+            [xi.job.BST] = xi.mobSkill.FAMILIAR_MAAT,
+            [xi.job.BRD] = xi.mobSkill.SOUL_VOICE_MAAT,
+            [xi.job.RNG] = xi.mobSkill.EES_MAAT,
+            [xi.job.SAM] = xi.mobSkill.MEIKYO_SHISUI_MAAT,
+            [xi.job.NIN] = xi.mobSkill.MIJIN_GAKURE_MAAT,
+            [xi.job.DRG] = xi.mobSkill.CALL_WYVERN_MAAT,
+            [xi.job.SMN] = xi.mobSkill.ASTRAL_FLOW_MAAT,
         }
 
         if mob:getHPP() < mob:getLocalVar('specialThreshold') then
@@ -96,18 +96,18 @@ g_mixins.families.maat = function(maatMob)
         mob:messageText(mob, ID.text.YOUVE_COME_A_LONG_WAY)
     end)
 
-    maatMob:addListener('WEAPONSKILL_TAKE', 'MAAT_WEAPONSKILL_TAKE', function(target, user, wsid, tp, action)
-        local ID = zones[target:getZoneID()]
-        target:messageText(target, ID.text.THAT_LL_HURT_IN_THE_MORNING)
+    maatMob:addListener('WEAPONSKILL_TAKE', 'MAAT_WEAPONSKILL_TAKE', function(user, target, skill, tp, action)
+        target:messageText(target, zones[target:getZoneID()].text.THAT_LL_HURT_IN_THE_MORNING)
     end)
 
-    maatMob:addListener('WEAPONSKILL_USE', 'MAAT_WEAPONSKILL_USE', function(mob, target, wsid, tp, action)
-        local ID = zones[mob:getZoneID()]
-        if wsid == 1028 then -- Tackle
+    maatMob:addListener('WEAPONSKILL_USE', 'MAAT_WEAPONSKILL_USE', function(mob, target, skill, tp, action, damage)
+        local ID       = zones[mob:getZoneID()]
+        local actionId = skill:getID()
+        if actionId == 1028 then -- Tackle
             mob:messageText(mob, ID.text.TAKE_THAT_YOU_WHIPPERSNAPPER)
-        elseif wsid == 1033 then -- Dragon Kick
+        elseif actionId == 1033 then -- Dragon Kick
             mob:messageText(mob, ID.text.TEACH_YOU_TO_RESPECT_ELDERS)
-        elseif wsid == 1034 then -- Asuran Fists
+        elseif actionId == 1034 then -- Asuran Fists
             mob:messageText(mob, ID.text.LOOKS_LIKE_YOU_WERENT_READY)
         end
     end)

@@ -34,6 +34,7 @@ const std::set immobilePets = {
     PETID_LUOPAN,
     PETID_ALEXANDER,
     PETID_ODIN,
+    PETID_ATOMOS,
 };
 
 }
@@ -46,7 +47,7 @@ CPetController::CPetController(CMobEntity* _PPet)
     SetWeaponSkillEnabled(false);
 }
 
-void CPetController::Tick(timer::time_point tick)
+auto CPetController::Tick(timer::time_point tick) -> Task<void>
 {
     TracyZoneScoped;
     TracyZoneString(PPet->getName());
@@ -60,7 +61,7 @@ void CPetController::Tick(timer::time_point tick)
         if (PPet->isCharmed && tick > PPet->charmTime)
         {
             petutils::DespawnPet(PPet->PMaster);
-            return;
+            co_return;
         }
 
         // if a jug pet and the current time > jug spawn time + jug duration then despawn
@@ -70,25 +71,26 @@ void CPetController::Tick(timer::time_point tick)
             if (tick > PPetEntity->getJugSpawnTime() + PPetEntity->getJugDuration())
             {
                 petutils::DespawnPet(PPetEntity->PMaster);
-                return;
+                co_return;
             }
         }
     }
-    CMobController::Tick(tick);
+
+    co_await CMobController::Tick(tick);
 }
 
-void CPetController::DoRoamTick(timer::time_point tick)
+auto CPetController::DoRoamTick(timer::time_point tick) -> Task<void>
 {
     if ((PPet->PMaster == nullptr || PPet->PMaster->isDead()) && PPet->isAlive() && PPet->objtype != TYPE_MOB)
     {
         PPet->Die();
-        return;
+        co_return;
     }
 
     // if pet cannot change state (for example because pet is asleep) then just return
     if (!PPet->PAI->CanChangeState())
     {
-        return;
+        co_return;
     }
 
     if (PPet->objtype == TYPE_PET || (PPet->objtype == TYPE_MOB && PPet->PMaster && PPet->PMaster->objtype == TYPE_PC))
@@ -99,47 +101,51 @@ void CPetController::DoRoamTick(timer::time_point tick)
         {
             if (PetIsHealing())
             {
-                return;
+                co_return;
             }
         }
         else if (PetEntity->isBstPet() && PPet->StatusEffectContainer->GetStatusEffect(EFFECT_HEALING))
         {
-            return;
+            co_return;
         }
         else if (PetEntity->m_PetID == PETID_LIGHTSPIRIT) // Only Light Spirit will cast on roam tick
         {
             // this will respect the pet's mob casting cooldown properties via MOBMOD_MAGIC_COOL
             if (CMobController::IsSpellReady(0) && CMobController::TryCastSpell())
             {
-                return;
+                co_return;
             }
         }
         else if (immobilePets.contains(static_cast<PETID>(PetEntity->m_PetID))) // certain pets do not roam
         {
-            return;
+            co_return;
         }
+    }
+
+    if (!PPet->PMaster)
+    {
+        co_return;
     }
 
     float currentDistance = distance(PPet->loc.p, PPet->PMaster->loc.p);
 
     if (currentDistance > PetRoamDistance)
     {
-        if (currentDistance < 35.0f)
+        if (!PPet->PAI->PathFind->IsFollowingPath() ||
+            distance(PPet->PAI->PathFind->GetDestination(), PPet->PMaster->loc.p) > 2.0f) // recalculate path only if owner moves more than X yalms
         {
-            if (!PPet->PAI->PathFind->IsFollowingPath() ||
-                distance(PPet->PAI->PathFind->GetDestination(), PPet->PMaster->loc.p) > 2.0f) // recalculate path only if owner moves more than X yalms
+            if (!PPet->PAI->PathFind->PathAround(PPet->PMaster->loc.p, 2.0f, PATHFLAG_RUN | PATHFLAG_WALLHACK))
             {
-                if (!PPet->PAI->PathFind->PathAround(PPet->PMaster->loc.p, 2.0f, PATHFLAG_RUN | PATHFLAG_WALLHACK))
+                if (!PPet->PAI->PathFind->PathInRange(PPet->PMaster->loc.p, 2.0f, PATHFLAG_RUN | PATHFLAG_WALLHACK))
                 {
-                    PPet->PAI->PathFind->PathInRange(PPet->PMaster->loc.p, 2.0f, PATHFLAG_RUN | PATHFLAG_WALLHACK);
+                    // If we got here, the pet isn't able to path to master
+                    // But it cant, so maybe we teleported or dropped down a hole
+                    PPet->PAI->PathFind->WarpTo(PPet->PMaster->loc.p, PetRoamDistance);
                 }
             }
-            PPet->PAI->PathFind->FollowPath(m_Tick);
         }
-        else if (PPet->GetSpeed() > 0)
-        {
-            PPet->PAI->PathFind->WarpTo(PPet->PMaster->loc.p, PetRoamDistance);
-        }
+
+        PPet->PAI->PathFind->FollowPath(m_Tick);
     }
 }
 

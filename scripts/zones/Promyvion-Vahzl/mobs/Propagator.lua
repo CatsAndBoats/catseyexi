@@ -11,12 +11,12 @@ entity.onMobInitialize = function(mob)
     mob:setMobMod(xi.mobMod.IDLE_DESPAWN, 240)
 end
 
-entity.onMobMobskillChoose = function(mob, target)
+entity.onMobMobskillChoose = function(mob, target, skillId)
     local tpMoves =
     {
         xi.mobSkill.PROMYVION_BARRIER_2,
         xi.mobSkill.QUADRATIC_CONTINUUM_2,
-        xi.mobSkill.SPIRIT_ABSORPTION_2,
+        xi.mobSkill.SPIRIT_ABSORPTION_GORGER_2,
         xi.mobSkill.STYGIAN_FLATUS_1,
         xi.mobSkill.VANITY_DRIVE_2,
     }

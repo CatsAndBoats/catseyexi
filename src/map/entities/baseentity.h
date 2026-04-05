@@ -239,14 +239,12 @@ struct location_t
     uint16     destination; // Destination zone while zoning
     CZone*     zone;        // Current zone
     uint16     prevzone;    // Previous zone (Not used for monsters and NPCs)
-    bool       zoning;      // The flag is reset at each entrance to the new zone. We are needed to implement the logic of game tasks ("Quests")
     uint16     boundary;    // A certain area in the zone in which the entity is located (used by characters and transport)
 
     location_t()
     : destination(0)
     , zone(nullptr)
     , prevzone(0)
-    , zoning(false)
     , boundary(0)
     {
     }
@@ -296,7 +294,8 @@ public:
     auto   GetLocalVars() -> std::map<std::string, uint32>&;
 
     // pre-tick update
-    virtual void Tick(timer::time_point) = 0;
+    virtual auto Tick(timer::time_point) -> Task<void> = 0;
+
     // post-tick update
     virtual void PostTick() = 0;
 
@@ -342,7 +341,7 @@ public:
     timer::time_point m_nextUpdateTimer; // next time the entity should push an update packet
 
 protected:
-    std::map<std::string, uint32> m_localVars;
+    std::map<std::string, uint32> localVars_;
     uint8                         speed; // speed of movement
 };
 

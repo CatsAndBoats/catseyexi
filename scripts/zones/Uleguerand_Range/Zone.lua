@@ -7,11 +7,8 @@ local ID = zones[xi.zone.ULEGUERAND_RANGE]
 local zoneObject = {}
 
 zoneObject.onInitialize = function(zone)
-    -- ffxiclopedia's pages for Black Coney and White Coney say 7 and 5 Earth seconds respectively, in game it is very fast
-    -- https://ffxiclopedia.fandom.com/wiki/Black_Coney
-    -- https://ffxiclopedia.fandom.com/wiki/White_Coney
-    -- BG Wiki has no info. For now, triggers every 3 vana minutes
-    GetNPCByID(ID.npc.RABBIT_FOOTPRINT):addPeriodicTrigger(0, 3, 0)
+    -- Set to move every 5 vana minutes as observed on retail
+    GetNPCByID(ID.npc.RABBIT_FOOTPRINT):addPeriodicTrigger(0, 5, 0)
 end
 
 zoneObject.onConquestUpdate = function(zone, updatetype, influence, owner, ranking, isConquestAlliance)

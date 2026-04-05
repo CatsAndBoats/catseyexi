@@ -59,7 +59,7 @@ end
 xi.job_utils.white_mage.useAfflatusMisery = function(player, target, ability)
     target:delStatusEffect(xi.effect.AFFLATUS_SOLACE)
     target:delStatusEffect(xi.effect.AFFLATUS_MISERY)
-    target:addStatusEffect(xi.effect.AFFLATUS_MISERY, 8, 0, 7200)
+    target:addStatusEffect(xi.effect.AFFLATUS_MISERY, { power = 8, duration = 7200, origin = player })
 
     return xi.effect.AFFLATUS_MISERY
 end
@@ -67,13 +67,13 @@ end
 xi.job_utils.white_mage.useAfflatusSolace = function(player, target, ability)
     target:delStatusEffect(xi.effect.AFFLATUS_SOLACE)
     target:delStatusEffect(xi.effect.AFFLATUS_MISERY)
-    target:addStatusEffect(xi.effect.AFFLATUS_SOLACE, 8, 0, 7200)
+    target:addStatusEffect(xi.effect.AFFLATUS_SOLACE, { power = 8, duration = 7200, origin = player })
 
     return xi.effect.AFFLATUS_SOLACE
 end
 
 xi.job_utils.white_mage.useAsylum = function(player, target, ability)
-    target:addStatusEffect(xi.effect.ASYLUM, 3, 0, 30)
+    target:addStatusEffect(xi.effect.ASYLUM, { power = 3, duration = 30, origin = player })
 
     return xi.effect.ASYLUM
 end
@@ -107,19 +107,18 @@ xi.job_utils.white_mage.useBenediction = function(player, target, ability)
     return heal
 end
 
-xi.job_utils.white_mage.useDevotion = function(player, target, ability)
+xi.job_utils.white_mage.useDevotion = function(player, target, ability, action)
     -- Plus 5 percent mp recovers per extra devotion merit
     local meritBonus = player:getMerit(xi.merit.DEVOTION) - 5
     local mpPercent  = (25 + meritBonus) / 100
     local damageHP   = math.floor(player:getHP() * 0.25)
 
     -- If stoneskin is present, it should absorb damage
-    damageHP = utils.stoneskin(player, damageHP)
+    damageHP = utils.handleStoneskin(player, damageHP)
 
     local healMP = player:getHP() * mpPercent
     healMP = utils.clamp(healMP, 0, target:getMaxMP() - target:getMP())
 
-    damageHP = utils.stoneskin(player, damageHP)
     player:delHP(damageHP)
     target:addMP(healMP)
 
@@ -127,18 +126,18 @@ xi.job_utils.white_mage.useDevotion = function(player, target, ability)
 end
 
 xi.job_utils.white_mage.useDivineCaress = function(player, target, ability)
-    player:addStatusEffect(xi.effect.DIVINE_CARESS_I, 3, 0, 60)
+    player:addStatusEffect(xi.effect.DIVINE_CARESS_I, { power = 3, duration = 60, origin = player })
 
     return xi.effect.DIVINE_CARESS_I
 end
 
 xi.job_utils.white_mage.useDivineSeal = function(player, target, ability)
-    player:addStatusEffect(xi.effect.DIVINE_SEAL, 1, 0, 60)
+    player:addStatusEffect(xi.effect.DIVINE_SEAL, { power = 1, duration = 60, origin = player })
 
     return xi.effect.DIVINE_SEAL
 end
 
-xi.job_utils.white_mage.useMartyr = function(player, target, ability)
+xi.job_utils.white_mage.useMartyr = function(player, target, ability, action)
     -- Plus 5 percent hp recovers per extra martyr merit
     local meritBonus = player:getMerit(xi.merit.MARTYR) - 5
 
@@ -151,7 +150,7 @@ xi.job_utils.white_mage.useMartyr = function(player, target, ability)
     healHP = utils.clamp(healHP, 0, target:getMaxHP() - target:getHP())
 
     -- If stoneskin is present, it should absorb damage
-    damageHP = utils.stoneskin(player, damageHP)
+    damageHP = utils.handleStoneskin(player, damageHP)
     player:delHP(damageHP)
     target:addHP(healHP)
 
@@ -159,7 +158,7 @@ xi.job_utils.white_mage.useMartyr = function(player, target, ability)
 end
 
 xi.job_utils.white_mage.useSacrosanctity = function(player, target, ability)
-    target:addStatusEffect(xi.effect.SACROSANCTITY, 3, 0, 60)
+    target:addStatusEffect(xi.effect.SACROSANCTITY, { power = 3, duration = 60, origin = player })
 
     return xi.effect.SACROSANCTITY
 end

@@ -14,16 +14,11 @@ entity.spawnPoints =
 
 entity.phList =
 {
-    [ID.mob.MIND_HOARDER - 3] = ID.mob.MIND_HOARDER,
-    [ID.mob.MIND_HOARDER - 2] = ID.mob.MIND_HOARDER,
-    [ID.mob.MIND_HOARDER - 1] = ID.mob.MIND_HOARDER,
+    [ID.mob.MIND_HOARDER - 2] = ID.mob.MIND_HOARDER, -- Confirmed retail
 }
 
 entity.onMobInitialize = function(mob)
     mob:setMobMod(xi.mobMod.ADD_EFFECT, 1)
-end
-
-entity.onMobSpawn = function(mob)
     mob:addImmunity(xi.immunity.GRAVITY)
     mob:addImmunity(xi.immunity.BIND)
     mob:addImmunity(xi.immunity.PETRIFY)
@@ -31,6 +26,10 @@ entity.onMobSpawn = function(mob)
     mob:addImmunity(xi.immunity.LIGHT_SLEEP)
     mob:addImmunity(xi.immunity.TERROR)
     mob:addImmunity(xi.immunity.SILENCE)
+end
+
+entity.onMobSpawn = function(mob)
+    mob:setMobMod(xi.mobMod.BASE_DAMAGE_MULTIPLIER, 150)
     mob:setMod(xi.mod.UDMGMAGIC, -5000)
 end
 

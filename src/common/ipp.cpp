@@ -110,3 +110,8 @@ auto IPP::operator<(const IPP& other) const -> bool
 {
     return ip_ < other.ip_ || (ip_ == other.ip_ && port_ < other.port_);
 }
+
+auto IPP::operator==(const IPP& other) const -> bool
+{
+    return ip_ == other.ip_ && port_ == other.port_;
+}

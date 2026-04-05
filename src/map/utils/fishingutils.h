@@ -951,9 +951,10 @@ uint8                     GetBaitPower(bait_t* bait, fish_t* fish);
 std::map<fish_t*, uint16> GetFishPool(uint16 zoneID, uint8 areaID, uint16 BaitID);
 std::vector<fish_t*>      GetItemPool(uint16 zoneID, uint8 areaID);
 std::vector<fishmob_t*>   GetMobPool(uint16 zoneId);
+std::vector<uint32>       GetChestPool(uint16 zoneId);
 uint16                    GetMessageOffset(uint16 ZoneID);
-bool                      IsFish(CItem* fish);
-fish_t*                   GetFish(uint32 fishId);
+auto                      IsFish(const CItem* fish) -> bool;
+auto                      GetFish(uint32 fishId) -> fish_t*;
 
 // Fishing Areas
 bool           onSegment(areavector_t p, areavector_t q, areavector_t r);
@@ -996,6 +997,7 @@ void LoadFishingMessages();
 void LoadFishingAreas();
 void LoadFishItems();
 void LoadFishMobs();
+void LoadChests();
 void LoadFishingRods();
 void LoadFishingBaits();
 void LoadFishingBaitAffinities();

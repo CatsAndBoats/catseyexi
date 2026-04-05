@@ -13,22 +13,6 @@ local ID = zones[xi.zone.AHT_URHGAN_WHITEGATE]
 xi = xi or {}
 xi.znm = xi.znm or {}
 
-local getHighBits16 = function(data)
-    return bit.rshift(data, 16)
-end
-
-local getLowBits16 = function(data)
-    return bit.band(data, 0xFFFF)
-end
-
-local setHighBits16 = function(data, diff)
-    return bit.bor(data, bit.lshift(getLowBits16(diff), 16))
-end
-
-local setLowBits16 = function(data, diff)
-    return bit.bor(data, getLowBits16(diff))
-end
-
 -----------------------------------
 -- Sanraku's Interest and Recommended Fauna
 -- Applies bonuses to soul plate zeni-value
@@ -80,11 +64,8 @@ end
 --- Is this mob Sanraku's current 'Recommended Fauna'?
 
 xi.znm.isCurrentFauna = function(plateData)
-    -- local zeni     = plateData.zeni
-
-    local data     = plateData.interestData
-    local zoneID   = getHighBits16(data)
-    local mobName  = plateData.name
+    local zoneID   = plateData.zoneId
+    local mobName  = plateData.signature
     local faunaRow = xi.znm.SANRAKUS_FAUNA[xi.znm.getSanrakusFauna()]
 
     if faunaRow.zone ~= zoneID then
@@ -109,15 +90,14 @@ end
 -- Main interest objective
 
 xi.znm.isCurrentSuperFamily = function(plateData)
-    local data            = plateData.interestData
-    local superFamily     = getLowBits16(data)
+    local superFamily     = plateData.superFamilyId
     local currectInterest = xi.znm.getSanrakusInterest()
     local interestRow     = xi.znm.SANRAKUS_INTEREST[currectInterest]
 
     if superFamily == interestRow.superFamily then
         -- Handle elementals as all have same superFamily
         if currectInterest >= 45 and currectInterest <= 51 then
-            if plateData.name ~= interestRow.name then
+            if plateData.signature ~= interestRow.name then
                 return false
             end
         end
@@ -130,8 +110,7 @@ end
 
 -- Secondary interest objective
 xi.znm.isCurrentEcosystem = function(plateData)
-    local data            = plateData.interestData
-    local superFamily     = getLowBits16(data)
+    local superFamily     = plateData.superFamilyId
     local currectInterest = xi.znm.getSanrakusInterest()
     local interestRow     = xi.znm.SANRAKUS_INTEREST[currectInterest]
 
@@ -144,7 +123,7 @@ end
 
 xi.znm.calculatePlateZeni = function(player, plateData)
     -- Cache the soulplate value on the player
-    local zeni  = plateData.zeni
+    local zeni  = plateData.quality
     local bonus = 'none'
 
     if xi.znm.isCurrentFauna(plateData) then
@@ -169,7 +148,7 @@ xi.znm.calculatePlateZeni = function(player, plateData)
     zeni = utils.clamp(zeni, xi.znm.SOULPLATE_MIN_VALUE, xi.znm.SOULPLATE_MAX_VALUE)
 
     -- if player:getDebugMode() then
-    --     player:printToPlayer(string.format('name: %s zeni %i, bonus: %s', plateData.name, zeni, bonus))
+    --     player:printToPlayer(string.format('name: %s zeni %i, bonus: %s', plateData.signature, zeni, bonus))
     -- end
 
     return zeni
@@ -234,23 +213,29 @@ xi.znm.soultrapper.onItemUse = function(target, player, item)
 
         player:removeAmmo(1)
     else
-        -- Determine Zeni starting value
-        local zeni = xi.znm.soultrapper.getZeniValue(target, player)
+        -- Deduct blank soul plate
+        player:removeAmmo(1)
+
+        -- Determine quality starting value
+        local quality = xi.znm.soultrapper.getZeniValue(target, player)
 
         -- Pick a skill totally at random...
-        local skillIndex, skillEntry = utils.randomEntryIdx(xi.pankration.feralSkills)
-        local interestData = xi.znm.soultrapper.packInterestData(target)
+        local skillIndex, skillEntry = xi.pankration.getRandomFeralSkill(target)
 
         -- Add plate
-        local plate = player:addSoulPlate(target:getName(), interestData, zeni, skillIndex, skillEntry.fp)
-        local data = plate:getSoulPlateData()
-
-        -- if player:getDebugMode() then
-        --     player:printToPlayer(string.format('mobName: %s zone: %i superID: %i SystemID: %i base zeni: %i', data.name, target:getZoneID(), target:getSuperFamily(), target:getSystem(), zeni))
-        -- end
-
-        utils.unused(plate)
-        utils.unused(data)
+        local plate = player:addItem({ id = xi.item.SOUL_PLATE, silent = true })
+        if plate then
+            plate:setExData({
+                signature     = target:getName(),
+                zoneId        = target:getZoneID(),
+                superFamilyId = target:getSuperFamily(),
+                poolId        = target:getPool(),
+                level         = target:getMainLvl(),
+                quality       = quality,
+                feralSkill    = skillIndex,
+                feralPoints   = skillEntry.fp,
+            })
+        end
 
         -- todo, message should show to all in area
         player:timer(4000, function(playerArg)
@@ -335,15 +320,6 @@ xi.znm.soultrapper.getZeniValue = function(target, player)
     return zeni
 end
 
-xi.znm.soultrapper.packInterestData = function(target)
-    local data = 0
-
-    data = setHighBits16(data, target:getZoneID())
-    data = setLowBits16(data, target:getSuperFamily())
-
-    return data
-end
-
 -----------------------------------
 -- Ryo
 -----------------------------------
@@ -358,7 +334,7 @@ xi.znm.ryo.onTrade = function(player, npc, trade)
     if npcUtil.tradeHasExactly(trade, xi.item.SOUL_PLATE) then
         -- Cache the soulplate value on the player
         local item = trade:getItem(0)
-        local zeni = xi.znm.calculatePlateZeni(player, item:getSoulPlateData())
+        local zeni = xi.znm.calculatePlateZeni(player, item:getExData())
         xi.znm.ryo.setTradedPlateValue(player, zeni)
 
         player:startEvent(914)
@@ -424,6 +400,14 @@ xi.znm.ryo.onEventUpdate = function(player, csid, option, npc)
 end
 
 xi.znm.ryo.onEventFinish = function(player, csid, option, npc)
+    if csid == 914 then
+        local item = player:getTrade():getItem()
+        if item then
+            item:setReservedValue(0)
+        end
+
+        player:getTrade():clean()
+    end
 end
 
 -----------------------------------
@@ -470,6 +454,12 @@ xi.znm.sanraku.handleTradeWithPlate = function(player, npc, item)
 
         if xi.znm.sanraku.platesTradedToday(player) >= tradeLimit then
             player:showText(npc, ID.text.APPRECIATE_MORE, 1, xi.item.SOUL_PLATE, tradeLimit)
+            local tradeItem = player:getTrade():getItem()
+            if tradeItem then
+                tradeItem:setReservedValue(0)
+            end
+
+            player:getTrade():clean()
             return
         end
     else -- If you have the KI, clear out the tracking vars!
@@ -477,7 +467,7 @@ xi.znm.sanraku.handleTradeWithPlate = function(player, npc, item)
     end
 
     -- Cache the soulplate value on the player
-    local zeni = xi.znm.calculatePlateZeni(player, item:getSoulPlateData())
+    local zeni = xi.znm.calculatePlateZeni(player, item:getExData())
     xi.znm.sanraku.setTradedPlateValue(player, zeni)
     xi.znm.serverPlateTrades()
 

@@ -23,6 +23,7 @@
 #define _LUAZONE_H
 
 #include "common/cbasetypes.h"
+#include "enums/terrain_type.h"
 #include "luautils.h"
 #include "zone.h"
 
@@ -42,6 +43,7 @@ public:
     friend std::ostream& operator<<(std::ostream& out, const CLuaZone& zone);
 
     auto getLocalVar(const char* key);
+    auto getLocalVars() -> sol::table;
     void setLocalVar(const char* key, uint32 value);
     void resetLocalVars();
 
@@ -62,6 +64,8 @@ public:
     uint32      getUptime();
     void        reloadNavmesh();
     bool        isNavigablePoint(const sol::table& position);
+    auto        getTerrainType(const sol::table& position) -> TerrainType;
+    auto        getFloorId(const sol::table& position) -> uint8;
     auto        insertDynamicEntity(sol::table table) -> CBaseEntity*;
 
     auto getSoloBattleMusic();

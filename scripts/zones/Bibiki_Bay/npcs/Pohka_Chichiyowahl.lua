@@ -3,20 +3,18 @@
 --  NPC: Pohka Chichiyowahl
 -- !pos -415 -2 -430 4
 -----------------------------------
-local ID = zones[xi.zone.BIBIKI_BAY]
------------------------------------
 ---@type TNpcEntity
 local entity = {}
 
 entity.onTrigger = function(player, npc)
     local stock =
     {
-        { 17388,  1238, 3, },    -- Fastwater F. Rod
-        { 17382, 11845, 3, },    -- S.H. Fishing Rod
-        { 4148,    290, 3, },    -- Antidote
+        { xi.item.FASTWATER_FISHING_ROD,    1238, 3 },
+        { xi.item.SINGLE_HOOK_FISHING_ROD, 11845, 3 },
+        { xi.item.ANTIDOTE,                  290, 3 },
     }
 
-    player:showText(npc, ID.text.POHKA_SHOP_DIALOG)
+    player:showText(npc, zones[xi.zone.BIBIKI_BAY].text.POHKA_SHOP_DIALOG)
     xi.shop.nation(player, stock, xi.nation.WINDURST)
 end
 

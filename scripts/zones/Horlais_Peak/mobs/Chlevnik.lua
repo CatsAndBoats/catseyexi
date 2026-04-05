@@ -3,7 +3,7 @@
 -- Mob: Chlevnik
 -- KSNM99 : Horns of War
 
--- TODO : Update Howl to give 25% Attack instead of 15% - Update Meteor to 1.6 fTP + dINT * 3(!)
+-- TODO : Update Meteor to 1.6 fTP + dINT * 3(!)
 -----------------------------------
 local entity = {}
 
@@ -12,33 +12,26 @@ entity.onMobInitialize = function(mob)
     mob:addImmunity(xi.immunity.DARK_SLEEP)
     mob:addImmunity(xi.immunity.PETRIFY)
     mob:addImmunity(xi.immunity.SILENCE)
+    mob:setMobMod(xi.mobMod.AOE_HIT_ALL, 1)
     mob:setBehavior(bit.bor(mob:getBehavior(), xi.behavior.NO_TURN))
-    mob:addListener('WEAPONSKILL_STATE_EXIT', 'FINAL_METEOR_DEATH', function(mobArg, skillID)
-        if skillID == xi.mobSkill.FINAL_METEOR then
-            if mobArg:getAnimationSub() ~= 1 then
-                mobArg:setAnimationSub(1)
-            end
-
-            mobArg:timer(6000, function(mobArgTimer)
-                mobArgTimer:setUnkillable(false)
-                mobArgTimer:setHP(0)
-            end)
-        end
-    end)
 end
 
 entity.onMobSpawn = function(mob)
+    mob:setMod(xi.mod.STUN_RES_RANK, 10)
+
+    mob:setMod(xi.mod.TRIPLE_ATTACK, 5)
+    mob:setMobMod(xi.mobMod.NO_MOVE, 0)
+    mob:setMobMod(xi.mobMod.ADD_EFFECT, 1)
+    mob:setMod(xi.mod.REGAIN, 50)
+
+    mob:setTP(3000)
     mob:setUnkillable(true)
     mob:setAutoAttackEnabled(true)
     mob:setMagicCastingEnabled(true)
     mob:setMobAbilityEnabled(true)
-    mob:setMod(xi.mod.TRIPLE_ATTACK, 5)
-    mob:addMod(xi.mod.STUNRES, 90)
-    mob:setMobMod(xi.mobMod.NO_MOVE, 0)
-    mob:setMobMod(xi.mobMod.ADD_EFFECT, 1)
-    mob:setMod(xi.mod.REGAIN, 50)
-    mob:setTP(3000)
-    mob:setLocalVar('finalMeteor', 0)
+    mob:setAnimationSub(0)
+
+    mob:setLocalVar('queueFinalMeteor', 0)
 end
 
 entity.onMobEngage = function(mob, target)
@@ -46,34 +39,62 @@ entity.onMobEngage = function(mob, target)
 end
 
 entity.onMobFight = function(mob, target)
-    local delay = mob:getLocalVar('meteorDelay')
-    if GetSystemTime() > delay then -- Cooldown on Meteor is 30 seconds.
-        mob:castSpell(xi.magic.spell.METEOR, target)
-        mob:setLocalVar('meteorDelay', GetSystemTime() + 30)
-    end
-
-    if mob:getHP() == 1 and mob:getLocalVar('finalMeteor') == 0 then
+    if
+        mob:getHP() == 1 and
+        mob:getLocalVar('queueFinalMeteor') == 0
+    then
+        mob:setLocalVar('queueFinalMeteor', 1)
         mob:setAutoAttackEnabled(false)
         mob:setMagicCastingEnabled(false)
         mob:setMobAbilityEnabled(false)
         mob:setMobMod(xi.mobMod.NO_MOVE, 1)
-        mob:setLocalVar('finalMeteor', 1)
+        return
     end
 
-    if mob:getLocalVar('finalMeteor') == 1 then
+    if
+        mob:getLocalVar('queueFinalMeteor') == 1 and
+        not xi.combat.behavior.isEntityBusy(mob)
+    then
         mob:useMobAbility(xi.mobSkill.FINAL_METEOR, nil, nil, true) -- Ignoring distance based off retail capture.
-        mob:setLocalVar('finalMeteor', 2)
+        mob:setLocalVar('queueFinalMeteor', 2)
+    end
+
+    local delay = mob:getLocalVar('meteorDelay')
+
+    if GetSystemTime() > delay then -- Cooldown on Meteor is 30 seconds.
+        mob:castSpell(xi.magic.spell.METEOR, target)
+        mob:setLocalVar('meteorDelay', GetSystemTime() + 30)
     end
 end
 
+entity.onMobMobskillChoose = function(mob, target, skillId)
+    local skillList =
+    {
+        xi.mobSkill.WILD_HORN,
+        xi.mobSkill.THUNDERBOLT_BEHEMOTH,
+        xi.mobSkill.KICK_OUT,
+        xi.mobSkill.SHOCK_WAVE_BEHEMOTH,
+        xi.mobSkill.FLAME_ARMOR,
+        xi.mobSkill.HOWL_BEHEMOTH,
+    }
+
+    return skillList[math.random(1, #skillList)]
+end
+
 entity.onAdditionalEffect = function(mob, target, damage)
-    return xi.mob.onAddEffect(mob, target, damage, xi.mob.ae.STUN, { chance = 25, duration = 10 }) -- 25% chance to stun for 10 seconds.
+    local pTable =
+    {
+        chance   = 25,
+        effectId = xi.effect.STUN,
+        duration = 10,
+    }
+
+    return xi.combat.action.executeAddEffectEnfeeblement(mob, target, pTable)
 end
 
 entity.onSpellPrecast = function(mob, spell)
     if spell:getID() == xi.magic.spell.METEOR then
         spell:setAoE(xi.magic.aoe.RADIAL)
-        spell:setFlag(xi.magic.spellFlag.HIT_ALL)
         spell:setRadius(30)
         spell:setAnimation(280)
         spell:setMPCost(0)

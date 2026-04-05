@@ -21,20 +21,18 @@
 
 #pragma once
 
-#include "common/cbasetypes.h"
-#include "common/timer.h"
-
 #include <array>
 #include <chrono>
 #include <cstdint>
 
 using namespace std::chrono_literals;
 
+// TODO: Move this file to common/constants.h
+
 //
-// There are 3 types of updates, all with similar names but different functions:
+// There are 2 types of updates, with similar names but different functions:
 // - The time server tick interval is every 2400ms, and is used for things like status effect ticks, etc. (the same as the FFXI tick)
 // - The server logic update interval is every 400ms, and is used for things like AI updates, etc.
-// - The server main loop update interval is every 200ms, and is split between the task manager and the networking workload.
 //
 
 static constexpr auto kTimeServerTickInterval = 2400ms;
@@ -50,15 +48,26 @@ static constexpr auto kLogicUpdateInterval = std::chrono::milliseconds(static_ca
 // Check Trigger Areas 2x as often as the server tick rate (200ms)
 static constexpr auto kTriggerAreaInterval = std::chrono::milliseconds(static_cast<uint64>(1000.0f / (kLogicUpdateRate * 2.0f)));
 
-// Split betweek task manager and networking workload (200ms)
-static constexpr auto kMainLoopInterval = 200ms;
+// SpawnHandler tick interval (30s) and spawn window (half of interval)
+static constexpr auto kSpawnHandlerInterval = 30s;
+static constexpr auto kSpawnHandlerWindow   = kSpawnHandlerInterval / 2;
 
-// If the main loop is more than 100ms behind, we're in trouble.
-static constexpr auto kMainLoopBacklogThreshold = 100ms;
+// If the main loop is more than 200ms behind, we're in trouble.
+static constexpr auto kMainThreadBacklogThreshold = 200ms;
+
+// The rate at which we cleanup timed-out and finished sessions
+static constexpr auto kSessionCleanupInterval = 5s;
+
+// The rate at which we force Lua garbage collections
+static constexpr auto kGarbageCollectionInterval = 15min;
+
+// The rate at which we persist any outstanding changes to volatile server vars
+static constexpr auto kPersistVolatileServerVarsInterval = 1min;
+
+// The rate at which we pump the ZMQ queues
+static constexpr auto kIPCPumpInterval = 100ms;
 
 // Packet & networking constants
 static constexpr auto kMaxBufferSize           = 2500U;
 static constexpr auto kMaxPacketPerCompression = 32U;
 static constexpr auto kMaxPacketBacklogSize    = kMaxPacketPerCompression * 6U; // If we hit this number, things are going very very badly.
-
-using NetworkBuffer = std::array<uint8, kMaxBufferSize>;

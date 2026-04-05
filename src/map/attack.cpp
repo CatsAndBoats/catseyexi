@@ -25,6 +25,7 @@
 #include "entities/battleentity.h"
 #include "items/item_weapon.h"
 #include "job_points.h"
+#include "mob_modifier.h"
 #include "status_effect_container.h"
 #include "utils/puppetutils.h"
 
@@ -138,38 +139,6 @@ void CAttack::SetCritical(bool value)
 
 /************************************************************************
  *                                                                      *
- *  Sets the guarded flag.                                              *
- *                                                                      *
- ************************************************************************/
-void CAttack::SetGuarded(bool isGuarded)
-{
-    m_isGuarded = isGuarded;
-}
-
-/************************************************************************
- *                                                                      *
- *  Gets the guarded flag.                                              *
- *                                                                      *
- ************************************************************************/
-bool CAttack::IsGuarded()
-{
-    m_isGuarded = attackutils::IsGuarded(m_attacker, m_victim);
-    if (m_isGuarded)
-    {
-        if (m_damageRatio > 1.0f)
-        {
-            m_damageRatio -= 1.0f;
-        }
-        else
-        {
-            m_damageRatio = 0;
-        }
-    }
-    return m_isGuarded;
-}
-
-/************************************************************************
- *                                                                      *
  *  Gets the evaded flag.                                               *
  *                                                                      *
  ************************************************************************/
@@ -201,6 +170,28 @@ bool CAttack::IsBlocked() const
 bool CAttack::IsParried() const
 {
     return m_isParried;
+}
+
+bool CAttack::IsGuarded() const
+{
+    return m_isGuarded;
+}
+
+bool CAttack::CheckGuarded()
+{
+    m_isGuarded = attackutils::IsGuarded(m_attacker, m_victim);
+    if (m_isGuarded)
+    {
+        if (m_damageRatio > 1.0f)
+        {
+            m_damageRatio -= 1.0f;
+        }
+        else
+        {
+            m_damageRatio = 0;
+        }
+    }
+    return m_isGuarded;
 }
 
 bool CAttack::CheckParried()
@@ -469,7 +460,7 @@ bool CAttack::CheckCounter()
 
     uint16 seiganChance = 0;
 
-    if (m_victim->objtype == TYPE_PC && m_victim->GetMJob() == JOB_SAM)
+    if (m_victim->objtype == TYPE_PC && m_victim->getMod(Mod::SEIGAN_COUNTER_BONUS) > 0)
     {
         // counter check (rate AND your hit rate makes it land, else its just a regular hit)
         // having seigan active gives chance to counter at 25% of the zanshin proc rate
@@ -642,13 +633,16 @@ void CAttack::ProcessDamage()
             int32       fSTR          = battleutils::GetFSTR(m_attacker, m_victim, slot);
             REGION_TYPE regionID      = m_attacker->loc.zone->GetRegionID();
 
-            if (regionID <= REGION_TYPE::LIMBUS) // Pre TOAU zones
+            if (static_cast<CMobEntity*>(m_attacker)->getMobMod(MOBMOD_NO_H2H_PENALTY) == 0)
             {
-                mobH2HPenalty = 0.425f; // Vanilla - COP
-            }
-            else
-            {
-                mobH2HPenalty = 0.650f; // TOAU onward
+                if (regionID <= REGION_TYPE::LIMBUS) // Pre TOAU zones
+                {
+                    mobH2HPenalty = 0.425f; // Vanilla - COP
+                }
+                else
+                {
+                    mobH2HPenalty = 0.650f; // TOAU onward
+                }
             }
 
             m_damage = m_baseDamage + m_bonusBasePhysicalDamage;
@@ -723,8 +717,11 @@ void CAttack::ProcessDamage()
         SetAttackType(PHYSICAL_ATTACK_TYPE::SAMBA);
     }
 
-    // Get damage multipliers.
-    m_damage = attackutils::CheckForDamageMultiplier((CCharEntity*)m_attacker, dynamic_cast<CItemWeapon*>(m_attacker->m_Weapons[slot]), m_damage, m_attackType, slot, m_isFirstSwing);
+    // Get player-only damage multipliers.
+    if (auto* PChar = dynamic_cast<CCharEntity*>(m_attacker))
+    {
+        m_damage = attackutils::CheckForDamageMultiplier(PChar, dynamic_cast<CItemWeapon*>(m_attacker->m_Weapons[slot]), m_damage, m_attackType, slot, m_isFirstSwing);
+    }
 
     // Apply Sneak Attack Augment Mod
     if (m_attacker->getMod(Mod::AUGMENTS_SA) > 0 && IsSneakAttack() && m_attacker->StatusEffectContainer->HasStatusEffect(EFFECT_SNEAK_ATTACK))

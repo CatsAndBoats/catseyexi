@@ -340,12 +340,12 @@ end
 local modByMobName =
 {
     ['Krabkatoa'] = function(mob)
-        mob:addStatusEffect(xi.effect.REGAIN, 10, 0, 0)
+        mob:addStatusEffect(xi.effect.REGAIN, { power = 10, origin = mob })
         mob:addMod(xi.mod.DOUBLE_ATTACK, 10)
     end,
 
     ['Tammuz'] = function(mob)
-        mob:addStatusEffect(xi.effect.MIGHTY_STRIKES, 1, 0, 0)
+        mob:addStatusEffect(xi.effect.MIGHTY_STRIKES, { power = 1, origin = mob })
     end,
 
     ['Erebus'] = function(mob)
@@ -366,29 +366,29 @@ local modByMobName =
 local mixinByMobName =
 {
     ['Capricornus'] = function(mob)
-        doMobSkillEveryHPP(mob, 20, 80, xi.jsa.MIGHTY_STRIKES, not mob:hasStatusEffect(xi.effect.MIGHTY_STRIKES))
+        doMobSkillEveryHPP(mob, 20, 80, xi.mobSkill.MIGHTY_STRIKES_1, not mob:hasStatusEffect(xi.effect.MIGHTY_STRIKES))
         if
             mob:hasStatusEffect(xi.effect.MIGHTY_STRIKES) and
             not xi.combat.behavior.isEntityBusy(mob)
         then
-            mob:useMobAbility(xi.mob.skills.RECOIL_DIVE)
+            mob:useMobAbility(xi.mobSkill.RECOIL_DIVE_1)
         end
     end,
 
     ['Yacumama'] = function(mob)
-        doMobSkillEveryHPP(mob, 20, 80, xi.jsa.HUNDRED_FISTS, not mob:hasStatusEffect(xi.effect.HUNDRED_FISTS))
+        doMobSkillEveryHPP(mob, 20, 80, xi.mobSkill.HUNDRED_FISTS_1, not mob:hasStatusEffect(xi.effect.HUNDRED_FISTS))
     end,
 
     ['Lamprey_Lord'] = function(mob)
-        randomly(mob, 10, 60, xi.effect.BLOOD_WEAPON, xi.jsa.BLOOD_WEAPON)
+        randomly(mob, 10, 60, xi.effect.BLOOD_WEAPON, xi.mobSkill.BLOOD_WEAPON_1)
     end,
 
     ['Shoggoth'] = function(mob)
-        doMobSkillEveryHPP(mob, 20, 80, xi.jsa.CHAINSPELL, not mob:hasStatusEffect(xi.effect.CHAINSPELL))
+        doMobSkillEveryHPP(mob, 20, 80, xi.mobSkill.CHAINSPELL_1, not mob:hasStatusEffect(xi.effect.CHAINSPELL))
     end,
 
     ['Jyeshtha'] = function(mob)
-        randomly(mob, 30, 60, xi.jsa.MIGHTY_STRIKES, xi.jsa.MIGHTY_STRIKES)
+        randomly(mob, 30, 60, xi.mobSkill.MIGHTY_STRIKES_1, xi.mobSkill.MIGHTY_STRIKES_1)
         if
             mob:getLocalVar('MOBSKILL_USE') == 1 and
             not mob:hasStatusEffect(xi.effect.MIGHTY_STRIKES)
@@ -398,33 +398,33 @@ local mixinByMobName =
     end,
 
     ['Blobdingnag'] = function(mob)
-        doMobSkillEveryHPP(mob, 20, 82, xi.mob.skills.CYTOKINESIS, true)
+        doMobSkillEveryHPP(mob, 20, 82, xi.mobSkill.CYTOKINESIS, true)
     end,
 
     ['Farruca_Fly'] = function(mob)
-        doMobSkillEveryHPP(mob, 20, 80, xi.jsa.PERFECT_DODGE, not mob:hasStatusEffect(xi.effect.PERFECT_DODGE))
+        doMobSkillEveryHPP(mob, 20, 80, xi.mobSkill.PERFECT_DODGE_1, not mob:hasStatusEffect(xi.effect.PERFECT_DODGE))
     end,
 
     ['Skuld'] = function(mob)
-        doMobSkillEveryHPP(mob, 20, 80, xi.jsa.CHAINSPELL, not mob:hasStatusEffect(xi.effect.CHAINSPELL))
+        doMobSkillEveryHPP(mob, 20, 80, xi.mobSkill.CHAINSPELL_1, not mob:hasStatusEffect(xi.effect.CHAINSPELL))
     end,
 
     ['Erebus'] = function(mob)
-        randomly(mob, 30, 60, xi.effect.BLOOD_WEAPON, xi.jsa.BLOOD_WEAPON)
+        randomly(mob, 30, 60, xi.effect.BLOOD_WEAPON, xi.mobSkill.BLOOD_WEAPON_1)
         if
             mob:hasStatusEffect(xi.effect.BLOOD_WEAPON) and
             not mob:hasStatusEffect(xi.effect.HUNDRED_FISTS)
         then
-            mob:addStatusEffect(xi.effect.HUNDRED_FISTS, 1, 0, 30)
+            mob:addStatusEffect(xi.effect.HUNDRED_FISTS, { power = 1, duration = 30, origin = mob })
         end
     end,
 
     ['Feuerunke'] = function(mob)
-        randomly(mob, 30, 60, xi.effect.HUNDRED_FISTS, xi.jsa.HUNDRED_FISTS)
+        randomly(mob, 30, 60, xi.effect.HUNDRED_FISTS, xi.mobSkill.HUNDRED_FISTS_1)
     end,
 
     ['Dawon'] = function(mob)
-        doMobSkillEveryHPP(mob, 20, 80, xi.jsa.PERFECT_DODGE, not mob:hasStatusEffect(xi.effect.PERFECT_DODGE))
+        doMobSkillEveryHPP(mob, 20, 80, xi.mobSkill.PERFECT_DODGE_1, not mob:hasStatusEffect(xi.effect.PERFECT_DODGE))
     end
 }
 

@@ -78,8 +78,17 @@ entity.spawnPoints =
 }
 
 entity.onMobInitialize = function(mob)
-    mob:setCarefulPathing(true)
     xi.mob.updateNMSpawnPoint(mob)
+
+    mob:addImmunity(xi.immunity.BIND)
+    mob:addImmunity(xi.immunity.BLIND)
+    mob:addImmunity(xi.immunity.DARK_SLEEP)
+    mob:addImmunity(xi.immunity.PLAGUE)
+    mob:addImmunity(xi.immunity.PETRIFY)
+    mob:addImmunity(xi.immunity.TERROR)
+    mob:setMobMod(xi.mobMod.AOE_HIT_ALL, 1)
+
+    mob:setCarefulPathing(true)
     mob:setRespawnTime(math.random(144, 240) * 1800) -- 3 to 5 days in 30 minute windows
 end
 
@@ -102,12 +111,6 @@ entity.onMobSpawn = function(mob)
     mob:setMobMod(xi.mobMod.ROAM_DISTANCE, 5)
     mob:setMobMod(xi.mobMod.SIGHT_RANGE, 30)
     mob:setMobMod(xi.mobMod.WEAPON_BONUS, 148) -- 245 total weapon damage
-    mob:addImmunity(xi.immunity.BIND)
-    mob:addImmunity(xi.immunity.BLIND)
-    mob:addImmunity(xi.immunity.DARK_SLEEP)
-    mob:addImmunity(xi.immunity.PLAGUE)
-    mob:addImmunity(xi.immunity.PETRIFY)
-    mob:addImmunity(xi.immunity.TERROR)
 end
 
 entity.onMobRoam = function(mob)
@@ -170,7 +173,7 @@ entity.onMobFight = function(mob, target)
     end
 end
 
-entity.onMobWeaponSkill = function(target, mob, skill)
+entity.onMobWeaponSkill = function(mob, target, skill, action)
     -- Don't lose TP from charm 2hr
     if skill:getID() == 710 then
         mob:addTP(mob:getLocalVar('skill_tp'))
@@ -179,7 +182,16 @@ entity.onMobWeaponSkill = function(target, mob, skill)
 end
 
 entity.onAdditionalEffect = function(mob, target, damage)
-    return xi.mob.onAddEffect(mob, target, damage, xi.mob.ae.ENDARK, { power = math.random(55, 90), chance = 25 })
+    local pTable =
+    {
+        chance         = 25,
+        attackType     = xi.attackType.MAGICAL,
+        magicalElement = xi.element.DARK,
+        basePower      = math.floor(damage / 2),
+        actorStat      = xi.mod.INT,
+    }
+
+    return xi.combat.action.executeAddEffectDamage(mob, target, pTable)
 end
 
 entity.onMobDisengage = function(mob)

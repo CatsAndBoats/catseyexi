@@ -35,13 +35,13 @@ public:
     bool CanEntitySee(CBaseEntity* source, CBaseEntity* target) const;
     bool CanEntitySee(CBaseEntity* source, const position_t& targetPointBase) const;
 
-    std::optional<Vector3D> Raycast(CBaseEntity* source, CBaseEntity* target) const;
-    std::optional<Vector3D> Raycast(const position_t& source, const position_t& target) const;
+    Maybe<Vector3D> Raycast(CBaseEntity* source, CBaseEntity* target) const;
+    Maybe<Vector3D> Raycast(const position_t& source, const position_t& target) const;
 
 private:
     ZoneLos(Triangle* elements, int elementCount);
 
-    std::optional<Vector3D> DoesRayCollide(Vector3D rayOrigin, Vector3D rayEnd) const;
+    Maybe<Vector3D> DoesRayCollide(Vector3D rayOrigin, Vector3D rayEnd) const;
 
     LosTree tree;
 };

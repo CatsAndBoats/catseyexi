@@ -39,7 +39,6 @@ public:
         ActiveZones,
         ConnectedPlayers,
         ActiveMobs,
-        TaskManagerTasks,
         DynamicTargIdUsagePercent,
     };
 

@@ -10,22 +10,22 @@ local entity = {}
 entity.onTrigger = function(player, npc)
     local stock =
     {
-        { 4612, 23400, }, -- Scroll of Cure IV
-        { 4616, 11200, }, -- Scroll of Curaga II
-        { 4617, 19932, }, -- Scroll of Curaga III
-        { 4653, 32000, }, -- Scroll of Protect III
-        { 4654, 91116, }, -- Scroll of Protect IV
-        { 4736, 85500, }, -- Scroll of Protectra IV
-        { 4629, 35000, }, -- Scroll of Holy
-        { 4647, 20000, }, -- Scroll of Banishga II
-        { 4625,  2330, }, -- Scroll of Silena
-        { 4626, 19200, }, -- Scroll of Stona
-        { 4627, 13300, }, -- Scroll of Viruna
-        { 4628,  8586, }, -- Scroll of Cursna
-        { 4868, 77600, }, -- Scroll of Dispell
-        { 4720, 27000, }, -- Scroll of Flash
-        { 4750, 99375, }, -- Scroll of Reraise III
-        { 4715, 28500, }, -- Scroll of Reprisal
+        { xi.item.SCROLL_OF_CURE_IV,       23400, },
+        { xi.item.SCROLL_OF_CURAGA_II,     11200, },
+        { xi.item.SCROLL_OF_CURAGA_III,    19932, },
+        { xi.item.SCROLL_OF_PROTECT_III,   32000, },
+        { xi.item.SCROLL_OF_PROTECT_IV,    91116, },
+        { xi.item.SCROLL_OF_PROTECTRA_IV,  85500, },
+        { xi.item.SCROLL_OF_HOLY,          35000, },
+        { xi.item.SCROLL_OF_BANISHGA_II,   20000, },
+        { xi.item.SCROLL_OF_SILENA,         2330, },
+        { xi.item.SCROLL_OF_STONA,         19200, },
+        { xi.item.SCROLL_OF_VIRUNA,        13300, },
+        { xi.item.SCROLL_OF_CURSNA,         8586, },
+        { xi.item.SCROLL_OF_DISPEL,        77600, },
+        { xi.item.SCROLL_OF_FLASH,         27000, },
+        { xi.item.SCROLL_OF_RERAISE_III,   99375, },
+        { xi.item.SCROLL_OF_REPRISAL,      28500, },
     }
 
     player:showText(npc, ID.text.ZAFIF_SHOP_DIALOG)

@@ -36,20 +36,17 @@ class CMobController : public CController
 public:
     CMobController(CMobEntity* PEntity);
 
-    virtual void Tick(timer::time_point tick) override;
+    virtual auto Tick(timer::time_point tick) -> Task<void> override;
     virtual auto Disengage() -> bool override;
     virtual auto Engage(uint16 targid) -> bool override;
     virtual void Despawn() override;
     virtual void Reset() override;
 
-    virtual auto MobSkill(uint16 targid, uint16 wsid, std::optional<timer::duration> castTimeOverride) -> bool;
-    virtual auto Ability(uint16 targid, uint16 abilityid) -> bool override
-    {
-        return false;
-    }
-    auto MobSkill(int listId = 0) -> bool;
-    auto TryCastSpell() -> bool;
-    auto TrySpecialSkill() -> bool;
+    virtual auto MobSkill(uint16 targid, uint16 wsid, Maybe<timer::duration> castTimeOverride) -> bool;
+    virtual auto Ability(uint16 targid, uint16 abilityid) -> bool override;
+    auto         MobSkill(int listId = 0) -> bool;
+    auto         TryCastSpell() -> bool;
+    auto         TrySpecialSkill() -> bool;
 
     auto         CanFollowTarget(CBattleEntity*) const -> bool;
     auto         CanAggroTarget(CBattleEntity*) const -> bool;
@@ -75,11 +72,11 @@ protected:
     void         CastSpell(SpellID spellid);
     virtual void Move();
 
-    virtual void DoCombatTick(timer::time_point tick);
+    virtual auto DoCombatTick(timer::time_point tick) -> Task<void>;
     void         FaceTarget(uint16 targid = 0) const;
     virtual void HandleEnmity();
 
-    virtual void DoRoamTick(timer::time_point tick);
+    virtual auto DoRoamTick(timer::time_point tick) -> Task<void>;
     void         Wait(timer::duration _duration);
     void         FollowRoamPath();
     auto         CanMoveForward(float currentDistance) -> bool;
@@ -108,4 +105,5 @@ private:
 
     bool              m_firstSpell{ true };
     timer::time_point m_LastRoamScript{ timer::time_point::min() };
+    uint16_t          m_tpThreshold{ 1000 };
 };

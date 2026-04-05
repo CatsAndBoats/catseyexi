@@ -93,7 +93,7 @@ void LoadSynergyRecipes()
     }
 }
 
-auto GetSynergyRecipeByID(uint32 id) -> std::optional<SynergyRecipe>
+auto GetSynergyRecipeByID(uint32 id) -> Maybe<SynergyRecipe>
 {
     // TODO: Use a map instead of a vector for faster lookups
     for (const auto& recipe : synergyRecipes)
@@ -106,7 +106,7 @@ auto GetSynergyRecipeByID(uint32 id) -> std::optional<SynergyRecipe>
     return std::nullopt;
 }
 
-auto GetSynergyRecipeByIngredients(uint16 ingredient1, uint16 ingredient2, uint16 ingredient3, uint16 ingredient4, uint16 ingredient5, uint16 ingredient6, uint16 ingredient7, uint16 ingredient8) -> std::optional<SynergyRecipe>
+auto GetSynergyRecipeByIngredients(uint16 ingredient1, uint16 ingredient2, uint16 ingredient3, uint16 ingredient4, uint16 ingredient5, uint16 ingredient6, uint16 ingredient7, uint16 ingredient8) -> Maybe<SynergyRecipe>
 {
     // TODO: Use a map instead of a vector for faster lookups
     for (const auto& recipe : synergyRecipes)

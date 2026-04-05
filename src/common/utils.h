@@ -149,8 +149,8 @@ void        EncodeStringLinkshell(const std::string& signature, char* target);
 void        DecodeStringLinkshell(const std::string& signature, char* target);
 std::string EncodeStringSignature(const std::string& signature, char* target);
 void        DecodeStringSignature(const std::string& signature, char* target);
-void        PackSoultrapperName(std::string name, uint8 output[]);
-std::string UnpackSoultrapperName(uint8 input[]);
+void        PackSoultrapperName(std::string name, uint8* output);
+std::string UnpackSoultrapperName(const uint8* input);
 
 auto escape(const std::string& s) -> std::string;
 auto split(const std::string& s, const std::string& delimiter = " ") -> std::vector<std::string>;

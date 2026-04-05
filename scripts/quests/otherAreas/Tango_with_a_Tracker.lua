@@ -3,9 +3,8 @@
 -----------------------------------
 -- Log ID: 4, Quest ID: 82
 -- Despachiaire !pos 111.209 -40.015 -85.481
--- TODO: Exact quest start is unknown but proven to be flaggable once the player is on CoP 8-3 from captures.
--- TODO: The quest doesn't show up in the log right away after accepting the first time.
---       The quest might flag as active upon entering the battlefield the first time, needs capture confirmation.
+-- Quest begins on battlefield entrance and completes on battlefield win
+-- TODO: Verify CoP quest progression requirements to begin quest
 -----------------------------------
 
 local quest = Quest:new(xi.questLog.OTHER_AREAS, xi.quest.id.otherAreas.TANGO_WITH_A_TRACKER)
@@ -19,6 +18,7 @@ quest.reward =
 quest.sections =
 {
     {
+        -- Section 1: Player receives key item to begin quest at battlefield
         check = function(player, status, vars)
             return status == xi.questStatus.QUEST_AVAILABLE and
                 player:hasCompletedMission(xi.mission.log_id.COP, xi.mission.id.cop.A_FATE_DECIDED)
@@ -26,33 +26,37 @@ quest.sections =
 
         [xi.zone.TAVNAZIAN_SAFEHOLD] =
         {
-            ['Despachiaire'] = quest:progressEvent(576),
+            ['Despachiaire'] =
+            {
+                onTrigger = function(player, npc)
+                    if quest:getVar(player, 'Prog') == 0 then
+                        return quest:progressEvent(576)
+                    end
+                end,
+            },
 
             onEventFinish =
             {
                 [576] = function(player, csid, option, npc)
                     npcUtil.giveKeyItem(player, xi.ki.LETTER_FROM_SHIKAREE_X)
+                    player:setCharVar('ShikareeBattleWait', NextConquestTally())   -- Player can only get a new letter once per conquest reset.
                     quest:setVar(player, 'Prog', 1)
-                    quest:begin(player)
                 end,
             },
         },
-    },
-
-    {
-        check = function(player, status, vars)
-            return vars.Prog == 1 and
-                (status == xi.questStatus.QUEST_ACCEPTED or
-                status == xi.questStatus.QUEST_COMPLETED)
-        end,
 
         [xi.zone.BONEYARD_GULLY] =
         {
             onEventFinish =
             {
                 [32000] = function(player, csid, option, npc)
-                    if option == 105 then
-                        quest:setVar(player, 'Prog', 2)
+                    local battlefield = player:getBattlefield()
+                    if not battlefield then
+                        return
+                    end
+
+                    if battlefield:getID() == xi.battlefield.id.TANGO_WITH_A_TRACKER then
+                        quest:begin(player)
                     end
                 end,
             },
@@ -60,10 +64,10 @@ quest.sections =
     },
 
     {
+        -- Section 2: Can speak with Despachiaire to receive letter again if failed after next conquest tally\
+        -- Complete quest on battlefield win
         check = function(player, status, vars)
-            return vars.Prog == 2 and
-                (status == xi.questStatus.QUEST_ACCEPTED or
-                status == xi.questStatus.QUEST_COMPLETED)
+            return status == xi.questStatus.QUEST_ACCEPTED
         end,
 
         [xi.zone.TAVNAZIAN_SAFEHOLD] =
@@ -71,7 +75,10 @@ quest.sections =
             ['Despachiaire'] =
             {
                 onTrigger = function(player, npc)
-                    if quest:getVar(player, 'Wait') < NextConquestTally() then
+                    if
+                        player:getCharVar('ShikareeBattleWait') < NextConquestTally() and
+                        not player:hasKeyItem(xi.ki.LETTER_FROM_SHIKAREE_X)
+                    then
                         return quest:progressEvent(577) -- Recieve a subsequent letter
                     end
                 end,
@@ -81,8 +88,7 @@ quest.sections =
             {
                 [577] = function(player, csid, option, npc)
                     npcUtil.giveKeyItem(player, xi.ki.LETTER_FROM_SHIKAREE_X)
-                    quest:setVar(player, 'Wait', NextConquestTally())   -- Player can only get a new letter once per conquest reset.
-                    quest:setVar(player, 'Prog', 1)
+                    player:setCharVar('ShikareeBattleWait', NextConquestTally())   -- Player can only get a new letter once per conquest reset.
                 end,
             },
         },

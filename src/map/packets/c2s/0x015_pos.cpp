@@ -87,22 +87,22 @@ void GP_CLI_COMMAND_POS::process(MapSession* PSession, CCharEntity* PChar) const
     PChar->loc.zone->SpawnTRUSTs(PChar);
     PChar->requestedInfoSync = true; // Ask to update PCs during CZoneEntities::ZoneServer
 
-    // clang-format off
-    PChar->WideScanTarget.apply([&](const auto& wideScanTarget)
-    {
-        if (const auto* PWideScanEntity = PChar->GetEntity(wideScanTarget.targid, TYPE_MOB | TYPE_NPC))
+    applyTo(
+        PChar->WideScanTarget,
+        [&](const auto& wideScanTarget)
         {
-            PChar->pushPacket<GP_SERV_COMMAND_TRACKING_POS>(PWideScanEntity);
+            if (const auto* PWideScanEntity = PChar->GetEntity(wideScanTarget.targid, TYPE_MOB | TYPE_NPC))
+            {
+                PChar->pushPacket<GP_SERV_COMMAND_TRACKING_POS>(PWideScanEntity);
 
-            if (PWideScanEntity->status == STATUS_TYPE::DISAPPEAR)
+                if (PWideScanEntity->status == STATUS_TYPE::DISAPPEAR)
+                {
+                    PChar->WideScanTarget = std::nullopt;
+                }
+            }
+            else
             {
                 PChar->WideScanTarget = std::nullopt;
             }
-        }
-        else
-        {
-            PChar->WideScanTarget = std::nullopt;
-        }
-    });
-    // clang-format on
+        });
 }

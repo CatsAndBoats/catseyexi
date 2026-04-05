@@ -1,4 +1,4 @@
-﻿/*
+/*
 ===========================================================================
 
   Copyright (c) 2010-2015 Darkstar Dev Teams
@@ -19,53 +19,22 @@
 ===========================================================================
 */
 
-#ifndef _CITEMFISH_H
-#define _CITEMFISH_H
+#pragma once
 
 #include "common/cbasetypes.h"
-
 #include "item.h"
-
-/************************************************************************
- *                                                                       *
- *  Fishing items.                                                       *
- *                                                                       *
- ************************************************************************/
 
 class CItemFish : public CItem
 {
 public:
     CItemFish(const CItem& PItem);
+    virtual ~CItemFish();
 
-    uint8  GetMin();
-    uint8  GetMax();
-    uint8  GetWatertype();
-    uint8  GetSize();
-    uint8  GetStamina();
-    uint8  GetRodFlag();
-    uint16 GetLength();
-    uint16 GetWeight();
-    bool   IsRanked();
+    auto GetLength() -> uint16;
+    auto GetWeight() -> uint16;
+    auto IsRanked() -> bool;
 
-    void SetMin(uint8);
-    void SetMax(uint8);
-    void SetWatertype(uint8);
-    void SetSize(uint8);
-    void SetStamina(uint8);
-    void SetRodFlag(uint8);
     void SetLength(uint16);
     void SetWeight(uint16);
     void SetRank(bool);
-
-    virtual ~CItemFish();
-
-private:
-    uint8 m_min;
-    uint8 m_max;
-    uint8 m_watertype;
-    uint8 m_size;
-    uint8 m_stamina;
-    uint8 m_rodflag;
 };
-
-#endif

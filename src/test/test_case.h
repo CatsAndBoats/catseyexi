@@ -21,24 +21,26 @@
 
 #pragma once
 
-#include <optional>
+#include <common/types/maybe.h>
+
 #include <sol/sol.hpp>
+
 #include <string>
 
 class TestCase
 {
 public:
-    TestCase(std::string name, std::optional<sol::protected_function> func, std::string parentPath);
+    TestCase(std::string name, Maybe<sol::protected_function> func, std::string parentPath);
 
     auto fullName() const -> std::string;
     auto name() const -> const std::string&;
-    auto testFunc() const -> const std::optional<sol::protected_function>&;
+    auto testFunc() const -> const Maybe<sol::protected_function>&;
     auto isSkipped() const -> bool;
     void markAsSkipped();
 
 private:
-    std::string                            name_;
-    std::optional<sol::protected_function> testFunc_;
-    std::string                            parentPath_;
-    bool                                   skipped_ = false;
+    std::string                    name_;
+    Maybe<sol::protected_function> testFunc_;
+    std::string                    parentPath_;
+    bool                           skipped_ = false;
 };

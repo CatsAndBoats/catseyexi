@@ -87,11 +87,11 @@ int32 GetVolatileServerVar(const std::string& name)
     return GetServerVar(name);
 }
 
-int32 PersistVolatileServerVars(timer::time_point tick, CTaskManager::CTask* PTask)
+void PersistVolatileServerVars()
 {
     if (serverVarChanges.empty())
     {
-        return 0;
+        return;
     }
 
     for (const auto& name : serverVarChanges)
@@ -111,8 +111,6 @@ int32 PersistVolatileServerVars(timer::time_point tick, CTaskManager::CTask* PTa
     }
 
     serverVarChanges.clear();
-
-    return 0;
 }
 
 void PersistServerVar(const std::string& name, int32 value, uint32 expiry /* = 0 */)

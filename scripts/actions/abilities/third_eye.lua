@@ -9,28 +9,11 @@
 local abilityObject = {}
 
 abilityObject.onAbilityCheck = function(player, target, ability)
-    if
-        player:hasStatusEffect(xi.effect.SEIGAN) and
-        player:isWeaponTwoHanded()
-    then
-        ability:setRecast(ability:getRecast() / 2)
-    end
-
-    return 0, 0
+    return xi.job_utils.samurai.checkThirdEye(player, target, ability)
 end
 
 abilityObject.onUseAbility = function(player, target, ability)
-    if
-        player:hasStatusEffect(xi.effect.COPY_IMAGE) or
-        player:hasStatusEffect(xi.effect.BLINK)
-    then
-        -- Returns "no effect" message when Copy Image is active when Third Eye is used.
-        ability:setMsg(xi.msg.basic.JA_NO_EFFECT)
-    else
-        player:addStatusEffect(xi.effect.THIRD_EYE, 0, 0, 30) -- Power keeps track of procs
-
-        return xi.effect.THIRD_EYE
-    end
+    return xi.job_utils.samurai.useThirdEye(player, target, ability)
 end
 
 return abilityObject

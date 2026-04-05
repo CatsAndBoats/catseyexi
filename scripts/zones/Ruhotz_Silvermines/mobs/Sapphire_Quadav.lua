@@ -18,7 +18,7 @@ entity.onMobSpawn = function(mob)
     xi.mix.jobSpecial.config(mob, {
         specials =
         {
-            { id = xi.jsa.BENEDICTION, hpp = math.random(40, 60) },
+            { id = xi.mobSkill.BENEDICTION_1, hpp = math.random(40, 60) },
         },
     })
 

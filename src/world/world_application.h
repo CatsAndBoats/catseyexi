@@ -34,5 +34,4 @@ public:
     ~WorldApplication() override;
 
     auto createEngine() -> std::unique_ptr<Engine> override;
-    void requestExit() override;
 };

@@ -29,6 +29,7 @@
 #include "lua/lua_client_entity_pair.h"
 #include "lua/lua_simulation.h"
 #include "lua/sol_bindings.h"
+#include "map/map_engine.h"
 #include "map/packet_system.h"
 #include "map/packets/c2s/0x00a_login.h"
 #include "map/packets/s2c/0x028_battle2.h"
@@ -115,7 +116,7 @@ void CLuaClientEntityPairPackets::sendZonePackets()
     // TestChar holds the actual CCharEntity, while parent_ is the Lua wrapper
     // that also needs its internal pointer updated to the newly loaded entity
     testChar->setBlowfish(BLOWFISH_PENDING_ZONE);
-    testChar->setEntity(charutils::LoadChar(testChar->charId()));
+    testChar->setEntity(charutils::LoadChar(parent_->engine()->scheduler(), parent_->engine()->config(), testChar->charId()));
     parent_->setEntity(testChar->entity());
 
     // Send LOGIN packet to begin zone-in sequence

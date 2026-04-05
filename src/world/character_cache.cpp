@@ -31,7 +31,7 @@ void CharacterCache::removeCharacter(uint32 charId)
     charIdToIPP_.erase(charId);
 }
 
-auto CharacterCache::getCharacterIPP(uint32 charId) -> std::optional<IPP>
+auto CharacterCache::getCharacterIPP(uint32 charId) -> Maybe<IPP>
 {
     if (const auto it = charIdToIPP_.find(charId); it != charIdToIPP_.end())
     {

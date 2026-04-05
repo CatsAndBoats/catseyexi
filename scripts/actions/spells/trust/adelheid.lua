@@ -41,11 +41,10 @@ spellObject.onMobSpawn = function(mob)
     -- TODO: Add Magic Burst Logic to Gambits to MB with Helix corresponding to SC
     mob:addGambit(ai.t.TARGET, { ai.c.NOT_SC_AVAILABLE, 0 }, { ai.r.MA, ai.s.HIGHEST, xi.magic.spellFamily.NONE }, 75)
 
-    mob:addListener('WEAPONSKILL_USE', 'ADELHEID_WEAPONSKILL_USE', function(mobArg, target, wsid, tp, action)
-        if wsid == 3469 then -- Twirling Dervish
-        -- You may want to cover your ears!
+    mob:addListener('WEAPONSKILL_USE', 'ADELHEID_WEAPONSKILL_USE', function(mobArg, target, skill, tp, action, damage)
+        if skill:getID() == xi.mobSkill.TWIRLING_DERVISH then
             if math.random(1, 100) <= 33 then
-                xi.trust.message(mobArg, xi.trust.messageOffset.SPECIAL_MOVE_1)
+                xi.trust.message(mobArg, xi.trust.messageOffset.SPECIAL_MOVE_1) -- You may want to cover your ears!
             end
         end
     end)

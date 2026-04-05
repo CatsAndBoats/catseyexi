@@ -25,7 +25,28 @@ entity.onMobInitialize = function(mob)
 end
 
 entity.onAdditionalEffect = function(mob, target, damage)
-    return xi.mob.onAddEffect(mob, target, damage, xi.mob.ae.ENFIRE, { power = math.random(25, 30) })
+    local pTable =
+    {
+        chance         = 100,
+        attackType     = xi.attackType.MAGICAL,
+        magicalElement = xi.element.FIRE,
+        basePower      = math.floor(damage / 2),
+        actorStat      = xi.mod.INT,
+    }
+
+    return xi.combat.action.executeAddEffectDamage(mob, target, pTable)
+end
+
+entity.onMobSpellChoose = function(mob, target, spellId)
+    local spellList =
+    {
+        xi.magic.spell.FIRE_III,
+        xi.magic.spell.FIRAGA_III,
+        xi.magic.spell.FLARE,
+        xi.magic.spell.BURN,
+    }
+
+    return spellList[math.random(1, #spellList)]
 end
 
 entity.onMobDeath = function(mob, player, optParams)

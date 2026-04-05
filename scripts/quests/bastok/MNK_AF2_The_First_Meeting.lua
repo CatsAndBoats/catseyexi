@@ -51,16 +51,35 @@ quest.sections =
             ['Hide_Flap_2'] =
             {
                 onTrigger = function(player, npc)
-                    if not player:hasKeyItem(xi.ki.SAN_DORIAN_MARTIAL_ARTS_SCROLL) then
-                        if quest:getLocalVar(player, 'nmKilled') == 3 then
-                            npcUtil.giveKeyItem(player, xi.ki.SAN_DORIAN_MARTIAL_ARTS_SCROLL)
-                        elseif
-                            not GetMobByID(davoiID.mob.BILOPDOP):isSpawned() and
-                            not GetMobByID(davoiID.mob.DELOKNOK):isSpawned()
-                        then
-                            SpawnMob(davoiID.mob.BILOPDOP):updateClaim(player)
-                            SpawnMob(davoiID.mob.DELOKNOK):updateClaim(player)
-                        end
+                    if player:checkDistance(npc) <= 1 then
+                        return quest:progressEvent(108)
+                    else
+                        return quest:messageSpecial(davoiID.text.CLOSER_TO_SEARCH)
+                    end
+                end,
+            },
+
+            onEventFinish =
+            {
+                [108] = function(player, csid, option, npc)
+                    if option ~= 0 then
+                        return
+                    end
+
+                    if player:hasKeyItem(xi.ki.SAN_DORIAN_MARTIAL_ARTS_SCROLL) then
+                        player:messageSpecial(davoiID.text.YOU_FIND_NOTHING)
+                    elseif quest:getLocalVar(player, 'nmKilled') == 3 then
+                        npcUtil.giveKeyItem(player, xi.ki.SAN_DORIAN_MARTIAL_ARTS_SCROLL)
+                    elseif
+                        player:hasKeyItem(xi.ki.LETTER_FROM_DALZAKK) and
+                        not GetMobByID(davoiID.mob.BILOPDOP):isSpawned() and
+                        not GetMobByID(davoiID.mob.DELOKNOK):isSpawned()
+                    then
+                        player:messageSpecial(davoiID.text.YOU_FIND_NOTHING)
+                        SpawnMob(davoiID.mob.BILOPDOP):updateClaim(player)
+                        SpawnMob(davoiID.mob.DELOKNOK):updateEnmity(player)
+                    else
+                        player:messageSpecial(davoiID.text.YOU_FIND_NOTHING)
                     end
                 end,
             },

@@ -21,8 +21,10 @@
 
 #include "world_engine.h"
 
-#include "common/application.h"
-#include "common/logging.h"
+#include <common/application.h>
+#include <common/logging.h>
+
+#include <map/map_constants.h>
 
 #include "besieged_system.h"
 #include "campaign_system.h"
@@ -33,60 +35,29 @@
 #include "party_system.h"
 #include "time_server.h"
 
-namespace
-{
-
-constexpr auto kTimeServerTickInterval = 2400ms;
-constexpr auto kPumpQueuesTime         = 250ms;
-
-} // namespace
-
-WorldEngine::WorldEngine(asio::io_context& io_context)
-: ipcServer_(std::make_unique<IPCServer>(*this))
+WorldEngine::WorldEngine(Scheduler& scheduler, EnableHTTPServer enableHTTPServer)
+: scheduler_(scheduler)
+, ipcServer_(std::make_unique<IPCServer>(*this))
 , partySystem_(std::make_unique<PartySystem>(*this))
 , conquestSystem_(std::make_unique<ConquestSystem>(*this))
 , besiegedSystem_(std::make_unique<BesiegedSystem>(*this))
 , campaignSystem_(std::make_unique<CampaignSystem>(*this))
 , colonizationSystem_(std::make_unique<ColonizationSystem>(*this))
-, httpServer_(std::make_unique<HTTPServer>())
-, m_timeServerTimer(io_context, kTimeServerTickInterval)
-, m_queuePumpTimer(io_context, kPumpQueuesTime)
+, httpServer_(enableHTTPServer ? std::make_unique<HTTPServer>(scheduler_) : nullptr)
 {
-    m_timeServerTimer.async_wait(std::bind(&WorldEngine::timeServer, this, std::placeholders::_1));
-    // TODO: Bind ZMQ socket FD to ASIO directly
-    m_queuePumpTimer.async_wait(std::bind(&WorldEngine::pumpQueues, this, std::placeholders::_1));
+    timeServerToken_ = scheduler_.intervalOnMainThread(
+        kTimeServerTickInterval,
+        [this]() -> Task<void>
+        {
+            co_await time_server(this);
+        });
+
+    pumpQueuesToken_ = scheduler_.intervalOnMainThread(
+        kIPCPumpInterval,
+        [this]()
+        {
+            ipcServer_->handleIncomingMessages();
+        });
 }
 
-WorldEngine::~WorldEngine()
-{
-    m_timeServerTimer.cancel();
-    m_queuePumpTimer.cancel();
-};
-
-void WorldEngine::timeServer(const asio::error_code ec)
-{
-    TracyZoneScoped;
-
-    if (!ec)
-    {
-        time_server(this);
-
-        // Reschedule
-        m_timeServerTimer.expires_at(m_timeServerTimer.expiry() + kPumpQueuesTime);
-        m_timeServerTimer.async_wait(std::bind(&WorldEngine::timeServer, this, std::placeholders::_1));
-    }
-}
-
-void WorldEngine::pumpQueues(const asio::error_code ec)
-{
-    TracyZoneScoped;
-
-    if (!ec)
-    {
-        ipcServer_->handleIncomingMessages();
-
-        // Reschedule
-        m_queuePumpTimer.expires_at(m_queuePumpTimer.expiry() + kPumpQueuesTime);
-        m_queuePumpTimer.async_wait(std::bind(&WorldEngine::pumpQueues, this, std::placeholders::_1));
-    }
-}
+WorldEngine::~WorldEngine() = default;

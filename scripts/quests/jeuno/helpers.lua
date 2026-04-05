@@ -454,7 +454,33 @@ function xi.jeuno.helpers.BorghertzQuests:new(params)
 
         {
             check = function(player, status, vars)
-                return status == xi.questStatus.QUEST_ACCEPTED
+                return status == xi.questStatus.QUEST_ACCEPTED and
+                    not player:hasKeyItem(xi.keyItem.OLD_GAUNTLETS)
+            end,
+
+            [xi.zone.UPPER_JEUNO] =
+            {
+                ['Guslam'] = quest:event(43),
+            },
+
+            -- Old gauntlets coffer logic.
+            [params.oldGauntletZoneId] =
+            {
+                ['Treasure_Coffer'] =
+                {
+                    onTrade = function(player, npc, trade)
+                        xi.treasure.onTrade(player, npc, trade, 2, xi.keyItem.OLD_GAUNTLETS)
+
+                        return quest:noAction()
+                    end,
+                },
+            },
+        },
+
+        {
+            check = function(player, status, vars)
+                return status == xi.questStatus.QUEST_ACCEPTED and
+                    player:hasKeyItem(xi.keyItem.OLD_GAUNTLETS)
             end,
 
             [xi.zone.CASTLE_ZVAHL_BAILEYS] =
@@ -563,16 +589,7 @@ function xi.jeuno.helpers.BorghertzQuests:new(params)
                     end,
                 },
 
-                ['Guslam'] =
-                {
-                    onTrigger = function(player, npc)
-                        if player:hasKeyItem(xi.keyItem.OLD_GAUNTLETS) then
-                            return quest:progressEvent(26)
-                        else
-                            return quest:event(43)
-                        end
-                    end,
-                },
+                ['Guslam'] = quest:progressEvent(26),
 
                 onEventFinish =
                 {
@@ -591,18 +608,26 @@ function xi.jeuno.helpers.BorghertzQuests:new(params)
                     end,
                 },
             },
+        },
 
-            -- Old gauntlets coffer logic.
-            [params.oldGauntletZoneId] =
+        {
+            check = function(player, status, vars)
+                return status ~= xi.questStatus.QUEST_AVAILABLE and -- Quest must be already started or completed.
+                    player:getMainJob() == params.requiredJobId and -- Player must be on the appropiate job.
+                    not utils.mask.getBit(player:getCharVar('[AF]ZilartCoffer'), params.requiredJobId * 2 - 1)
+            end,
+
+            [params.optionalZoneId1] =
             {
                 ['Treasure_Coffer'] =
                 {
                     onTrade = function(player, npc, trade)
-                        if not player:hasKeyItem(xi.keyItem.OLD_GAUNTLETS) then
-                            xi.treasure.onTrade(player, npc, trade, 2, xi.keyItem.OLD_GAUNTLETS)
-
-                            return quest:noAction()
+                        local result = xi.treasure.onTrade(player, npc, trade, 1, params.optionalArtifact1)
+                        if result == params.optionalArtifact1 then
+                            player:incrementCharVar('[AF]ZilartCoffer', bit.lshift(1, params.requiredJobId * 2 - 1))
                         end
+
+                        return quest:noAction()
                     end,
                 },
             },
@@ -611,33 +636,21 @@ function xi.jeuno.helpers.BorghertzQuests:new(params)
         {
             check = function(player, status, vars)
                 return status ~= xi.questStatus.QUEST_AVAILABLE and
-                    player:getMainJob() == params.requiredJobId
+                    player:getMainJob() == params.requiredJobId and
+                    not utils.mask.getBit(player:getCharVar('[AF]ZilartCoffer'), params.requiredJobId * 2)
             end,
-
-            [params.optionalZoneId1] =
-            {
-                ['Treasure_Coffer'] =
-                {
-                    onTrade = function(player, npc, trade)
-                        if not player:hasItem(params.optionalArtifact1) then
-                            xi.treasure.onTrade(player, npc, trade, 1, params.optionalArtifact1)
-
-                            return quest:noAction()
-                        end
-                    end,
-                },
-            },
 
             [params.optionalZoneId2] =
             {
                 ['Treasure_Coffer'] =
                 {
                     onTrade = function(player, npc, trade)
-                        if not player:hasItem(params.optionalArtifact2) then
-                            xi.treasure.onTrade(player, npc, trade, 1, params.optionalArtifact2)
-
-                            return quest:noAction()
+                        local result = xi.treasure.onTrade(player, npc, trade, 1, params.optionalArtifact2)
+                        if result == params.optionalArtifact2 then
+                            player:incrementCharVar('[AF]ZilartCoffer', bit.lshift(1, params.requiredJobId * 2))
                         end
+
+                        return quest:noAction()
                     end,
                 },
             },

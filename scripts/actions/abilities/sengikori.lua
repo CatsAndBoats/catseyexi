@@ -13,7 +13,7 @@ abilityObject.onAbilityCheck = function(player, target, ability)
 end
 
 abilityObject.onUseAbility = function(player, target, ability)
-    player:addStatusEffect(xi.effect.SENGIKORI, 25, 0, 60)
+    return xi.job_utils.samurai.useSengikori(player, target, ability)
 end
 
 return abilityObject

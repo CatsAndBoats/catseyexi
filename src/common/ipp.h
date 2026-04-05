@@ -51,6 +51,7 @@
 #include <cstring>
 #include <memory>
 #include <string>
+#include <type_traits>
 
 auto ip2str(uint32 ip) -> std::string;
 auto str2ip(const std::string& ip_str) -> uint32;
@@ -59,6 +60,9 @@ auto sockaddr2hostport(const sockaddr_in& addr) -> uint16;
 
 //
 // An IP-Port Pair
+//
+// Even though this is a very simple type, cppcheck is unhappy if you pass it around by value,
+// so pass it around by reference :(
 //
 class IPP final
 {
@@ -81,6 +85,7 @@ public:
     //
 
     auto operator<(const IPP& other) const -> bool;
+    auto operator==(const IPP& other) const -> bool;
 
 private:
     // IP is always stored and used in network byte order.
@@ -89,3 +94,19 @@ private:
     // Port is always stored and used in host byte order (human-readable).
     uint16 port_{};
 };
+
+static_assert(std::is_standard_layout_v<IPP>, "IPP must be standard-layout");
+
+namespace std
+{
+
+template <>
+struct hash<IPP>
+{
+    size_t operator()(const IPP& ipp) const noexcept
+    {
+        return hash<uint64>{}(ipp.getRawIPP());
+    }
+};
+
+} // namespace std

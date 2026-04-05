@@ -23,7 +23,6 @@
 #define _NPCENTITY_H
 
 #include "common/cbasetypes.h"
-#include "common/task_manager.h"
 
 #include "baseentity.h"
 
@@ -43,8 +42,10 @@ public:
     bool         IsTriggerable() const;
     virtual bool isWideScannable() override;
     virtual void PostTick() override;
-    virtual void Tick(timer::time_point) override
+
+    virtual auto Tick(timer::time_point) -> Task<void> override
     {
+        co_return;
     }
 
     CNpcEntity();

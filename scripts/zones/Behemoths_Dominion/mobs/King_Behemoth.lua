@@ -72,6 +72,7 @@ entity.onMobInitialize = function(mob)
 
     mob:setMobMod(xi.mobMod.ADD_EFFECT, 1)
     mob:setMobMod(xi.mobMod.MAGIC_COOL, 60)
+    mob:setMobMod(xi.mobMod.AOE_HIT_ALL, 1)
 end
 
 entity.onMobSpawn = function(mob)
@@ -130,7 +131,6 @@ end
 entity.onSpellPrecast = function(mob, spell)
     if spell:getID() == xi.magic.spell.METEOR then
         spell:setAoE(xi.magic.aoe.RADIAL)
-        spell:setFlag(xi.magic.spellFlag.HIT_ALL)
         spell:setRadius(25)
         spell:setAnimation(280)
         spell:setMPCost(0)
@@ -138,7 +138,9 @@ entity.onSpellPrecast = function(mob, spell)
 end
 
 entity.onMobDeath = function(mob, player, optParams)
-    player:addTitle(xi.title.BEHEMOTH_DETHRONER)
+    if player then
+        player:addTitle(xi.title.BEHEMOTH_DETHRONER)
+    end
 end
 
 entity.onMobDespawn = function(mob)

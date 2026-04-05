@@ -39,8 +39,11 @@
 #include <utility>
 #include <vector>
 
-TestEngine::TestEngine(asio::io_context& io_context, TestConfig testConfig)
-: worldEngine_(std::make_unique<WorldEngine>(io_context))
+TestEngine::TestEngine(Application& application, TestConfig testConfig, std::unique_ptr<MapEngine> mapEngine, std::unique_ptr<WorldEngine> worldEngine)
+: application_(application)
+, scheduler_(application_.scheduler())
+, mapEngine_(std::move(mapEngine))
+, worldEngine_(std::move(worldEngine))
 , mockManager_(std::make_unique<MockManager>())
 , testConfig_(std::move(testConfig))
 , reporters_(testConfig_.verbose, testConfig_.output)
@@ -50,22 +53,6 @@ TestEngine::TestEngine(asio::io_context& io_context, TestConfig testConfig)
     // Unset specific settings that conflict with tests
     lua["xi"]["settings"]["main"]["NEW_CHARACTER_CUTSCENE"] = 0;
     lua["xi"]["settings"]["main"]["ALL_MAPS"]               = 0;
-
-    // Without a world server actively pumping the queues,
-    // the embedded map server deadlocks on exit
-    //
-    // We will need this to work to support multiprocess tests and validating systems that rely on world server.
-    // However, that requires deeper rework to the IPP logic so we can smartly route messages during tests.
-    auto mapConfig = MapConfig{
-        .isTestServer      = true,
-        .lazyZones         = true,
-        .controlledWeather = true,
-    };
-
-    mapEngine_ = std::make_unique<MapEngine>(io_context, mapConfig);
-
-    worldEngine_->onInitialize();
-    mapEngine_->onInitialize();
 
     // Initialize Lua environment after engines are ready
     luaEnvironment_ = std::make_unique<TestLuaEnvironment>(mockManager_.get());
@@ -83,12 +70,13 @@ TestEngine::TestEngine(asio::io_context& io_context, TestConfig testConfig)
 
 TestEngine::~TestEngine() = default;
 
-auto TestEngine::executeTests() -> bool
+auto TestEngine::executeTests() -> Task<bool>
 {
     TracyZoneScoped;
 
     TestResults results;
-    const auto  runStartTime = std::chrono::steady_clock::now();
+
+    const auto runStartTime = std::chrono::steady_clock::now();
 
     // Execute all test suites
     const auto& rootSuite = testCollector_->rootSuite();
@@ -117,12 +105,7 @@ auto TestEngine::executeTests() -> bool
 
     reporters_.onRunComplete(totalDuration);
 
-    // Control the destruction order, else the program may hang.
-    // TODO: Figure out why the ZMQ listeners hang on early exits.
-    mapEngine_.reset();
-    worldEngine_.reset();
-
-    return results.failed == 0;
+    co_return results.failed == 0;
 }
 
 auto TestEngine::executeSuite(const TestSuite& suite, HookContext context) -> TestResults
@@ -299,7 +282,17 @@ auto TestEngine::executeTestCase(const TestCase& testCase, const HookContext& co
     {
         if (const auto& testFunc = testCase.testFunc())
         {
-            if (auto testResult = (*testFunc)(); !testResult.valid())
+            sol::function_result testResult;
+            try
+            {
+                testResult = (*testFunc)();
+            }
+            catch (const std::exception& e)
+            {
+                std::cerr << e.what() << '\n';
+            }
+
+            if (!testResult.valid())
             {
                 sol::error err = testResult;
                 errorMessage   = err.what();
@@ -342,7 +335,7 @@ auto TestEngine::executeTestCase(const TestCase& testCase, const HookContext& co
     return status == TestStatus::Passed;
 }
 
-auto TestEngine::runBeforeHooks(const HookContext& context, const std::string& testName) const -> std::optional<std::string>
+auto TestEngine::runBeforeHooks(const HookContext& context, const std::string& testName) const -> Maybe<std::string>
 {
     TracyZoneScoped;
 

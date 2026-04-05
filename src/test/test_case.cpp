@@ -24,7 +24,7 @@
 
 #include <format>
 
-TestCase::TestCase(std::string name, std::optional<sol::protected_function> func, std::string parentPath)
+TestCase::TestCase(std::string name, Maybe<sol::protected_function> func, std::string parentPath)
 : name_(std::move(name))
 , testFunc_(std::move(func))
 , parentPath_(std::move(parentPath))
@@ -41,7 +41,7 @@ auto TestCase::name() const -> const std::string&
     return name_;
 }
 
-auto TestCase::testFunc() const -> const std::optional<sol::protected_function>&
+auto TestCase::testFunc() const -> const Maybe<sol::protected_function>&
 {
     return testFunc_;
 }

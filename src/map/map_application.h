@@ -24,9 +24,8 @@
 #include "map_engine.h"
 #include "pch.h"
 
-#include "common/application.h"
-#include "common/timer.h"
-#include "common/watchdog.h"
+#include <common/application.h>
+#include <common/timer.h>
 
 #include "zone.h"
 

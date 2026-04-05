@@ -1,4 +1,4 @@
-﻿/*
+/*
 ===========================================================================
 
   Copyright (c) 2010-2015 Darkstar Dev Teams
@@ -21,60 +21,41 @@
 
 #include "item_fish.h"
 
-#include "common/utils.h"
-
-/************************************************************************
- *                                                                       *
- *                                                                       *
- *                                                                       *
- ************************************************************************/
+#include "exdata/fish.h"
 
 CItemFish::CItemFish(const CItem& PItem)
 : CItem(PItem)
-, m_min(0)
-, m_max(0)
-, m_watertype(0)
-, m_size(0)
-, m_stamina(0)
-, m_rodflag(0)
 {
 }
 
 CItemFish::~CItemFish() = default;
 
-uint16 CItemFish::GetLength()
+auto CItemFish::GetLength() -> uint16
 {
-    return ref<uint16>(m_extra, 0);
+    return this->exdata<Exdata::Fish>().Size;
 }
 
-uint16 CItemFish::GetWeight()
+auto CItemFish::GetWeight() -> uint16
 {
-    return ref<uint16>(m_extra, 2);
+    return this->exdata<Exdata::Fish>().Weight;
 }
 
-bool CItemFish::IsRanked()
+auto CItemFish::IsRanked() -> bool
 {
-    return (ref<uint8>(m_extra, 4) & 0x01) == 0x01;
+    return this->exdata<Exdata::Fish>().IsRanked;
 }
 
-void CItemFish::SetLength(uint16 length)
+void CItemFish::SetLength(const uint16 length)
 {
-    ref<uint16>(m_extra, 0) = length;
+    this->exdata<Exdata::Fish>().Size = length;
 }
 
-void CItemFish::SetWeight(uint16 weight)
+void CItemFish::SetWeight(const uint16 weight)
 {
-    ref<uint16>(m_extra, 2) = weight;
+    this->exdata<Exdata::Fish>().Weight = weight;
 }
 
-void CItemFish::SetRank(bool rank)
+void CItemFish::SetRank(const bool rank)
 {
-    if (rank)
-    {
-        ref<uint8>(m_extra, 4) |= 0x01;
-    }
-    else
-    {
-        ref<uint8>(m_extra, 4) &= ~0x01;
-    }
+    this->exdata<Exdata::Fish>().IsRanked = rank ? 1 : 0;
 }

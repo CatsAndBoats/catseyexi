@@ -118,6 +118,24 @@ xi.pet.spawnPet = function(caster, petID, state, target)
         elseif petID == xi.petId.ODIN then
             if target then
                 caster:petAttack(target)
+                --pet:timer(5000, function()
+                --    pet:usePetAbility(xi.jobAbility.ZANTETSUKEN, target)
+                --end)
+            end
+        elseif petID == xi.petId.ATOMOS then
+            if target then
+                -- Use Deconstruction on the target 3 seconds after spawning.
+                local pet = caster:getPet()
+                if pet then
+                    -- Timed sequence after spawning, wait -> Deconstruction -> wait -> Chronoshift (despawn pet after complete)
+                    pet:timer(3000, function()
+                        pet:usePetAbility(xi.jobAbility.DECONSTRUCTION, target)
+                    end)
+
+                    pet:timer(10000, function()
+                        pet:usePetAbility(xi.jobAbility.CHRONOSHIFT, pet)
+                    end)
+                end
             end
         end
     end
@@ -163,15 +181,6 @@ xi.pet.applyFamiliarBuffs = function(owner, pet)
     pet:setMaxHP(pet:getMaxHP() + addedHP) -- technically BASE_HP mod is added back to generate modhp, but close enough
     -- wakes up pets
     pet:addHP(addedHP)
-
-    -- adds % bonuses to the following stats
-    -- TODO are these the only stats boosted?
-    pet:addMod(xi.mod.ATTP, familiarBoost)
-    pet:addMod(xi.mod.RATTP, familiarBoost)
-    pet:addMod(xi.mod.DEFP, familiarBoost)
-    pet:addMod(xi.mod.ACC, pet:getMod(xi.mod.ACC) * familiarBoostPerc)
-    pet:addMod(xi.mod.RACC, pet:getMod(xi.mod.RACC) * familiarBoostPerc)
-    pet:addMod(xi.mod.EVA, pet:getMod(xi.mod.EVA) * familiarBoostPerc)
 
     -- TODO does familiar give some bonus resistance to crowd control? Is it only for mob pets?
     -- Lots of reports of mobs using Familiar and the pet having higher chance to resist bind/sleep/etc

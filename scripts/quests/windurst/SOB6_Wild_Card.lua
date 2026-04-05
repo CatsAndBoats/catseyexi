@@ -1,6 +1,6 @@
 -----------------------------------
 -- Wild Card
---
+-- Log ID: 2, Quest ID: 77
 -- Honoi-Gumoi: !pos -195 -11 -120 238
 -----------------------------------
 
@@ -69,7 +69,7 @@ quest.sections =
             },
         },
 
-        [xi.zone.CASTLE_ZVAHL_BAILEYS] =
+        [xi.zone.TORAIMARAI_CANAL] =
         {
             ['Treasure_Coffer'] =
             {

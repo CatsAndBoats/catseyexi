@@ -116,6 +116,7 @@ INSERT INTO `fishing_area` VALUES (101,1,'Whole Zone',0,0,0,NULL,0.000,0.000,0.0
 INSERT INTO `fishing_area` VALUES (102,1,'Whole Zone',0,0,0,NULL,0.000,0.000,0.000);
 -- Valkurm Dunes
 INSERT INTO `fishing_area` VALUES (103,1,'Whole Zone',0,0,0,NULL,0.000,0.000,0.000);
+INSERT INTO `fishing_area` VALUES (103,2,'Whole Zone',0,0,0,NULL,0.000,0.000,0.000);
 -- Jugner Forest
 INSERT INTO `fishing_area` VALUES (104,1,'Crystalwater Spring',1,20,20,'',300.000,1.000,-179.833);
 INSERT INTO `fishing_area` VALUES (104,2,'Lake Mechieume - Mouth',1,20,31,'',19.458,3.000,334.528);
@@ -156,6 +157,7 @@ INSERT INTO `fishing_area` VALUES (116,4,'Other Waterside (rivers)',2,50,0,0x7B1
 INSERT INTO `fishing_area` VALUES (116,5,'Lake Tepokalipuka',2,20,0,0x0000B4C30000000000004CC30000B4C300000000000096C2A4707FC300000000000096C233F36BC300000000EC51E6C2523894C200000000F628E7C266E6A2C2000000003D8A2AC37BD478C3000000007B1429C3CD8C83C3000000005CCF46C3,0.000,-1.000,0.000);
 -- Buburimu Peninsula
 INSERT INTO `fishing_area` VALUES (118,1,'Whole Zone',0,0,0,NULL,0.000,0.000,0.000);
+INSERT INTO `fishing_area` VALUES (118,2,'Brigands Chart Quest',0,0,0,NULL,0.000,0.000,0.000);
 -- Sarumugue Champaign
 INSERT INTO `fishing_area` VALUES (120,1,'Whole Zone',0,0,0,NULL,0.000,0.000,0.000);
 -- The Sanctuary of Zi'Tah

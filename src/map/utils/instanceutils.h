@@ -30,22 +30,22 @@ class CCharEntity;
 
 struct InstanceData_t
 {
-    uint16                id;
-    std::string           instance_name;
-    uint16                instance_zone;
-    std::string           instance_zone_name;
-    uint16                entrance_zone;
-    std::string           entrance_zone_name;
-    uint16                time_limit;
-    float                 start_x;
-    float                 start_y;
-    float                 start_z;
-    uint16                start_rot;
-    std::optional<uint16> music_day{ std::nullopt };
-    std::optional<uint16> music_night{ std::nullopt };
-    std::optional<uint16> battlesolo{ std::nullopt };
-    std::optional<uint16> battlemulti{ std::nullopt };
-    std::string           filename;
+    uint16        id;
+    std::string   instance_name;
+    uint16        instance_zone;
+    std::string   instance_zone_name;
+    uint16        entrance_zone;
+    std::string   entrance_zone_name;
+    uint16        time_limit;
+    float         start_x;
+    float         start_y;
+    float         start_z;
+    uint16        start_rot;
+    Maybe<uint16> music_day{ std::nullopt };
+    Maybe<uint16> music_night{ std::nullopt };
+    Maybe<uint16> battlesolo{ std::nullopt };
+    Maybe<uint16> battlemulti{ std::nullopt };
+    std::string   filename;
 
     InstanceData_t()
     : id(0)

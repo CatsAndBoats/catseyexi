@@ -21,7 +21,6 @@
 
 #include "trustutils.h"
 
-#include "common/timer.h"
 #include "common/utils.h"
 
 #include <algorithm>
@@ -34,7 +33,6 @@
 #include "zoneutils.h"
 
 #include "grades.h"
-#include "mob_modifier.h"
 #include "mob_spell_list.h"
 
 #include "ai/ai_container.h"
@@ -44,9 +42,6 @@
 #include "entities/trustentity.h"
 #include "items/item_weapon.h"
 #include "mobskill.h"
-#include "packets/char_sync.h"
-#include "packets/entity_update.h"
-#include "packets/s2c/0x009_message.h"
 #include "status_effect_container.h"
 #include "weapon_skill.h"
 #include "zone_instance.h"
@@ -400,6 +395,14 @@ auto LoadTrust(CCharEntity* PMaster, uint32 TrustID) -> CTrustEntity*
         mainWeapon->setDamage(finalDamage);
         mainWeapon->setDelay((trustData->cmbDelay * 1000) / 60);
         mainWeapon->setBaseDelay((trustData->cmbDelay * 1000) / 60);
+
+        // Compute DPS so rune/enchantment calculations that rely on getDPS() return meaningful values for trusts.
+        // Use damage per second: damage / (delay_seconds). Delay is stored in ms.
+        if (mainWeapon->getDelay() > 0)
+        {
+            double dps = static_cast<double>(mainWeapon->getDamage()) / (static_cast<double>(mainWeapon->getDelay()) / 1000.0);
+            mainWeapon->setDPS(dps);
+        }
     }
 
     if (auto* subWeapon = dynamic_cast<CItemWeapon*>(PTrust->m_Weapons[SLOT_SUB]))
@@ -407,6 +410,12 @@ auto LoadTrust(CCharEntity* PMaster, uint32 TrustID) -> CTrustEntity*
         subWeapon->setDamage(finalDamage);
         subWeapon->setDelay((trustData->cmbDelay * 1000) / 60);
         subWeapon->setBaseDelay((trustData->cmbDelay * 1000) / 60);
+
+        if (subWeapon->getDelay() > 0)
+        {
+            double dps = static_cast<double>(subWeapon->getDamage()) / (static_cast<double>(subWeapon->getDelay()) / 1000.0);
+            subWeapon->setDPS(dps);
+        }
     }
 
     if (auto* rangedWeapon = dynamic_cast<CItemWeapon*>(PTrust->m_Weapons[SLOT_RANGED]))
@@ -414,6 +423,12 @@ auto LoadTrust(CCharEntity* PMaster, uint32 TrustID) -> CTrustEntity*
         rangedWeapon->setDamage(finalDamage);
         rangedWeapon->setDelay((trustData->cmbDelay * 1000) / 60);
         rangedWeapon->setBaseDelay((trustData->cmbDelay * 1000) / 60);
+
+        if (rangedWeapon->getDelay() > 0)
+        {
+            double dps = static_cast<double>(rangedWeapon->getDamage()) / (static_cast<double>(rangedWeapon->getDelay()) / 1000.0);
+            rangedWeapon->setDPS(dps);
+        }
     }
 
     if (auto* ammoWeapon = dynamic_cast<CItemWeapon*>(PTrust->m_Weapons[SLOT_AMMO]))
@@ -421,6 +436,12 @@ auto LoadTrust(CCharEntity* PMaster, uint32 TrustID) -> CTrustEntity*
         ammoWeapon->setDamage(finalDamage);
         ammoWeapon->setDelay((trustData->cmbDelay * 1000) / 60);
         ammoWeapon->setBaseDelay((trustData->cmbDelay * 1000) / 60);
+
+        if (ammoWeapon->getDelay() > 0)
+        {
+            double dps = static_cast<double>(ammoWeapon->getDamage()) / (static_cast<double>(ammoWeapon->getDelay()) / 1000.0);
+            ammoWeapon->setDPS(dps);
+        }
     }
 
     // NOTE: Trusts don't really have weapons, and they don't really have combat skills. They only have
@@ -533,7 +554,9 @@ void LoadTrustStatsAndSkills(CTrustEntity* PTrust)
                    (grade::GetHPScale(grade, scaleOver30Column) * subLevelOver30) + subLevelOver30 + subLevelOver10;
     }
 
-    PTrust->health.maxhp = (int16)(settings::get<float>("map.ALTER_EGO_HP_MULTIPLIER") * (raceStat + jobStat + bonusStat + sJobStat));
+    auto hpMultiplierTrust = settings::get<float>("map.ALTER_EGO_HP_MULTIPLIER");
+    hpMultiplierTrust      = (hpMultiplierTrust >= 0.1f && hpMultiplierTrust <= 2.0f) ? hpMultiplierTrust : 1.0f;
+    PTrust->health.maxhp   = (int16)((raceStat + jobStat + bonusStat + sJobStat) * hpMultiplierTrust);
 
     // MP
     raceStat = 0;
@@ -569,7 +592,9 @@ void LoadTrustStatsAndSkills(CTrustEntity* PTrust)
         sJobStat = grade::GetMPScale(grade, 0) + grade::GetMPScale(grade, scaleTo60Column);
     }
 
-    PTrust->health.maxmp = (int16)(settings::get<float>("map.ALTER_EGO_MP_MULTIPLIER") * (raceStat + jobStat + sJobStat));
+    auto mpMultiplierTrust = settings::get<float>("map.ALTER_EGO_MP_MULTIPLIER");
+    mpMultiplierTrust      = (mpMultiplierTrust >= 0.1f && mpMultiplierTrust <= 2.0f) ? mpMultiplierTrust : 1.0f;
+    PTrust->health.maxmp   = (int16)((raceStat + jobStat + sJobStat) * mpMultiplierTrust);
 
     PTrust->health.tp = 0;
     PTrust->UpdateHealth();
@@ -623,6 +648,7 @@ void LoadTrustStatsAndSkills(CTrustEntity* PTrust)
     }
 
     auto statMultiplier = settings::get<float>("map.ALTER_EGO_STAT_MULTIPLIER");
+    statMultiplier      = (statMultiplier >= 0.1f && statMultiplier <= 2.0f) ? statMultiplier : 1.0f;
     PTrust->stats.STR   = static_cast<uint16>((fSTR + mSTR + sSTR) * statMultiplier);
     PTrust->stats.DEX   = static_cast<uint16>((fDEX + mDEX + sDEX) * statMultiplier);
     PTrust->stats.VIT   = static_cast<uint16>((fVIT + mVIT + sVIT) * statMultiplier);

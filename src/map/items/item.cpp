@@ -373,42 +373,19 @@ bool CItem::isStorageSlip() const
     return m_id < 29340 && m_id > 29311;
 }
 
+auto CItem::isDirty() const -> bool
+{
+    return dirty_;
+}
+
+void CItem::setDirty(const bool dirty)
+{
+    dirty_ = dirty;
+}
+
 bool CItem::isSoultrapper() const
 {
     return m_id == 18721 || m_id == 18724;
-}
-
-void CItem::setSoulPlateData(const std::string& name, uint32 interestData, uint8 zeni, uint16 skillIndex, uint8 fp)
-{
-    PackSoultrapperName(name, m_extra);
-
-    // interestData is zone ID (high) + mob family ID (low)
-    m_extra[15] = (interestData >> 24) & 0xFF;
-    m_extra[16] = (interestData >> 16) & 0xFF;
-    m_extra[17] = (interestData >> 8) & 0xFF;
-    m_extra[18] = interestData & 0xFF;
-
-    m_extra[19] = zeni;
-
-    m_extra[20] = skillIndex << 7;
-    m_extra[21] = skillIndex >> 1;
-    m_extra[22] = skillIndex >> 9;
-
-    m_extra[22] = fp << 3;
-    m_extra[23] = (0x03 << 4) & fp;
-}
-
-auto CItem::getSoulPlateData() -> std::tuple<std::string, uint32, uint8, uint16, uint8>
-{
-    auto   name         = UnpackSoultrapperName(m_extra);
-    uint32 interestData = (m_extra[15] << 24) |
-                          (m_extra[16] << 16) |
-                          (m_extra[17] << 8) |
-                          m_extra[18];
-    uint8  zeni       = m_extra[19];
-    uint16 skillIndex = (m_extra[20] >> 7) + (m_extra[21] << 1) + ((m_extra[22] & 0x03) << 9);
-    uint8  fp         = (m_extra[22] >> 3) + ((m_extra[23] & 0x03) << 4);
-    return std::tuple(name, interestData, zeni, skillIndex, fp);
 }
 
 bool CItem::isMannequin() const

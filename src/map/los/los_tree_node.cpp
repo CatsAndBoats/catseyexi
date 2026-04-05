@@ -211,7 +211,7 @@ void LosTreeNode::SetElements(Triangle* elements, int* elementNexts, int* elemen
     }
 }
 
-std::optional<Vector3D> LosTreeNode::DoesRayCollide(BoundingBox& bounds, Vector3D& rayOrigin, Vector3D& rayVector, int* elementNexts, Triangle* elements) const
+Maybe<Vector3D> LosTreeNode::DoesRayCollide(BoundingBox& bounds, Vector3D& rayOrigin, Vector3D& rayVector, int* elementNexts, Triangle* elements) const
 {
     TracyZoneScoped;
     if (bounds.coords[2] > maxY || bounds.coords[3] < minY)

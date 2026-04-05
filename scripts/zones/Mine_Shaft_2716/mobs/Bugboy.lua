@@ -6,8 +6,8 @@
 ---@type TMobEntity
 local entity = {}
 
-entity.onMobSpawn = function(mob)
-    mob:setMobMod(xi.mobMod.WEAPON_BONUS, 20)
+entity.onMobInitialize = function(mob)
+    mob:setMobMod(xi.mobMod.BASE_DAMAGE_MULTIPLIER, 150)
 end
 
 entity.onMobFight = function(mob, target)
@@ -63,7 +63,7 @@ entity.onMobFight = function(mob, target)
     end
 end
 
-entity.onMobWeaponSkill = function(target, mob, skill)
+entity.onMobWeaponSkill = function(mob, target, skill, action)
     -- Bugboy always follows up Mighty Strikes with Heavy Blow.
     if skill:getID() == xi.mobSkill.MIGHTY_STRIKES_1 then
         mob:useMobAbility(xi.mobSkill.HEAVY_BLOW)

@@ -55,11 +55,11 @@ local avdebug = utils.getDebugPlayerPrinter(debugAV)
 
 local combos =
 {
-    [xi.jsa.CHAINSPELL    ] = { xi.jsa.CHAINSPELL,     xi.jsa.MANAFONT,     { xi.jsa.CHAINSPELL, xi.jsa.SOUL_VOICE } },
-    [xi.jsa.MIGHTY_STRIKES] = { xi.jsa.MIGHTY_STRIKES, xi.jsa.HUNDRED_FISTS                                          },
-    [xi.jsa.MEIKYO_SHISUI ] = { xi.jsa.MEIKYO_SHISUI,  xi.jsa.EES_AERN,     xi.jsa.EES_AERN,     xi.jsa.EES_AERN     },
-    [xi.jsa.INVINCIBLE    ] = { xi.jsa.INVINCIBLE,     xi.jsa.BENEDICTION,  xi.jsa.MIJIN_GAKURE                      },
-    [xi.jsa.CALL_WYVERN   ] = { xi.jsa.CALL_WYVERN,    xi.jsa.FAMILIAR,     xi.jsa.ASTRAL_FLOW                       },
+    [xi.mobSkill.CHAINSPELL_1    ] = { xi.mobSkill.CHAINSPELL_1,     xi.mobSkill.MANAFONT_1,     { xi.mobSkill.CHAINSPELL_1, xi.mobSkill.SOUL_VOICE_1 } },
+    [xi.mobSkill.MIGHTY_STRIKES_1] = { xi.mobSkill.MIGHTY_STRIKES_1, xi.mobSkill.HUNDRED_FISTS_1                                          },
+    [xi.mobSkill.MEIKYO_SHISUI_1 ] = { xi.mobSkill.MEIKYO_SHISUI_1,  xi.mobSkill.EES_AERN,     xi.mobSkill.EES_AERN,     xi.mobSkill.EES_AERN     },
+    [xi.mobSkill.INVINCIBLE_1    ] = { xi.mobSkill.INVINCIBLE_1,     xi.mobSkill.BENEDICTION_1,  xi.mobSkill.MIJIN_GAKURE_1                      },
+    [xi.mobSkill.CALL_WYVERN_1   ] = { xi.mobSkill.CALL_WYVERN_1,    xi.mobSkill.FAMILIAR_1,     xi.mobSkill.ASTRAL_FLOW_1                       },
 }
 
 local handleDamageResists = function(mob)
@@ -78,21 +78,21 @@ end
 
 local playerAbilityToMobSP =
 {
-    [xi.ja.MIGHTY_STRIKES] = xi.jsa.MIGHTY_STRIKES,
-    [xi.ja.HUNDRED_FISTS]  = xi.jsa.HUNDRED_FISTS,
-    [xi.ja.BENEDICTION]    = xi.jsa.BENEDICTION,
-    [xi.ja.MANAFONT]       = xi.jsa.MANAFONT,
-    [xi.ja.CHAINSPELL]     = xi.jsa.CHAINSPELL,
-    [xi.ja.PERFECT_DODGE]  = xi.jsa.PERFECT_DODGE,
-    [xi.ja.INVINCIBLE]     = xi.jsa.INVINCIBLE,
-    [xi.ja.BLOOD_WEAPON]   = xi.jsa.BLOOD_WEAPON,
-    [xi.ja.FAMILIAR]       = xi.jsa.FAMILIAR,
-    [xi.ja.SOUL_VOICE]     = xi.jsa.SOUL_VOICE,
-    [xi.ja.EAGLE_EYE_SHOT] = xi.jsa.EES_AERN,
-    [xi.ja.MEIKYO_SHISUI]  = xi.jsa.MEIKYO_SHISUI,
-    [xi.ja.MIJIN_GAKURE]   = xi.jsa.MIJIN_GAKURE,
-    [xi.ja.ASTRAL_FLOW]    = xi.jsa.ASTRAL_FLOW,
-    [xi.ja.CALL_WYVERN]    = xi.jsa.CALL_WYVERN,
+    [xi.ja.MIGHTY_STRIKES] = xi.mobSkill.MIGHTY_STRIKES_1,
+    [xi.ja.HUNDRED_FISTS ] = xi.mobSkill.HUNDRED_FISTS_1,
+    [xi.ja.BENEDICTION   ] = xi.mobSkill.BENEDICTION_1,
+    [xi.ja.MANAFONT      ] = xi.mobSkill.MANAFONT_1,
+    [xi.ja.CHAINSPELL    ] = xi.mobSkill.CHAINSPELL_1,
+    [xi.ja.PERFECT_DODGE ] = xi.mobSkill.PERFECT_DODGE_1,
+    [xi.ja.INVINCIBLE    ] = xi.mobSkill.INVINCIBLE_1,
+    [xi.ja.BLOOD_WEAPON  ] = xi.mobSkill.BLOOD_WEAPON_1,
+    [xi.ja.FAMILIAR      ] = xi.mobSkill.FAMILIAR_1,
+    [xi.ja.SOUL_VOICE    ] = xi.mobSkill.SOUL_VOICE_1,
+    [xi.ja.EAGLE_EYE_SHOT] = xi.mobSkill.EES_AERN,
+    [xi.ja.MEIKYO_SHISUI ] = xi.mobSkill.MEIKYO_SHISUI_1,
+    [xi.ja.MIJIN_GAKURE  ] = xi.mobSkill.MIJIN_GAKURE_1,
+    [xi.ja.ASTRAL_FLOW   ] = xi.mobSkill.ASTRAL_FLOW_1,
+    [xi.ja.CALL_WYVERN   ] = xi.mobSkill.CALL_WYVERN_1,
 }
 
 local isLocked = function(sp)
@@ -133,7 +133,7 @@ local handleSP = function(mob)
         if xi.av.bracelets and #xi.av.braceletsps ~= 0 then
             local trigger = xi.av.braceletsps[math.random(1, #xi.av.braceletsps)]
             local combo = combos[trigger]
-            if trigger == xi.jsa.CHAINSPELL then
+            if trigger == xi.mobSkill.CHAINSPELL_1 then
                 combo = combos[math.random(1, 2)]
             end
 
@@ -165,10 +165,11 @@ local entity = {}
 
 entity.onMobInitialize = function(mob)
     mob:setMobMod(xi.mobMod.ABILITY_RESPONSE, 1)
+    mob:setMobMod(xi.mobMod.AOE_HIT_ALL, 1)
+    mob:setMobMod(xi.mobMod.IDLE_DESPAWN, 180)
 
     --[[
     mob:setMobMod(xi.mobMod.MAGIC_COOL, 20)
-    mob:setMobMod(xi.mobMod.IDLE_DESPAWN, 180)
     mob:setMod(xi.mod.SOULEATERRES, 4)
     mob:setMod(xi.mod.UFASTCAST, 100)
     mob:setMod(xi.mod.MAIN_DMG_RATING, 150)
@@ -208,30 +209,30 @@ entity.onMobSpawn = function(mob)
     xi.av.locks = {}
     xi.av.sps =
     {
-        xi.jsa.MIGHTY_STRIKES,
-        xi.jsa.BENEDICTION,
-        xi.jsa.HUNDRED_FISTS,
-        xi.jsa.MANAFONT,
-        xi.jsa.CHAINSPELL,
-        xi.jsa.PERFECT_DODGE, -- no combo
-        xi.jsa.INVINCIBLE,
-        xi.jsa.BLOOD_WEAPON, -- no combo
-        xi.jsa.SOUL_VOICE,
-        xi.jsa.MEIKYO_SHISUI,
-        xi.jsa.MIJIN_GAKURE,
-        xi.jsa.EES_AERN,
-        xi.jsa.CALL_WYVERN,
-        xi.jsa.FAMILIAR,
-        xi.jsa.ASTRAL_FLOW,
+        xi.mobSkill.MIGHTY_STRIKES_1,
+        xi.mobSkill.BENEDICTION_1,
+        xi.mobSkill.HUNDRED_FISTS_1,
+        xi.mobSkill.MANAFONT_1,
+        xi.mobSkill.CHAINSPELL_1,
+        xi.mobSkill.PERFECT_DODGE_1, -- no combo
+        xi.mobSkill.INVINCIBLE_1,
+        xi.mobSkill.BLOOD_WEAPON_1, -- no combo
+        xi.mobSkill.SOUL_VOICE_1,
+        xi.mobSkill.MEIKYO_SHISUI_1,
+        xi.mobSkill.MIJIN_GAKURE_1,
+        xi.mobSkill.EES_AERN,
+        xi.mobSkill.CALL_WYVERN_1,
+        xi.mobSkill.FAMILIAR_1,
+        xi.mobSkill.ASTRAL_FLOW_1,
     }
 
     xi.av.braceletsps =
     {
-        xi.jsa.CHAINSPELL,
-        xi.jsa.MIGHTY_STRIKES,
-        xi.jsa.MEIKYO_SHISUI,
-        xi.jsa.INVINCIBLE,
-        xi.jsa.CALL_WYVERN,
+        xi.mobSkill.CHAINSPELL_1,
+        xi.mobSkill.MIGHTY_STRIKES_1,
+        xi.mobSkill.MEIKYO_SHISUI_1,
+        xi.mobSkill.INVINCIBLE_1,
+        xi.mobSkill.CALL_WYVERN_1,
     }
 
     -- Special check for regen modification by JoL pets killed
@@ -308,7 +309,6 @@ end
 entity.onSpellPrecast = function(mob, spell)
     if spell:getID() == xi.magic.spell.METEOR then
         spell:setAoE(xi.magic.aoe.RADIAL)
-        spell:setFlag(xi.magic.spellFlag.HIT_ALL)
         spell:setRadius(30)
         spell:setAnimation(280) -- AoE Meteor Animation
     end

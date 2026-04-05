@@ -23,11 +23,11 @@
 
 #include "pch.h"
 
-#include "common/application.h"
-#include "common/timer.h"
-#include "common/watchdog.h"
+#include <common/application.h>
+#include <common/ipp.h>
+#include <common/timer.h>
 
-#include "common/ipp.h"
+#include "map_config.h"
 #include "zone.h"
 
 //
@@ -39,15 +39,6 @@ class MapNetworking;
 class MapStatistics;
 class CZone;
 
-struct MapConfig final
-{
-    IPP  ipp{};
-    bool inCI{ false };
-    bool isTestServer{ false };      // Disables watchdog and certain recurring tasks when ticks are externally managed.
-    bool lazyZones{ false };         // Load zones when first accessed
-    bool controlledWeather{ false }; // Disables automated weather
-};
-
 //
 // Exposed globals
 //
@@ -57,26 +48,24 @@ extern std::map<uint16, CZone*> g_PZoneList; // Global array of pointers for zon
 class MapEngine final : public Engine
 {
 public:
-    MapEngine(asio::io_context& io_context, MapConfig& config);
+    MapEngine(Application& application, MapConfig& config);
     ~MapEngine() override;
 
-    void gameLoop();
-
     //
-    // Init
+    // Tasks
     //
 
-    void prepareWatchdog();
-
-    void do_init();
-    void do_final() const;
+    auto init() -> Task<void>;
+    auto watchdogUpdater() -> Task<void>;
+    auto watchdogWatcher() -> Task<void>;
 
     //
     // Maintenance
     //
 
-    int32 map_cleanup(timer::time_point tick, CTaskManager::CTask* PTask) const; // Clean up timed out players
-    int32 map_garbage_collect(timer::time_point tick, CTaskManager::CTask* PTask) const;
+    // TODO: Turn these into real coroutines
+    void sessionCleanup() const;
+    void garbageCollect() const;
 
     //
     // Commands callbacks
@@ -93,15 +82,24 @@ public:
 
     auto networking() const -> MapNetworking&;
     auto statistics() const -> MapStatistics&;
+    auto scheduler() -> Scheduler&;
     auto zones() const -> std::map<uint16, CZone*>&; // g_PZoneList
-    // gameState()
-
-    void requestExit();
+    auto config() const -> MapConfig&;
+    // TODO: gameState()
 
 private:
-    asio::io_context&              ioContext_; // this is also shared with networking_
+    Application& application_;
+    Scheduler&   scheduler_;
+
+    Maybe<Scheduler::Token> mapCleanupToken_;
+    Maybe<Scheduler::Token> mapGarbageCollectToken_;
+    Maybe<Scheduler::Token> timeServerToken_;
+    Maybe<Scheduler::Token> persistVolatileServerVarsToken_;
+    Maybe<Scheduler::Token> pumpIPCToken_;
+    Maybe<Scheduler::Token> flushStatisticsToken_;
+
     std::unique_ptr<MapStatistics> mapStatistics_;
     std::unique_ptr<MapNetworking> networking_;
-    std::unique_ptr<Watchdog>      watchdog_;
-    MapConfig&                     engineConfig_;
+    std::atomic<timer::time_point> watchdogLastUpdate_;
+    MapConfig&                     config_;
 };

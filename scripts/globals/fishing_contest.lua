@@ -4,42 +4,35 @@
 xi = xi or {}
 xi.fishingContest = xi.fishingContest or {}
 
-local exDataIndex =
-{
-    LENGTH = 0x00,
-    WEIGHT = 0x02,
-    RANKED = 0x04,
-}
-
 xi.fishingContest.fish =
 {
     -- NOTE: If you don't want certain fish included in the contest (era restrictions, or whatever),
     --   then you must comment out the lines containing unwanted fish.  The C++ core calls the
     --   random function in this file to select a fish for each contest, which uses this table.
 
-    { id = xi.item.GRIMMONITE,      name = 'grimmonite'      , realName = 'Grimmonite'      },
-    { id = xi.item.RYUGU_TITAN,     name = 'ryugu_titan'     , realName = 'Ryugu Titan'     },
-    { id = xi.item.GIANT_DONKO,     name = 'giant_donko'     , realName = 'Giant Donko'     },
-    { id = xi.item.JUNGLE_CATFISH,  name = 'jungle_catfish'  , realName = 'Jungle Catfish'  },
-    { id = xi.item.GIANT_CHIRAI,    name = 'giant_chirai'    , realName = 'Giant Chirai'    },
-    { id = xi.item.CAVE_CHERAX,     name = 'cave_cherax'     , realName = 'Cave Cherax'     },
-    { id = xi.item.ARMORED_PISCES,  name = 'armored_pisces'  , realName = 'Armored Pisces'  },
-    { id = xi.item.TRICORN,         name = 'tricorn'         , realName = 'Tricorn'         },
-    { id = xi.item.EMPEROR_FISH,    name = 'emperor_fish'    , realName = 'Emperor Fish'    },
-    { id = xi.item.MONKE_ONKE,      name = 'monke-onke'      , realName = 'Monke-Onke'      },
-    { id = xi.item.TAKITARO,        name = 'takitaro'        , realName = 'Takitaro'        },
-    { id = xi.item.GIANT_CATFISH,   name = 'giant_catfish'   , realName = 'Giant Catfish'   },
-    { id = xi.item.BLADEFISH,       name = 'bladefish'       , realName = 'Bladefish'       },
-    { id = xi.item.GIGANT_SQUID,    name = 'gigant_squid'    , realName = 'Gigant Squid'    },
-    { id = xi.item.SEA_ZOMBIE,      name = 'sea_zombie'      , realName = 'Sea Zombie'      },
-    { id = xi.item.TITANICTUS,      name = 'titanictus'      , realName = 'Titanictus'      },
-    { id = xi.item.GAVIAL_FISH,     name = 'gavial_fish'     , realName = 'Gavial Fish'     },
-    { id = xi.item.THREE_EYED_FISH, name = 'three-eyed_fish' , realName = 'Three-eyed Fish' },
-    { id = xi.item.BHEFHEL_MARLIN,  name = 'bhefhel_marlin'  , realName = 'Bhefhel Marlin'  },
-    { id = xi.item.GUGRU_TUNA,      name = 'gugru_tuna'      , realName = 'Gugru Tuna'      },
-    { id = xi.item.TITANIC_SAWFISH, name = 'titanic_sawfish' , realName = 'Titanic Sawfish' },
-    { id = xi.item.GUGRUSAURUS,     name = 'gugrusaurus'     , realName = 'Gugrusaurus'     },
-    { id = xi.item.LIK,             name = 'lik'             , realName = 'Lik'             },
+    { id = xi.item.GRIMMONITE,        name = 'grimmonite'      , realName = 'Grimmonite'      },
+    { id = xi.item.RYUGU_TITAN,       name = 'ryugu_titan'     , realName = 'Ryugu Titan'     },
+    { id = xi.item.GIANT_DONKO_1,     name = 'giant_donko'     , realName = 'Giant Donko'     },
+    { id = xi.item.JUNGLE_CATFISH,    name = 'jungle_catfish'  , realName = 'Jungle Catfish'  },
+    { id = xi.item.GIANT_CHIRAI,      name = 'giant_chirai'    , realName = 'Giant Chirai'    },
+    { id = xi.item.CAVE_CHERAX,       name = 'cave_cherax'     , realName = 'Cave Cherax'     },
+    { id = xi.item.ARMORED_PISCES,    name = 'armored_pisces'  , realName = 'Armored Pisces'  },
+    { id = xi.item.TRICORN,           name = 'tricorn'         , realName = 'Tricorn'         },
+    { id = xi.item.EMPEROR_FISH,      name = 'emperor_fish'    , realName = 'Emperor Fish'    },
+    { id = xi.item.MONKE_ONKE_1,      name = 'monke-onke'      , realName = 'Monke-Onke'      },
+    { id = xi.item.TAKITARO,          name = 'takitaro'        , realName = 'Takitaro'        },
+    { id = xi.item.GIANT_CATFISH_1,   name = 'giant_catfish'   , realName = 'Giant Catfish'   },
+    { id = xi.item.BLADEFISH_1,       name = 'bladefish'       , realName = 'Bladefish'       },
+    { id = xi.item.GIGANT_SQUID,      name = 'gigant_squid'    , realName = 'Gigant Squid'    },
+    { id = xi.item.SEA_ZOMBIE,        name = 'sea_zombie'      , realName = 'Sea Zombie'      },
+    { id = xi.item.TITANICTUS,        name = 'titanictus'      , realName = 'Titanictus'      },
+    { id = xi.item.GAVIAL_FISH,       name = 'gavial_fish'     , realName = 'Gavial Fish'     },
+    { id = xi.item.THREE_EYED_FISH_1, name = 'three-eyed_fish' , realName = 'Three-eyed Fish' },
+    { id = xi.item.BHEFHEL_MARLIN_1,  name = 'bhefhel_marlin'  , realName = 'Bhefhel Marlin'  },
+    { id = xi.item.GUGRU_TUNA_1,      name = 'gugru_tuna'      , realName = 'Gugru Tuna'      },
+    { id = xi.item.TITANIC_SAWFISH,   name = 'titanic_sawfish' , realName = 'Titanic Sawfish' },
+    { id = xi.item.GUGRUSAURUS,       name = 'gugrusaurus'     , realName = 'Gugrusaurus'     },
+    { id = xi.item.LIK,               name = 'lik'             , realName = 'Lik'             },
 }
 
 xi.fishingContest.criteria =
@@ -119,8 +112,6 @@ local function findFishSlot(trade, fish)
     return 0
 end
 
--- The npcUtil.giveItem function currently does not support custom exdata
--- Since we need to include the measurements of the fish, we need a modified function
 local function giveFish(player, params)
     params = params or {}
     local ID = zones[player:getZoneID()]
@@ -134,7 +125,12 @@ local function giveFish(player, params)
     end
 
     -- give items to player
-    if player:addItem(params) then
+    local fishItem = player:addItem({ id = fishid, quantity = params.quantity or 1 })
+    if fishItem then
+        if params.exdata then
+            fishItem:setExData(params.exdata)
+        end
+
         player:messageSpecial(ID.text.ITEM_OBTAINED, fishid)
     else
         player:messageSpecial(ID.text.ITEM_CANNOT_BE_OBTAINED, fishid)
@@ -230,56 +226,6 @@ end
 -- GLOBAL FUNCTIONS
 -----------------------------------
 
--- Create the table of exdata
-xi.fishingContest.createExData = function(length, weight, ranked)
-    -- If the provided data table has a nil value, the key will not be passed to the setExData function
-    -- setExData only accepts one-byte keys and vals so we need to break down the 16-bit vars
-    local exData = {}
-    if length ~= nil then
-        exData[exDataIndex.LENGTH    ] = bit.band(length, 0x00FF)
-        exData[exDataIndex.LENGTH + 1] = bit.rshift(bit.band(length, 0xFF00), 8)
-    end
-
-    if weight ~= nil then
-        exData[exDataIndex.WEIGHT    ] = bit.band(weight, 0x00FF)
-        exData[exDataIndex.WEIGHT + 1] = bit.rshift(bit.band(weight, 0xFF00), 8)
-    end
-
-    if ranked ~= nil then
-        exData[exDataIndex.RANKED    ] = ranked
-    end
-
-    return exData
-end
-
--- Read the necessary data from the exdata
-xi.fishingContest.getFishData = function(fishItem)
-    local fishData = fishItem:getExData()
-    local fishTable = {}
-
-    fishTable['length'] = (bit.lshift(fishData[exDataIndex.LENGTH + 1], 8) + fishData[exDataIndex.LENGTH]) or 0
-    fishTable['weight'] = (bit.lshift(fishData[exDataIndex.WEIGHT + 1], 8) + fishData[exDataIndex.WEIGHT]) or 0
-    fishTable['ranked'] = fishData[exDataIndex.RANKED]
-
-    return fishTable
-end
-
--- Update the fish exdata
-xi.fishingContest.setFishData = function(fishItem, length, weight, ranked)
-    -- Data Table should have only three possible options: 'length', 'width', and 'ranked'
-    if fishItem == nil then
-        return
-    end
-
-    -- If the provided data table has a nil value, the key will not be passed to the setExData function
-    -- setExData only accepts one-byte keys and vals so we need to break down the 16-bit vars
-    local newExData = xi.fishingContest.createExData(length, weight, ranked)
-
-    if newExData ~= nil then
-        fishItem:setExData(newExData)
-    end
-end
-
 xi.fishingContest.selectContestFish = function()
     return utils.randomEntry(xi.fishingContest.fish)['id']
 end
@@ -327,25 +273,25 @@ xi.fishingContest.onTrade = function(player, npc, trade)
         npcUtil.tradeHasExactly(trade, contest['fishid'])
     then
         local fishItem = trade:getItem(findFishSlot(trade, contest['fishid']))
-        local fishData = xi.fishingContest.getFishData(fishItem)
+        local fishData = fishItem:getExData()
 
         if fishData == nil then
             return
         elseif
-            fishData['ranked'] == 1 or
-            fishData['length'] == 0 or
-            fishData['weight'] == 0
+            fishData.isRanked or
+            fishData.size == 0 or
+            fishData.weight == 0
         then
             -- Fish has already been ranked previously
             player:startEvent(10007, { [4] = 1 })
         else
             -- Fish is a valid entry, not previously ranked
             -- Player local vars used to hold submission data until end of event
-            player:setLocalVar('[FishContest]Length', fishData['length'])
-            player:setLocalVar('[FishContest]Weight', fishData['weight'])
+            player:setLocalVar('[FishContest]Length', fishData.size)
+            player:setLocalVar('[FishContest]Weight', fishData.weight)
 
             player:startEvent(10007, {
-                [5] = scoreFish(fishData['length'], fishData['weight'], contest['criteria']),
+                [5] = scoreFish(fishData.size, fishData.weight, contest['criteria']),
                 [6] = player:getContestScore(),
             })
         end
@@ -452,7 +398,7 @@ xi.fishingContest.onEventFinish = function(player, csid, option, npc)
             local weight = player:getLocalVar('[FishContest]Weight')
             local obtained = giveFish(player, { id = contest['fishid'],
                                                 quantity = 1,
-                                                exdata = xi.fishingContest.createExData(length, weight, 1) })
+                                                exdata = { size = length, weight = weight, isRanked = true } })
             if obtained then
                 player:confirmTrade()
                 player:delGil(500) -- Pay the registration fee of 500 gil.

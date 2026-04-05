@@ -33,7 +33,7 @@ entity.onMobInitialize = function(mob)
             otherPrudence and
             otherPrudence:isAlive() and
             otherPrudence:checkDistance(mob) <= 50 and
-            skillid ~= xi.jsa.PERFECT_DODGE -- Perfect Dodge is manually controlled
+            skillid ~= xi.mobSkill.PERFECT_DODGE_1 -- Perfect Dodge is manually controlled
         then
             otherPrudence:setLocalVar('mirrored_ws', 1)
             otherPrudence:useMobAbility(skillid)
@@ -86,7 +86,7 @@ entity.onMobFight = function(mob, target)
         (not hasUsedPerfectDodge and mob:getHPP() <= 95) or
         (hasUsedPerfectDodge and currentTime >= cooldownTime)
     then
-        mob:useMobAbility(xi.jsa.PERFECT_DODGE)
+        mob:useMobAbility(xi.mobSkill.PERFECT_DODGE_1)
         mob:setLocalVar('perfectDodgeCooldown', currentTime + 120)
 
         -- First time only: trigger both Prudences together
@@ -94,7 +94,7 @@ entity.onMobFight = function(mob, target)
             mob:setLocalVar('perfectDodgeUsed', 1)
 
             if otherPrudence and otherPrudence:isAlive() then
-                otherPrudence:useMobAbility(xi.jsa.PERFECT_DODGE)
+                otherPrudence:useMobAbility(xi.mobSkill.PERFECT_DODGE_1)
                 otherPrudence:setLocalVar('perfectDodgeUsed', 1)
                 otherPrudence:setLocalVar('perfectDodgeCooldown', currentTime + 120)
             end

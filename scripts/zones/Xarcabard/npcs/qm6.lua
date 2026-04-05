@@ -4,6 +4,8 @@
 -- Involved in Quests: RNG AF3 - Unbridled Passion
 -- !pos -254.883 -17.003 -150.818 112
 -----------------------------------
+local ID = zones[xi.zone.XARCABARD]
+-----------------------------------
 ---@type TNpcEntity
 local entity = {}
 
@@ -14,13 +16,15 @@ entity.onTrigger = function(player, npc)
         player:startEvent(6, 0, 13360)
     elseif unbridledPassionCS == 6 then
         player:startEvent(7)
+    else
+        player:messageSpecial(ID.text.CAVERN_CONTINUES)
     end
 end
 
 entity.onEventFinish = function(player, csid, option, npc)
     if csid == 6 then
         player:setCharVar('unbridledPassion', 6)
-    elseif csid == 7 and npcUtil.giveItem(player, xi.item.ICE_ARROW) then
+    elseif csid == 7 and npcUtil.giveItem(player, { { xi.item.ICE_ARROW, 99 } }) then
         player:setCharVar('unbridledPassion', 7)
     end
 end

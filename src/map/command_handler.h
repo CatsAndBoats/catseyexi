@@ -19,11 +19,11 @@
 ===========================================================================
 */
 
-#ifndef _COMMAND_HANDLER_H
-#define _COMMAND_HANDLER_H
+#pragma once
 
-#include "common/cbasetypes.h"
-#include "common/logging.h"
+#include <common/cbasetypes.h>
+#include <common/logging.h>
+#include <common/scheduler.h>
 
 #include <list>
 #include <string>
@@ -39,7 +39,5 @@ class state;
 class CCommandHandler
 {
 public:
-    static int32 call(sol::state& lua, CCharEntity* PChar, const std::string& commandline);
+    static int32 call(Scheduler& scheduler, sol::state& lua, CCharEntity* PChar, const std::string& commandline);
 };
-
-#endif // _COMMAND_HANDLER_H

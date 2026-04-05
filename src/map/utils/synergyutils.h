@@ -20,9 +20,8 @@
 */
 #pragma once
 
-#include "common/cbasetypes.h"
-
-#include <optional>
+#include <common/cbasetypes.h>
+#include <common/types/maybe.h>
 
 namespace synergyutils
 {
@@ -71,7 +70,7 @@ struct SynergyRecipe
 
 void LoadSynergyRecipes();
 
-auto GetSynergyRecipeByID(uint32 id) -> std::optional<SynergyRecipe>;
-auto GetSynergyRecipeByIngredients(uint16 ingredient1, uint16 ingredient2, uint16 ingredient3, uint16 ingredient4, uint16 ingredient5, uint16 ingredient6, uint16 ingredient7, uint16 ingredient8) -> std::optional<SynergyRecipe>;
+auto GetSynergyRecipeByID(uint32 id) -> Maybe<SynergyRecipe>;
+auto GetSynergyRecipeByIngredients(uint16 ingredient1, uint16 ingredient2, uint16 ingredient3, uint16 ingredient4, uint16 ingredient5, uint16 ingredient6, uint16 ingredient7, uint16 ingredient8) -> Maybe<SynergyRecipe>;
 
 } // namespace synergyutils

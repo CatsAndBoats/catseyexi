@@ -11,7 +11,7 @@ entity.onMobSpawn = function(mob)
     xi.mix.jobSpecial.config(mob, {
         specials =
         {
-            { id = xi.jsa.MEIKYO_SHISUI, hpp = math.random(50, 60) },
+            { id = xi.mobSkill.MEIKYO_SHISUI_1, hpp = math.random(50, 60) },
         },
     })
 end
