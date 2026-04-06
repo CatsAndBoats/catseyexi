@@ -22,7 +22,9 @@ def apply_patches(debug=False):
             subprocess.run(
                 ["git", "apply", "--ignore-whitespace", "-v", patch_path],
                 cwd="../",
-                check=True
+                check=True,
+                capture_output=True,
+                text=True
             )
             print(f"SUCCESS: Applied patch: {filename}")
         except subprocess.CalledProcessError as e:
