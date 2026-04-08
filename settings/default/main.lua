@@ -339,6 +339,7 @@ xi.settings.main =
     ENABLE_WEW_TO_ACE            = true,
     ENABLE_SUMMIT_OF_THE_STARS   = true,
     ENABLE_SUMMIT_RIFTS          = true, -- Stronghold Invasion / Augmentation system
+    PARTYFINDER_ENABLED          = true,
 
     -- Crystal Warrior
     ENABLE_CW      = 1,
