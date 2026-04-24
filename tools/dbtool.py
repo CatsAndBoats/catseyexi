@@ -282,7 +282,7 @@ def fetch_errors(query, result):
             exit(-1)
 
 
-def db_query(query):
+def db_query(query, cwd=None):
     result = subprocess.run(
         [
             f"{mysql_bin}mysql{exe}",
@@ -295,6 +295,7 @@ def db_query(query):
         ],
         capture_output=True,
         text=True,
+        cwd=cwd,
     )
     fetch_errors(query, result)
     return result
@@ -504,7 +505,7 @@ def import_file(file):
     SET foreign_key_checks=1;
     COMMIT;
     """
-    _ = db_query(query)
+    _ = db_query(query, cwd=os.path.dirname(os.path.abspath(file)))
 
 
 def connect():
