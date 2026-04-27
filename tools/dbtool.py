@@ -505,7 +505,7 @@ def import_file(file):
     SET foreign_key_checks=1;
     COMMIT;
     """
-    _ = db_query(query, cwd=os.path.dirname(os.path.abspath(file)))
+    _ = db_query(query, cwd=server_dir_path)
 
 
 def connect():
