@@ -184,6 +184,10 @@ def populate_settings():
 settings, default_settings = populate_settings()
 
 
+# Files to skip during import (not player data, just skip)
+# Additional files can be added via config.yaml: skip_files: ["file.sql"]
+skip_files = []
+
 # These are the 'protected' files
 player_data = [
     "accounts.sql",
@@ -337,7 +341,7 @@ def fetch_versions():
 
 
 def fetch_configs():
-    global mysql_bin, auto_backup, auto_update_client, db_ver
+    global mysql_bin, auto_backup, auto_update_client, db_ver, skip_files
     try:
         if os.path.exists(from_dbtool_path("config.yaml")):
             with open(from_dbtool_path("config.yaml")) as file:
@@ -353,6 +357,9 @@ def fetch_configs():
                             auto_update_client = bool(value)
                         if key == "db_ver":
                             db_ver = value
+                        if key == "skip_files":
+                            if isinstance(value, list):
+                                skip_files.extend(value)
         else:
             write_configs()
     except Exception as e:
@@ -567,7 +574,9 @@ def close():
 def setup_db():
     fetch_files()
     for sql_file in import_files:
-        import_file(sql_file)
+        filename = pathlib.Path(sql_file).name
+        if filename not in skip_files:
+            import_file(sql_file)
     print_green("Finished importing!")
     write_version()
 
@@ -632,13 +641,15 @@ def update_db(silent=False, express=False):
         if import_files:
             print_green("The following files will be imported:")
             for sql_file in import_files:
-                if pathlib.Path(sql_file).name not in player_data:
+                filename = pathlib.Path(sql_file).name
+                if filename not in player_data and filename not in skip_files:
                     print(os.path.normpath(sql_file).replace("\\", "/"))
     if silent or input("Proceed with update? [y/N] ").lower() == "y":
         for sql_file in import_protected:
             import_file(sql_file)
         for sql_file in import_files:
-            if pathlib.Path(sql_file).name not in player_data:
+            filename = pathlib.Path(sql_file).name
+            if filename not in player_data and filename not in skip_files:
                 import_file(sql_file)
         print_green("Finished importing!")
         express_enabled = False
