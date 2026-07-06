@@ -46,7 +46,7 @@ CLuaSpell::CLuaSpell(CSpell* PSpell)
  *                                                                       *
  ************************************************************************/
 
-void CLuaSpell::setMsg(uint16 messageID)
+void CLuaSpell::setMsg(MsgBasic messageID)
 {
     m_PLuaSpell->setMessage(messageID);
 }
@@ -106,7 +106,7 @@ uint16 CLuaSpell::getTotalTargets()
     return m_PLuaSpell->getTotalTargets();
 }
 
-uint16 CLuaSpell::getMagicBurstMessage()
+auto CLuaSpell::getMagicBurstMessage() const -> MsgBasic
 {
     return m_PLuaSpell->getMagicBurstMessage();
 }

@@ -15,7 +15,7 @@ xi.combat.tp.getSingleMeleeHitTPReturn = function(actor, target, isZanshin)
         tpReturn = tpReturn + actor:getMerit(xi.merit.IKISHOTEN) -- https://www.bg-wiki.com/ffxi/Ikishoten
     end
 
-    local storeTPModifier = (100 + actor:getMod(xi.mod.STORETP)) / 100
+    local storeTPModifier = 1 + actor:getMod(xi.mod.STORETP) / 100
 
     return math.floor(tpReturn * storeTPModifier)
 end
@@ -27,7 +27,7 @@ xi.combat.tp.getSingleWeaponTPReturn = function(actor, slot)
         local delay           = actor:getBaseWeaponDelay(slot)
         local attackOutput    = xi.combat.tp.getModifiedDelayAndCanZanshin(actor, delay)
         local tpReturn        = xi.combat.tp.calculateTPReturn(actor, attackOutput.modifiedDelay)
-        local storeTPModifier = (100 + actor:getMod(xi.mod.STORETP)) / 100
+        local storeTPModifier = 1 + actor:getMod(xi.mod.STORETP) / 100
 
         return math.floor(tpReturn * storeTPModifier)
     end
@@ -73,7 +73,7 @@ xi.combat.tp.getSingleRangedHitTPReturn = function(actor, target)
     local delay = actor:getBaseRangedDelay() -- there do not appear to be any delay modifiers for ranged attacks, snapshot does not seem to effect this
 
     if delay > 0 then
-        local storeTPModifier = (100 + actor:getMod(xi.mod.STORETP)) / 100
+        local storeTPModifier = 1 + actor:getMod(xi.mod.STORETP) / 100
 
         return math.floor(xi.combat.tp.calculateTPReturn(actor, delay) * storeTPModifier)
     end
@@ -141,13 +141,13 @@ xi.combat.tp.calculateTPGainOnPhysicalDamage = function(totalDamage, delay, acto
         local baseTPGain         = xi.combat.tp.calculateTPReturn(target, attackOutput.modifiedDelay)
         local dAGI               = actor:getStat(xi.mod.AGI) - target:getStat(xi.mod.AGI)
         local inhibitTPModifier  = (100 - target:getMod(xi.mod.INHIBIT_TP)) / 100                    -- no known cap: https://www.bg-wiki.com/ffxi/Monster_TP_gain#Inhibit_TP
-        local dAGIModifier       = utils.clamp(200 - (dAGI + 30) / 200, 1.0, 0.5)                    -- 50% reduction at +70 dAGI: https://www.bg-wiki.com/ffxi/Monster_TP_gain
+        local dAGIModifier       = utils.clamp(200 - (dAGI + 30) / 200, 0.5, 1)                      -- 50% reduction at +70 dAGI: https://www.bg-wiki.com/ffxi/Monster_TP_gain
         local subtleBlowMerits   = actor:getMerit(xi.merit.SUBTLE_BLOW_EFFECT)
         local subtleBlowI        = math.min(actor:getMod(xi.mod.SUBTLE_BLOW) + subtleBlowMerits, 50) -- cap of 50% https://www.bg-wiki.com/ffxi/Subtle_Blow
         local tandemBlowBonus    = xi.combat.tp.getTandemBlowBonus(actor)
         local subtleBlowII       = actor:getMod(xi.mod.SUBTLE_BLOW_II) + tandemBlowBonus             -- no known cap
         local subtleBlowModifier = math.max((100 - subtleBlowI + subtleBlowII) / 100, 0.25)          -- combined cap of 75% reduction: https://www.bg-wiki.com/ffxi/Subtle_Blow
-        local storeTPModifier    = (100 + target:getMod(xi.mod.STORETP)) / 100
+        local storeTPModifier    = 1 + target:getMod(xi.mod.STORETP) / 100
 
         -- TODO: unknown where/how many floor steps there are. Napkin math seems to be a single floor step, but given x/256 it's hard to tell
         -- TODO: unknown if player pets (automaton/wyvern/avatars) are affected by dAGI
@@ -174,13 +174,13 @@ xi.combat.tp.calculateTPGainOnMagicalDamage = function(totalDamage, actor, targe
     if totalDamage > 0 and target and actor then
         local dAGI               = actor:getStat(xi.mod.AGI) - target:getStat(xi.mod.AGI)
         local inhibitTPModifier  = (100 - target:getMod(xi.mod.INHIBIT_TP)) / 100                    -- no known cap: https://www.bg-wiki.com/ffxi/Monster_TP_gain#Inhibit_TP
-        local dAGIModifier       = utils.clamp(200 - (dAGI + 30) / 200, 1.0, 0.5)                    -- 50% reduction at +70 dAGI: https://www.bg-wiki.com/ffxi/Monster_TP_gain
+        local dAGIModifier       = utils.clamp(200 - (dAGI + 30) / 200, 0.5, 1)                      -- 50% reduction at +70 dAGI: https://www.bg-wiki.com/ffxi/Monster_TP_gain
         local subtleBlowMerits   = actor:getMerit(xi.merit.SUBTLE_BLOW_EFFECT)
         local subtleBlowI        = math.min(actor:getMod(xi.mod.SUBTLE_BLOW) + subtleBlowMerits, 50) -- cap of 50% https://www.bg-wiki.com/ffxi/Subtle_Blow
         local tandemBlowBonus    = xi.combat.tp.getTandemBlowBonus(actor)
         local subtleBlowII       = actor:getMod(xi.mod.SUBTLE_BLOW_II) + tandemBlowBonus             -- no known cap
         local subtleBlowModifier = math.max((100 - subtleBlowI + subtleBlowII) / 100, 0.25)          -- combined cap of 75% reduction: https://www.bg-wiki.com/ffxi/Subtle_Blow
-        local storeTPModifier    = (100 + target:getMod(xi.mod.STORETP)) / 100
+        local storeTPModifier    = 1 + target:getMod(xi.mod.STORETP) / 100
 
         -- Similar caveats to above for physical damage, unknown where/how many floors but seems to be one.
         if target:getObjType() == xi.objType.MOB then
@@ -188,6 +188,20 @@ xi.combat.tp.calculateTPGainOnMagicalDamage = function(totalDamage, actor, targe
         else
             return math.floor(50 * inhibitTPModifier * subtleBlowModifier * storeTPModifier)                 -- 50 sourced from testing & https://www.bg-wiki.com/ffxi/Tactical_Points#Getting_hit_for_more_than_0_damage
         end
+    end
+
+    return 0
+end
+
+-- Calculate TP generated by spell for Occult Acumen trait
+xi.combat.tp.calculateSpellTP = function(actor, spell)
+    if
+        actor:isPC() and
+        utils.contains(spell:getSkillType(), { xi.skill.ELEMENTAL_MAGIC, xi.skill.DARK_MAGIC })
+    then
+        local occultAcumenModifier = actor:getMod(xi.mod.OCCULT_ACUMEN) / 100
+        local storeTPModifier      = 1 + actor:getMod(xi.mod.STORETP) / 100
+        return math.floor(spell:getMPCost() * occultAcumenModifier * storeTPModifier)
     end
 
     return 0

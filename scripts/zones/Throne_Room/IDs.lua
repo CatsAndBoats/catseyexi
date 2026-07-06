@@ -41,7 +41,7 @@ zones[xi.zone.THRONE_ROOM] =
     {
         GRAND_MARQUIS_CHOMIEL     = GetFirstID('Grand_Marquis_Chomiel'),
         RIKO_KUPENREICH           = GetFirstID('Riko_Kupenreich'),
-        SHADOW_LORD_RANK_5_OFFSET = GetFirstID('Shadow_Lord'),
+        SHADOW_LORD_RANK_5_OFFSET = GetFirstID('Shadow_Lord_Phase_1'),
         ZEID_BCNM_OFFSET          = GetFirstID('Zeid'),
     },
     npc =

@@ -34,12 +34,14 @@ xi.data.statusEffect.dataTable =
 {
     [xi.effect.ADDLE        ] = { 0,               xi.effect.NOCTURNE, xi.element.FIRE,    xi.immunity.ADDLE,      xi.mod.SLOWRES,     0,                          0,                    xi.mod.ADDLE_IMMUNOBREAK    }, -- Addle cant be immunobroken?
     [xi.effect.AMNESIA      ] = { 0,               0,                  xi.element.FIRE,    0,                      xi.mod.AMNESIARES,  0,                          xi.mod.AMNESIA_MEVA,  0                           },
+    [xi.effect.ATTACK_DOWN  ] = { 0,               0,                  xi.element.WATER,   0,                      0,                  0,                          0,                    0                           },
     [xi.effect.BIND         ] = { 0,               0,                  xi.element.ICE,     xi.immunity.BIND,       xi.mod.BINDRES,     xi.mod.BIND_RES_RANK,       xi.mod.BIND_MEVA,     xi.mod.BIND_IMMUNOBREAK     },
     [xi.effect.BLINDNESS    ] = { 0,               0,                  xi.element.DARK,    xi.immunity.BLIND,      xi.mod.BLINDRES,    xi.mod.BLIND_RES_RANK,      xi.mod.BLIND_MEVA,    xi.mod.BLIND_IMMUNOBREAK    },
     [xi.effect.BURN         ] = { xi.effect.DROWN, 0,                  xi.element.FIRE,    0,                      0,                  0,                          0,                    0                           },
     [xi.effect.CHARM_I      ] = { 0,               0,                  xi.element.LIGHT,   0,                      xi.mod.CHARMRES,    0,                          xi.mod.CHARM_MEVA,    0                           }, -- TODO: charm should be moved from a mob property to a regular immunity
     [xi.effect.CHOKE        ] = { xi.effect.FROST, 0,                  xi.element.WIND,    0,                      0,                  0,                          0,                    0                           },
     [xi.effect.CURSE_I      ] = { 0,               0,                  xi.element.DARK,    xi.immunity.NONE,       xi.mod.CURSERES,    0,                          xi.mod.CURSE_MEVA,    0                           },
+    [xi.effect.DEFENSE_DOWN ] = { 0,               0,                  xi.element.WIND,    0,                      0,                  0,                          0,                    0                           },
     [xi.effect.DROWN        ] = { xi.effect.SHOCK, 0,                  xi.element.WATER,   0,                      0,                  0,                          0,                    0                           },
     [xi.effect.FLASH        ] = { 0,               0,                  xi.element.LIGHT,   xi.immunity.BLIND,      xi.mod.BLINDRES,    xi.mod.BLIND_RES_RANK,      xi.mod.BLIND_MEVA,    xi.mod.BLIND_IMMUNOBREAK    },
     [xi.effect.FROST        ] = { xi.effect.BURN,  0,                  xi.element.ICE,     0,                      0,                  0,                          0,                    0                           },

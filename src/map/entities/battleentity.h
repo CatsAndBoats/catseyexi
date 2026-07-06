@@ -352,7 +352,7 @@ public:
     bool isInAssault();
     bool isInDynamis();
     bool isInGarrison();
-    bool isInMogHouse();
+    bool inMogHouse();
     bool hasImmunity(uint32 imID);
     bool isAsleep();
     bool isMounted();
@@ -501,7 +501,7 @@ public:
     virtual void           OnDisengage(CAttackState&);
     /* Casting */
     virtual void OnCastFinished(CMagicState&, action_t&);
-    virtual void OnCastInterrupted(CMagicState&, action_t&, MSGBASIC_ID msg, bool blockedCast);
+    virtual void OnCastInterrupted(CMagicState&, action_t&, MsgBasic msg, bool blockedCast);
     /* Weaponskill */
     virtual void OnWeaponSkillFinished(CWeaponSkillState& state, action_t& action);
     virtual void OnMobSkillFinished(CMobSkillState& state, action_t& action);
@@ -539,7 +539,6 @@ public:
     timer::time_point charmTime; // to hold the time entity is charmed
     bool              isCharmed; // is the battle entity charmed?
 
-    float           m_ModelRadius;  // The radius of the entity model, for calculating the range of a physical attack
     ECOSYSTEM       m_EcoSystem{};  // Entity eco system
     CItemEquipment* m_Weapons[4]{}; // Four main slots used to store weapons (weapons only)
     bool            m_dualWield;    // True/false depending on if the entity is using two weapons

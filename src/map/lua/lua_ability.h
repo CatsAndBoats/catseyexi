@@ -26,7 +26,7 @@
 #include "luautils.h"
 
 class CAbility;
-
+enum class Recast : uint16_t;
 class CLuaAbility
 {
     CAbility* m_PLuaAbility;
@@ -42,15 +42,17 @@ public:
     friend std::ostream& operator<<(std::ostream& out, const CLuaAbility& ability);
 
     uint16 getID();
-    int16  getMsg();
+    auto   getMsg() -> MsgBasic;
     uint16 getRecast();
-    uint16 getRecastID();
-    uint16 getRange();
+    auto   getRecastID() const -> Recast;
+    auto   getRange() -> uint16;
+    auto   getRadius() const -> uint8;
+    auto   getAOE() const -> uint8;
     auto   getName() -> const std::string&;
     auto   getAnimation() -> ActionAnimation;
     uint16 getAddType(); // see map/ability.h for definitions. These can tell if the ability is a Merit ability, Astral Flow only ability, etc
 
-    void  setMsg(uint16 messageID);
+    void  setMsg(MsgBasic messageID);
     void  setAnimation(uint16 animationID);
     void  setRecast(uint16 recastTime);
     int32 getCE();

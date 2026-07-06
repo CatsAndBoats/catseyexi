@@ -354,7 +354,6 @@ xi.spells.blue.useMagicalSpell = function(caster, target, spell, params)
     local finalDamage    = (initialD + wsc) * (params.multiplier + azureBonus + correlationMultiplier) + statBonus
 
     finalDamage = math.floor(finalDamage * xi.combat.magicHitRate.calculateResistRate(caster, target, spellGroup, skillType, 0, spellElement, params.attribute, 0, 0))
-    finalDamage = math.floor(finalDamage * xi.spells.damage.calculateMTDR(spell))
     finalDamage = math.floor(finalDamage * xi.spells.damage.calculateElementalStaffBonus(caster, spellElement))
     finalDamage = math.floor(finalDamage * xi.spells.damage.calculateSDT(target, spellElement))
     finalDamage = math.floor(finalDamage * xi.spells.damage.calculateDayAndWeather(caster, spellElement, false))
@@ -412,7 +411,6 @@ xi.spells.blue.useDrainSpell = function(caster, target, spell, params, damageCap
     local _, skillchainCount = xi.magicburst.formMagicBurst(spellElement, target) -- External function. Not present in magic.lua.
 
     finalDamage = math.floor(finalDamage * xi.combat.magicHitRate.calculateResistRate(caster, target, spellGroup, skillType, 0, spellElement, params.attribute, 0, 0))
-    finalDamage = math.floor(finalDamage * xi.spells.damage.calculateMTDR(spell))
     finalDamage = math.floor(finalDamage * xi.spells.damage.calculateElementalStaffBonus(caster, spellElement))
     finalDamage = math.floor(finalDamage * xi.spells.damage.calculateSDT(target, spellElement))
     finalDamage = math.floor(finalDamage * xi.spells.damage.calculateDayAndWeather(caster, spellElement, false))
@@ -449,9 +447,9 @@ xi.spells.blue.useDrainSpell = function(caster, target, spell, params, damageCap
     end
 
     -- Handle Phalanx, One for All, Stoneskin and target HP (Cant be higher than current HP)
-    finalDamage = utils.clamp(finalDamage - target:getMod(xi.mod.PHALANX), 0, 99999)
-    finalDamage = utils.clamp(utils.oneforall(target, finalDamage), 0, 99999)
-    finalDamage = utils.clamp(utils.stoneskin(target, finalDamage), -99999, 99999)
+    finalDamage = utils.clamp(utils.handlePhalanx(target, finalDamage), 0, 99999)
+    finalDamage = utils.clamp(utils.handleOneForAll(target, finalDamage), 0, 99999)
+    finalDamage = utils.clamp(utils.handleStoneskin(target, finalDamage), -99999, 99999)
     finalDamage = utils.clamp(finalDamage, 0, target:getHP())
 
     -- Check if the mob has a damage cap
@@ -498,7 +496,6 @@ xi.spells.blue.useBreathSpell = function(caster, target, spell, params)
     local absorb                      = xi.spells.damage.calculateAbsorption(target, spellElement, false)
     local nullify                     = xi.spells.damage.calculateNullification(target, spellElement, false, true)
     local targetMagicDamageAdjustment = xi.spells.damage.calculateDamageAdjustment(target, false, false, false, true)
-    local multipleTargetReduction     = xi.spells.damage.calculateMTDR(spell)
     local elementalStaffBonus         = xi.spells.damage.calculateElementalStaffBonus(caster, spellElement)
     local elementalAffinityBonus      = xi.spells.damage.calculateElementalAffinityBonus(caster, spellElement)
     local resistTier                  = xi.combat.magicHitRate.calculateResistRate(caster, target, spellFamily, xi.skill.BLUE_MAGIC, 0, spellElement, 0, 0, 0)
@@ -515,7 +512,6 @@ xi.spells.blue.useBreathSpell = function(caster, target, spell, params)
     dmg = math.floor(dmg * correlationMultiplier)
     dmg = math.floor(dmg * breathSDT)
     dmg = math.floor(dmg * targetMagicDamageAdjustment)
-    dmg = math.floor(dmg * multipleTargetReduction)
     dmg = math.floor(dmg * elementalStaffBonus)
     dmg = math.floor(dmg * elementalAffinityBonus)
     dmg = math.floor(dmg * resistTier)
@@ -547,9 +543,9 @@ xi.spells.blue.useBreathSpell = function(caster, target, spell, params)
 
     -- Final adjustments.
     if dmg > 0 then
-        dmg = utils.clamp(dmg - target:getMod(xi.mod.PHALANX), 0, 99999)
-        dmg = utils.clamp(utils.oneforall(target, dmg), 0, 99999)
-        dmg = utils.clamp(utils.stoneskin(target, dmg), -99999, 99999)
+        dmg = utils.clamp(utils.handlePhalanx(target, dmg), 0, 99999)
+        dmg = utils.clamp(utils.handleOneForAll(target, dmg), 0, 99999)
+        dmg = utils.clamp(utils.handleStoneskin(target, dmg), -99999, 99999)
         dmg = utils.clamp(dmg, 0, target:getHP())
         dmg = target:checkDamageCap(dmg)
     end
@@ -591,16 +587,11 @@ xi.spells.blue.applySpellDamage = function(caster, target, spell, dmg, params, t
             return dmg
         end
 
-        dmg = utils.oneforall(target, dmg)
+        dmg = utils.handleOneForAll(target, dmg)
     end
 
-    -- handle Phalanx
-    if dmg > 0 then
-        dmg = utils.clamp(dmg - target:getMod(xi.mod.PHALANX), 0, 99999)
-    end
-
-    -- handle stoneskin
-    dmg = utils.stoneskin(target, dmg)
+    dmg = utils.handlePhalanx(target, dmg)
+    dmg = utils.handleStoneskin(target, dmg)
 
     -- Check if the mob has a damage cap
     dmg = target:checkDamageCap(dmg)
