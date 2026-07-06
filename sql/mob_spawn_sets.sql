@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS `mob_spawn_sets` (
 )
 ENGINE=Aria TRANSACTIONAL=0 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- Ghelsba Outpost
+-- Ghelsba Outpost (Zone 140)
 INSERT INTO `mob_spawn_sets` VALUES (140,1,2);
 INSERT INTO `mob_spawn_sets` VALUES (140,2,2);
 INSERT INTO `mob_spawn_sets` VALUES (140,3,1);
@@ -72,7 +72,71 @@ INSERT INTO `mob_spawn_sets` VALUES (140,60,1);
 INSERT INTO `mob_spawn_sets` VALUES (140,61,1);
 INSERT INTO `mob_spawn_sets` VALUES (140,62,1);
 
--- Monastic Cavern
+-- Fort Ghelsba (Zone 141)
+INSERT INTO `mob_spawn_sets` VALUES (141,1,1);
+INSERT INTO `mob_spawn_sets` VALUES (141,2,1);
+INSERT INTO `mob_spawn_sets` VALUES (141,3,1);
+INSERT INTO `mob_spawn_sets` VALUES (141,4,1);
+INSERT INTO `mob_spawn_sets` VALUES (141,5,2);
+INSERT INTO `mob_spawn_sets` VALUES (141,6,2);
+INSERT INTO `mob_spawn_sets` VALUES (141,7,1);
+INSERT INTO `mob_spawn_sets` VALUES (141,8,1);
+INSERT INTO `mob_spawn_sets` VALUES (141,9,1);
+INSERT INTO `mob_spawn_sets` VALUES (141,10,1);
+INSERT INTO `mob_spawn_sets` VALUES (141,11,1);
+INSERT INTO `mob_spawn_sets` VALUES (141,12,1);
+INSERT INTO `mob_spawn_sets` VALUES (141,13,1);
+INSERT INTO `mob_spawn_sets` VALUES (141,14,1);
+INSERT INTO `mob_spawn_sets` VALUES (141,15,1);
+INSERT INTO `mob_spawn_sets` VALUES (141,16,1);
+INSERT INTO `mob_spawn_sets` VALUES (141,17,1);
+INSERT INTO `mob_spawn_sets` VALUES (141,18,1);
+INSERT INTO `mob_spawn_sets` VALUES (141,19,1);
+INSERT INTO `mob_spawn_sets` VALUES (141,20,1);
+INSERT INTO `mob_spawn_sets` VALUES (141,21,1);
+INSERT INTO `mob_spawn_sets` VALUES (141,22,1);
+INSERT INTO `mob_spawn_sets` VALUES (141,23,1);
+INSERT INTO `mob_spawn_sets` VALUES (141,24,1);
+INSERT INTO `mob_spawn_sets` VALUES (141,25,1);
+INSERT INTO `mob_spawn_sets` VALUES (141,26,1);
+INSERT INTO `mob_spawn_sets` VALUES (141,27,1);
+INSERT INTO `mob_spawn_sets` VALUES (141,28,1);
+INSERT INTO `mob_spawn_sets` VALUES (141,29,1);
+INSERT INTO `mob_spawn_sets` VALUES (141,30,1);
+INSERT INTO `mob_spawn_sets` VALUES (141,31,1);
+INSERT INTO `mob_spawn_sets` VALUES (141,32,1);
+INSERT INTO `mob_spawn_sets` VALUES (141,33,1);
+INSERT INTO `mob_spawn_sets` VALUES (141,34,1);
+INSERT INTO `mob_spawn_sets` VALUES (141,35,1);
+INSERT INTO `mob_spawn_sets` VALUES (141,36,1);
+INSERT INTO `mob_spawn_sets` VALUES (141,37,1);
+INSERT INTO `mob_spawn_sets` VALUES (141,38,1);
+INSERT INTO `mob_spawn_sets` VALUES (141,39,1);
+INSERT INTO `mob_spawn_sets` VALUES (141,40,1);
+INSERT INTO `mob_spawn_sets` VALUES (141,41,1);
+INSERT INTO `mob_spawn_sets` VALUES (141,42,1);
+INSERT INTO `mob_spawn_sets` VALUES (141,43,1);
+INSERT INTO `mob_spawn_sets` VALUES (141,44,1);
+INSERT INTO `mob_spawn_sets` VALUES (141,45,1);
+INSERT INTO `mob_spawn_sets` VALUES (141,46,1);
+INSERT INTO `mob_spawn_sets` VALUES (141,47,1);
+INSERT INTO `mob_spawn_sets` VALUES (141,48,1);
+INSERT INTO `mob_spawn_sets` VALUES (141,49,1);
+INSERT INTO `mob_spawn_sets` VALUES (141,50,1);
+INSERT INTO `mob_spawn_sets` VALUES (141,51,1);
+INSERT INTO `mob_spawn_sets` VALUES (141,52,1);
+INSERT INTO `mob_spawn_sets` VALUES (141,53,1);
+INSERT INTO `mob_spawn_sets` VALUES (141,54,1);
+INSERT INTO `mob_spawn_sets` VALUES (141,55,1);
+INSERT INTO `mob_spawn_sets` VALUES (141,56,1);
+INSERT INTO `mob_spawn_sets` VALUES (141,57,1);
+INSERT INTO `mob_spawn_sets` VALUES (141,58,1);
+INSERT INTO `mob_spawn_sets` VALUES (141,59,1);
+INSERT INTO `mob_spawn_sets` VALUES (141,60,1);
+INSERT INTO `mob_spawn_sets` VALUES (141,61,1);
+INSERT INTO `mob_spawn_sets` VALUES (141,62,1);
+
+-- Monastic Cavern (Zone 150)
 INSERT INTO `mob_spawn_sets` VALUES (150, 1, 1);
 INSERT INTO `mob_spawn_sets` VALUES (150, 2, 1);
 INSERT INTO `mob_spawn_sets` VALUES (150, 3, 2);

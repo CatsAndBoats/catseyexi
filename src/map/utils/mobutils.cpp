@@ -1685,7 +1685,7 @@ auto InstantiateAlly(uint32 groupid, uint16 zoneID, CInstance* instance) -> CMob
                                        "minLevel, maxLevel, modelid, mJob, "
                                        "sJob, cmbSkill, cmbDmgMult, cmbDelay, "
                                        "behavior, links, mobType, immunity, "
-                                       "ecosystemID, mobradius, speed, STR, "
+                                       "ecosystemID, speed, STR, "
                                        "DEX, VIT, AGI, `INT`, "
                                        "MND, CHR, EVA, DEF, "
                                        "ATT, ACC, slash_sdt, pierce_sdt, "
@@ -1697,8 +1697,8 @@ auto InstantiateAlly(uint32 groupid, uint16 zoneID, CInstance* instance) -> CMob
                                        "mob_pools.familyid, name_prefix, entityFlags, animationsub, "
                                        "(mob_family_system.HP / 100) AS hp_scale, (mob_family_system.MP / 100) AS mp_scale, hasSpellScript, spellList, "
                                        "mob_groups.poolid, allegiance, namevis, aggro, "
-                                       "mob_pools.skill_list_id, mob_pools.true_detection, mob_family_system.detects "
-                                       "mob_pools.modelSize, mob_pools.modelHitboxSize, "
+                                       "mob_pools.skill_list_id, mob_pools.true_detection, mob_family_system.detects, "
+                                       "mob_pools.modelSize, mob_pools.modelHitboxSize "
                                        "FROM mob_groups INNER JOIN mob_pools ON mob_groups.poolid = mob_pools.poolid "
                                        "INNER JOIN mob_resistances ON mob_pools.resist_id = mob_resistances.resist_id "
                                        "INNER JOIN mob_family_system ON mob_pools.familyid = mob_family_system.familyID "
@@ -1736,12 +1736,11 @@ auto InstantiateAlly(uint32 groupid, uint16 zoneID, CInstance* instance) -> CMob
         static_cast<CItemWeapon*>(PMob->m_Weapons[SLOT_MAIN])->setDelay((rset->get<uint16>("cmbDelay") * 1000) / 60);
         static_cast<CItemWeapon*>(PMob->m_Weapons[SLOT_MAIN])->setBaseDelay((rset->get<uint16>("cmbDelay") * 1000) / 60);
 
-        PMob->m_Behavior    = rset->get<uint16>("behavior");
-        PMob->m_Link        = rset->get<uint8>("links");
-        PMob->m_Type        = rset->get<uint8>("mobType");
-        PMob->m_Immunity    = rset->get<IMMUNITY>("immunity");
-        PMob->m_EcoSystem   = rset->get<ECOSYSTEM>("ecosystemID");
-        PMob->m_ModelRadius = rset->get<float>("mobradius");
+        PMob->m_Behavior  = rset->get<uint16>("behavior");
+        PMob->m_Link      = rset->get<uint8>("links");
+        PMob->m_Type      = rset->get<uint8>("mobType");
+        PMob->m_Immunity  = rset->get<IMMUNITY>("immunity");
+        PMob->m_EcoSystem = rset->get<ECOSYSTEM>("ecosystemID");
 
         PMob->baseSpeed      = rset->get<uint8>("speed"); // Overwrites baseentity.cpp's defined baseSpeed
         PMob->animationSpeed = rset->get<uint8>("speed"); // Overwrites baseentity.cpp's defined animationSpeed
@@ -1862,7 +1861,7 @@ auto InstantiateDynamicMob(uint32 groupid, uint16 groupZoneId, uint16 targetZone
                                        "minLevel, maxLevel, modelid, mJob, "
                                        "sJob, cmbSkill, cmbDmgMult, cmbDelay, "
                                        "behavior, links, mobType, immunity, "
-                                       "ecosystemID, mobradius, speed, STR, "
+                                       "ecosystemID, speed, STR, "
                                        "DEX, VIT, AGI, `INT`, "
                                        "MND, CHR, EVA, DEF, "
                                        "ATT, ACC, slash_sdt, pierce_sdt, "
@@ -1910,12 +1909,11 @@ auto InstantiateDynamicMob(uint32 groupid, uint16 groupZoneId, uint16 targetZone
         static_cast<CItemWeapon*>(PMob->m_Weapons[SLOT_MAIN])->setDelay((rset->get<uint16>("cmbDelay") * 1000) / 60);
         static_cast<CItemWeapon*>(PMob->m_Weapons[SLOT_MAIN])->setBaseDelay((rset->get<uint16>("cmbDelay") * 1000) / 60);
 
-        PMob->m_Behavior    = rset->get<uint16>("behavior");
-        PMob->m_Link        = rset->get<uint8>("links");
-        PMob->m_Type        = rset->get<uint8>("mobType");
-        PMob->m_Immunity    = rset->get<IMMUNITY>("immunity");
-        PMob->m_EcoSystem   = rset->get<ECOSYSTEM>("ecosystemID");
-        PMob->m_ModelRadius = rset->get<float>("mobradius");
+        PMob->m_Behavior  = rset->get<uint16>("behavior");
+        PMob->m_Link      = rset->get<uint8>("links");
+        PMob->m_Type      = rset->get<uint8>("mobType");
+        PMob->m_Immunity  = rset->get<IMMUNITY>("immunity");
+        PMob->m_EcoSystem = rset->get<ECOSYSTEM>("ecosystemID");
 
         PMob->baseSpeed      = rset->get<uint8>("speed"); // Overwrites baseentity.cpp's defined baseSpeed
         PMob->animationSpeed = rset->get<uint8>("speed"); // Overwrites baseentity.cpp's defined animationSpeed

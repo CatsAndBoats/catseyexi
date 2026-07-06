@@ -44,10 +44,6 @@ INSERT INTO `mob_pool_mods` VALUES (60,370,20,0); -- REGEN: 20
 -- Animated Shield
 INSERT INTO `mob_pool_mods` VALUES (154,163,-1250,0); -- DMGMAGIC: -1250
 
--- Antican Praetor
-INSERT INTO `mob_pool_mods` VALUES (181,1,6000,1); -- GIL_MIN: 6000
-INSERT INTO `mob_pool_mods` VALUES (181,2,9234,1); -- GIL_MAX: 9234
-
 -- Aspidochelone
 INSERT INTO `mob_pool_mods` VALUES (268,368,150,0); -- REGAIN: 150
 INSERT INTO `mob_pool_mods` VALUES (268,370,50,0);  -- REGEN: 50
@@ -179,12 +175,6 @@ INSERT INTO `mob_pool_mods` VALUES (2047,163,-1000,0); -- DMGMAGIC: -1000
 -- Intulo
 INSERT INTO `mob_pool_mods` VALUES (2083,29,25,0); -- MDEF: 25
 
--- Ixzdei Blm
-INSERT INTO `mob_pool_mods` VALUES (2114,4,15,1);  -- SIGHT_RANGE: 15
-INSERT INTO `mob_pool_mods` VALUES (2114,5,15,1);  -- SOUND_RANGE: 15
-INSERT INTO `mob_pool_mods` VALUES (2114,11,30,1); -- LINK_RADIUS: 30
-INSERT INTO `mob_pool_mods` VALUES (2114,34,60,1); -- MAGIC_COOL: 60
-
 -- Kaiser Behemoth S
 INSERT INTO `mob_pool_mods` VALUES (2180,3,100,1); -- MP_BASE: 100
 
@@ -211,9 +201,6 @@ INSERT INTO `mob_pool_mods` VALUES (2271,165,15,0); -- CRITHITRATE: 15
 -- Ladon
 INSERT INTO `mob_pool_mods` VALUES (2314,28,23,1); -- EXP_BONUS: 23
 
--- Lindwurm
-INSERT INTO `mob_pool_mods` VALUES (2420,302,10,0); -- TRIPLE_ATTACK: 10
-
 -- Maats Avatar
 INSERT INTO `mob_pool_mods` VALUES (2461,61,25,1); -- HP_SCALE: 25
 
@@ -225,9 +212,6 @@ INSERT INTO `mob_pool_mods` VALUES (2463,61,20,1); -- HP_SCALE: 20
 
 -- Mammet-19 Epsilon
 INSERT INTO `mob_pool_mods` VALUES (2499,240,90,0); -- SLEEPRES: 90
-
--- Mammet-22 Zeta
-INSERT INTO `mob_pool_mods` VALUES (2500,240,90,0); -- SLEEPRES: 90
 
 -- Minotaur
 INSERT INTO `mob_pool_mods` VALUES (2675,4,25,1); -- SIGHT_RANGE: 25
@@ -262,10 +246,6 @@ INSERT INTO `mob_pool_mods` VALUES (2840,370,50,0); -- REGEN: 50
 
 -- Nunyunuwi
 INSERT INTO `mob_pool_mods` VALUES (2922,370,100,0); -- REGEN: 100
-
--- Omega
-INSERT INTO `mob_pool_mods` VALUES (2973,291,25,0); -- COUNTER: 25
-INSERT INTO `mob_pool_mods` VALUES (2973,370,1,0);  -- REGEN: 1
 
 -- Ore Golem
 INSERT INTO `mob_pool_mods` VALUES (3051,4,4,1); -- SIGHT_RANGE: 4
@@ -357,10 +337,6 @@ INSERT INTO `mob_pool_mods` VALUES (4046,23,6191,1); -- IMMUNITY: 6191
 
 -- Ullikummi
 INSERT INTO `mob_pool_mods` VALUES (4082,4,4,1); -- SIGHT_RANGE: 4
-
--- Ultima
-INSERT INTO `mob_pool_mods` VALUES (4083,368,30,0); -- REGAIN: 30
-INSERT INTO `mob_pool_mods` VALUES (4083,370,1,0);  -- REGEN: 1
 
 -- Vanguard_Armorer
 INSERT INTO `mob_pool_mods` VALUES (4136,75,3,1); -- CAN_PARRY: 3
@@ -588,12 +564,6 @@ INSERT INTO `mob_pool_mods` VALUES (6011,165,25,0);     -- CRITHITRATE: 25
 
 -- Trust: Shantotto II
 INSERT INTO `mob_pool_mods` VALUES (6019,3,-10,0);      -- HPP: -10
-
--- Ixzdei Rdm
-INSERT INTO `mob_pool_mods` VALUES (7039,34,60,1); -- MAGIC_COOL: 60
-INSERT INTO `mob_pool_mods` VALUES (7039,4,15,1);  -- SIGHT_RANGE: 15
-INSERT INTO `mob_pool_mods` VALUES (7039,5,15,1);  -- SOUND_RANGE: 15
-INSERT INTO `mob_pool_mods` VALUES (7039,11,30,1); -- LINK_RADIUS: 30
 
 -- Kaiser Behemoth (Apollyon NW)
 INSERT INTO `mob_pool_mods` VALUES (6732,3,100,1); -- MP_BASE: 100

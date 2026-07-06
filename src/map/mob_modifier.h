@@ -120,6 +120,7 @@ enum MOBMODIFIER : int
     MOBMOD_AVATAR_PETID           = 89, // A value from xi.petId to select model/ability from when owner uses astral flow
     MOBMOD_AVATAR_ASTRAL_DELAY    = 90, // Number of milliseconds to delay AF after avatar spawn
     MOBMOD_H2H_SINGLE_SWING       = 91, // Mob will have only one swing per attack even as MNK with H2H skill
+    MOBMOD_AOE_HIT_ALL            = 92, // Mob AoE can hit any player regardless of enmity
 };
 
 #endif

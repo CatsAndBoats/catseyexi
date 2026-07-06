@@ -253,14 +253,31 @@ end
 
 ---@nodiscard
 ---@param input number
----@param min_val number?
----@param max_val number?
+---@param minValue number
+---@param maxValue number
 ---@return number
-function utils.clamp(input, min_val, max_val)
-    if min_val ~= nil and input < min_val then
-        input = min_val
-    elseif max_val ~= nil and input > max_val then
-        input = max_val
+function utils.clamp(input, minValue, maxValue)
+    if minValue == nil then
+        print('utils.clamp() -> invalid "min" value.')
+        return input
+    end
+
+    if maxValue == nil then
+        print('utils.clamp() -> invalid "max" value.')
+        return input
+    end
+
+    if minValue > maxValue then
+        print('utils.clamp() -> "min" value.is higher than "max" value.')
+        return input
+    end
+
+    if input < minValue then
+        return minValue
+    end
+
+    if input > maxValue then
+        return maxValue
     end
 
     return input
@@ -438,123 +455,6 @@ function utils.counter(predicate)
             return 0
         end
     end
-end
-
--- returns unabsorbed damage
----@nodiscard
----@param target CBaseEntity
----@param dmg integer
----@return integer
-function utils.stoneskin(target, dmg)
-    --handling stoneskin
-    if dmg > 0 then
-        local skin = target:getMod(xi.mod.STONESKIN)
-        if skin > 0 then
-            if skin > dmg then --absorb all damage
-                target:delMod(xi.mod.STONESKIN, dmg)
-                return 0
-            else --absorbs some damage then wear
-                target:delStatusEffect(xi.effect.STONESKIN)
-                target:setMod(xi.mod.STONESKIN, 0)
-                return dmg - skin
-            end
-        end
-    end
-
-    return dmg
-end
-
--- returns reduced magic damage from RUN buff, 'One for All'
----@nodiscard
----@param target CBaseEntity
----@param dmg integer
----@return integer
-function utils.oneforall(target, dmg)
-    if dmg > 0 then
-        local oneForAllEffect = target:getStatusEffect(xi.effect.ONE_FOR_ALL)
-
-        if oneForAllEffect ~= nil then
-            local power = oneForAllEffect:getPower()
-            dmg = math.max(0, dmg - power)
-        end
-    end
-
-    return dmg
-end
-
----@param target CBaseEntity
----@param dmg integer
----@param shadowbehav integer?
----@return integer
-function utils.takeShadows(target, dmg, shadowbehav)
-    if shadowbehav == nil then
-        shadowbehav = 1
-    end
-
-    local targShadows = target:getMod(xi.mod.UTSUSEMI)
-    local shadowType = xi.mod.UTSUSEMI
-
-    if targShadows == 0 then
-        --try blink, as utsusemi always overwrites blink this is okay
-        targShadows = target:getMod(xi.mod.BLINK)
-        shadowType = xi.mod.BLINK
-    end
-
-    local shadowsLeft = targShadows
-    local shadowsUsed = 0
-
-    if targShadows > 0 then
-        if shadowType == xi.mod.BLINK then
-            for i = 1, shadowbehav, 1 do
-                if shadowsLeft > 0 then
-                    if math.random() <= 0.8 then
-                        shadowsUsed = shadowsUsed + 1
-                        shadowsLeft = shadowsLeft - 1
-                    end
-                end
-            end
-
-            if shadowsUsed >= shadowbehav then
-                dmg = 0
-            else
-                dmg = (dmg / shadowbehav) * (shadowbehav - shadowsUsed)
-            end
-        else
-            if targShadows >= shadowbehav then
-                shadowsLeft = targShadows - shadowbehav
-
-                if shadowsLeft > 0 then
-                    -- Update icon
-                    local effect = target:getStatusEffect(xi.effect.COPY_IMAGE)
-                    if effect ~= nil then
-                        if shadowsLeft == 1 then
-                            effect:setIcon(xi.effect.COPY_IMAGE)
-                        elseif shadowsLeft == 2 then
-                            effect:setIcon(xi.effect.COPY_IMAGE_2)
-                        elseif shadowsLeft == 3 then
-                            effect:setIcon(xi.effect.COPY_IMAGE_3)
-                        elseif shadowsLeft >= 4 then
-                            effect:setIcon(xi.effect.COPY_IMAGE_4)
-                        end
-                    end
-                end
-
-                dmg = 0
-            else
-                shadowsLeft = 0
-                dmg = dmg * (shadowbehav - targShadows) / shadowbehav
-            end
-        end
-
-        target:setMod(shadowType, shadowsLeft)
-
-        if shadowsLeft <= 0 then
-            target:delStatusEffect(xi.effect.COPY_IMAGE)
-            target:delStatusEffect(xi.effect.BLINK)
-        end
-    end
-
-    return dmg
 end
 
 ---@nodiscard

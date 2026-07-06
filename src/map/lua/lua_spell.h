@@ -40,7 +40,7 @@ public:
 
     friend std::ostream& operator<<(std::ostream& out, const CLuaSpell& spell);
 
-    void   setMsg(uint16 messageID);
+    void   setMsg(MsgBasic messageID);
     void   setModifier(ActionModifier modifier) const;
     void   setAoE(uint8 aoe);
     void   setFlag(uint8 flags);
@@ -53,7 +53,7 @@ public:
     float  getRadius();
     bool   tookEffect();
     uint16 getTotalTargets();
-    uint16 getMagicBurstMessage();
+    auto   getMagicBurstMessage() const -> MsgBasic;
     uint16 getElement();
     uint16 getID();
     uint16 getMPCost();

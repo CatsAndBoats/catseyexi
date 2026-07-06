@@ -2,7 +2,7 @@
 -- Area: Fort Karugo Narugo [S]
 --  NPC: ???
 -- Type: Quest
--- !pos 280 -20 85 96
+-- !pos 208 -30 54 96
 -----------------------------------
 local ID = zones[xi.zone.FORT_KARUGO_NARUGO_S]
 -----------------------------------
