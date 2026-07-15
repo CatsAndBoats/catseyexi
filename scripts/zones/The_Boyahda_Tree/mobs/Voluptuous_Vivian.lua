@@ -70,7 +70,8 @@ entity.spawnPoints =
 
 entity.onMobInitialize = function(mob)
     mob:setMobMod(xi.mobMod.GIL_MIN, 20000)
-    mob:setMobMod(xi.mobMod.GIL_MAX, 24000)
+    mob:setMobMod(xi.mobMod.GIL_MAX, 20000)
+    mob:setMobMod(xi.mobMod.BASE_DAMAGE_MULTIPLIER, 150)
 end
 
 entity.onMobSpawn = function(mob)

@@ -69,7 +69,8 @@ entity.phList =
 }
 
 entity.onMobInitialize = function(mob)
-    mob:setMobMod(xi.mobMod.MULTI_HIT, 5)
+    mob:setMobMod(xi.mobMod.BASE_DAMAGE_MULTIPLIER, 150)
+    mob:setMobMod(xi.mobMod.MULTI_HIT, 8) -- TODO : This is not correct. Will need to be updated to proper multi-hit handling later.
 end
 
 entity.onMobDeath = function(mob, player, optParams)

@@ -4,8 +4,8 @@
 -----------------------------------
 xi = xi or {}
 
----@enum xi.mobPools
-xi.mobPools =
+---@enum xi.mobPool
+xi.mobPool =
 {
     AGONIZER               = 63,   -- Agonizer (CoP 5-2 Spire Battle)
     ARMED_GEARS            = 243,  -- Armed Gears Restoral

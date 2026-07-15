@@ -4998,7 +4998,7 @@ INSERT INTO `mob_droplist` VALUES (533,4,0,1000,940,0);          -- Revival Tree
 -- ZoneID: 195 - Dark Stalker War
 -- ZoneID: 195 - Dark Stalker Blm
 -- ZoneID: 195 - Dark Stalker Rng
-INSERT INTO `mob_droplist` VALUES (554,2,0,1000,1098,@RARE);  -- Tavnazia Bell (Rare, 5%)
+INSERT INTO `mob_droplist` VALUES (554,0,0,1000,1098,@RARE);  -- Tavnazia Bell (Rare, 5%)
 INSERT INTO `mob_droplist` VALUES (554,0,0,1000,4876,@VRARE); -- Scroll Of Absorb-Vit (Very Rare, 1%)
 INSERT INTO `mob_droplist` VALUES (554,0,0,1000,4877,@VRARE); -- Scroll Of Absorb-Agi (Very Rare, 1%)
 INSERT INTO `mob_droplist` VALUES (554,0,0,1000,4878,@RARE);  -- Scroll Of Absorb-Int (Rare, 5%)
@@ -5137,7 +5137,7 @@ INSERT INTO `mob_droplist` VALUES (569,0,0,1000,17316,@UNCOMMON); -- Bomb Arm (U
 INSERT INTO `mob_droplist` VALUES (569,4,0,1000,928,0);           -- Pinch Of Bomb Ash (Despoil)
 
 -- ZoneID: 195 - Dark Stalker Thf
-INSERT INTO `mob_droplist` VALUES (570,2,0,1000,1098,@RARE); -- Tavnazia Bell (Rare, 5%)
+INSERT INTO `mob_droplist` VALUES (570,0,0,1000,1098,@RARE); -- Tavnazia Bell (Rare, 5%)
 INSERT INTO `mob_droplist` VALUES (570,0,0,1000,940,@VRARE); -- Revival Tree Root (Very Rare, 1%)
 
 -- ZoneID:  30 - Hawker
@@ -11704,8 +11704,8 @@ INSERT INTO `mob_droplist` VALUES (1410,1,3,@VCOMMON,1313,111);      -- Lock Of 
 INSERT INTO `mob_droplist` VALUES (1410,0,0,@VCOMMON,17586,@COMMON); -- Mercurial Pole (Common, 15%)
 
 -- ZoneID: 158 - Jotunn Gatekeeper
-INSERT INTO `mob_droplist` VALUES (1411,1,1,@RARE,2386,800);      -- Hoary Battle Horn (Group 1, Rare, 5% - 80%)
-INSERT INTO `mob_droplist` VALUES (1411,1,1,@RARE,2385,200);      -- Moldy Buckler (Group 1, Rare, 5% - 20%)
+INSERT INTO `mob_droplist` VALUES (1411,1,1,@RARE,2386,750);      -- Hoary Battle Horn (Group 1, Rare, 5% - 75%)
+INSERT INTO `mob_droplist` VALUES (1411,1,1,@RARE,2385,250);      -- Moldy Buckler (Group 1, Rare, 5% - 25%)
 INSERT INTO `mob_droplist` VALUES (1411,0,0,1000,1426,@UNCOMMON); -- Warriors Testimony (Uncommon, 10%)
 INSERT INTO `mob_droplist` VALUES (1411,0,0,1000,497,@UNCOMMON);  -- Gigas Socks (Uncommon, 10%)
 INSERT INTO `mob_droplist` VALUES (1411,0,0,1000,499,@VRARE);     -- Gigas Necklace (Very Rare, 1%)
@@ -11713,8 +11713,8 @@ INSERT INTO `mob_droplist` VALUES (1411,4,0,1000,820,0);          -- Wool Thread
 INSERT INTO `mob_droplist` VALUES (1411,4,0,1000,827,0);          -- Wool Cloth (Despoil)
 
 -- ZoneID: 158 - Jotunn Hallkeeper
-INSERT INTO `mob_droplist` VALUES (1412,1,1,@RARE,2386,800);      -- Hoary Battle Horn (Group 1, Rare, 5% - 80%)
-INSERT INTO `mob_droplist` VALUES (1412,1,1,@RARE,2385,200);      -- Moldy Buckler (Group 1, Rare, 5% - 20%)
+INSERT INTO `mob_droplist` VALUES (1412,1,1,@RARE,2386,750);      -- Hoary Battle Horn (Group 1, Rare, 5% - 75%)
+INSERT INTO `mob_droplist` VALUES (1412,1,1,@RARE,2385,250);      -- Moldy Buckler (Group 1, Rare, 5% - 25%)
 INSERT INTO `mob_droplist` VALUES (1412,0,0,1000,1427,@UNCOMMON); -- Monks Testimony (Uncommon, 10%)
 INSERT INTO `mob_droplist` VALUES (1412,0,0,1000,497,@UNCOMMON);  -- Gigas Socks (Uncommon, 10%)
 INSERT INTO `mob_droplist` VALUES (1412,0,0,1000,499,@VRARE);     -- Gigas Necklace (Very Rare, 1%)
@@ -11722,8 +11722,8 @@ INSERT INTO `mob_droplist` VALUES (1412,4,0,1000,820,0);          -- Wool Thread
 INSERT INTO `mob_droplist` VALUES (1412,4,0,1000,827,0);          -- Wool Cloth (Despoil)
 
 -- ZoneID: 158 - Jotunn Wallkeeper
-INSERT INTO `mob_droplist` VALUES (1413,1,1,@RARE,2386,800);      -- Hoary Battle Horn (Group 1, Rare, 5% - 80%)
-INSERT INTO `mob_droplist` VALUES (1413,1,1,@RARE,2385,200);      -- Moldy Buckler (Group 1, Rare, 5% - 20%)
+INSERT INTO `mob_droplist` VALUES (1413,1,1,@RARE,2386,750);      -- Hoary Battle Horn (Group 1, Rare, 5% - 75%)
+INSERT INTO `mob_droplist` VALUES (1413,1,1,@RARE,2385,250);      -- Moldy Buckler (Group 1, Rare, 5% - 25%)
 INSERT INTO `mob_droplist` VALUES (1413,0,0,1000,1436,@UNCOMMON); -- Rangers Testimony (Uncommon, 10%)
 INSERT INTO `mob_droplist` VALUES (1413,0,0,1000,5010,@VRARE);    -- Scroll Of Archers Prelude (Very Rare, 1%)
 INSERT INTO `mob_droplist` VALUES (1413,0,0,1000,497,@COMMON);    -- Gigas Socks (Common, 15%)
@@ -11732,8 +11732,8 @@ INSERT INTO `mob_droplist` VALUES (1413,4,0,1000,820,0);          -- Wool Thread
 INSERT INTO `mob_droplist` VALUES (1413,4,0,1000,827,0);          -- Wool Cloth (Despoil)
 
 -- ZoneID: 158 - Jotunn Wildkeeper
-INSERT INTO `mob_droplist` VALUES (1414,1,1,@RARE,2386,800);      -- Hoary Battle Horn (Group 1, Rare, 5% - 80%)
-INSERT INTO `mob_droplist` VALUES (1414,1,1,@RARE,2385,200);      -- Moldy Buckler (Group 1, Rare, 5% - 20%)
+INSERT INTO `mob_droplist` VALUES (1414,1,1,@RARE,2386,750);      -- Hoary Battle Horn (Group 1, Rare, 5% - 75%)
+INSERT INTO `mob_droplist` VALUES (1414,1,1,@RARE,2385,250);      -- Moldy Buckler (Group 1, Rare, 5% - 25%)
 INSERT INTO `mob_droplist` VALUES (1414,0,0,1000,1434,@UNCOMMON); -- Beastmasters Testimony (Uncommon, 10%)
 INSERT INTO `mob_droplist` VALUES (1414,0,0,1000,497,@COMMON);    -- Gigas Socks (Common, 15%)
 INSERT INTO `mob_droplist` VALUES (1414,0,0,1000,499,@VRARE);     -- Gigas Necklace (Very Rare, 1%)

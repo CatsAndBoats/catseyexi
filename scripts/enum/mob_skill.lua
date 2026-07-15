@@ -68,6 +68,8 @@ xi.mobSkill =
 
     BAD_BREATH_1                  =  319,
 
+    THOUSAND_NEEDLES_1            =  322,
+
     DRILL_BRANCH                  =  328,
     PINECONE_BOMB                 =  329,
 
@@ -138,7 +140,12 @@ xi.mobSkill =
 
     CHARGED_WHISKER               =  483,
 
+    WHIP_TONGUE                   =  486,
     TRANSMOGRIFICATION            =  487, -- Mammet-800
+
+    STINKING_GAS                  =  489,
+
+    ABYSS_BLAST                   =  492,
 
     TRICLIP_1                     =  498,
     BACK_SWISH_1                  =  499,
@@ -212,6 +219,10 @@ xi.mobSkill =
 
     FINAL_METEOR                  =  634, -- Final Meteor Chlevnik
 
+    VOIDSONG_1                    =  649,
+    THORNSONG_1                   =  650,
+    LODESONG_1                    =  651,
+
     CHAOTIC_EYE_1                 =  653,
 
     CURSED_SPHERE_1               =  659,
@@ -272,7 +283,13 @@ xi.mobSkill =
     THUNDER_BREATH                =  820,
     RADIANT_BREATH                =  821,
     CHAOS_BREATH                  =  822,
-
+    FIRE_BLADE_1                  =  823,
+    FROST_BLADE_1                 =  824,
+    WIND_BLADE_1                  =  825,
+    EARTH_BLADE_1                 =  826,
+    LIGHTNING_BLADE_1             =  827,
+    WATER_BLADE_1                 =  828,
+    GREAT_WHEEL_1                 =  829,
     LIGHT_BLADE_1                 =  830,
 
     HOWLING_MOON_1                =  838, -- Unknown usage.
@@ -339,6 +356,9 @@ xi.mobSkill =
     AJIDO_WARP_OUT                =  977, -- Windurst 9-2 Ajido teleport
     AJIDO_WARP_IN                 =  978, -- Windurst 9-2 Ajido teleport
 
+    STELLAR_BURST_1               =  986,
+    VORTEX_1                      =  987,
+
     PHASE_SHIFT_1_EXOPLATES       =  993,
 
     PHASE_SHIFT_2_EXOPLATES       =  997,
@@ -346,6 +366,7 @@ xi.mobSkill =
     PHASE_SHIFT_3_EXOPLATES       = 1001,
     ZEID_SUMMON_SHADOWS_1         = 1002, -- TODO: Investigate why was this in sql, where it came from and why wasnt it actually used in an scripted way.
 
+    OMEGA_JAVELIN_1               = 1006,
     ZEID_SUMMON_SHADOWS_2         = 1007, -- Captured. Bastok mission 9-2 BCNM, phase 2. No actual name in log.
 
     CALL_BEAST                    = 1017, -- "Tango with a Tracker" Shikaree X
@@ -375,6 +396,8 @@ xi.mobSkill =
     DIAMOND_DUST_3                = 1166, -- Confirmed usage: "Trial-Size Trial by Ice" bcnm. (Shiva)
     JUDGMENT_BOLT_3               = 1167, -- Confirmed usage: "Trial-Size Trial by Lightning" bcnm. (Ramuh)
 
+    THORNSONG_2                   = 1176, -- Extremely powerful version of Thornsong
+
     RANGED_ATTACK_4               = 1202,
     RANGED_ATTACK_5               = 1203,
     RANGED_ATTACK_6               = 1204,
@@ -401,6 +424,14 @@ xi.mobSkill =
     MATERIAL_FEND                 = 1233,
     CAROUSEL_1                    = 1234,
 
+    PILE_PITCH                    = 1235,
+    GUIDED_MISSILE                = 1236,
+    HYPER_PULSE                   = 1237,
+    TARGET_ANALYSIS               = 1238,
+    DISCHARGER                    = 1239,
+    ION_EFFLUX                    = 1240,
+    REAR_LASERS                   = 1241,
+
     NEGATIVE_WHIRL_1              = 1243,
     STYGIAN_VAPOR                 = 1244,
     WINDS_OF_PROMYVION_1          = 1245,
@@ -413,23 +444,39 @@ xi.mobSkill =
     TRINARY_TAP                   = 1251,
     SHADOW_SPREAD                 = 1252,
 
+    WIRE_CUTTER                   = 1259,
+    ANTIMATTER                    = 1260,
+    EQUALIZER                     = 1261,
+    FLAME_THROWER                 = 1262,
+    CRYO_JET                      = 1263,
+    TURBOFAN                      = 1264,
+    SMOKE_DISCHARGER              = 1265,
+    HIGH_TENSION_DISCHARGER       = 1266,
+    HYDRO_CANON                   = 1267,
+    NUCLEAR_WASTE                 = 1268,
+    CHEMICAL_BOMB                 = 1269,
+    PARTICLE_SHIELD               = 1270,
+
     EMPTY_CUTTER                  = 1271,
 
     IMPALEMENT                    = 1274,
     EMPTY_THRASH                  = 1275,
     PROMYVION_BRUME_2             = 1276,
 
+    GERJIS_GRIP                   = 1322,
+
     HOOF_VOLLEY                   = 1330,
 
     COUNTERSTANCE                 = 1331, -- The Waughroon Kid
-
+    EXTREMELY_BAD_BREATH_1        = 1332,
     CONTAGION_TRANSFER            = 1333,
     CONTAMINATION                 = 1334,
     TOXIC_PICK                    = 1335,
-
     FRENZIED_RAGE_1               = 1336,
     CHARM_2                       = 1337,
+    INFERNAL_PESTILENCE           = 1338,
 
+    CROSSTHRASH_1                 = 1340,
     KNIFE_EDGE_CIRCLE             = 1341,
     TRAIN_FALL                    = 1342,
 
@@ -456,15 +503,33 @@ xi.mobSkill =
 
     AMATSU_TORIMAI                = 1390,
     AMATSU_KAZAKIRI               = 1391,
-
+    AMATSU_YUKIARASHI             = 1392,
+    AMATSU_TSUKIOBORO             = 1393,
     AMATSU_HANAIKUSA              = 1394,
     AMATSU_TSUKIKAGE              = 1395,
     COSMIC_ELUCIDATION            = 1396,
-
+    OISOYA                        = 1397,
     RANGED_ATTACK_TENZEN_1        = 1398, -- Tenzen Bow High
     RICEBALL_TENZEN               = 1399,
     RANGED_ATTACK_TENZEN_2        = 1400, -- Tenzen Bow Low
     SOUL_ACCRETION                = 1401,
+
+    ACTINIC_BURST                 = 1441,
+
+    HEXIDISCS                     = 1443,
+    VORPAL_BLADE_GHRAH            = 1444,
+    DAMNATION_DIVE_GHRAH          = 1445,
+    SICKLE_SLASH                  = 1446,
+
+    REACTOR_COOL                  = 1463,
+    OPTIC_INDURATION_CHARGE       = 1464,
+    OPTIC_INDURATION              = 1465,
+    STATIC_FILAMENT               = 1466,
+    DECAYED_FILAMENT              = 1467,
+    REACTOR_OVERHEAT              = 1468,
+    REACTOR_OVERLOAD              = 1469,
+
+    DEADALUS_WING_COP_PRISHE      = 1487, -- Dwing COP 8-4 Dawn
 
     HOWLING_MOON_3                = 1520, -- Unknown usage.
 
@@ -514,6 +579,8 @@ xi.mobSkill =
 
     BOREAS_MANTLE                 = 1980, -- Unique entry.
 
+    REWARD                        = 2005,
+
     NOCTURNAL_SERVITUDE           = 2112,
     HELLSNAP                      = 2113,
     HELLCLAP                      = 2114,
@@ -553,6 +620,9 @@ xi.mobSkill =
     OPPRESSIVE_GLARE              = 2392,
 
     ROAR_3                        = 2406,
+
+    REAVING_WIND                  = 2431,
+    REAVING_WIND_KNOCKBACK        = 2434,
 
     AQUA_BLAST                    = 2437,
 
