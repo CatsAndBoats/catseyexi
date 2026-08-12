@@ -357,6 +357,4 @@ xi.settings.main =
     ENABLE_SUMMIT_OF_THE_STARS   = true,
     ENABLE_SUMMIT_RIFTS          = true, -- Stronghold Invasion / Augmentation system
     PARTYFINDER_ENABLED          = true,
-    TEST_SERVER                  = false, -- If enabled, gives all characters GM Level based TEST_SERVER_GM_LEVEL
-    TEST_SERVER_GM_LEVEL         = 4,     -- Default GM Level to give players if TEST_SERVER is enabled.
 }
