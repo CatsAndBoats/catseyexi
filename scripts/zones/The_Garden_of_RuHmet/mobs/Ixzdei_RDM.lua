@@ -91,7 +91,7 @@ entity.onMobFight = function(mob, target)
     end
 end
 
-entity.onMobMobskillChoose = function(mob, target)
+entity.onMobMobskillChoose = function(mob, target, skillId)
     local form = mob:getAnimationSub()
     local tpMoves = { xi.mobSkill.REACTOR_COOL }
 
@@ -150,21 +150,21 @@ entity.onMobSpellChoose = function(mob, target, spellId)
 
     local spellListLight =
     {
-        [1] = { xi.magic.spell.CURE_V,    mob,    true,  xi.action.type.HEALING_TARGET,    33,                100 },
-        [2] = { xi.magic.spell.REGEN,     mob,    true,  xi.action.type.ENHANCING_TARGET,  xi.effect.REGEN,   100 },
-        [3] = { xi.magic.spell.GRAVITY,   target, false, xi.action.type.ENFEEBLING_TARGET, xi.effect.WEIGHT,  100 },
-        [4] = { xi.magic.spell.DIAGA_II,  target, false, xi.action.type.ENFEEBLING_TARGET, xi.effect.DIA,     100 },
-        [5] = { xi.magic.spell.SILENCEGA, target, false, xi.action.type.ENFEEBLING_TARGET, xi.effect.SILENCE, 100 },
-        [6] = { xi.magic.spell.FLASH,     target, false, xi.action.type.ENFEEBLING_TARGET, xi.effect.FLASH,   100 },
+        [1] = { xi.magic.spell.CURE_V,    mob,    true,  xi.action.type.HEALING_TARGET,    33,                0, 100 },
+        [2] = { xi.magic.spell.REGEN,     mob,    true,  xi.action.type.ENHANCING_TARGET,  xi.effect.REGEN,   0, 100 },
+        [3] = { xi.magic.spell.GRAVITY,   target, false, xi.action.type.ENFEEBLING_TARGET, xi.effect.WEIGHT,  0, 100 },
+        [4] = { xi.magic.spell.DIAGA_II,  target, false, xi.action.type.ENFEEBLING_TARGET, xi.effect.DIA,     0, 100 },
+        [5] = { xi.magic.spell.SILENCEGA, target, false, xi.action.type.ENFEEBLING_TARGET, xi.effect.SILENCE, 0, 100 },
+        [6] = { xi.magic.spell.FLASH,     target, false, xi.action.type.ENFEEBLING_TARGET, xi.effect.FLASH,   0, 100 },
     }
 
     local spellListDark =
     {
-        [1] = { xi.magic.spell.POISON_II, target, false, xi.action.type.ENFEEBLING_TARGET, xi.effect.POISON,    100 },
-        [2] = { xi.magic.spell.BIO_III,   target, false, xi.action.type.ENFEEBLING_TARGET, xi.effect.BIO,       100 },
-        [3] = { xi.magic.spell.BLIND,     target, false, xi.action.type.ENFEEBLING_TARGET, xi.effect.BLINDNESS, 100 },
-        [5] = { xi.magic.spell.BINDGA,    target, false, xi.action.type.ENFEEBLING_TARGET, xi.effect.BIND,      100 },
-        [4] = { xi.magic.spell.DISPELGA,  target, false, xi.action.type.DAMAGE_TARGET,     nil,                 100 },
+        [1] = { xi.magic.spell.POISON_II, target, false, xi.action.type.ENFEEBLING_TARGET, xi.effect.POISON,    0, 100 },
+        [2] = { xi.magic.spell.BIO_III,   target, false, xi.action.type.ENFEEBLING_TARGET, xi.effect.BIO,       0, 100 },
+        [3] = { xi.magic.spell.BLIND,     target, false, xi.action.type.ENFEEBLING_TARGET, xi.effect.BLINDNESS, 0, 100 },
+        [5] = { xi.magic.spell.BINDGA,    target, false, xi.action.type.ENFEEBLING_TARGET, xi.effect.BIND,      0, 100 },
+        [4] = { xi.magic.spell.DISPELGA,  target, false, xi.action.type.DAMAGE_TARGET,     nil,                 0, 100 },
     }
 
     local groupTableLight =

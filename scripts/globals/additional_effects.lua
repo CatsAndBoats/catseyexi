@@ -162,7 +162,7 @@ xi.additionalEffect.calcPhysDamage = function(attacker, defender, item, params)
         return params.damage * -1
     end
 
-    params.damage = params.damage * xi.spells.damage.calculateDamageAdjustment(defender, params.isPhysical, false, params.isRanged, params.isBreath)
+    params.damage = params.damage * xi.combat.damage.calculateDamageAdjustment(defender, params.isPhysical, false, params.isRanged, params.isBreath)
 
     -- multiplicative
     switch (params.damageType) : caseof
@@ -266,7 +266,7 @@ xi.additionalEffect.procFunctions[xi.additionalEffect.procType.DEBUFF] = functio
     end
 
     -- Early return: Incompatible effect in place.
-    if xi.data.statusEffect.isEffectNullified(target, effectId) then
+    if xi.data.statusEffect.isEffectNullified(target, effectId, 0) then
         return 0, 0, 0
     end
 

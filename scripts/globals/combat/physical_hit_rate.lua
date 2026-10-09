@@ -164,7 +164,7 @@ local function accuracyAndEvasionToHitRate(attacker, target, acc, eva)
 
         -- Accuracy Penalty, only applies to PCs -- TODO: does this apply to player pets?
         elseif attacker:isPC() and attacker:getMainLvl() < target:getMainLvl() then
-            acc = acc - dlvl * 4
+            acc = acc + dlvl * 4
         end
     end
 

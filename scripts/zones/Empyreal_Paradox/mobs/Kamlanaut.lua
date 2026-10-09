@@ -50,7 +50,7 @@ entity.onMobFight = function(mob, target)
     end
 end
 
-entity.onMobMobskillChoose = function(mob, target)
+entity.onMobMobskillChoose = function(mob, target, skillId)
     local tpList =
     {
         xi.mobSkill.GREAT_WHEEL_1,
@@ -105,10 +105,10 @@ end
 entity.onMobSpellChoose = function(mob, target)
     local spellList =
     {
-        [1] = { xi.magic.spell.DISPELGA,  target, false, xi.action.type.DAMAGE_TARGET,      nil,               100 },
-        [2] = { xi.magic.spell.SLOWGA,    target, false, xi.action.type.ENFEEBLING_TARGET,  xi.effect.SLOW,    100 },
-        [3] = { xi.magic.spell.SILENCEGA, target, false, xi.action.type.ENFEEBLING_TARGET,  xi.effect.SILENCE, 100 },
-        [4] = { xi.magic.spell.GRAVIGA,   target, false, xi.action.type.ENFEEBLING_TARGET,  xi.effect.WEIGHT,  100 },
+        [1] = { xi.magic.spell.DISPELGA,  target, false, xi.action.type.DAMAGE_TARGET,      nil,               0, 100 },
+        [2] = { xi.magic.spell.SLOWGA,    target, false, xi.action.type.ENFEEBLING_TARGET,  xi.effect.SLOW,    3, 100 },
+        [3] = { xi.magic.spell.SILENCEGA, target, false, xi.action.type.ENFEEBLING_TARGET,  xi.effect.SILENCE, 0, 100 },
+        [4] = { xi.magic.spell.GRAVIGA,   target, false, xi.action.type.ENFEEBLING_TARGET,  xi.effect.WEIGHT,  0, 100 },
     }
 
     return xi.combat.behavior.chooseAction(mob, target, nil, spellList)

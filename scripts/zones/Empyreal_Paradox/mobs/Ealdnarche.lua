@@ -29,7 +29,7 @@ entity.onMobSpawn = function(mob)
     mob:setMobMod(xi.mobMod.BASE_DAMAGE_MULTIPLIER, 150)
 end
 
-entity.onMobMobskillChoose = function(mob, target)
+entity.onMobMobskillChoose = function(mob, target, skillId)
     local spellList =
     {
         xi.mobSkill.OMEGA_JAVELIN_1,
@@ -43,14 +43,14 @@ end
 entity.onMobSpellChoose = function(mob, target)
     local spellList =
     {
-        [1] = { xi.magic.spell.THUNDAGA_III, target, false, xi.action.type.DAMAGE_TARGET,      nil,                100 },
-        [2] = { xi.magic.spell.BLIZZAGA_III, target, false, xi.action.type.DAMAGE_TARGET,      nil,                100 },
-        [3] = { xi.magic.spell.FIRAGA_III,   target, false, xi.action.type.DAMAGE_TARGET,      nil,                100 },
-        [4] = { xi.magic.spell.AEROGA_III,   target, false, xi.action.type.DAMAGE_TARGET,      nil,                100 },
-        [5] = { xi.magic.spell.WATERGA_III,  target, false, xi.action.type.DAMAGE_TARGET,      nil,                100 },
-        [6] = { xi.magic.spell.STONEGA_III,  target, false, xi.action.type.DAMAGE_TARGET,      nil,                100 },
-        [7] = { xi.magic.spell.SLEEPGA_II,   target, false, xi.action.type.ENFEEBLING_TARGET,  xi.effect.SLEEP_II, 100 },
-        [8] = { xi.magic.spell.BINDGA,       target, false, xi.action.type.ENFEEBLING_TARGET,  xi.effect.BIND,     100 },
+        [1] = { xi.magic.spell.THUNDAGA_III, target, false, xi.action.type.DAMAGE_TARGET,      nil,                0, 100 },
+        [2] = { xi.magic.spell.BLIZZAGA_III, target, false, xi.action.type.DAMAGE_TARGET,      nil,                0, 100 },
+        [3] = { xi.magic.spell.FIRAGA_III,   target, false, xi.action.type.DAMAGE_TARGET,      nil,                0, 100 },
+        [4] = { xi.magic.spell.AEROGA_III,   target, false, xi.action.type.DAMAGE_TARGET,      nil,                0, 100 },
+        [5] = { xi.magic.spell.WATERGA_III,  target, false, xi.action.type.DAMAGE_TARGET,      nil,                0, 100 },
+        [6] = { xi.magic.spell.STONEGA_III,  target, false, xi.action.type.DAMAGE_TARGET,      nil,                0, 100 },
+        [7] = { xi.magic.spell.SLEEPGA_II,   target, false, xi.action.type.ENFEEBLING_TARGET,  xi.effect.SLEEP_II, 0, 100 },
+        [8] = { xi.magic.spell.BINDGA,       target, false, xi.action.type.ENFEEBLING_TARGET,  xi.effect.BIND,     0, 100 },
     }
 
     return xi.combat.behavior.chooseAction(mob, target, nil, spellList)

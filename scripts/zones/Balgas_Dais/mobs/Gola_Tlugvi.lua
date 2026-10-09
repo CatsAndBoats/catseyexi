@@ -47,7 +47,7 @@ entity.onAdditionalEffect = function(mob, target, damage)
     return xi.mob.onAddEffect(mob, target, damage, xi.mob.ae.TP_DRAIN, { chance = 15, power = math.random (50, 1100) })
 end
 
-entity.onMobMobskillChoose = function(mob, target)
+entity.onMobMobskillChoose = function(mob, target, skillId)
     return xi.mobSkill.DRILL_BRANCH
 end
 
@@ -80,17 +80,17 @@ end
 entity.onMobSpellChoose = function(mob, target, spellId)
     local spellList =
     {
-        [ 1] = { xi.magic.spell.DRAIN,        target, false, xi.action.type.DRAIN_HP,          nil,                100 },
-        [ 2] = { xi.magic.spell.ASPIR,        target, false, xi.action.type.DRAIN_MP,          nil,                100 },
-        [ 3] = { xi.magic.spell.STUN,         mob,    false, xi.action.type.ENFEEBLING_EFFECT, xi.effect.STUN,     100 },
-        [ 4] = { xi.magic.spell.ABSORB_TP,    mob,    false, xi.action.type.ENFEEBLING_EFFECT, nil,                100 },
-        [ 5] = { xi.magic.spell.ABSORB_STR,   mob,    false, xi.action.type.ENFEEBLING_EFFECT, xi.effect.STR_DOWN, 100 },
-        [ 6] = { xi.magic.spell.ABSORB_DEX,   mob,    false, xi.action.type.ENFEEBLING_EFFECT, xi.effect.DEX_DOWN, 100 },
-        [ 7] = { xi.magic.spell.ABSORB_VIT,   mob,    false, xi.action.type.ENFEEBLING_EFFECT, xi.effect.VIT_DOWN, 100 },
-        [ 8] = { xi.magic.spell.ABSORB_AGI,   mob,    false, xi.action.type.ENFEEBLING_EFFECT, xi.effect.AGI_DOWN, 100 },
-        [ 9] = { xi.magic.spell.ABSORB_INT,   mob,    false, xi.action.type.ENFEEBLING_EFFECT, xi.effect.INT_DOWN, 100 },
-        [10] = { xi.magic.spell.ABSORB_MND,   mob,    false, xi.action.type.ENFEEBLING_EFFECT, xi.effect.MND_DOWN, 100 },
-        [11] = { xi.magic.spell.ABSORB_CHR,   mob,    false, xi.action.type.ENFEEBLING_EFFECT, xi.effect.CHR_DOWN, 100 },
+        [ 1] = { xi.magic.spell.DRAIN,        target, false, xi.action.type.DRAIN_HP,          nil,                0, 100 },
+        [ 2] = { xi.magic.spell.ASPIR,        target, false, xi.action.type.DRAIN_MP,          nil,                0, 100 },
+        [ 3] = { xi.magic.spell.STUN,         mob,    false, xi.action.type.ENFEEBLING_EFFECT, xi.effect.STUN,     0, 100 },
+        [ 4] = { xi.magic.spell.ABSORB_TP,    mob,    false, xi.action.type.ENFEEBLING_EFFECT, nil,                0, 100 },
+        [ 5] = { xi.magic.spell.ABSORB_STR,   mob,    false, xi.action.type.ENFEEBLING_EFFECT, xi.effect.STR_DOWN, 0, 100 },
+        [ 6] = { xi.magic.spell.ABSORB_DEX,   mob,    false, xi.action.type.ENFEEBLING_EFFECT, xi.effect.DEX_DOWN, 0, 100 },
+        [ 7] = { xi.magic.spell.ABSORB_VIT,   mob,    false, xi.action.type.ENFEEBLING_EFFECT, xi.effect.VIT_DOWN, 0, 100 },
+        [ 8] = { xi.magic.spell.ABSORB_AGI,   mob,    false, xi.action.type.ENFEEBLING_EFFECT, xi.effect.AGI_DOWN, 0, 100 },
+        [ 9] = { xi.magic.spell.ABSORB_INT,   mob,    false, xi.action.type.ENFEEBLING_EFFECT, xi.effect.INT_DOWN, 0, 100 },
+        [10] = { xi.magic.spell.ABSORB_MND,   mob,    false, xi.action.type.ENFEEBLING_EFFECT, xi.effect.MND_DOWN, 0, 100 },
+        [11] = { xi.magic.spell.ABSORB_CHR,   mob,    false, xi.action.type.ENFEEBLING_EFFECT, xi.effect.CHR_DOWN, 0, 100 },
     }
     return xi.combat.behavior.chooseAction(mob, target, nil, spellList)
 end
