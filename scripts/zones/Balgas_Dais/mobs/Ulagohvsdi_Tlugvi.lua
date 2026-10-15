@@ -49,7 +49,7 @@ entity.onAdditionalEffect = function(mob, target, damage)
 end
 
 -- Only uses Pinecone Bomb.
-entity.onMobMobskillChoose = function(mob, target)
+entity.onMobMobskillChoose = function(mob, target, skillId)
     return xi.mobSkill.PINECONE_BOMB
 end
 
@@ -82,17 +82,17 @@ end
 entity.onMobSpellChoose = function(mob, target, spellId)
     local spellList =
     {
-        [ 1] = { xi.magic.spell.DOTON_NI,     target, false, xi.action.type.DAMAGE_TARGET,     nil,                  100 },
-        [ 2] = { xi.magic.spell.HYOTON_NI,    target, false, xi.action.type.DAMAGE_TARGET,     nil,                  100 },
-        [ 3] = { xi.magic.spell.HUTON_NI,     target, false, xi.action.type.DAMAGE_TARGET,     nil,                  100 },
-        [ 4] = { xi.magic.spell.KATON_NI,     target, false, xi.action.type.DAMAGE_TARGET,     nil,                  100 },
-        [ 5] = { xi.magic.spell.RAITON_NI,    target, false, xi.action.type.DAMAGE_TARGET,     nil,                  100 },
-        [ 6] = { xi.magic.spell.SUITON_NI,    target, false, xi.action.type.DAMAGE_TARGET,     nil,                  100 },
-        [ 7] = { xi.magic.spell.DOKUMORI_NI,  mob,    false, xi.action.type.ENFEEBLING_EFFECT, xi.effect.POISON,     100 },
-        [ 8] = { xi.magic.spell.KURAYAMI_NI,  mob,    false, xi.action.type.ENFEEBLING_EFFECT, xi.effect.BLINDNESS,  100 },
-        [ 9] = { xi.magic.spell.HOJO_NI,      mob,    false, xi.action.type.ENFEEBLING_EFFECT, xi.effect.SLOW,       100 },
-        [10] = { xi.magic.spell.JUBAKU_NI,    mob,    false, xi.action.type.ENFEEBLING_EFFECT, xi.effect.PARALYSIS,  100 },
-        [11] = { xi.magic.spell.UTSUSEMI_NI,  mob,    false, xi.action.type.ENHANCING_TARGET,  xi.effect.COPY_IMAGE, 100 },
+        [ 1] = { xi.magic.spell.DOTON_NI,     target, false, xi.action.type.DAMAGE_TARGET,     nil,                  0, 100 },
+        [ 2] = { xi.magic.spell.HYOTON_NI,    target, false, xi.action.type.DAMAGE_TARGET,     nil,                  0, 100 },
+        [ 3] = { xi.magic.spell.HUTON_NI,     target, false, xi.action.type.DAMAGE_TARGET,     nil,                  0, 100 },
+        [ 4] = { xi.magic.spell.KATON_NI,     target, false, xi.action.type.DAMAGE_TARGET,     nil,                  0, 100 },
+        [ 5] = { xi.magic.spell.RAITON_NI,    target, false, xi.action.type.DAMAGE_TARGET,     nil,                  0, 100 },
+        [ 6] = { xi.magic.spell.SUITON_NI,    target, false, xi.action.type.DAMAGE_TARGET,     nil,                  0, 100 },
+        [ 7] = { xi.magic.spell.DOKUMORI_NI,  target, false, xi.action.type.ENFEEBLING_EFFECT, xi.effect.POISON,     0, 100 },
+        [ 8] = { xi.magic.spell.KURAYAMI_NI,  target, false, xi.action.type.ENFEEBLING_EFFECT, xi.effect.BLINDNESS,  0, 100 },
+        [ 9] = { xi.magic.spell.HOJO_NI,      target, false, xi.action.type.ENFEEBLING_EFFECT, xi.effect.SLOW,       4, 100 },
+        [10] = { xi.magic.spell.JUBAKU_NI,    target, false, xi.action.type.ENFEEBLING_EFFECT, xi.effect.PARALYSIS,  0, 100 },
+        [11] = { xi.magic.spell.UTSUSEMI_NI,  mob,    false, xi.action.type.ENHANCING_TARGET,  xi.effect.COPY_IMAGE, 0, 100 },
     }
     return xi.combat.behavior.chooseAction(mob, target, nil, spellList)
 end

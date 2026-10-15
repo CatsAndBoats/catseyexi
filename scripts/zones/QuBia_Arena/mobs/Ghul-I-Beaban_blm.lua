@@ -41,16 +41,16 @@ end
 entity.onMobSpellChoose = function(mob, target, spellId)
     local spellList =
     {
-        [ 1] = { xi.magic.spell.AERO_II,    target, false, xi.action.type.DAMAGE_TARGET,        nil,                  100 },
-        [ 2] = { xi.magic.spell.FIRE_II,    target, false, xi.action.type.DAMAGE_TARGET,        nil,                  100 },
-        [ 3] = { xi.magic.spell.THUNDAGA,   target, false, xi.action.type.DAMAGE_TARGET,        nil,                  100 },
-        [ 4] = { xi.magic.spell.STONEGA_II, target, false, xi.action.type.DAMAGE_TARGET,        nil,                  100 },
-        [ 5] = { xi.magic.spell.DRAIN,      target, false, xi.action.type.DRAIN_HP,             nil,                  100 },
-        [ 6] = { xi.magic.spell.ASPIR,      target, false, xi.action.type.DRAIN_MP,             nil,                  100 },
-        [ 7] = { xi.magic.spell.SLEEP,      target, false, xi.action.type.ENFEEBLING_TARGET,    xi.effect.SLEEP_I,    100 },
-        [ 8] = { xi.magic.spell.SLEEPGA,    target, false, xi.action.type.ENFEEBLING_TARGET,    xi.effect.SLEEP_I,    100 },
-        [ 9] = { xi.magic.spell.BIO_II,     target, false, xi.action.type.ENFEEBLING_TARGET,    xi.effect.BIO,        100 },
-        [10] = { xi.magic.spell.ICE_SPIKES, mob,    false, xi.action.type.ENHANCING_FORCE_SELF, xi.effect.ICE_SPIKES, 100 },
+        [ 1] = { xi.magic.spell.AERO_II,    target, false, xi.action.type.DAMAGE_TARGET,        nil,                  0, 100 },
+        [ 2] = { xi.magic.spell.FIRE_II,    target, false, xi.action.type.DAMAGE_TARGET,        nil,                  0, 100 },
+        [ 3] = { xi.magic.spell.THUNDAGA,   target, false, xi.action.type.DAMAGE_TARGET,        nil,                  0, 100 },
+        [ 4] = { xi.magic.spell.STONEGA_II, target, false, xi.action.type.DAMAGE_TARGET,        nil,                  0, 100 },
+        [ 5] = { xi.magic.spell.DRAIN,      target, false, xi.action.type.DRAIN_HP,             nil,                  0, 100 },
+        [ 6] = { xi.magic.spell.ASPIR,      target, false, xi.action.type.DRAIN_MP,             nil,                  0, 100 },
+        [ 7] = { xi.magic.spell.SLEEP,      target, false, xi.action.type.ENFEEBLING_TARGET,    xi.effect.SLEEP_I,    0, 100 },
+        [ 8] = { xi.magic.spell.SLEEPGA,    target, false, xi.action.type.ENFEEBLING_TARGET,    xi.effect.SLEEP_I,    0, 100 },
+        [ 9] = { xi.magic.spell.BIO_II,     target, false, xi.action.type.ENFEEBLING_TARGET,    xi.effect.BIO,        4, 100 },
+        [10] = { xi.magic.spell.ICE_SPIKES, mob,    false, xi.action.type.ENHANCING_FORCE_SELF, xi.effect.ICE_SPIKES, 0, 100 },
     }
 
     return xi.combat.behavior.chooseAction(mob, target, nil, spellList)

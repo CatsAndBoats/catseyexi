@@ -9,11 +9,11 @@ mixins = { require('scripts/mixins/job_special') }
 local entity = {}
 
 entity.onMobInitialize = function(mob)
-    mob:addImmunity(xi.immunity.PETRIFY)
-    mob:addImmunity(xi.immunity.SILENCE)
     mob:setMobMod(xi.mobMod.ADD_EFFECT, 1)
     mob:setMobMod(xi.mobMod.NO_LINK, 1)
     mob:setMobMod(xi.mobMod.NO_STANDBACK, 1)
+    mob:addImmunity(xi.immunity.PETRIFY)
+    mob:addImmunity(xi.immunity.SILENCE)
 end
 
 entity.onMobSpawn = function(mob)
@@ -43,13 +43,17 @@ entity.onMobFight = function(mob, target)
     end
 end
 
--- Has additional effect: Dispel (15% chance)
 entity.onAdditionalEffect = function(mob, target, damage)
-    return xi.mob.onAddEffect(mob, target, damage, xi.mob.ae.DISPEL, { chance = 15 })
+    local pTable =
+    {
+        chance  = 25,
+        element = xi.element.DARK,
+    }
+
+    return xi.combat.action.executeAdditionalDispel(mob, target, pTable)
 end
 
--- Only uses Entangle.
-entity.onMobMobskillChoose = function(mob, target)
+entity.onMobMobskillChoose = function(mob, target, skillId)
     return xi.mobSkill.ENTANGLE
 end
 
@@ -82,25 +86,25 @@ end
 entity.onMobSpellChoose = function(mob, target, spellId)
     local spellList =
     {
-        [ 1] = { xi.magic.spell.BANISH_III,  target, false, xi.action.type.DAMAGE_TARGET,      nil,                 100 },
-        [ 2] = { xi.magic.spell.BANISHGA_II, target, false, xi.action.type.DAMAGE_TARGET,      nil,                 100 },
-        [ 3] = { xi.magic.spell.HOLY,        target, false, xi.action.type.DAMAGE_TARGET,      nil,                 100 },
-        [ 4] = { xi.magic.spell.CURE_V,      mob,    true,  xi.action.type.HEALING_TARGET,     33,                  100 },
-        [ 5] = { xi.magic.spell.CURAGA_II,   mob,    true,  xi.action.type.HEALING_FORCE_SELF, 33,                  100 },
-        [ 6] = { xi.magic.spell.BLINDNA,     mob,    true,  xi.action.type.HEALING_EFFECT,     xi.effect.BLINDNESS, 100 },
-        [ 7] = { xi.magic.spell.PARALYNA,    mob,    true,  xi.action.type.HEALING_EFFECT,     xi.effect.PARALYSIS, 100 },
-        [ 8] = { xi.magic.spell.POISONA,     mob,    true,  xi.action.type.HEALING_EFFECT,     xi.effect.POISON,    100 },
-        [ 9] = { xi.magic.spell.SILENA,      mob,    true,  xi.action.type.HEALING_EFFECT,     xi.effect.SILENCE,   100 },
-        [10] = { xi.magic.spell.VIRUNA,      mob,    true,  xi.action.type.HEALING_EFFECT,     xi.effect.DISEASE,   100 },
-        [11] = { xi.magic.spell.VIRUNA,      mob,    true,  xi.action.type.HEALING_EFFECT,     xi.effect.PLAGUE,    100 },
-        [12] = { xi.magic.spell.AQUAVEIL,    mob,    false, xi.action.type.ENHANCING_TARGET,   xi.effect.AQUAVEIL,  100 },
-        [13] = { xi.magic.spell.BLINK,       mob,    false, xi.action.type.ENHANCING_TARGET,   xi.effect.BLINK,     100 },
-        [14] = { xi.magic.spell.PROTECT_IV,  mob,    true,  xi.action.type.ENHANCING_TARGET,   xi.effect.PROTECT,    25 },
-        [15] = { xi.magic.spell.SHELL_IV,    mob,    true,  xi.action.type.ENHANCING_TARGET,   xi.effect.SHELL,      25 },
-        [16] = { xi.magic.spell.DIA_II,      target, false, xi.action.type.ENFEEBLING_TARGET,  xi.effect.DIA,        50 },
-        [17] = { xi.magic.spell.DIAGA_II,    target, false, xi.action.type.ENFEEBLING_TARGET,  xi.effect.DIA,        50 },
-        [18] = { xi.magic.spell.PARALYZE,    target, false, xi.action.type.ENFEEBLING_TARGET,  xi.effect.PARALYSIS, 100 },
-        [19] = { xi.magic.spell.SILENCE,     target, false, xi.action.type.ENFEEBLING_TARGET,  xi.effect.SILENCE,   100 },
+        [ 1] = { xi.magic.spell.BANISH_III,  target, false, xi.action.type.DAMAGE_TARGET,      nil,                 0, 100 },
+        [ 2] = { xi.magic.spell.BANISHGA_II, target, false, xi.action.type.DAMAGE_TARGET,      nil,                 0, 100 },
+        [ 3] = { xi.magic.spell.HOLY,        target, false, xi.action.type.DAMAGE_TARGET,      nil,                 0, 100 },
+        [ 4] = { xi.magic.spell.CURE_V,      mob,    true,  xi.action.type.HEALING_TARGET,     33,                  0, 100 },
+        [ 5] = { xi.magic.spell.CURAGA_II,   mob,    true,  xi.action.type.HEALING_FORCE_SELF, 33,                  0, 100 },
+        [ 6] = { xi.magic.spell.BLINDNA,     mob,    true,  xi.action.type.HEALING_EFFECT,     xi.effect.BLINDNESS, 0, 100 },
+        [ 7] = { xi.magic.spell.PARALYNA,    mob,    true,  xi.action.type.HEALING_EFFECT,     xi.effect.PARALYSIS, 0, 100 },
+        [ 8] = { xi.magic.spell.POISONA,     mob,    true,  xi.action.type.HEALING_EFFECT,     xi.effect.POISON,    0, 100 },
+        [ 9] = { xi.magic.spell.SILENA,      mob,    true,  xi.action.type.HEALING_EFFECT,     xi.effect.SILENCE,   0, 100 },
+        [10] = { xi.magic.spell.VIRUNA,      mob,    true,  xi.action.type.HEALING_EFFECT,     xi.effect.DISEASE,   0, 100 },
+        [11] = { xi.magic.spell.VIRUNA,      mob,    true,  xi.action.type.HEALING_EFFECT,     xi.effect.PLAGUE,    0, 100 },
+        [12] = { xi.magic.spell.AQUAVEIL,    mob,    false, xi.action.type.ENHANCING_TARGET,   xi.effect.AQUAVEIL,  0, 100 },
+        [13] = { xi.magic.spell.BLINK,       mob,    false, xi.action.type.ENHANCING_TARGET,   xi.effect.BLINK,     0, 100 },
+        [14] = { xi.magic.spell.PROTECT_IV,  mob,    true,  xi.action.type.ENHANCING_TARGET,   xi.effect.PROTECT,   0,  25 },
+        [15] = { xi.magic.spell.SHELL_IV,    mob,    true,  xi.action.type.ENHANCING_TARGET,   xi.effect.SHELL,     0,  25 },
+        [16] = { xi.magic.spell.DIA_II,      target, false, xi.action.type.ENFEEBLING_TARGET,  xi.effect.DIA,       3,  50 },
+        [17] = { xi.magic.spell.DIAGA_II,    target, false, xi.action.type.ENFEEBLING_TARGET,  xi.effect.DIA,       3,  50 },
+        [18] = { xi.magic.spell.PARALYZE,    target, false, xi.action.type.ENFEEBLING_TARGET,  xi.effect.PARALYSIS, 0, 100 },
+        [19] = { xi.magic.spell.SILENCE,     target, false, xi.action.type.ENFEEBLING_TARGET,  xi.effect.SILENCE,   0, 100 },
     }
 
     local groupTable =

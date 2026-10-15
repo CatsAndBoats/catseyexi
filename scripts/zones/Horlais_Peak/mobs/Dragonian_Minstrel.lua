@@ -25,7 +25,7 @@ entity.onMobSpawn = function(mob)
     mob:setMod(xi.mod.DOUBLE_ATTACK, 50)
 end
 
-entity.onMobMobskillChoose = function(mob, target)
+entity.onMobMobskillChoose = function(mob, target, skillId)
     local skills =
     {
         xi.mobSkill.VOIDSONG_1,
@@ -56,17 +56,17 @@ end
 entity.onMobSpellChoose = function(mob, target, spellId)
     local spellList =
     {
-        { xi.magic.spell.VICTORY_MARCH,     mob,    false, xi.action.type.ENHANCING_FORCE_SELF, xi.effect.MARCH,   100 },
-        { xi.magic.spell.VALOR_MINUET_IV,   mob,    false, xi.action.type.ENHANCING_FORCE_SELF, xi.effect.MINUET,  100 },
-        { xi.magic.spell.KNIGHTS_MINNE_IV,  mob,    false, xi.action.type.ENHANCING_FORCE_SELF, xi.effect.MINNE,   100 },
-        { xi.magic.spell.ARMYS_PAEON_V,     mob,    false, xi.action.type.ENHANCING_FORCE_SELF, xi.effect.PAEON,   100 },
-        { xi.magic.spell.MAGES_BALLAD_II,   mob,    false, xi.action.type.ENHANCING_FORCE_SELF, xi.effect.BALLAD,  100 },
-        { xi.magic.spell.UNCANNY_ETUDE,     mob,    false, xi.action.type.ENHANCING_FORCE_SELF, xi.effect.ETUDE,   100 },
-        { xi.magic.spell.SWIFT_ETUDE,       mob,    false, xi.action.type.ENHANCING_FORCE_SELF, xi.effect.ETUDE,   100 },
-        { xi.magic.spell.FOE_REQUIEM_VI,    target, false, xi.action.type.ENFEEBLING_TARGET,    xi.effect.REQUIEM, 100 },
-        { xi.magic.spell.BATTLEFIELD_ELEGY, target, false, xi.action.type.ENFEEBLING_TARGET,    xi.effect.ELEGY,   100 },
-        { xi.magic.spell.HORDE_LULLABY,     target, false, xi.action.type.ENFEEBLING_TARGET,    xi.effect.SLEEP_I, 100 },
-        { xi.magic.spell.MAGIC_FINALE,      target, false, xi.action.type.NONE,                 nil,                50 },
+        { xi.magic.spell.VICTORY_MARCH,     mob,    false, xi.action.type.ENHANCING_FORCE_SELF, xi.effect.MARCH,   0, 100 },
+        { xi.magic.spell.VALOR_MINUET_IV,   mob,    false, xi.action.type.ENHANCING_FORCE_SELF, xi.effect.MINUET,  0, 100 },
+        { xi.magic.spell.KNIGHTS_MINNE_IV,  mob,    false, xi.action.type.ENHANCING_FORCE_SELF, xi.effect.MINNE,   0, 100 },
+        { xi.magic.spell.ARMYS_PAEON_V,     mob,    false, xi.action.type.ENHANCING_FORCE_SELF, xi.effect.PAEON,   0, 100 },
+        { xi.magic.spell.MAGES_BALLAD_II,   mob,    false, xi.action.type.ENHANCING_FORCE_SELF, xi.effect.BALLAD,  0, 100 },
+        { xi.magic.spell.UNCANNY_ETUDE,     mob,    false, xi.action.type.ENHANCING_FORCE_SELF, xi.effect.ETUDE,   0, 100 },
+        { xi.magic.spell.SWIFT_ETUDE,       mob,    false, xi.action.type.ENHANCING_FORCE_SELF, xi.effect.ETUDE,   0, 100 },
+        { xi.magic.spell.FOE_REQUIEM_VI,    target, false, xi.action.type.ENFEEBLING_TARGET,    xi.effect.REQUIEM, 0, 100 },
+        { xi.magic.spell.BATTLEFIELD_ELEGY, target, false, xi.action.type.ENFEEBLING_TARGET,    xi.effect.ELEGY,   0, 100 },
+        { xi.magic.spell.HORDE_LULLABY,     target, false, xi.action.type.ENFEEBLING_TARGET,    xi.effect.SLEEP_I, 0, 100 },
+        { xi.magic.spell.MAGIC_FINALE,      target, false, xi.action.type.NONE,                 nil,               0,  50 },
     }
 
     return xi.combat.behavior.chooseAction(mob, target, nil, spellList)

@@ -152,7 +152,7 @@ entity.onMobFight = function(mob, target)
     end
 end
 
-entity.onMobMobskillChoose = function(mob, target)
+entity.onMobMobskillChoose = function(mob, target, skillId)
     local form = mob:getAnimationSub()
     local tpMoves = { xi.mobSkill.REACTOR_COOL }
 
@@ -217,28 +217,28 @@ entity.onMobSpellChoose = function(mob, target, spellId)
 
     local spellListLight =
     {
-        [1] = { xi.magic.spell.AERO,         target, false, xi.action.type.DAMAGE_TARGET, nil, 100 },
-        [2] = { xi.magic.spell.AERO_IV,      target, false, xi.action.type.DAMAGE_TARGET, nil, 100 },
-        [3] = { xi.magic.spell.AEROGA_III,   target, false, xi.action.type.DAMAGE_TARGET, nil, 100 },
-        [4] = { xi.magic.spell.FIRE,         target, false, xi.action.type.DAMAGE_TARGET, nil, 100 },
-        [5] = { xi.magic.spell.FIRE_IV,      target, false, xi.action.type.DAMAGE_TARGET, nil, 100 },
-        [6] = { xi.magic.spell.FIRAGA_III,   target, false, xi.action.type.DAMAGE_TARGET, nil, 100 },
-        [7] = { xi.magic.spell.THUNDER,      target, false, xi.action.type.DAMAGE_TARGET, nil, 100 },
-        [8] = { xi.magic.spell.THUNDER_IV,   target, false, xi.action.type.DAMAGE_TARGET, nil, 100 },
-        [9] = { xi.magic.spell.THUNDAGA_III, target, false, xi.action.type.DAMAGE_TARGET, nil, 100 },
+        [1] = { xi.magic.spell.AERO,         target, false, xi.action.type.DAMAGE_TARGET, nil, 0, 100 },
+        [2] = { xi.magic.spell.AERO_IV,      target, false, xi.action.type.DAMAGE_TARGET, nil, 0, 100 },
+        [3] = { xi.magic.spell.AEROGA_III,   target, false, xi.action.type.DAMAGE_TARGET, nil, 0, 100 },
+        [4] = { xi.magic.spell.FIRE,         target, false, xi.action.type.DAMAGE_TARGET, nil, 0, 100 },
+        [5] = { xi.magic.spell.FIRE_IV,      target, false, xi.action.type.DAMAGE_TARGET, nil, 0, 100 },
+        [6] = { xi.magic.spell.FIRAGA_III,   target, false, xi.action.type.DAMAGE_TARGET, nil, 0, 100 },
+        [7] = { xi.magic.spell.THUNDER,      target, false, xi.action.type.DAMAGE_TARGET, nil, 0, 100 },
+        [8] = { xi.magic.spell.THUNDER_IV,   target, false, xi.action.type.DAMAGE_TARGET, nil, 0, 100 },
+        [9] = { xi.magic.spell.THUNDAGA_III, target, false, xi.action.type.DAMAGE_TARGET, nil, 0, 100 },
     }
 
     local spellListDark =
     {
-        [1] = { xi.magic.spell.BLIZZARD,     target, false, xi.action.type.DAMAGE_TARGET, nil, 100 },
-        [2] = { xi.magic.spell.BLIZZARD_IV,  target, false, xi.action.type.DAMAGE_TARGET, nil, 100 },
-        [3] = { xi.magic.spell.BLIZZAGA_III, target, false, xi.action.type.DAMAGE_TARGET, nil, 100 },
-        [4] = { xi.magic.spell.STONE,        target, false, xi.action.type.DAMAGE_TARGET, nil, 100 },
-        [5] = { xi.magic.spell.STONE_IV,     target, false, xi.action.type.DAMAGE_TARGET, nil, 100 },
-        [6] = { xi.magic.spell.STONEGA_III,  target, false, xi.action.type.DAMAGE_TARGET, nil, 100 },
-        [7] = { xi.magic.spell.WATER,        target, false, xi.action.type.DAMAGE_TARGET, nil, 100 },
-        [8] = { xi.magic.spell.WATER_IV,     target, false, xi.action.type.DAMAGE_TARGET, nil, 100 },
-        [9] = { xi.magic.spell.WATERGA_III,  target, false, xi.action.type.DAMAGE_TARGET, nil, 100 },
+        [1] = { xi.magic.spell.BLIZZARD,     target, false, xi.action.type.DAMAGE_TARGET, nil, 0, 100 },
+        [2] = { xi.magic.spell.BLIZZARD_IV,  target, false, xi.action.type.DAMAGE_TARGET, nil, 0, 100 },
+        [3] = { xi.magic.spell.BLIZZAGA_III, target, false, xi.action.type.DAMAGE_TARGET, nil, 0, 100 },
+        [4] = { xi.magic.spell.STONE,        target, false, xi.action.type.DAMAGE_TARGET, nil, 0, 100 },
+        [5] = { xi.magic.spell.STONE_IV,     target, false, xi.action.type.DAMAGE_TARGET, nil, 0, 100 },
+        [6] = { xi.magic.spell.STONEGA_III,  target, false, xi.action.type.DAMAGE_TARGET, nil, 0, 100 },
+        [7] = { xi.magic.spell.WATER,        target, false, xi.action.type.DAMAGE_TARGET, nil, 0, 100 },
+        [8] = { xi.magic.spell.WATER_IV,     target, false, xi.action.type.DAMAGE_TARGET, nil, 0, 100 },
+        [9] = { xi.magic.spell.WATERGA_III,  target, false, xi.action.type.DAMAGE_TARGET, nil, 0, 100 },
     }
 
     local spellList = isDark and spellListDark or spellListLight

@@ -202,8 +202,8 @@ enum class ATTACK_TYPE : uint8
     PHYSICAL = 1,
     MAGICAL  = 2,
     RANGED   = 3,
-    SPECIAL  = 4,
-    BREATH   = 5,
+    BREATH   = 4,
+    SPECIAL  = 5,
 };
 DECLARE_FORMAT_AS_UNDERLYING(ATTACK_TYPE);
 
@@ -345,7 +345,7 @@ public:
     uint16 RATT(uint16 bonusAtt = 0);
     uint16 RACC(uint16 bonusAcc = 0);
 
-    bool isDead();
+    auto isDead() const -> bool;
     bool isAlive();
     bool isFullyHealed();
     bool isInAdoulin();
@@ -355,7 +355,7 @@ public:
     bool inMogHouse();
     bool hasImmunity(uint32 imID);
     bool isAsleep();
-    bool isMounted();
+    auto isMounted() const -> bool;
     bool isSitting();
 
     JOBTYPE GetMJob() const;
